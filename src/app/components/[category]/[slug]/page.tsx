@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { notFound } from "next/navigation";
 
+import { BackButton } from "@/components/back-button";
 import { CodeBlock } from "@/components/code-block";
 import { ComponentPreview } from "@/components/component-preview";
 import { DownloadButton } from "@/components/download-button";
@@ -30,7 +31,9 @@ export default async function ComponentPage({
   const Demo = entry.Demo;
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16">
+    <main className="mx-auto w-full max-w-3xl px-6 py-16">
+      <BackButton fallbackHref="/components" className="mb-6" />
+
       <div className="mb-8 space-y-2">
         <p className="text-sm font-medium text-muted-foreground capitalize">{entry.category}</p>
         <h1 className="text-3xl font-semibold tracking-tight">{entry.title}</h1>

@@ -12,6 +12,8 @@ import PromptBarDemo from "./composer/prompt-bar/demo";
 import { pattern as promptBarPattern } from "./composer/prompt-bar/pattern";
 import DiffSummaryCardDemo from "./code/diff-summary/demo";
 import { pattern as diffSummaryPattern } from "./code/diff-summary/pattern";
+import SessionStarterBarDemo from "./composer/session-starter-bar/demo";
+import { pattern as sessionStarterBarPattern } from "./composer/session-starter-bar/pattern";
 import FlowchartDemo from "./flowcharts/trigger-condition/demo";
 import { pattern as flowchartPattern } from "./flowcharts/trigger-condition/pattern";
 
@@ -73,6 +75,14 @@ export const registry: RegistryEntry[] = [
     description: "A collapsed summary of a batch of file edits, with undo and an overflow list.",
     Demo: DiffSummaryCardDemo,
     uxDoc: diffSummaryPattern,
+  },
+  {
+    slug: "session-starter-bar",
+    category: "composer",
+    title: "Session Starter Bar",
+    description: "A first-run composer with suggestion chips, an environment picker, and an orchestrator picker.",
+    Demo: SessionStarterBarDemo,
+    uxDoc: sessionStarterBarPattern,
   },
   {
     slug: "trigger-condition",
