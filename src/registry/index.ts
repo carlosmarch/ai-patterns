@@ -10,6 +10,8 @@ import StreamingTextDemo from "./text/streaming-text/demo";
 import { pattern as streamingTextPattern } from "./text/streaming-text/pattern";
 import PromptBarDemo from "./composer/prompt-bar/demo";
 import { pattern as promptBarPattern } from "./composer/prompt-bar/pattern";
+import DiffSummaryCardDemo from "./code/diff-summary/demo";
+import { pattern as diffSummaryPattern } from "./code/diff-summary/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -61,6 +63,14 @@ export const registry: RegistryEntry[] = [
     description: "A composer with @ sources, / commands, a model picker, and dictation.",
     Demo: PromptBarDemo,
     uxDoc: promptBarPattern,
+  },
+  {
+    slug: "diff-summary",
+    category: "code",
+    title: "Diff Summary Card",
+    description: "A collapsed summary of a batch of file edits, with undo and an overflow list.",
+    Demo: DiffSummaryCardDemo,
+    uxDoc: diffSummaryPattern,
   },
 ];
 
