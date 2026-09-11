@@ -15,7 +15,7 @@ An inline status indicator shown while an agent is working on a response: a smal
 ## Anatomy
 - Brain icon: a dim base glyph with a brighter sheen swept across it on a loop.
 - Shimmering label: a present-participle verb or short phrase describing the current activity, cycling through a small set of synonyms ("Thinking", "Reasoning", "Pondering", ...) on a timer.
-- Elapsed-time counter: seconds with one decimal place, counting up from 0.0s.
+- Elapsed-time counter: whole seconds, counting up from 0s.
 
 ## Behavior
 - Starts counting the instant work begins.
