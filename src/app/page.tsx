@@ -4,7 +4,7 @@ import { registry } from "@/registry";
 
 export default function Home() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16">
+    <main className="mx-auto w-full max-w-3xl px-6 py-16">
       <div className="mb-16 space-y-3 text-center">
         <h1 className="text-4xl font-semibold tracking-tight text-balance">
           Beautiful, copy-paste UI components

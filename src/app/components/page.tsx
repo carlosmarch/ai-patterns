@@ -9,7 +9,7 @@ export default function ComponentsIndexPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16">
+    <main className="mx-auto w-full max-w-3xl px-6 py-16">
       <h1 className="text-3xl font-semibold tracking-tight">Components</h1>
       <p className="mt-2 text-muted-foreground">
         Copy-paste animated components, organized by category.
