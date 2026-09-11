@@ -17,7 +17,7 @@ export default function PatternsIndexPage() {
 
       <div className="mt-10 space-y-10">
         {Object.entries(byCategory).map(([category, entries]) => (
-          <section key={category}>
+          <section key={category} id={category} className="scroll-mt-20">
             <h2 className="mb-4 text-lg font-medium capitalize">{category}</h2>
             <ul className="grid gap-3 sm:grid-cols-2">
               {entries.map((entry) => (
