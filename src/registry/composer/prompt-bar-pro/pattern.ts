@@ -1,4 +1,4 @@
-export const pattern = `# Session Starter Bar
+export const pattern = `# Prompt Bar Pro
 
 ## Summary
 An empty-state composer for launching a new agent session: a row of clickable example prompts above the input (with a shuffle to see other examples), and a bar that lets the user pick where the agent runs (environment) and which agent/config handles it (orchestrator) before they've typed anything.

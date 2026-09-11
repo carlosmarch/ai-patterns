@@ -17,7 +17,7 @@ export interface SessionOption {
   label: string;
 }
 
-export interface SessionStarterBarProps {
+export interface PromptBarProProps {
   suggestions: SessionSuggestion[];
   visibleCount?: number;
   environments?: SessionOption[];
@@ -43,7 +43,7 @@ function pickRandom<T>(items: T[], count: number): T[] {
   return [...items].sort(() => Math.random() - 0.5).slice(0, count);
 }
 
-export function SessionStarterBar({
+export function PromptBarPro({
   suggestions,
   visibleCount = 3,
   environments = defaultEnvironments,
@@ -51,7 +51,7 @@ export function SessionStarterBar({
   placeholder = "Start a session",
   onSubmit,
   className,
-}: SessionStarterBarProps) {
+}: PromptBarProProps) {
   const [visible, setVisible] = React.useState(() => suggestions.slice(0, visibleCount));
   const [value, setValue] = React.useState("");
   const [environment, setEnvironment] = React.useState(environments[0]?.label ?? "");
