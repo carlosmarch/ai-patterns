@@ -16,6 +16,8 @@ import PromptBarProDemo from "./composer/prompt-bar-pro/demo";
 import { pattern as promptBarProPattern } from "./composer/prompt-bar-pro/pattern";
 import FlowchartDemo from "./flowcharts/trigger-condition/demo";
 import { pattern as flowchartPattern } from "./flowcharts/trigger-condition/pattern";
+import ToolApprovalDemo from "./permissions/tool-approval/demo";
+import { pattern as toolApprovalPattern } from "./permissions/tool-approval/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -91,6 +93,14 @@ export const registry: RegistryEntry[] = [
     description: "Workflow trigger and condition steps on a dotted canvas.",
     Demo: FlowchartDemo,
     uxDoc: flowchartPattern,
+  },
+  {
+    slug: "tool-approval",
+    category: "permissions",
+    title: "Tool Approval",
+    description: "A pending tool-call prompt with allow, always-allow, and deny actions.",
+    Demo: ToolApprovalDemo,
+    uxDoc: toolApprovalPattern,
   },
 ];
 
