@@ -1,29 +1,72 @@
 "use client";
 
 import * as React from "react";
+import { Brain } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
 import { cn } from "@/lib/utils";
 
+const DEFAULT_WORDS = [
+  "Thinking",
+  "Reasoning",
+  "Pondering",
+  "Analyzing",
+  "Considering",
+  "Working it out",
+];
+
 export interface ThinkingLoaderProps {
-  label?: string;
+  /** Words to cycle through as the label. Defaults to a set of generic synonyms. */
+  words?: string[];
+  /** How often the label changes, in ms. */
+  interval?: number;
   className?: string;
 }
 
-export function ThinkingLoader({ label = "Thinking", className }: ThinkingLoaderProps) {
+export function ThinkingLoader({
+  words = DEFAULT_WORDS,
+  interval = 2000,
+  className,
+}: ThinkingLoaderProps) {
   const elapsed = useElapsedSeconds();
+  const word = useCyclingWord(words, interval);
 
   return (
     <div
       className={cn("flex items-center gap-3 px-4 py-3 text-muted-foreground", className)}
     >
-      <SpinnerIcon />
-      <ShimmerText text={label} />
+      <ShimmerBrain />
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={word}
+          initial={{ y: 6, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -6, opacity: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="inline-block"
+        >
+          <ShimmerText text={word} />
+        </motion.span>
+      </AnimatePresence>
       <span className="ml-auto flex items-baseline font-mono text-sm tabular-nums">
         <SlidingNumber value={elapsed} />s
       </span>
     </div>
   );
+}
+
+function useCyclingWord(words: string[], interval: number) {
+  const [index, setIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    if (words.length <= 1) return;
+    const id = window.setInterval(() => {
+      setIndex((i) => (i + 1) % words.length);
+    }, interval);
+    return () => window.clearInterval(id);
+  }, [words, interval]);
+
+  return words[index % words.length];
 }
 
 function useElapsedSeconds() {
@@ -82,12 +125,27 @@ function SlidingNumber({ value }: { value: string }) {
   );
 }
 
-function SpinnerIcon() {
+/** A dim brain icon with a brighter copy swept across it by a moving mask, echoing ShimmerText's sheen. */
+function ShimmerBrain() {
+  const maskImage = "linear-gradient(90deg, transparent 30%, black 50%, transparent 70%)";
+
   return (
-    <motion.span
-      className="size-3.5 rounded-full border-2 border-current/25 border-t-current"
-      animate={{ rotate: 360 }}
-      transition={{ duration: 0.7, repeat: Infinity, ease: "linear" }}
-    />
+    <span className="relative inline-flex size-4 shrink-0">
+      <Brain className="size-4 text-muted-foreground/40" aria-hidden />
+      <motion.span
+        className="absolute inset-0"
+        style={{
+          maskImage,
+          WebkitMaskImage: maskImage,
+          maskSize: "300% 100%",
+          WebkitMaskSize: "300% 100%",
+        }}
+        initial={{ maskPosition: "100% 0%" }}
+        animate={{ maskPosition: "-100% 0%" }}
+        transition={{ repeat: Infinity, duration: 1.8, ease: "linear" }}
+      >
+        <Brain className="size-4 text-foreground" aria-hidden />
+      </motion.span>
+    </span>
   );
 }
