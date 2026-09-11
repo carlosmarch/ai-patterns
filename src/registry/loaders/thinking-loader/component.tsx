@@ -70,13 +70,13 @@ function useCyclingWord(words: string[], interval: number) {
 }
 
 function useElapsedSeconds() {
-  const [elapsed, setElapsed] = React.useState("0.0");
+  const [elapsed, setElapsed] = React.useState("0");
 
   React.useEffect(() => {
     const start = Date.now();
     const id = window.setInterval(() => {
-      setElapsed(((Date.now() - start) / 1000).toFixed(1));
-    }, 100);
+      setElapsed(Math.floor((Date.now() - start) / 1000).toString());
+    }, 1000);
     return () => window.clearInterval(id);
   }, []);
 
