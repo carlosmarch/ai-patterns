@@ -9,21 +9,22 @@ A vertical, read-at-a-glance diagram of a workflow's trigger and condition steps
 
 ## When not to use
 - For a linear list of steps with no branching or field-level detail — use Expandable Trace instead, it's lighter weight.
-- As a fully interactive node-based editor (drag-to-connect, zoom/pan, arbitrary graph topology). This pattern is a straight vertical chain; build a dedicated canvas editor for free-form graphs.
+- As a full graph editor (drag-to-connect between arbitrary nodes, zoom/pan, rewiring the sequence itself). Cards here can be repositioned for readability, but the connector lines always follow the fixed node order passed in — this isn't a place to rewire what leads to what.
 - When there are more than a handful of steps and horizontal branches — a vertical chain stops communicating structure once branches fork.
 
 ## Anatomy
 - Canvas: a bordered, rounded container with a dotted background that visually separates the flow from surrounding UI.
-- Node badge: a small colored pill labeling the node's kind ("Trigger" in violet, "If / Else" in amber). Color coding lets users scan a long flow for node types without reading every card.
+- Node badge: a small colored pill labeling the node's kind ("Trigger" in violet, "If / Else" in amber), and the handle used to reposition that node. Color coding lets users scan a long flow for node types without reading every card.
 - Node card: a white, rounded, shadowed card containing the node's content.
   - Trigger card: icon in a tinted rounded box, a bold title, and a one-line description.
   - Condition card: one row per clause. Each row has a drag handle, a connector word ("if" / "and" / "or"), a subject field chip (with icon), a comparison field chip, the word "is", and a value chip (a leading color dot + label) representing the selected option.
-- Connector line: a short vertical line between consecutive nodes, showing they execute in sequence.
+- Connector line: a straight line between consecutive nodes' centers, showing they execute in sequence. It follows the nodes live as they're dragged.
 
 ## Behavior
-- Field and value chips are dropdown triggers (chevron affixed) even in a read-only summary — they signal "this is configurable," not just descriptive text.
+- Each node (badge + card together) is draggable within the canvas by its badge, so users can spread a dense flow out for readability. The card body itself stays free of drag interference so its own controls stay clickable.
+- Field and value chips with an \`options\` list are real dropdown pickers: click to open, click an option to select it and close. A chip with no options renders as a plain, non-interactive label — don't show a chevron on it.
 - Long values (e.g. a long topping name) wrap onto their own line, indented to align under the row's first field chip rather than the card edge, so the row still reads as one clause.
-- The drag handle on each clause row implies clauses are reorderable; only show it when reordering is actually supported.
+- Clause rows are reordered by dragging their grip handle; the rest of the row (its chips) stays inert during that drag so a click never gets mistaken for the start of a reorder.
 
 ## Content guidelines
 - Trigger titles are short event names ("New order created"); descriptions restate them as a plain sentence for users who need the extra context.
