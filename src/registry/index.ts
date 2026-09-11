@@ -1,10 +1,15 @@
 import type { ComponentType } from "react";
 
 import ShinyButtonDemo from "./buttons/shiny-button/demo";
+import { pattern as shinyButtonPattern } from "./buttons/shiny-button/pattern";
 import ThinkingLoaderDemo from "./loaders/thinking-loader/demo";
+import { pattern as thinkingLoaderPattern } from "./loaders/thinking-loader/pattern";
 import ExpandableTraceDemo from "./traces/expandable-trace/demo";
+import { pattern as expandableTracePattern } from "./traces/expandable-trace/pattern";
 import StreamingTextDemo from "./text/streaming-text/demo";
+import { pattern as streamingTextPattern } from "./text/streaming-text/pattern";
 import PromptBarDemo from "./composer/prompt-bar/demo";
+import { pattern as promptBarPattern } from "./composer/prompt-bar/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -12,6 +17,8 @@ export interface RegistryEntry {
   title: string;
   description: string;
   Demo: ComponentType;
+  /** A UX spec for the pattern, written for agents implementing or reusing it — not the code. */
+  uxDoc: string;
 }
 
 export const registry: RegistryEntry[] = [
@@ -21,6 +28,7 @@ export const registry: RegistryEntry[] = [
     title: "Shiny Button",
     description: "A button with an animated light sweep across its surface.",
     Demo: ShinyButtonDemo,
+    uxDoc: shinyButtonPattern,
   },
   {
     slug: "thinking-loader",
@@ -28,6 +36,7 @@ export const registry: RegistryEntry[] = [
     title: "Thinking Loader",
     description: "A loader with a shimmering label and a live elapsed-time counter.",
     Demo: ThinkingLoaderDemo,
+    uxDoc: thinkingLoaderPattern,
   },
   {
     slug: "expandable-trace",
@@ -35,6 +44,7 @@ export const registry: RegistryEntry[] = [
     title: "Expandable Trace",
     description: "A collapsible \"Thought for Xs\" summary that expands into a step-by-step trace.",
     Demo: ExpandableTraceDemo,
+    uxDoc: expandableTracePattern,
   },
   {
     slug: "streaming-text",
@@ -42,6 +52,7 @@ export const registry: RegistryEntry[] = [
     title: "Streaming Text",
     description: "A streamed answer with inline sources, actions, and follow-ups.",
     Demo: StreamingTextDemo,
+    uxDoc: streamingTextPattern,
   },
   {
     slug: "prompt-bar",
@@ -49,6 +60,7 @@ export const registry: RegistryEntry[] = [
     title: "Prompt Bar",
     description: "A composer with @ sources, / commands, a model picker, and dictation.",
     Demo: PromptBarDemo,
+    uxDoc: promptBarPattern,
   },
 ];
 

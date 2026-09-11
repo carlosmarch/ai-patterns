@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { CodeBlock } from "@/components/code-block";
 import { ComponentPreview } from "@/components/component-preview";
+import { DownloadButton } from "@/components/download-button";
 import { getRegistryEntry, registry } from "@/registry";
 
 export function generateStaticParams() {
@@ -36,7 +37,25 @@ export default async function ComponentPage({
         <p className="text-muted-foreground">{entry.description}</p>
       </div>
 
-      <ComponentPreview preview={<Demo />} code={<CodeBlock code={source} />} />
+      <ComponentPreview
+        preview={<Demo />}
+        code={<CodeBlock code={source} />}
+        pattern={
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm text-muted-foreground">
+                A UX spec for this pattern — written for agents implementing or reusing it, not the code.
+              </p>
+              <DownloadButton
+                filename={`${entry.slug}.pattern.md`}
+                content={entry.uxDoc}
+                className="shrink-0"
+              />
+            </div>
+            <CodeBlock code={entry.uxDoc} lang="markdown" wrap />
+          </div>
+        }
+      />
     </main>
   );
 }
