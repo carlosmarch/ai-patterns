@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { registry, type RegistryEntry } from "@/registry";
 
-export default function ComponentsIndexPage() {
+export default function PatternsIndexPage() {
   const byCategory: Record<string, RegistryEntry[]> = {};
   for (const entry of registry) {
     (byCategory[entry.category] ??= []).push(entry);
@@ -10,9 +10,9 @@ export default function ComponentsIndexPage() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">Components</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">Patterns</h1>
       <p className="mt-2 text-muted-foreground">
-        Copy-paste animated components, organized by category.
+        Copy-paste animated UI patterns for AI products, organized by category.
       </p>
 
       <div className="mt-10 space-y-10">
@@ -23,7 +23,7 @@ export default function ComponentsIndexPage() {
               {entries.map((entry) => (
                 <li key={entry.slug}>
                   <Link
-                    href={`/components/${entry.category}/${entry.slug}`}
+                    href={`/patterns/${entry.category}/${entry.slug}`}
                     className="block rounded-lg border p-4 transition-colors hover:bg-accent"
                   >
                     <p className="font-medium">{entry.title}</p>

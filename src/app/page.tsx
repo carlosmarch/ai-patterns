@@ -25,7 +25,7 @@ export default function Home() {
                   <p className="text-sm text-muted-foreground">{entry.description}</p>
                 </div>
                 <Link
-                  href={`/components/${entry.category}/${entry.slug}`}
+                  href={`/patterns/${entry.category}/${entry.slug}`}
                   className="shrink-0 text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   View details →

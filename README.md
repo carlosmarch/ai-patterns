@@ -33,8 +33,8 @@ src/registry/buttons/shiny-button/
 
 Register it in `src/registry/index.ts` and it's automatically picked up by:
 
-- `/components` — the gallery, grouped by category
-- `/components/<category>/<slug>` — the detail page (live preview + syntax-highlighted, copyable source)
+- `/patterns` — the gallery, grouped by category
+- `/patterns/<category>/<slug>` — the detail page (live preview + syntax-highlighted, copyable source)
 
 ## Design skill
 

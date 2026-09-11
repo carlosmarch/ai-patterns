@@ -12,7 +12,7 @@ export function generateStaticParams() {
   return registry.map(({ category, slug }) => ({ category, slug }));
 }
 
-export default async function ComponentPage({
+export default async function PatternPage({
   params,
 }: {
   params: Promise<{ category: string; slug: string }>;
@@ -32,7 +32,7 @@ export default async function ComponentPage({
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-16">
-      <BackButton fallbackHref="/components" className="mb-6" />
+      <BackButton fallbackHref="/patterns" className="mb-6" />
 
       <div className="mb-8 space-y-2">
         <p className="text-sm font-medium text-muted-foreground capitalize">{entry.category}</p>

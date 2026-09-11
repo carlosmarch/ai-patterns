@@ -30,9 +30,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Link href="/" className="font-semibold tracking-tight">
               ai-patterns
             </Link>
-            <Link href="/components" className="text-sm text-muted-foreground hover:text-foreground">
-              Components
-            </Link>
+            <nav className="flex items-center gap-6">
+              <Link href="/patterns" className="text-sm text-muted-foreground hover:text-foreground">
+                Patterns
+              </Link>
+              <Link href="/skill" className="text-sm text-muted-foreground hover:text-foreground">
+                Skill
+              </Link>
+            </nav>
           </div>
         </header>
         {children}
