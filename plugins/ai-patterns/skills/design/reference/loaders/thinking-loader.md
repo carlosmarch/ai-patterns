@@ -17,13 +17,13 @@ An inline status indicator shown while an agent is working on a response: a smal
 - More than one active at a time in the same conversation/view. One "the system is working" signal per turn.
 
 ## Anatomy
-- Brain icon: a dim base glyph with a brighter sheen swept across it on a loop.
+- Brain icon: a plain, solid glyph — it doesn't shimmer, so it stays legible as a fixed anchor next to the moving label.
 - Shimmering label: a present-participle verb or short phrase describing the current activity, cycling through a small set of synonyms ("Thinking", "Reasoning", "Pondering", ...) on a timer.
 - Elapsed-time counter: whole seconds, counting up from 0s.
 
 ## Behavior
 - Starts counting the instant work begins.
-- The label cycles to the next word in its list every couple of seconds, fading/sliding out the old word and in the new one — the shimmer alone communicates "still working" even between word changes.
+- The label cycles to the next word in its list every 6 seconds, fading/sliding out the old word and in the new one — the shimmer (a single sweep, pause, repeat, not a relentless loop) communicates "still working" even between word changes.
 - If real sub-step information is available ("Thinking" → "Searching" → "Writing"), drive the label from that instead of the generic cycle.
 - The counter's changed digit animates in place (a short roll/slide) rather than the whole number re-rendering, so it doesn't read as flicker.
 - On completion, replace the whole component with a result — for an agent trace, that's typically the collapsed header of an Expandable Trace ("Thought for 4 seconds").
@@ -35,7 +35,7 @@ An inline status indicator shown while an agent is working on a response: a smal
 ## Accessibility
 - Wrap in an `aria-live="polite"` region so screen readers announce label changes without interrupting other content.
 - Don't rely on the animated counter alone to signal "still working" for assistive tech — the live-region label carries that meaning.
-- Respect `prefers-reduced-motion`: keep the counter (it's informational) but reduce or remove the looping icon/shimmer motion.
+- Respect `prefers-reduced-motion`: keep the counter (it's informational) but reduce or remove the shimmer motion.
 
 ## Related patterns
 - Expandable Trace is the "done" counterpart — replace this component with that one the moment work completes.
@@ -78,7 +78,7 @@ export interface ThinkingLoaderProps {
 
 export function ThinkingLoader({
   words = DEFAULT_WORDS,
-  interval = 2000,
+  interval = 6000,
   className,
 }: ThinkingLoaderProps) {
   const elapsed = useElapsedSeconds();
@@ -125,19 +125,24 @@ function useElapsedSeconds() {
   return elapsed;
 }
 
-/** The shimmer sweep runs continuously on this outer span; only the word inside it swaps. */
+/**
+ * The shimmer sweeps once, pauses, then repeats — like the Shiny Button's
+ * light sweep — on this outer span; only the word inside it swaps. A single
+ * clean pass reads better than a relentless loop, especially paired with an
+ * infrequent word change.
+ */
 function ShimmerWord({ word }: { word: string }) {
   return (
     <motion.span
       className="inline-block bg-clip-text text-sm font-medium text-transparent"
       style={{
         backgroundImage:
-          "linear-gradient(90deg, var(--muted-foreground) 40%, var(--foreground) 50%, var(--muted-foreground) 60%)",
+          "linear-gradient(90deg, var(--muted-foreground) 30%, var(--foreground) 50%, var(--muted-foreground) 70%)",
         backgroundSize: "200% 100%",
       }}
-      initial={{ backgroundPositionX: "100%" }}
-      animate={{ backgroundPositionX: "-100%" }}
-      transition={{ repeat: Infinity, duration: 1.8, ease: "linear" }}
+      initial={{ backgroundPositionX: "150%" }}
+      animate={{ backgroundPositionX: "-50%" }}
+      transition={{ repeat: Infinity, repeatType: "loop", duration: 1.4, ease: "linear", repeatDelay: 0.8 }}
     >
       <AnimatePresence mode="wait">
         <motion.span
