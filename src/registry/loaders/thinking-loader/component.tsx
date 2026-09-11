@@ -23,10 +23,7 @@ export function ThinkingLoader({
 
   return (
     <div
-      className={cn(
-        "flex items-center gap-3 rounded-xl border bg-card px-4 py-3 text-muted-foreground",
-        className
-      )}
+      className={cn("flex items-center gap-3 px-4 py-3 text-muted-foreground", className)}
     >
       <Icon />
       <ShimmerText text={label} />

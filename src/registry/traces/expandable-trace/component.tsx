@@ -27,7 +27,7 @@ export function ExpandableTrace({
   const [open, setOpen] = React.useState(defaultOpen);
 
   return (
-    <div className={cn("rounded-xl border bg-card", className)}>
+    <div className={className}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
