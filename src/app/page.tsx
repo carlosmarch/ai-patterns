@@ -25,7 +25,7 @@ export default function Home() {
           </Link>
 
           <h1 className="mt-6 text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
-            Copy-paste UI for AI products
+            Design patterns for AI products
           </h1>
           <p className="mx-auto mt-4 max-w-md text-muted-foreground">
             Animated React components for composers, loaders, traces, and more — you own the
