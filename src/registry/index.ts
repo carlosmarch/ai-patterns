@@ -16,6 +16,8 @@ import PromptBarProDemo from "./composer/prompt-bar-pro/demo";
 import { pattern as promptBarProPattern } from "./composer/prompt-bar-pro/pattern";
 import FlowchartDemo from "./flowcharts/trigger-condition/demo";
 import { pattern as flowchartPattern } from "./flowcharts/trigger-condition/pattern";
+import ChatBubbleDemo from "./messages/chat-bubble/demo";
+import { pattern as chatBubblePattern } from "./messages/chat-bubble/pattern";
 import ToolApprovalDemo from "./permissions/tool-approval/demo";
 import { pattern as toolApprovalPattern } from "./permissions/tool-approval/pattern";
 
@@ -95,6 +97,12 @@ export const registry: RegistryEntry[] = [
     uxDoc: flowchartPattern,
   },
   {
+    slug: "chat-bubble",
+    category: "messages",
+    title: "Chat Bubble with Actions",
+    description: "A message bubble with feedback thumbs, edit-and-resubmit, and regenerate.",
+    Demo: ChatBubbleDemo,
+    uxDoc: chatBubblePattern,
     slug: "tool-approval",
     category: "permissions",
     title: "Tool Approval",

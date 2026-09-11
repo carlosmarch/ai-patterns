@@ -37,6 +37,11 @@ one-line description, not the Anatomy/Behavior/Accessibility contract.
 | --- | --- | --- | --- |
 | `thinking-loader` | Thinking Loader | A loader with a shimmering label and a live elapsed-time counter. | [loaders/thinking-loader.md](./loaders/thinking-loader.md) |
 
+### messages
+
+| slug | title | description | spec |
+| --- | --- | --- | --- |
+| `chat-bubble` | Chat Bubble with Actions | A message bubble with feedback thumbs, edit-and-resubmit, and regenerate. | [messages/chat-bubble.md](./messages/chat-bubble.md) |
 ### permissions
 
 | slug | title | description | spec |
