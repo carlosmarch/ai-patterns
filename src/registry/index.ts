@@ -12,6 +12,8 @@ import PromptBarDemo from "./composer/prompt-bar/demo";
 import { pattern as promptBarPattern } from "./composer/prompt-bar/pattern";
 import DiffSummaryCardDemo from "./code/diff-summary/demo";
 import { pattern as diffSummaryPattern } from "./code/diff-summary/pattern";
+import FlowchartDemo from "./flowcharts/trigger-condition/demo";
+import { pattern as flowchartPattern } from "./flowcharts/trigger-condition/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -71,6 +73,14 @@ export const registry: RegistryEntry[] = [
     description: "A collapsed summary of a batch of file edits, with undo and an overflow list.",
     Demo: DiffSummaryCardDemo,
     uxDoc: diffSummaryPattern,
+  },
+  {
+    slug: "trigger-condition",
+    category: "flowcharts",
+    title: "Flowchart",
+    description: "Workflow trigger and condition steps on a dotted canvas.",
+    Demo: FlowchartDemo,
+    uxDoc: flowchartPattern,
   },
 ];
 
