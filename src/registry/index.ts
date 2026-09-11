@@ -14,6 +14,8 @@ import DiffSummaryCardDemo from "./code/diff-summary/demo";
 import { pattern as diffSummaryPattern } from "./code/diff-summary/pattern";
 import SessionStarterBarDemo from "./composer/session-starter-bar/demo";
 import { pattern as sessionStarterBarPattern } from "./composer/session-starter-bar/pattern";
+import FlowchartDemo from "./flowcharts/trigger-condition/demo";
+import { pattern as flowchartPattern } from "./flowcharts/trigger-condition/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -81,6 +83,14 @@ export const registry: RegistryEntry[] = [
     description: "A first-run composer with suggestion chips, an environment picker, and an orchestrator picker.",
     Demo: SessionStarterBarDemo,
     uxDoc: sessionStarterBarPattern,
+  },
+  {
+    slug: "trigger-condition",
+    category: "flowcharts",
+    title: "Flowchart",
+    description: "Workflow trigger and condition steps on a dotted canvas.",
+    Demo: FlowchartDemo,
+    uxDoc: flowchartPattern,
   },
 ];
 
