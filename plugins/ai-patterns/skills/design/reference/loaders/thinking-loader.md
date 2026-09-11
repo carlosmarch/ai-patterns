@@ -17,19 +17,20 @@ An inline status indicator shown while an agent is working on a response: a smal
 - More than one active at a time in the same conversation/view. One "the system is working" signal per turn.
 
 ## Anatomy
-- Variant icon: a small looping glyph (pick one style per product — don't mix variants within the same app).
-- Shimmering label: a present-participle verb or short phrase describing the current activity ("Thinking", "Searching", "Churning").
-- Elapsed-time counter: seconds with one decimal place, counting up from 0.0s.
+- Brain icon: a dim base glyph with a brighter sheen swept across it on a loop.
+- Shimmering label: a present-participle verb or short phrase describing the current activity, cycling through a small set of synonyms ("Thinking", "Reasoning", "Pondering", ...) on a timer.
+- Elapsed-time counter: whole seconds, counting up from 0s.
 
 ## Behavior
 - Starts counting the instant work begins.
-- The label may update mid-flight to reflect real sub-steps ("Thinking" → "Searching" → "Writing") if that information is available — the shimmer alone communicates "still working" even when the label is static.
+- The label cycles to the next word in its list every couple of seconds, fading/sliding out the old word and in the new one — the shimmer alone communicates "still working" even between word changes.
+- If real sub-step information is available ("Thinking" → "Searching" → "Writing"), drive the label from that instead of the generic cycle.
 - The counter's changed digit animates in place (a short roll/slide) rather than the whole number re-rendering, so it doesn't read as flicker.
 - On completion, replace the whole component with a result — for an agent trace, that's typically the collapsed header of an Expandable Trace ("Thought for 4 seconds").
 
 ## Content guidelines
-- Label is one or two words, present-participle or short verb phrase, no punctuation.
-- Keep it truthful: don't show "Searching" unless a search is actually happening.
+- Each word is one or two words, present-participle or short verb phrase, no punctuation.
+- Keep it truthful: don't cycle through "Searching" unless a search is actually happening.
 
 ## Accessibility
 - Wrap in an `aria-live="polite"` region so screen readers announce label changes without interrupting other content.
@@ -53,68 +54,122 @@ instead of copying these Tailwind classes or the Motion API.
 "use client";
 
 import * as React from "react";
+import { Brain } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
 import { cn } from "@/lib/utils";
 
-export type ThinkingLoaderVariant = "drive" | "dots" | "orbit" | "surfer";
+const DEFAULT_WORDS = [
+  "Thinking",
+  "Reasoning",
+  "Pondering",
+  "Analyzing",
+  "Considering",
+  "Working it out",
+];
 
 export interface ThinkingLoaderProps {
-  label?: string;
-  variant?: ThinkingLoaderVariant;
+  /** Words to cycle through as the label. Defaults to a set of generic synonyms. */
+  words?: string[];
+  /** How often the label changes, in ms. */
+  interval?: number;
   className?: string;
 }
 
 export function ThinkingLoader({
-  label = "Thinking",
-  variant = "drive",
+  words = DEFAULT_WORDS,
+  interval = 2000,
   className,
 }: ThinkingLoaderProps) {
   const elapsed = useElapsedSeconds();
-  const Icon = icons[variant];
+  const word = useCyclingWord(words, interval);
 
   return (
     <div
       className={cn("flex items-center gap-3 px-4 py-3 text-muted-foreground", className)}
     >
-      <Icon />
-      <ShimmerText text={label} />
-      <span className="ml-auto flex items-baseline font-mono text-sm tabular-nums">
+      <ShimmerRow word={word} />
+      <span className="ml-auto flex items-center font-mono text-sm tabular-nums">
         <SlidingNumber value={elapsed} />s
       </span>
     </div>
   );
 }
 
+function useCyclingWord(words: string[], interval: number) {
+  const [index, setIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    if (words.length <= 1) return;
+    const id = window.setInterval(() => {
+      setIndex((i) => (i + 1) % words.length);
+    }, interval);
+    return () => window.clearInterval(id);
+  }, [words, interval]);
+
+  return words[index % words.length];
+}
+
 function useElapsedSeconds() {
-  const [elapsed, setElapsed] = React.useState("0.0");
+  const [elapsed, setElapsed] = React.useState("0");
 
   React.useEffect(() => {
     const start = Date.now();
     const id = window.setInterval(() => {
-      setElapsed(((Date.now() - start) / 1000).toFixed(1));
-    }, 100);
+      setElapsed(Math.floor((Date.now() - start) / 1000).toString());
+    }, 1000);
     return () => window.clearInterval(id);
   }, []);
 
   return elapsed;
 }
 
-function ShimmerText({ text }: { text: string }) {
+/**
+ * A dim icon+label row with a brighter copy of the same row swept across it by
+ * one shared moving mask, so the sheen crosses the icon and the text together
+ * as a single band instead of two independently-timed shimmers.
+ */
+function ShimmerRow({ word }: { word: string }) {
+  const maskImage = "linear-gradient(90deg, transparent 30%, black 50%, transparent 70%)";
+
   return (
-    <motion.span
-      className="bg-clip-text text-sm font-medium text-transparent"
-      style={{
-        backgroundImage:
-          "linear-gradient(90deg, var(--muted-foreground) 40%, var(--foreground) 50%, var(--muted-foreground) 60%)",
-        backgroundSize: "200% 100%",
-      }}
-      initial={{ backgroundPositionX: "100%" }}
-      animate={{ backgroundPositionX: "-100%" }}
-      transition={{ repeat: Infinity, duration: 1.8, ease: "linear" }}
-    >
-      {text}
-    </motion.span>
+    <span className="relative inline-flex items-center gap-3">
+      <WordRow word={word} className="text-muted-foreground/40" />
+      <motion.span
+        className="absolute inset-0 flex items-center gap-3 text-foreground"
+        style={{
+          maskImage,
+          WebkitMaskImage: maskImage,
+          maskSize: "300% 100%",
+          WebkitMaskSize: "300% 100%",
+        }}
+        initial={{ maskPosition: "100% 0%" }}
+        animate={{ maskPosition: "-100% 0%" }}
+        transition={{ repeat: Infinity, duration: 1.8, ease: "linear" }}
+      >
+        <WordRow word={word} />
+      </motion.span>
+    </span>
+  );
+}
+
+function WordRow({ word, className }: { word: string; className?: string }) {
+  return (
+    <span className={cn("inline-flex items-center gap-3", className)}>
+      <Brain className="size-4 shrink-0" aria-hidden />
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={word}
+          initial={{ y: 6, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -6, opacity: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="inline-block text-sm font-medium"
+        >
+          {word}
+        </motion.span>
+      </AnimatePresence>
+    </span>
   );
 }
 
@@ -141,74 +196,4 @@ function SlidingNumber({ value }: { value: string }) {
     </span>
   );
 }
-
-function GridIcon() {
-  return (
-    <div className="grid grid-cols-3 gap-0.5">
-      {Array.from({ length: 9 }).map((_, i) => (
-        <motion.span
-          key={i}
-          className="size-1 rounded-[1px] bg-current"
-          animate={{ opacity: [0.25, 1, 0.25] }}
-          transition={{
-            duration: 1.2,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: (i % 3) * 0.1 + Math.floor(i / 3) * 0.1,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function DotsIcon() {
-  return (
-    <div className="flex items-center gap-1">
-      {[0, 1, 2].map((i) => (
-        <motion.span
-          key={i}
-          className="size-1.5 rounded-full bg-current"
-          animate={{ y: [0, -4, 0] }}
-          transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut", delay: i * 0.15 }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function OrbitIcon() {
-  return (
-    <motion.div
-      className="relative size-4"
-      animate={{ rotate: 360 }}
-      transition={{ duration: 1.4, repeat: Infinity, ease: "linear" }}
-    >
-      <span className="absolute inset-0 rounded-full border border-current/25" />
-      <span className="absolute -top-0.5 left-1/2 size-1.5 -translate-x-1/2 rounded-full bg-current" />
-    </motion.div>
-  );
-}
-
-function SurferIcon() {
-  return (
-    <div className="flex h-4 items-end gap-0.5">
-      {[0, 1, 2, 3].map((i) => (
-        <motion.span
-          key={i}
-          className="w-1 rounded-full bg-current"
-          animate={{ height: ["30%", "100%", "30%"] }}
-          transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut", delay: i * 0.12 }}
-        />
-      ))}
-    </div>
-  );
-}
-
-const icons: Record<ThinkingLoaderVariant, React.ComponentType> = {
-  drive: GridIcon,
-  dots: DotsIcon,
-  orbit: OrbitIcon,
-  surfer: SurferIcon,
-};
 ```

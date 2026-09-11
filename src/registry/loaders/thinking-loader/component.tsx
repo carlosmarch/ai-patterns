@@ -35,20 +35,8 @@ export function ThinkingLoader({
     <div
       className={cn("flex items-center gap-3 px-4 py-3 text-muted-foreground", className)}
     >
-      <ShimmerBrain />
-      <AnimatePresence mode="wait">
-        <motion.span
-          key={word}
-          initial={{ y: 6, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -6, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="inline-block"
-        >
-          <ShimmerText text={word} />
-        </motion.span>
-      </AnimatePresence>
-      <span className="ml-auto flex items-baseline font-mono text-sm tabular-nums">
+      <ShimmerRow word={word} />
+      <span className="ml-auto flex items-center font-mono text-sm tabular-nums">
         <SlidingNumber value={elapsed} />s
       </span>
     </div>
@@ -83,21 +71,52 @@ function useElapsedSeconds() {
   return elapsed;
 }
 
-function ShimmerText({ text }: { text: string }) {
+/**
+ * A dim icon+label row with a brighter copy of the same row swept across it by
+ * one shared moving mask, so the sheen crosses the icon and the text together
+ * as a single band instead of two independently-timed shimmers.
+ */
+function ShimmerRow({ word }: { word: string }) {
+  const maskImage = "linear-gradient(90deg, transparent 30%, black 50%, transparent 70%)";
+
   return (
-    <motion.span
-      className="bg-clip-text text-sm font-medium text-transparent"
-      style={{
-        backgroundImage:
-          "linear-gradient(90deg, var(--muted-foreground) 40%, var(--foreground) 50%, var(--muted-foreground) 60%)",
-        backgroundSize: "200% 100%",
-      }}
-      initial={{ backgroundPositionX: "100%" }}
-      animate={{ backgroundPositionX: "-100%" }}
-      transition={{ repeat: Infinity, duration: 1.8, ease: "linear" }}
-    >
-      {text}
-    </motion.span>
+    <span className="relative inline-flex items-center gap-3">
+      <WordRow word={word} className="text-muted-foreground/40" />
+      <motion.span
+        className="absolute inset-0 flex items-center gap-3 text-foreground"
+        style={{
+          maskImage,
+          WebkitMaskImage: maskImage,
+          maskSize: "300% 100%",
+          WebkitMaskSize: "300% 100%",
+        }}
+        initial={{ maskPosition: "100% 0%" }}
+        animate={{ maskPosition: "-100% 0%" }}
+        transition={{ repeat: Infinity, duration: 1.8, ease: "linear" }}
+      >
+        <WordRow word={word} />
+      </motion.span>
+    </span>
+  );
+}
+
+function WordRow({ word, className }: { word: string; className?: string }) {
+  return (
+    <span className={cn("inline-flex items-center gap-3", className)}>
+      <Brain className="size-4 shrink-0" aria-hidden />
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={word}
+          initial={{ y: 6, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -6, opacity: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="inline-block text-sm font-medium"
+        >
+          {word}
+        </motion.span>
+      </AnimatePresence>
+    </span>
   );
 }
 
@@ -121,31 +140,6 @@ function SlidingNumber({ value }: { value: string }) {
           </AnimatePresence>
         </span>
       ))}
-    </span>
-  );
-}
-
-/** A dim brain icon with a brighter copy swept across it by a moving mask, echoing ShimmerText's sheen. */
-function ShimmerBrain() {
-  const maskImage = "linear-gradient(90deg, transparent 30%, black 50%, transparent 70%)";
-
-  return (
-    <span className="relative inline-flex size-4 shrink-0">
-      <Brain className="size-4 text-muted-foreground/40" aria-hidden />
-      <motion.span
-        className="absolute inset-0"
-        style={{
-          maskImage,
-          WebkitMaskImage: maskImage,
-          maskSize: "300% 100%",
-          WebkitMaskSize: "300% 100%",
-        }}
-        initial={{ maskPosition: "100% 0%" }}
-        animate={{ maskPosition: "-100% 0%" }}
-        transition={{ repeat: Infinity, duration: 1.8, ease: "linear" }}
-      >
-        <Brain className="size-4 text-foreground" aria-hidden />
-      </motion.span>
     </span>
   );
 }
