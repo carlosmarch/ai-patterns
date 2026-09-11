@@ -4,6 +4,7 @@ import ShinyButtonDemo from "./buttons/shiny-button/demo";
 import ThinkingLoaderDemo from "./loaders/thinking-loader/demo";
 import ExpandableTraceDemo from "./traces/expandable-trace/demo";
 import StreamingTextDemo from "./text/streaming-text/demo";
+import PromptBarDemo from "./composer/prompt-bar/demo";
 
 export interface RegistryEntry {
   slug: string;
@@ -41,6 +42,13 @@ export const registry: RegistryEntry[] = [
     title: "Streaming Text",
     description: "A streamed answer with inline sources, actions, and follow-ups.",
     Demo: StreamingTextDemo,
+  },
+  {
+    slug: "prompt-bar",
+    category: "composer",
+    title: "Prompt Bar",
+    description: "A composer with @ sources, / commands, a model picker, and dictation.",
+    Demo: PromptBarDemo,
   },
 ];
 
