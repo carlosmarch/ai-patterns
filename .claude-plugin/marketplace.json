@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "ai-patterns",
+  "owner": {
+    "name": "carlosmarch"
+  },
+  "description": "A growing catalogue of AI product UI patterns (composers, traces, loaders, diff summaries, flowcharts) and a design-engineering skill built on it.",
+  "plugins": [
+    {
+      "name": "ai-patterns",
+      "source": "./plugins/ai-patterns",
+      "description": "Design-engineering expert for AI product prototypes. Recommends and scaffolds screens from the ai-patterns catalogue, defaulting to its demoed Tailwind + Radix + Motion look but adapting to any host design system.",
+      "version": "0.1.0",
+      "author": {
+        "name": "carlosmarch"
+      },
+      "homepage": "https://github.com/carlosmarch/ai-patterns",
+      "repository": "https://github.com/carlosmarch/ai-patterns",
+      "keywords": ["design", "ui", "ux", "ai", "agents", "prototyping", "design-system"]
+    }
+  ]
+}

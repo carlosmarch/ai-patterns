@@ -33,8 +33,42 @@ src/registry/buttons/shiny-button/
 
 Register it in `src/registry/index.ts` and it's automatically picked up by:
 
-- `/components` — the gallery, grouped by category
-- `/components/<category>/<slug>` — the detail page (live preview + syntax-highlighted, copyable source)
+- `/patterns` — the gallery, grouped by category
+- `/patterns/<category>/<slug>` — the detail page (live preview + syntax-highlighted, copyable source)
+
+## Design skill
+
+This catalogue ships as an installable Claude Code skill/plugin, `ai-patterns`,
+under `plugins/ai-patterns/`. It's a design-engineering expert for AI product
+prototypes: given a screen or flow to build, it shortlists candidates from the
+catalogue, checks each one's `When to use` / `When not to use` boundary, and
+scaffolds it — defaulting to this repo's own Tailwind v4 + Radix + Motion look,
+or adapting the same UX contract (anatomy, behavior, accessibility) to
+whatever design system the target project already uses.
+
+Install it in any project:
+
+```
+/plugin marketplace add carlosmarch/ai-patterns
+/plugin install ai-patterns@ai-patterns
+```
+
+Then ask your agent something like "Use ai-patterns to add a loading state
+while the agent is working" or "use ai-patterns to design this composer."
+
+**It grows with the catalogue, not by hand.** The skill's reference material
+(`plugins/ai-patterns/skills/design/reference/`) is generated from
+`src/registry/` — never edited directly. After adding a new component to the
+registry:
+
+```bash
+npm run skill:build          # regenerates reference/ from src/registry/
+```
+
+Then bump `version` in both `plugins/ai-patterns/.claude-plugin/plugin.json`
+and the plugin entry in `.claude-plugin/marketplace.json`, and push. Anyone
+with the plugin installed picks up the new pattern via `/plugin marketplace
+update` + `/plugin update ai-patterns@ai-patterns`.
 
 ## Roadmap
 
