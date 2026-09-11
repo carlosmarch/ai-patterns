@@ -1,7 +1,5 @@
 import type { ComponentType } from "react";
 
-import ShinyButtonDemo from "./buttons/shiny-button/demo";
-import { pattern as shinyButtonPattern } from "./buttons/shiny-button/pattern";
 import ThinkingLoaderDemo from "./loaders/thinking-loader/demo";
 import { pattern as thinkingLoaderPattern } from "./loaders/thinking-loader/pattern";
 import ExpandableTraceDemo from "./traces/expandable-trace/demo";
@@ -28,14 +26,6 @@ export interface RegistryEntry {
 }
 
 export const registry: RegistryEntry[] = [
-  {
-    slug: "shiny-button",
-    category: "buttons",
-    title: "Shiny Button",
-    description: "A button with an animated light sweep across its surface.",
-    Demo: ShinyButtonDemo,
-    uxDoc: shinyButtonPattern,
-  },
   {
     slug: "thinking-loader",
     category: "loaders",
