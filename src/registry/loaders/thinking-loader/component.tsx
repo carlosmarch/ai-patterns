@@ -25,7 +25,7 @@ export interface ThinkingLoaderProps {
 
 export function ThinkingLoader({
   words = DEFAULT_WORDS,
-  interval = 2000,
+  interval = 6000,
   className,
 }: ThinkingLoaderProps) {
   const elapsed = useElapsedSeconds();
@@ -72,19 +72,24 @@ function useElapsedSeconds() {
   return elapsed;
 }
 
-/** The shimmer sweep runs continuously on this outer span; only the word inside it swaps. */
+/**
+ * The shimmer sweeps once, pauses, then repeats — like the Shiny Button's
+ * light sweep — on this outer span; only the word inside it swaps. A single
+ * clean pass reads better than a relentless loop, especially paired with an
+ * infrequent word change.
+ */
 function ShimmerWord({ word }: { word: string }) {
   return (
     <motion.span
       className="inline-block bg-clip-text text-sm font-medium text-transparent"
       style={{
         backgroundImage:
-          "linear-gradient(90deg, var(--muted-foreground) 40%, var(--foreground) 50%, var(--muted-foreground) 60%)",
+          "linear-gradient(90deg, var(--muted-foreground) 30%, var(--foreground) 50%, var(--muted-foreground) 70%)",
         backgroundSize: "200% 100%",
       }}
-      initial={{ backgroundPositionX: "100%" }}
-      animate={{ backgroundPositionX: "-100%" }}
-      transition={{ repeat: Infinity, duration: 1.8, ease: "linear" }}
+      initial={{ backgroundPositionX: "150%" }}
+      animate={{ backgroundPositionX: "-50%" }}
+      transition={{ repeat: Infinity, repeatType: "loop", duration: 1.4, ease: "linear", repeatDelay: 0.8 }}
     >
       <AnimatePresence mode="wait">
         <motion.span

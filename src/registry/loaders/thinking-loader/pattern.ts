@@ -13,13 +13,13 @@ An inline status indicator shown while an agent is working on a response: a smal
 - More than one active at a time in the same conversation/view. One "the system is working" signal per turn.
 
 ## Anatomy
-- Brain icon: a dim base glyph with a brighter sheen swept across it on a loop.
+- Brain icon: a plain, solid glyph — it doesn't shimmer, so it stays legible as a fixed anchor next to the moving label.
 - Shimmering label: a present-participle verb or short phrase describing the current activity, cycling through a small set of synonyms ("Thinking", "Reasoning", "Pondering", ...) on a timer.
 - Elapsed-time counter: whole seconds, counting up from 0s.
 
 ## Behavior
 - Starts counting the instant work begins.
-- The label cycles to the next word in its list every couple of seconds, fading/sliding out the old word and in the new one — the shimmer alone communicates "still working" even between word changes.
+- The label cycles to the next word in its list every 6 seconds, fading/sliding out the old word and in the new one — the shimmer (a single sweep, pause, repeat, not a relentless loop) communicates "still working" even between word changes.
 - If real sub-step information is available ("Thinking" → "Searching" → "Writing"), drive the label from that instead of the generic cycle.
 - The counter's changed digit animates in place (a short roll/slide) rather than the whole number re-rendering, so it doesn't read as flicker.
 - On completion, replace the whole component with a result — for an agent trace, that's typically the collapsed header of an Expandable Trace ("Thought for 4 seconds").
@@ -31,7 +31,7 @@ An inline status indicator shown while an agent is working on a response: a smal
 ## Accessibility
 - Wrap in an \`aria-live="polite"\` region so screen readers announce label changes without interrupting other content.
 - Don't rely on the animated counter alone to signal "still working" for assistive tech — the live-region label carries that meaning.
-- Respect \`prefers-reduced-motion\`: keep the counter (it's informational) but reduce or remove the looping icon/shimmer motion.
+- Respect \`prefers-reduced-motion\`: keep the counter (it's informational) but reduce or remove the shimmer motion.
 
 ## Related patterns
 - Expandable Trace is the "done" counterpart — replace this component with that one the moment work completes.
