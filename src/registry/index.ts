@@ -1,6 +1,8 @@
 import type { ComponentType } from "react";
 
 import ShinyButtonDemo from "./buttons/shiny-button/demo";
+import ThinkingLoaderDemo from "./loaders/thinking-loader/demo";
+import ExpandableTraceDemo from "./traces/expandable-trace/demo";
 
 export interface RegistryEntry {
   slug: string;
@@ -17,6 +19,20 @@ export const registry: RegistryEntry[] = [
     title: "Shiny Button",
     description: "A button with an animated light sweep across its surface.",
     Demo: ShinyButtonDemo,
+  },
+  {
+    slug: "thinking-loader",
+    category: "loaders",
+    title: "Thinking Loader",
+    description: "A loader with a shimmering label and a live elapsed-time counter.",
+    Demo: ThinkingLoaderDemo,
+  },
+  {
+    slug: "expandable-trace",
+    category: "traces",
+    title: "Expandable Trace",
+    description: "A collapsible \"Thought for Xs\" summary that expands into a step-by-step trace.",
+    Demo: ExpandableTraceDemo,
   },
 ];
 
