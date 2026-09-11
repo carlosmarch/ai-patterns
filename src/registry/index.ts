@@ -3,6 +3,7 @@ import type { ComponentType } from "react";
 import ShinyButtonDemo from "./buttons/shiny-button/demo";
 import ThinkingLoaderDemo from "./loaders/thinking-loader/demo";
 import ExpandableTraceDemo from "./traces/expandable-trace/demo";
+import StreamingTextDemo from "./text/streaming-text/demo";
 
 export interface RegistryEntry {
   slug: string;
@@ -33,6 +34,13 @@ export const registry: RegistryEntry[] = [
     title: "Expandable Trace",
     description: "A collapsible \"Thought for Xs\" summary that expands into a step-by-step trace.",
     Demo: ExpandableTraceDemo,
+  },
+  {
+    slug: "streaming-text",
+    category: "text",
+    title: "Streaming Text",
+    description: "A streamed answer with inline sources, actions, and follow-ups.",
+    Demo: StreamingTextDemo,
   },
 ];
 
