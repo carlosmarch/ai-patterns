@@ -42,6 +42,11 @@ one-line description, not the Anatomy/Behavior/Accessibility contract.
 | slug | title | description | spec |
 | --- | --- | --- | --- |
 | `chat-bubble` | Chat Bubble with Actions | A message bubble with feedback thumbs, edit-and-resubmit, and regenerate. | [messages/chat-bubble.md](./messages/chat-bubble.md) |
+### permissions
+
+| slug | title | description | spec |
+| --- | --- | --- | --- |
+| `tool-approval` | Tool Approval | A pending tool-call prompt with allow, always-allow, and deny actions. | [permissions/tool-approval.md](./permissions/tool-approval.md) |
 
 ### text
 
