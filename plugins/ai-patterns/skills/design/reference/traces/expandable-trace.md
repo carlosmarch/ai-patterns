@@ -18,7 +18,7 @@ A collapsed-by-default summary line ("Thought for N seconds") that expands into 
 
 ## Anatomy
 - Header button: icon + "Thought for N seconds" + chevron. The entire header is the toggle target, not just the chevron.
-- Collapsible body: a vertical list of steps, each with a completion mark, a short label, and optional trailing metadata (e.g. "6 flavors").
+- Collapsible body: a vertical list of steps, each with a completion mark, a short label, and optional trailing metadata (e.g. "6 sources").
 - A connecting line between steps so they read as one continuous sequence, not disconnected items.
 
 ## Behavior
@@ -28,7 +28,7 @@ A collapsed-by-default summary line ("Thought for N seconds") that expands into 
 - The duration shown in the header is fixed once the run is complete; it does not keep counting like the Thinking Loader's timer does.
 
 ## Content guidelines
-- Step labels are short, neutral action phrases ("Reading flavor briefs"), not first-person narration ("I read the flavor briefs").
+- Step labels are short, neutral action phrases ("Reading the uploaded document"), not first-person narration ("I read the uploaded document").
 - Trailing metadata should be a single scannable fact, not another full sentence.
 
 ## Accessibility

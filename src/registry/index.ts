@@ -145,7 +145,7 @@ export const registry: RegistryEntry[] = [
     slug: "chat-bubble",
     category: "messages",
     title: "Chat Bubble with Actions",
-    description: "A message bubble with feedback thumbs, edit-and-resubmit, and regenerate.",
+    description: "A message bubble with feedback thumbs, edit-and-resubmit, retry/regenerate, and a version stepper.",
     Demo: ChatBubbleDemo,
     uxDoc: chatBubblePattern,
   },
