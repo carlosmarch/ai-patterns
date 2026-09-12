@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { RotateCcw } from "lucide-react";
 
 import { MultiAgentTrace, type Agent } from "./component";
 
@@ -30,6 +31,7 @@ const INITIAL: Agent[] = [
 ];
 
 export default function MultiAgentTraceDemo() {
+  const [run, setRun] = React.useState(0);
   const [agents, setAgents] = React.useState<Agent[]>(INITIAL);
 
   React.useEffect(() => {
@@ -88,7 +90,22 @@ export default function MultiAgentTraceDemo() {
       );
     }, 1000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [run]);
 
-  return <MultiAgentTrace agents={agents} className="w-full max-w-md" />;
+  return (
+    <div className="flex w-full max-w-md flex-col items-center gap-4">
+      <MultiAgentTrace agents={agents} className="w-full" />
+      <button
+        type="button"
+        onClick={() => {
+          setAgents(INITIAL);
+          setRun((r) => r + 1);
+        }}
+        className="mx-auto flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <RotateCcw className="size-3" />
+        Replay
+      </button>
+    </div>
+  );
 }

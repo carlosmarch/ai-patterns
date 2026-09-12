@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { RotateCcw } from "lucide-react";
 
 import { ToolCallChip, type ToolCallStatus } from "./component";
 
@@ -25,9 +26,10 @@ export default function ToolCallChipDemo() {
       <button
         type="button"
         onClick={() => setStatus("running")}
-        className="rounded-full border px-3 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="mx-auto flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
       >
-        Run again
+        <RotateCcw className="size-3" />
+        Replay
       </button>
     </div>
   );

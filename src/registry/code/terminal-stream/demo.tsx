@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { RotateCcw } from "lucide-react";
 
 import { TerminalStream, type LogLine, type TerminalStatus } from "./component";
 
@@ -17,6 +18,7 @@ const SCRIPT: Omit<LogLine, "id">[] = [
 ];
 
 export default function TerminalStreamDemo() {
+  const [run, setRun] = React.useState(0);
   const [lines, setLines] = React.useState<LogLine[]>([]);
   const status: TerminalStatus = lines.length >= SCRIPT.length ? "done" : "running";
 
@@ -29,6 +31,25 @@ export default function TerminalStreamDemo() {
   }, [lines]);
 
   return (
-    <TerminalStream command="npm run build" lines={lines} status={status} className="w-full max-w-md" />
+    <div className="w-full max-w-md space-y-4">
+      <TerminalStream
+        key={run}
+        command="npm run build"
+        lines={lines}
+        status={status}
+        className="w-full"
+      />
+      <button
+        type="button"
+        onClick={() => {
+          setLines([]);
+          setRun((r) => r + 1);
+        }}
+        className="mx-auto flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <RotateCcw className="size-3" />
+        Replay
+      </button>
+    </div>
   );
 }
