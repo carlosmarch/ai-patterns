@@ -20,6 +20,10 @@ import ChatBubbleDemo from "./messages/chat-bubble/demo";
 import { pattern as chatBubblePattern } from "./messages/chat-bubble/pattern";
 import ToolApprovalDemo from "./permissions/tool-approval/demo";
 import { pattern as toolApprovalPattern } from "./permissions/tool-approval/pattern";
+import ToolCallChipDemo from "./loaders/tool-call-chip/demo";
+import { pattern as toolCallChipPattern } from "./loaders/tool-call-chip/pattern";
+import AttachmentTrayDemo from "./uploads/attachment-chip/demo";
+import { pattern as attachmentChipPattern } from "./uploads/attachment-chip/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -103,12 +107,30 @@ export const registry: RegistryEntry[] = [
     description: "A message bubble with feedback thumbs, edit-and-resubmit, and regenerate.",
     Demo: ChatBubbleDemo,
     uxDoc: chatBubblePattern,
+  },
+  {
     slug: "tool-approval",
     category: "permissions",
     title: "Tool Approval",
     description: "A pending tool-call prompt with allow, always-allow, and deny actions.",
     Demo: ToolApprovalDemo,
     uxDoc: toolApprovalPattern,
+  },
+  {
+    slug: "tool-call-chip",
+    category: "loaders",
+    title: "Tool Call Chip",
+    description: "An inline pill naming an in-flight tool call that resolves into a result summary.",
+    Demo: ToolCallChipDemo,
+    uxDoc: toolCallChipPattern,
+  },
+  {
+    slug: "attachment-chip",
+    category: "uploads",
+    title: "Attachment Chip",
+    description: "A composer's file/image attachment tray with drag-drop, upload progress, and inline preview.",
+    Demo: AttachmentTrayDemo,
+    uxDoc: attachmentChipPattern,
   },
 ];
 
