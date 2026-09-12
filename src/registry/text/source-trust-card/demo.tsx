@@ -6,21 +6,21 @@ function favicon(domain: string) {
 
 const SOURCES: TrustedSource[] = [
   {
-    title: "Namecheap: Buy a domain name - Register…",
-    domain: "namecheap.com",
+    title: "Next.js Docs — App Router",
+    domain: "nextjs.org",
     description:
-      "Register domain names at Namecheap. Buy cheap domain names and enjoy 24/7 support. With over 18 million domains under management…",
-    url: "https://www.namecheap.com",
-    faviconUrl: favicon("namecheap.com"),
-    trustReason: "is trusted for official domain registration, hosting, and web-services information from a U.S. provider.",
+      "The official Next.js documentation for the App Router, covering layouts, server components, and file-based routing — the foundation ai-patterns is built on.",
+    url: "https://nextjs.org/docs/app",
+    faviconUrl: favicon("nextjs.org"),
+    trustReason: "is trusted for official framework documentation, maintained directly by the Next.js core team.",
   },
   {
-    title: "Cloudflare Registrar — At-cost domain registration",
-    domain: "cloudflare.com",
+    title: "Motion for React",
+    domain: "motion.dev",
     description:
-      "Cloudflare Registrar offers at-cost domain registration with free WHOIS privacy and built-in DDoS protection for every domain.",
-    url: "https://www.cloudflare.com/products/registrar/",
-    faviconUrl: favicon("cloudflare.com"),
+      "The animation library behind every pattern in this registry — looping sheens, expand/collapse lists, and paginated carousels like this one.",
+    url: "https://motion.dev",
+    faviconUrl: favicon("motion.dev"),
   },
 ];
 
