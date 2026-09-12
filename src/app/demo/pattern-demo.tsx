@@ -35,7 +35,11 @@ import { StopGenerationButton } from "@/registry/buttons/stop-generation-button/
 import { ShinyButton } from "@/registry/buttons/shiny-button/component";
 import { AttachmentTray, type Attachment } from "@/registry/uploads/attachment-chip/component";
 import { Flowchart, type FlowchartNode } from "@/registry/flowcharts/trigger-condition/component";
-import { PromptBarPro, type SessionSuggestion } from "@/registry/composer/prompt-bar-pro/component";
+import {
+  PromptBarPro,
+  type PromptBarItem,
+  type SessionSuggestion,
+} from "@/registry/composer/prompt-bar-pro/component";
 
 // ---------------------------------------------------------------------------
 // Demo data
@@ -52,6 +56,19 @@ const SUGGESTIONS: SessionSuggestion[] = [
   { id: "stop", label: "Give me a slow answer", icon: Square },
   { id: "more", label: "Show me more patterns", icon: LayoutGrid },
   { id: "skill", label: "How do I install this?", icon: PackagePlus },
+];
+
+const COMMANDS: PromptBarItem[] = SUGGESTIONS.map((s) => ({
+  id: s.id,
+  label: `/${s.id}`,
+  description: s.label,
+}));
+
+const SOURCES: PromptBarItem[] = [
+  { id: "diff-summary", label: "Diff Summary" },
+  { id: "terminal-stream", label: "Terminal Stream" },
+  { id: "multi-agent-trace", label: "Multi-Agent Trace" },
+  { id: "tool-approval", label: "Tool Approval" },
 ];
 
 const GENERIC_REPLIES = [
@@ -1003,15 +1020,19 @@ export function PatternDemo() {
 
   function handleSubmit(value: string) {
     if (generating) return;
-    const trimmed = value.trim();
-    if (!trimmed) return;
+    const raw = value.trim();
+    if (!raw) return;
 
-    if (trimmed.toLowerCase() === "replay from the start") {
+    if (raw.toLowerCase() === "replay from the start") {
       replay();
       return;
     }
 
-    const suggestion = SUGGESTIONS.find((s) => s.label.toLowerCase() === trimmed.toLowerCase());
+    const command = COMMANDS.find((c) => c.label.toLowerCase() === raw.toLowerCase());
+    const suggestion =
+      SUGGESTIONS.find((s) => s.label.toLowerCase() === raw.toLowerCase()) ??
+      (command ? SUGGESTIONS.find((s) => s.id === command.id) : undefined);
+    const trimmed = suggestion?.label ?? raw;
 
     if (!suggestion) {
       runReplyFlow(trimmed);
@@ -1110,6 +1131,8 @@ export function PatternDemo() {
           <PromptBarPro
             suggestions={SUGGESTIONS}
             visibleCount={4}
+            sources={SOURCES}
+            commands={COMMANDS}
             placeholder="Ask about a pattern, or try one below…"
             onSubmit={handleSubmit}
           />
