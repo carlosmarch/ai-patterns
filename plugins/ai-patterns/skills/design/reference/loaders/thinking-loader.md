@@ -127,9 +127,8 @@ function useElapsedSeconds() {
 
 /**
  * The shimmer sweeps once, pauses, then repeats — like the Shiny Button's
- * light sweep — on this outer span; only the word inside it swaps. A single
- * clean pass reads better than a relentless loop, especially paired with an
- * infrequent word change.
+ * light sweep — on this outer span; the word inside it swaps instantly with
+ * no transition, so cycling never looks laggy against the sweep.
  */
 function ShimmerWord({ word }: { word: string }) {
   return (
@@ -144,18 +143,7 @@ function ShimmerWord({ word }: { word: string }) {
       animate={{ backgroundPositionX: "-50%" }}
       transition={{ repeat: Infinity, repeatType: "loop", duration: 1.4, ease: "linear", repeatDelay: 0.8 }}
     >
-      <AnimatePresence mode="wait">
-        <motion.span
-          key={word}
-          initial={{ y: 6, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -6, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="inline-block"
-        >
-          {word}
-        </motion.span>
-      </AnimatePresence>
+      <span className="inline-block whitespace-nowrap">{word}</span>
     </motion.span>
   );
 }

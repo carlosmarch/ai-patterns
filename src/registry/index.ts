@@ -32,6 +32,8 @@ import InlineCitationDemo from "./text/inline-citation/demo";
 import { pattern as inlineCitationPattern } from "./text/inline-citation/pattern";
 import MultiAgentTraceDemo from "./traces/multi-agent-trace/demo";
 import { pattern as multiAgentTracePattern } from "./traces/multi-agent-trace/pattern";
+import SourcesStackDemo from "./text/sources-stack/demo";
+import { pattern as sourcesStackPattern } from "./text/sources-stack/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -171,6 +173,14 @@ export const registry: RegistryEntry[] = [
     description: "A tree of parallel sub-agent tasks, each with its own status and step list.",
     Demo: MultiAgentTraceDemo,
     uxDoc: multiAgentTracePattern,
+  },
+  {
+    slug: "sources-stack",
+    category: "text",
+    title: "Sources Stack",
+    description: "An overlapping stack of source favicons with a count, expanding into a linked source list.",
+    Demo: SourcesStackDemo,
+    uxDoc: sourcesStackPattern,
   },
 ];
 
