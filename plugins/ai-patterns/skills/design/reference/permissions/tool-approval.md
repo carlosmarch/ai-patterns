@@ -17,11 +17,10 @@ A pending permission prompt shown before an agent executes a tool call it doesn'
 - As a generic confirm dialog for non-tool actions (e.g. "delete this message?"). Use a plain confirmation pattern instead; this one is specifically a pending tool call with a scope decision attached.
 
 ## Anatomy
-- Icon: a small tinted box identifying the tool (terminal, globe, file, etc.).
-- Title + summary: the tool's name and a one-line plain-language description of the action.
+- Header line: a small inline tool icon, the tool's name, and a one-line plain-language description of the action, all on a single row — kept light since this is a transient prompt, not a card that has to carry visual weight.
 - Detail block: the literal call being made (a shell command, a URL, a file path) in monospace, so the user can verify exactly what will run rather than trusting the summary alone.
 - Action row: Deny, Always allow (with a scope picker), and Allow — deny nearest the reading start, the two affirmative actions grouped on the trailing side.
-- Resolved state: once answered, the whole card collapses to a single row — a status icon and a short label ("Allowed", "Always allowed for this project", "Denied") — replacing the action row entirely.
+- Resolved state: once answered, the whole prompt collapses to the same single-line shape as the header, with a small status icon in place of the action row and the label swapped in for the summary ("Allowed", "Always allowed for this project", "Denied").
 
 ## Behavior
 - "Always allow" is a split control: clicking the label applies a default scope immediately; the attached chevron opens a short menu of narrower/wider scopes (e.g. "this command", "this project", "always") so precision doesn't cost extra clicks in the common case.
@@ -110,43 +109,41 @@ export function ToolApproval({
   }
 
   if (resolution) {
-    return <ResolvedRow toolName={toolName} resolution={resolution} className={className} />;
+    return <ResolvedRow icon={Icon} toolName={toolName} resolution={resolution} className={className} />;
   }
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card shadow-sm", className)}>
-      <div className="flex items-start gap-3 px-4 py-3.5">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
-          <Icon className="size-4.5" />
-        </span>
-        <div className="min-w-0 flex-1 pt-0.5">
-          <p className="font-semibold">{toolName}</p>
-          <p className="text-sm text-muted-foreground">{summary}</p>
-        </div>
+    <div className={cn("w-full overflow-hidden rounded-xl border bg-card", className)}>
+      <div className="flex items-center gap-2 px-3.5 py-2.5">
+        <Icon className="size-4 shrink-0 text-muted-foreground" />
+        <p className="min-w-0 flex-1 truncate text-sm">
+          <span className="font-medium">{toolName}</span>
+          <span className="text-muted-foreground"> · {summary}</span>
+        </p>
       </div>
 
       {detail && (
-        <div className="px-4 pb-3.5">
-          <code className="block overflow-x-auto rounded-lg bg-muted px-3 py-2 font-mono text-sm">{detail}</code>
+        <div className="px-3.5 pb-2.5">
+          <code className="block overflow-x-auto rounded-lg bg-muted px-2.5 py-1.5 font-mono text-xs">{detail}</code>
         </div>
       )}
 
-      <div className="flex items-center gap-2 border-t px-4 py-3">
+      <div className="flex items-center gap-1.5 border-t px-3.5 py-2">
         <button
           type="button"
           onClick={() => resolve("deny")}
-          className="rounded-full px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="rounded-full px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           Deny
         </button>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1.5">
           <div ref={scopeRef} className="relative shrink-0">
             <div className="flex items-center overflow-hidden rounded-full border">
               <button
                 type="button"
                 onClick={() => resolve("always-allow", scopes[0])}
-                className="px-3.5 py-1.5 text-sm font-medium transition-colors hover:bg-accent"
+                className="px-2.5 py-1 text-xs font-medium transition-colors hover:bg-accent"
               >
                 Always allow
               </button>
@@ -156,9 +153,9 @@ export function ToolApproval({
                 aria-expanded={scopeOpen}
                 aria-label="Choose scope for always allow"
                 onClick={() => setScopeOpen((v) => !v)}
-                className="flex h-full items-center border-l px-2 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                className="flex h-full items-center border-l px-1.5 py-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
-                <ChevronDown className={cn("size-3.5 transition-transform", scopeOpen && "rotate-180")} />
+                <ChevronDown className={cn("size-3 transition-transform", scopeOpen && "rotate-180")} />
               </button>
             </div>
             <AnimatePresence>
@@ -169,7 +166,7 @@ export function ToolApproval({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 4 }}
                   transition={{ duration: 0.12 }}
-                  className="absolute bottom-full right-0 z-10 mb-2 w-44 overflow-hidden rounded-xl border bg-popover shadow-md"
+                  className="absolute bottom-full right-0 z-10 mb-2 w-40 overflow-hidden rounded-lg border bg-popover shadow-md"
                 >
                   {scopes.map((scope) => (
                     <button
@@ -177,7 +174,7 @@ export function ToolApproval({
                       type="button"
                       role="menuitem"
                       onClick={() => resolve("always-allow", scope)}
-                      className="block w-full px-3 py-2 text-left text-sm hover:bg-accent"
+                      className="block w-full px-2.5 py-1.5 text-left text-xs hover:bg-accent"
                     >
                       Always allow for {scope.label}
                     </button>
@@ -190,7 +187,7 @@ export function ToolApproval({
           <button
             type="button"
             onClick={() => resolve("allow")}
-            className="rounded-full bg-foreground px-4 py-1.5 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+            className="rounded-full bg-foreground px-3 py-1 text-xs font-medium text-background transition-colors hover:bg-foreground/90"
           >
             Allow
           </button>
@@ -201,10 +198,12 @@ export function ToolApproval({
 }
 
 function ResolvedRow({
+  icon: Icon,
   toolName,
   resolution,
   className,
 }: {
+  icon: React.ComponentType<{ className?: string }>;
   toolName: string;
   resolution: Resolution;
   className?: string;
@@ -216,28 +215,20 @@ function ResolvedRow({
         ? `Always allowed for ${resolution.scope?.label ?? "this project"}`
         : "Allowed";
 
+  const StatusIcon = resolution.decision === "deny" ? X : resolution.decision === "always-allow" ? ShieldCheck : Check;
+  const statusColor =
+    resolution.decision === "deny"
+      ? "text-red-600 dark:text-red-400"
+      : "text-emerald-600 dark:text-emerald-400";
+
   return (
-    <div className={cn("flex items-center gap-3 rounded-2xl border bg-card px-4 py-3 shadow-sm", className)}>
-      <span
-        className={cn(
-          "flex size-8 shrink-0 items-center justify-center rounded-full",
-          resolution.decision === "deny"
-            ? "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400"
-            : "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400"
-        )}
-      >
-        {resolution.decision === "deny" ? (
-          <X className="size-4" />
-        ) : resolution.decision === "always-allow" ? (
-          <ShieldCheck className="size-4" />
-        ) : (
-          <Check className="size-4" />
-        )}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium">{toolName}</p>
-        <p className="text-xs text-muted-foreground">{label}</p>
-      </div>
+    <div className={cn("flex items-center gap-2 rounded-xl border bg-card px-3.5 py-2.5", className)}>
+      <Icon className="size-4 shrink-0 text-muted-foreground" />
+      <p className="min-w-0 flex-1 truncate text-sm">
+        <span className="font-medium">{toolName}</span>
+        <span className="text-muted-foreground"> · {label}</span>
+      </p>
+      <StatusIcon className={cn("size-3.5 shrink-0", statusColor)} />
     </div>
   );
 }

@@ -13,11 +13,10 @@ A pending permission prompt shown before an agent executes a tool call it doesn'
 - As a generic confirm dialog for non-tool actions (e.g. "delete this message?"). Use a plain confirmation pattern instead; this one is specifically a pending tool call with a scope decision attached.
 
 ## Anatomy
-- Icon: a small tinted box identifying the tool (terminal, globe, file, etc.).
-- Title + summary: the tool's name and a one-line plain-language description of the action.
+- Header line: a small inline tool icon, the tool's name, and a one-line plain-language description of the action, all on a single row — kept light since this is a transient prompt, not a card that has to carry visual weight.
 - Detail block: the literal call being made (a shell command, a URL, a file path) in monospace, so the user can verify exactly what will run rather than trusting the summary alone.
 - Action row: Deny, Always allow (with a scope picker), and Allow — deny nearest the reading start, the two affirmative actions grouped on the trailing side.
-- Resolved state: once answered, the whole card collapses to a single row — a status icon and a short label ("Allowed", "Always allowed for this project", "Denied") — replacing the action row entirely.
+- Resolved state: once answered, the whole prompt collapses to the same single-line shape as the header, with a small status icon in place of the action row and the label swapped in for the summary ("Allowed", "Always allowed for this project", "Denied").
 
 ## Behavior
 - "Always allow" is a split control: clicking the label applies a default scope immediately; the attached chevron opens a short menu of narrower/wider scopes (e.g. "this command", "this project", "always") so precision doesn't cost extra clicks in the common case.

@@ -11,7 +11,7 @@ export default function ToolApprovalDemo() {
       toolName="Bash"
       summary="Run a shell command"
       detail="npm install lodash"
-      className="w-full max-w-md"
+      className="w-full max-w-sm"
     />
   );
 }
