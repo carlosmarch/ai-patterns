@@ -3,6 +3,7 @@ import path from "node:path";
 import Link from "next/link";
 
 import { CodeBlock } from "@/components/code-block";
+import { GithubMark } from "@/components/github-mark";
 import { getCategories, registry } from "@/registry";
 
 const INSTALL_COMMAND = `/plugin marketplace add carlosmarch/ai-patterns
@@ -178,9 +179,10 @@ export default async function SkillPage() {
           href="https://github.com/carlosmarch/ai-patterns"
           target="_blank"
           rel="noreferrer"
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
         >
-          View source on GitHub →
+          <GithubMark className="size-4" />
+          View source on GitHub
         </a>
       </div>
     </main>
