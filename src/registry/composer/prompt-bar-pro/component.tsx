@@ -6,7 +6,6 @@ import { ChevronDown, Mic, Monitor, Plus, Shuffle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { StopGenerationButton, type GenerationState } from "../../buttons/stop-generation-button/component";
-import { ThinkingLoader } from "../../loaders/thinking-loader/component";
 
 export interface SessionSuggestion {
   id: string;
@@ -253,19 +252,16 @@ export function PromptBarPro({
         </AnimatePresence>
 
         <div className="flex flex-col gap-3 rounded-2xl border bg-card p-3 shadow-sm">
-          {generationState === "generating" ? (
-            <ThinkingLoader className="min-h-14 px-1 py-1" />
-          ) : (
-            <textarea
-              ref={textareaRef}
-              rows={1}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={placeholder}
-              className="max-h-40 min-h-14 w-full resize-none bg-transparent px-1 py-1 text-base outline-none placeholder:text-muted-foreground"
-            />
-          )}
+          <textarea
+            ref={textareaRef}
+            rows={1}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            disabled={generationState === "generating"}
+            className="max-h-40 min-h-14 w-full resize-none bg-transparent px-1 py-1 text-base outline-none placeholder:text-muted-foreground disabled:text-muted-foreground"
+          />
 
           <div className="flex flex-wrap items-center gap-y-2 gap-x-1">
             <button
