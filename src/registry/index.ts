@@ -44,6 +44,8 @@ import PartialResponseDemo from "./errors/partial-response/demo";
 import { pattern as partialResponsePattern } from "./errors/partial-response/pattern";
 import ResponseCompareDemo from "./compare/response-compare/demo";
 import { pattern as responseComparePattern } from "./compare/response-compare/pattern";
+import ConfidenceIndicatorDemo from "./indicators/confidence-indicator/demo";
+import { pattern as confidenceIndicatorPattern } from "./indicators/confidence-indicator/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -232,6 +234,14 @@ export const registry: RegistryEntry[] = [
     description: "A side-by-side pair of response panels with independent regenerate and a single preferred pick.",
     Demo: ResponseCompareDemo,
     uxDoc: responseComparePattern,
+  },
+  {
+    slug: "confidence-indicator",
+    category: "indicators",
+    title: "Confidence Indicator",
+    description: "A badge or inline dot signaling how sure an AI answer or extraction is.",
+    Demo: ConfidenceIndicatorDemo,
+    uxDoc: confidenceIndicatorPattern,
   },
 ];
 
