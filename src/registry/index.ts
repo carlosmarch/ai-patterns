@@ -34,6 +34,8 @@ import MultiAgentTraceDemo from "./traces/multi-agent-trace/demo";
 import { pattern as multiAgentTracePattern } from "./traces/multi-agent-trace/pattern";
 import SourcesStackDemo from "./text/sources-stack/demo";
 import { pattern as sourcesStackPattern } from "./text/sources-stack/pattern";
+import FollowUpListDemo from "./text/follow-up-list/demo";
+import { pattern as followUpListPattern } from "./text/follow-up-list/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -181,6 +183,14 @@ export const registry: RegistryEntry[] = [
     description: "An overlapping stack of source favicons with a count, expanding into a linked source list.",
     Demo: SourcesStackDemo,
     uxDoc: sourcesStackPattern,
+  },
+  {
+    slug: "follow-up-list",
+    category: "text",
+    title: "Follow-Up List",
+    description: "A vertical list of suggested next questions shown after a response, each sendable with a tap.",
+    Demo: FollowUpListDemo,
+    uxDoc: followUpListPattern,
   },
 ];
 
