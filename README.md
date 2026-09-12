@@ -40,11 +40,22 @@ Register it in `src/registry/index.ts` and it's automatically picked up by:
 
 This catalogue ships as an installable Claude Code skill/plugin, `ai-patterns`,
 under `plugins/ai-patterns/`. It's a design-engineering expert for AI product
-prototypes: given a screen or flow to build, it shortlists candidates from the
-catalogue, checks each one's `When to use` / `When not to use` boundary, and
-scaffolds it — defaulting to this repo's own Tailwind v4 + Radix + Motion look,
-or adapting the same UX contract (anatomy, behavior, accessibility) to
-whatever design system the target project already uses.
+prototypes, with three entry points:
+
+- **list** — list every pattern in the catalogue as a numbered inventory
+  ("list all patterns", "what patterns are available").
+- **review** — scan a project for hand-rolled UI that duplicates a catalogue
+  pattern and report where each would slot in. Read-only; nothing gets
+  edited ("review my project", "audit my UI for reusable patterns").
+- **apply** — the main flow: given a screen or flow to build, shortlist
+  candidates from the catalogue, check each one's `When to use` / `When not
+  to use` boundary, and scaffold it — defaulting to this repo's own
+  Tailwind v4 + Radix + Motion look, or adapting the same UX contract
+  (anatomy, behavior, accessibility) to whatever design system the target
+  project already uses. Name a pattern directly to skip detection, or just
+  describe the feature and let it auto-detect the best fit.
+
+See `plugins/ai-patterns/skills/design/SKILL.md` for the full spec of each.
 
 Install it in any project:
 
@@ -54,7 +65,8 @@ Install it in any project:
 ```
 
 Then ask your agent something like "Use ai-patterns to add a loading state
-while the agent is working" or "use ai-patterns to design this composer."
+while the agent is working," "review my project for reusable ai-patterns,"
+or "list all patterns in the ai-patterns catalogue."
 
 **It grows with the catalogue, not by hand.** The skill's reference material
 (`plugins/ai-patterns/skills/design/reference/`) is generated from
