@@ -85,8 +85,8 @@ export function MultiAgentTrace({ agents, className }: MultiAgentTraceProps) {
   const allResolved = active === 0;
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card shadow-sm", className)}>
-      <div aria-live="polite" className="flex items-center gap-2 border-b px-4 py-3 text-sm font-medium">
+    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card", className)}>
+      <div aria-live="polite" className="flex items-center gap-2 border-b px-4 py-3 text-xs font-medium">
         {!allResolved ? (
           <Loader2 className="size-3.5 animate-spin text-muted-foreground" aria-hidden />
         ) : failed > 0 ? (
@@ -123,8 +123,8 @@ function AgentRow({ agent }: { agent: Agent }) {
       >
         <StatusIcon status={agent.status} />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium">{agent.name}</p>
-          {agent.currentStep && <p className="truncate text-xs text-muted-foreground">{agent.currentStep}</p>}
+          <p className="text-xs font-medium">{agent.name}</p>
+          {agent.currentStep && <p className="truncate text-[11px] text-muted-foreground">{agent.currentStep}</p>}
         </div>
         {typeof agent.elapsedSeconds === "number" && (
           <span className="shrink-0 font-mono text-xs text-muted-foreground">{agent.elapsedSeconds}s</span>
@@ -152,7 +152,7 @@ function AgentRow({ agent }: { agent: Agent }) {
                     </span>
                     {i < agent.steps.length - 1 && <span className="my-1 w-px flex-1 bg-border" />}
                   </div>
-                  <p className="pb-3 text-sm text-foreground/90">
+                  <p className="pb-3 text-xs text-foreground/90">
                     {step.label}
                     {step.meta && <span className="ml-1.5 text-muted-foreground">{step.meta}</span>}
                   </p>
