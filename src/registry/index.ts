@@ -103,6 +103,8 @@ export const registry: RegistryEntry[] = [
     description: "A message bubble with feedback thumbs, edit-and-resubmit, and regenerate.",
     Demo: ChatBubbleDemo,
     uxDoc: chatBubblePattern,
+  },
+  {
     slug: "tool-approval",
     category: "permissions",
     title: "Tool Approval",
