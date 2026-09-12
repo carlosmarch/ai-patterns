@@ -12,6 +12,8 @@ import PromptBarDemo from "./composer/prompt-bar/demo";
 import { pattern as promptBarPattern } from "./composer/prompt-bar/pattern";
 import DiffSummaryCardDemo from "./code/diff-summary/demo";
 import { pattern as diffSummaryPattern } from "./code/diff-summary/pattern";
+import DiffTabsDemo from "./code/diff-tabs/demo";
+import { pattern as diffTabsPattern } from "./code/diff-tabs/pattern";
 import PromptBarProDemo from "./composer/prompt-bar-pro/demo";
 import { pattern as promptBarProPattern } from "./composer/prompt-bar-pro/pattern";
 import FlowchartDemo from "./flowcharts/trigger-condition/demo";
@@ -120,6 +122,14 @@ export const registry: RegistryEntry[] = [
     description: "A collapsed summary of a batch of file edits, with undo and an overflow list.",
     Demo: DiffSummaryCardDemo,
     uxDoc: diffSummaryPattern,
+  },
+  {
+    slug: "diff-tabs",
+    category: "code",
+    title: "Diff Tabs",
+    description: "Per-file chips that switch an inline diff viewer between a batch of changed files.",
+    Demo: DiffTabsDemo,
+    uxDoc: diffTabsPattern,
   },
   {
     slug: "trigger-condition",
