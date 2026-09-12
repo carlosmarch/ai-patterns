@@ -2,15 +2,15 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { FileCode2, Home, LayoutGrid, MonitorPlay, Search, Sparkles } from "lucide-react";
+import { FileCode2, LayoutGrid, Origami, Search, Sparkles, SquareDashedMousePointer } from "lucide-react";
 
 import { registry } from "@/registry";
 import { CommandPalette, type CommandPaletteGroup } from "@/registry/navigation/command-palette/component";
 
 const navItems = [
-  { id: "/", label: "Home", icon: Home },
+  { id: "/", label: "Home", icon: Origami },
   { id: "/patterns", label: "Patterns", icon: LayoutGrid },
-  { id: "/demo", label: "Demo", icon: MonitorPlay },
+  { id: "/demo", label: "Demo", icon: SquareDashedMousePointer },
   { id: "/skill", label: "Skill", icon: Sparkles },
 ];
 
