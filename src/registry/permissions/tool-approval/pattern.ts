@@ -1,43 +1,41 @@
 export const pattern = `# Tool Approval
 
 ## Summary
-An inline card that pauses an agent's turn to ask the user to allow or deny a specific tool call before it runs — naming the tool, showing the exact command/arguments, and offering "Always allow" alongside a one-time Allow and a Deny. It's the gate that keeps an agent from taking a consequential action without explicit consent.
+A pending permission prompt shown before an agent executes a tool call it doesn't already have standing approval for: the tool's name, a plain-language summary of what it's about to do, the literal call (command, path, args) it will run, and three ways to respond — deny it, allow it once, or always allow it going forward. Once answered, it collapses into a compact resolved row so the transcript keeps moving.
 
 ## When to use
-- Before executing an action with real side effects the user should confirm: running a shell command, sending a message, spending money, deleting or overwriting data.
-- Whenever the user (or an admin policy) has configured "ask before X" for a class of tools.
-- For actions that are hard or impossible to undo — the higher the stakes, the more this pattern earns its interruption.
+- Before any tool call whose effect is irreversible, external, or otherwise outside the trust the agent already has (running a shell command, calling a paid API, writing outside the project, sending a message on the user's behalf).
+- Inline in an agent transcript or chat UI, at the point the call would happen — not as an app-blocking modal, since the user usually wants the surrounding conversation still visible while deciding.
 
 ## When not to use
-- For read-only or low-risk calls (a search, a file read) that don't need gating — prompting for everything trains users to click Allow without reading, which defeats the point.
-- After the action already happened. This is a gate, not a log entry — use a trace or a Diff Summary-style pattern to report what already ran.
-- As a blanket, unscoped "trust this agent forever" toggle. "Always allow" should scope to this tool (and ideally this session or project), never silently disable approval for everything.
+- For actions the user already granted standing permission for — show them running, not asking again. Re-prompting after "always allow" erodes trust in the setting.
+- For read-only, side-effect-free calls (e.g. re-reading a file already in context) where the friction outweighs the risk — gate only what actually needs gating.
+- As a generic confirm dialog for non-tool actions (e.g. "delete this message?"). Use a plain confirmation pattern instead; this one is specifically a pending tool call with a scope decision attached.
 
 ## Anatomy
-- Icon: a plain tool glyph normally, a warning glyph when the action is destructive.
-- Ask line: "Run \`<toolName>\`?" plus an optional one-line description of what it will do.
-- Command/argument preview: the literal command or payload, in a monospace block — never a paraphrase.
-- Primary actions: Allow (once), Always allow (scoped to this tool), and Deny.
-- Optional reason field: shown when the user picks Deny, so they can tell the agent what to do instead.
-- Resolved state: once answered, the card collapses to a compact one-line result (Allowed / Always allowed / Denied) that stays visible as a record.
+- Icon: a small tinted box identifying the tool (terminal, globe, file, etc.).
+- Title + summary: the tool's name and a one-line plain-language description of the action.
+- Detail block: the literal call being made (a shell command, a URL, a file path) in monospace, so the user can verify exactly what will run rather than trusting the summary alone.
+- Action row: Deny, Always allow (with a scope picker), and Allow — deny nearest the reading start, the two affirmative actions grouped on the trailing side.
+- Resolved state: once answered, the whole card collapses to a single row — a status icon and a short label ("Allowed", "Always allowed for this project", "Denied") — replacing the action row entirely.
 
 ## Behavior
-- Appears inline at the exact point the agent wants to invoke the tool; the agent's turn is blocked until the prompt resolves.
-- Allow and Always allow both let this specific call proceed; Always allow additionally suppresses the prompt for future matching calls (same tool, and typically same scope — session or project) and should surface a lightweight indicator when it silently allows a later call.
-- Choosing Deny reveals a short optional text field before committing, so the user can redirect the agent instead of just blocking it.
-- Escape is treated as Deny — the safer default when a user dismisses the prompt without an explicit choice.
-- Once resolved, the card does not disappear; it collapses into a compact resolved-state row so the transcript keeps an accurate record of what was allowed or denied.
+- "Always allow" is a split control: clicking the label applies a default scope immediately; the attached chevron opens a short menu of narrower/wider scopes (e.g. "this command", "this project", "always") so precision doesn't cost extra clicks in the common case.
+- A decision is terminal for this prompt — there's no separate confirm step after clicking one of the three actions, and none of the actions stay interactive once a decision is recorded.
+- Deny doesn't carry a scope; it always applies to just this one call. Permanently blocking a tool belongs in settings, not this prompt.
+- The detail block shows the actual call verbatim (real command, real path), never a paraphrase — this is the one place the user gets to verify before it runs.
 
 ## Content guidelines
-- Show the real command or arguments verbatim, exactly as they'll execute, so the user can verify what they're approving.
-- Keep the ask specific — name the tool and its target ("Run \`delete_file\`?" on \`report.pdf\`), never a generic "Allow this action?".
+- Tool names are short and literal ("Bash", "Web Search"), not a marketing name for the underlying feature.
+- The summary states the action, not the agent's justification for it ("Run a shell command", not "I need to check if the tests pass").
+- Scope labels in the always-allow menu name what they cover concretely ("this project", "this command"), never vague terms like "sometimes".
 
 ## Accessibility
-- Focus moves to the prompt when it appears, and Allow/Always allow/Deny are all reachable and operable by keyboard.
-- Wrap state changes (resolved result) in an \`aria-live="polite"\` region, since the prompt can appear mid-conversation and interrupt reading.
-- Don't signal destructive vs. safe with color alone — pair it with an icon and label change.
+- The three (or more, with scope options) actions must be real, focusable buttons — a keyboard-only user needs to reach Deny as easily as Allow.
+- The always-allow menu follows the standard disclosure pattern: \`aria-haspopup\`/\`aria-expanded\` on the trigger, and closes on Escape or an outside click.
+- Don't rely on color alone to distinguish Allow from Deny — the label text already carries the meaning, so keep it even under custom theming.
 
 ## Related patterns
-- Tool Call Chip shows the in-flight and completed state of a call once it's been approved.
-- Diff Summary is the after-the-fact review counterpart for a batch of file edits, once changes have already been made.
+- Diff Summary Card is the after-the-fact counterpart — this pattern gates a call before it runs, that one summarizes calls that already ran.
+- Prompt Bar's chip-with-chevron dropdown is the same disclosure idiom used here for the scope picker.
 `;

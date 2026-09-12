@@ -5,45 +5,43 @@
 # Tool Approval
 
 ## Summary
-An inline card that pauses an agent's turn to ask the user to allow or deny a specific tool call before it runs — naming the tool, showing the exact command/arguments, and offering "Always allow" alongside a one-time Allow and a Deny. It's the gate that keeps an agent from taking a consequential action without explicit consent.
+A pending permission prompt shown before an agent executes a tool call it doesn't already have standing approval for: the tool's name, a plain-language summary of what it's about to do, the literal call (command, path, args) it will run, and three ways to respond — deny it, allow it once, or always allow it going forward. Once answered, it collapses into a compact resolved row so the transcript keeps moving.
 
 ## When to use
-- Before executing an action with real side effects the user should confirm: running a shell command, sending a message, spending money, deleting or overwriting data.
-- Whenever the user (or an admin policy) has configured "ask before X" for a class of tools.
-- For actions that are hard or impossible to undo — the higher the stakes, the more this pattern earns its interruption.
+- Before any tool call whose effect is irreversible, external, or otherwise outside the trust the agent already has (running a shell command, calling a paid API, writing outside the project, sending a message on the user's behalf).
+- Inline in an agent transcript or chat UI, at the point the call would happen — not as an app-blocking modal, since the user usually wants the surrounding conversation still visible while deciding.
 
 ## When not to use
-- For read-only or low-risk calls (a search, a file read) that don't need gating — prompting for everything trains users to click Allow without reading, which defeats the point.
-- After the action already happened. This is a gate, not a log entry — use a trace or a Diff Summary-style pattern to report what already ran.
-- As a blanket, unscoped "trust this agent forever" toggle. "Always allow" should scope to this tool (and ideally this session or project), never silently disable approval for everything.
+- For actions the user already granted standing permission for — show them running, not asking again. Re-prompting after "always allow" erodes trust in the setting.
+- For read-only, side-effect-free calls (e.g. re-reading a file already in context) where the friction outweighs the risk — gate only what actually needs gating.
+- As a generic confirm dialog for non-tool actions (e.g. "delete this message?"). Use a plain confirmation pattern instead; this one is specifically a pending tool call with a scope decision attached.
 
 ## Anatomy
-- Icon: a plain tool glyph normally, a warning glyph when the action is destructive.
-- Ask line: "Run `<toolName>`?" plus an optional one-line description of what it will do.
-- Command/argument preview: the literal command or payload, in a monospace block — never a paraphrase.
-- Primary actions: Allow (once), Always allow (scoped to this tool), and Deny.
-- Optional reason field: shown when the user picks Deny, so they can tell the agent what to do instead.
-- Resolved state: once answered, the card collapses to a compact one-line result (Allowed / Always allowed / Denied) that stays visible as a record.
+- Icon: a small tinted box identifying the tool (terminal, globe, file, etc.).
+- Title + summary: the tool's name and a one-line plain-language description of the action.
+- Detail block: the literal call being made (a shell command, a URL, a file path) in monospace, so the user can verify exactly what will run rather than trusting the summary alone.
+- Action row: Deny, Always allow (with a scope picker), and Allow — deny nearest the reading start, the two affirmative actions grouped on the trailing side.
+- Resolved state: once answered, the whole card collapses to a single row — a status icon and a short label ("Allowed", "Always allowed for this project", "Denied") — replacing the action row entirely.
 
 ## Behavior
-- Appears inline at the exact point the agent wants to invoke the tool; the agent's turn is blocked until the prompt resolves.
-- Allow and Always allow both let this specific call proceed; Always allow additionally suppresses the prompt for future matching calls (same tool, and typically same scope — session or project) and should surface a lightweight indicator when it silently allows a later call.
-- Choosing Deny reveals a short optional text field before committing, so the user can redirect the agent instead of just blocking it.
-- Escape is treated as Deny — the safer default when a user dismisses the prompt without an explicit choice.
-- Once resolved, the card does not disappear; it collapses into a compact resolved-state row so the transcript keeps an accurate record of what was allowed or denied.
+- "Always allow" is a split control: clicking the label applies a default scope immediately; the attached chevron opens a short menu of narrower/wider scopes (e.g. "this command", "this project", "always") so precision doesn't cost extra clicks in the common case.
+- A decision is terminal for this prompt — there's no separate confirm step after clicking one of the three actions, and none of the actions stay interactive once a decision is recorded.
+- Deny doesn't carry a scope; it always applies to just this one call. Permanently blocking a tool belongs in settings, not this prompt.
+- The detail block shows the actual call verbatim (real command, real path), never a paraphrase — this is the one place the user gets to verify before it runs.
 
 ## Content guidelines
-- Show the real command or arguments verbatim, exactly as they'll execute, so the user can verify what they're approving.
-- Keep the ask specific — name the tool and its target ("Run `delete_file`?" on `report.pdf`), never a generic "Allow this action?".
+- Tool names are short and literal ("Bash", "Web Search"), not a marketing name for the underlying feature.
+- The summary states the action, not the agent's justification for it ("Run a shell command", not "I need to check if the tests pass").
+- Scope labels in the always-allow menu name what they cover concretely ("this project", "this command"), never vague terms like "sometimes".
 
 ## Accessibility
-- Focus moves to the prompt when it appears, and Allow/Always allow/Deny are all reachable and operable by keyboard.
-- Wrap state changes (resolved result) in an `aria-live="polite"` region, since the prompt can appear mid-conversation and interrupt reading.
-- Don't signal destructive vs. safe with color alone — pair it with an icon and label change.
+- The three (or more, with scope options) actions must be real, focusable buttons — a keyboard-only user needs to reach Deny as easily as Allow.
+- The always-allow menu follows the standard disclosure pattern: `aria-haspopup`/`aria-expanded` on the trigger, and closes on Escape or an outside click.
+- Don't rely on color alone to distinguish Allow from Deny — the label text already carries the meaning, so keep it even under custom theming.
 
 ## Related patterns
-- Tool Call Chip shows the in-flight and completed state of a call once it's been approved.
-- Diff Summary is the after-the-fact review counterpart for a batch of file edits, once changes have already been made.
+- Diff Summary Card is the after-the-fact counterpart — this pattern gates a call before it runs, that one summarizes calls that already ran.
+- Prompt Bar's chip-with-chevron dropdown is the same disclosure idiom used here for the scope picker.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 
@@ -60,162 +58,199 @@ instead of copying these Tailwind classes or the Motion API.
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Check, ShieldAlert, Terminal, X } from "lucide-react";
+import { Check, ChevronDown, ShieldCheck, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+export type ToolApprovalDecision = "allow" | "always-allow" | "deny";
+
+export interface ToolApprovalScope {
+  id: string;
+  label: string;
+}
+
 export interface ToolApprovalProps {
+  icon: React.ComponentType<{ className?: string }>;
   toolName: string;
-  command: string;
-  description?: string;
-  /** Marks the action as consequential/hard to undo — swaps the icon and accents the border. */
-  destructive?: boolean;
-  onAllow?: () => void;
-  onAllowAlways?: () => void;
-  onDeny?: (reason?: string) => void;
+  summary: string;
+  detail?: string;
+  scopes?: ToolApprovalScope[];
+  onDecision?: (decision: ToolApprovalDecision, scope?: ToolApprovalScope) => void;
   className?: string;
 }
 
-type Status = "pending" | "allowed" | "always-allowed" | "denied";
+const defaultScopes: ToolApprovalScope[] = [
+  { id: "command", label: "this command" },
+  { id: "project", label: "this project" },
+  { id: "always", label: "always" },
+];
+
+interface Resolution {
+  decision: ToolApprovalDecision;
+  scope?: ToolApprovalScope;
+}
 
 export function ToolApproval({
+  icon: Icon,
   toolName,
-  command,
-  description,
-  destructive = false,
-  onAllow,
-  onAllowAlways,
-  onDeny,
+  summary,
+  detail,
+  scopes = defaultScopes,
+  onDecision,
   className,
 }: ToolApprovalProps) {
-  const [status, setStatus] = React.useState<Status>("pending");
-  const [denying, setDenying] = React.useState(false);
-  const [reason, setReason] = React.useState("");
+  const [resolution, setResolution] = React.useState<Resolution | null>(null);
+  const [scopeOpen, setScopeOpen] = React.useState(false);
+  const scopeRef = useClickOutside<HTMLDivElement>(() => setScopeOpen(false));
 
-  function allow() {
-    setStatus("allowed");
-    onAllow?.();
+  function resolve(decision: ToolApprovalDecision, scope?: ToolApprovalScope) {
+    setScopeOpen(false);
+    setResolution({ decision, scope });
+    onDecision?.(decision, scope);
   }
-  function allowAlways() {
-    setStatus("always-allowed");
-    onAllowAlways?.();
-  }
-  function deny() {
-    setStatus("denied");
-    onDeny?.(reason.trim() || undefined);
+
+  if (resolution) {
+    return <ResolvedRow toolName={toolName} resolution={resolution} className={className} />;
   }
 
   return (
-    <div
-      role="group"
-      aria-label={`Approve running ${toolName}`}
-      onKeyDown={(e) => {
-        if (e.key === "Escape" && status === "pending") deny();
-      }}
-      className={cn(
-        "w-full max-w-md overflow-hidden rounded-2xl border bg-card shadow-sm",
-        destructive && status === "pending" && "border-destructive/40",
-        className
-      )}
-    >
+    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card shadow-sm", className)}>
       <div className="flex items-start gap-3 px-4 py-3.5">
-        <span
-          className={cn(
-            "flex size-8 shrink-0 items-center justify-center rounded-full",
-            destructive ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"
-          )}
-        >
-          {destructive ? <ShieldAlert className="size-4" /> : <Terminal className="size-4" />}
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
+          <Icon className="size-4.5" />
         </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium">
-            Run <span className="font-mono">{toolName}</span>?
-          </p>
-          {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
-          <pre className="mt-2 overflow-x-auto rounded-lg bg-muted px-3 py-2 font-mono text-xs text-foreground/90">
-            {command}
-          </pre>
+        <div className="min-w-0 flex-1 pt-0.5">
+          <p className="font-semibold">{toolName}</p>
+          <p className="text-sm text-muted-foreground">{summary}</p>
         </div>
       </div>
 
-      <AnimatePresence mode="wait" initial={false}>
-        {status === "pending" ? (
-          <motion.div
-            key="actions"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="border-t"
+      {detail && (
+        <div className="px-4 pb-3.5">
+          <code className="block overflow-x-auto rounded-lg bg-muted px-3 py-2 font-mono text-sm">{detail}</code>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 border-t px-4 py-3">
+        <button
+          type="button"
+          onClick={() => resolve("deny")}
+          className="rounded-full px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        >
+          Deny
+        </button>
+
+        <div className="ml-auto flex items-center gap-2">
+          <div ref={scopeRef} className="relative shrink-0">
+            <div className="flex items-center overflow-hidden rounded-full border">
+              <button
+                type="button"
+                onClick={() => resolve("always-allow", scopes[0])}
+                className="px-3.5 py-1.5 text-sm font-medium transition-colors hover:bg-accent"
+              >
+                Always allow
+              </button>
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={scopeOpen}
+                aria-label="Choose scope for always allow"
+                onClick={() => setScopeOpen((v) => !v)}
+                className="flex h-full items-center border-l px-2 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              >
+                <ChevronDown className={cn("size-3.5 transition-transform", scopeOpen && "rotate-180")} />
+              </button>
+            </div>
+            <AnimatePresence>
+              {scopeOpen && (
+                <motion.div
+                  role="menu"
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ duration: 0.12 }}
+                  className="absolute bottom-full right-0 z-10 mb-2 w-44 overflow-hidden rounded-xl border bg-popover shadow-md"
+                >
+                  {scopes.map((scope) => (
+                    <button
+                      key={scope.id}
+                      type="button"
+                      role="menuitem"
+                      onClick={() => resolve("always-allow", scope)}
+                      className="block w-full px-3 py-2 text-left text-sm hover:bg-accent"
+                    >
+                      Always allow for {scope.label}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => resolve("allow")}
+            className="rounded-full bg-foreground px-4 py-1.5 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
           >
-            {!denying ? (
-              <div className="flex items-center gap-2 px-4 py-2.5">
-                <button
-                  type="button"
-                  onClick={allow}
-                  className="rounded-full bg-foreground px-3.5 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
-                >
-                  Allow
-                </button>
-                <button
-                  type="button"
-                  onClick={allowAlways}
-                  className="rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors hover:bg-accent"
-                >
-                  Always allow
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDenying(true)}
-                  className="ml-auto text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Deny
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 px-4 py-2.5">
-                <input
-                  autoFocus
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && deny()}
-                  placeholder="Tell it what to do instead (optional)"
-                  className="min-w-0 flex-1 rounded-md border bg-background px-2.5 py-1.5 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                />
-                <button
-                  type="button"
-                  onClick={deny}
-                  className="shrink-0 rounded-full bg-destructive px-3.5 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
-                >
-                  Deny
-                </button>
-              </div>
-            )}
-          </motion.div>
-        ) : (
-          <motion.div
-            key="resolved"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            role="status"
-            aria-live="polite"
-            className="flex items-center gap-1.5 border-t px-4 py-2.5 text-sm text-muted-foreground"
-          >
-            {status === "denied" ? (
-              <>
-                <X className="size-3.5" /> Denied{reason.trim() ? `: ${reason.trim()}` : ""}
-              </>
-            ) : (
-              <>
-                <Check className="size-3.5" /> {status === "always-allowed" ? "Always allowed" : "Allowed"}
-              </>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+            Allow
+          </button>
+        </div>
+      </div>
     </div>
   );
+}
+
+function ResolvedRow({
+  toolName,
+  resolution,
+  className,
+}: {
+  toolName: string;
+  resolution: Resolution;
+  className?: string;
+}) {
+  const label =
+    resolution.decision === "deny"
+      ? "Denied"
+      : resolution.decision === "always-allow"
+        ? `Always allowed for ${resolution.scope?.label ?? "this project"}`
+        : "Allowed";
+
+  return (
+    <div className={cn("flex items-center gap-3 rounded-2xl border bg-card px-4 py-3 shadow-sm", className)}>
+      <span
+        className={cn(
+          "flex size-8 shrink-0 items-center justify-center rounded-full",
+          resolution.decision === "deny"
+            ? "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400"
+            : "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400"
+        )}
+      >
+        {resolution.decision === "deny" ? (
+          <X className="size-4" />
+        ) : resolution.decision === "always-allow" ? (
+          <ShieldCheck className="size-4" />
+        ) : (
+          <Check className="size-4" />
+        )}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium">{toolName}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
+      </div>
+    </div>
+  );
+}
+
+function useClickOutside<T extends HTMLElement>(onOutside: () => void) {
+  const ref = React.useRef<T>(null);
+  React.useEffect(() => {
+    function handle(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) onOutside();
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [onOutside]);
+  return ref;
 }
 ```

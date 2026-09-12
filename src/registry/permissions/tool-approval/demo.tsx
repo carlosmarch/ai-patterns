@@ -1,12 +1,17 @@
+"use client";
+
+import { TerminalSquare } from "lucide-react";
+
 import { ToolApproval } from "./component";
 
 export default function ToolApprovalDemo() {
   return (
     <ToolApproval
-      toolName="run_command"
-      description="Wants to run a shell command in this project."
-      command="rm -rf node_modules && npm install"
-      destructive
+      icon={TerminalSquare}
+      toolName="Bash"
+      summary="Run a shell command"
+      detail="npm install lodash"
+      className="w-full max-w-md"
     />
   );
 }
