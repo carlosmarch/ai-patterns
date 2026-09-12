@@ -209,16 +209,17 @@ export function Flowchart({ nodes, className }: FlowchartProps) {
       </svg>
 
       {nodeList.map((node) => {
-        const { cx, top } = place(node.id);
+        const offset = offsets[node.id] ?? { dx: 0, dy: 0 };
         return (
           <FlowchartNodeItem
             key={node.id}
             node={node}
-            offset={offsets[node.id] ?? { dx: 0, dy: 0 }}
+            offset={offset}
             style={{
-              left: cx,
-              top,
+              left: baseCenterX,
+              top: baseTops[node.id] ?? 0,
               width: cardWidth,
+              transform: `translate3d(${offset.dx}px, ${offset.dy}px, 0) translateX(-50%)`,
               zIndex: draggingId === node.id ? 2 : 1,
             }}
             registerRef={(el) => {
@@ -263,6 +264,22 @@ function FlowchartNodeItem({
   const drag = React.useRef<{ pointerId: number; startX: number; startY: number; baseDx: number; baseDy: number } | null>(
     null
   );
+  const pendingMove = React.useRef<{ dx: number; dy: number } | null>(null);
+  const rafId = React.useRef<number | null>(null);
+
+  function flushPendingMove() {
+    rafId.current = null;
+    if (pendingMove.current) {
+      onDragMove(pendingMove.current.dx, pendingMove.current.dy);
+      pendingMove.current = null;
+    }
+  }
+
+  React.useEffect(() => {
+    return () => {
+      if (rafId.current != null) cancelAnimationFrame(rafId.current);
+    };
+  }, []);
 
   function handlePointerDown(event: React.PointerEvent<HTMLButtonElement>) {
     drag.current = {
@@ -279,22 +296,27 @@ function FlowchartNodeItem({
   function handlePointerMove(event: React.PointerEvent<HTMLButtonElement>) {
     const d = drag.current;
     if (!d || d.pointerId !== event.pointerId) return;
-    onDragMove(d.baseDx + event.clientX - d.startX, d.baseDy + event.clientY - d.startY);
+    pendingMove.current = { dx: d.baseDx + event.clientX - d.startX, dy: d.baseDy + event.clientY - d.startY };
+    if (rafId.current == null) rafId.current = requestAnimationFrame(flushPendingMove);
   }
 
   function handlePointerUp(event: React.PointerEvent<HTMLButtonElement>) {
     if (drag.current?.pointerId === event.pointerId) {
       drag.current = null;
+      if (rafId.current != null) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+      }
+      if (pendingMove.current) {
+        onDragMove(pendingMove.current.dx, pendingMove.current.dy);
+        pendingMove.current = null;
+      }
       onDragEnd();
     }
   }
 
   return (
-    <div
-      ref={registerRef}
-      className="absolute flex -translate-x-1/2 flex-col items-start gap-1.5"
-      style={style}
-    >
+    <div ref={registerRef} className="absolute flex flex-col items-start gap-1.5" style={style}>
       <div className="flex items-center gap-1.5">
         <span className={cn("rounded-md px-2.5 py-1 text-xs font-semibold", badgeStyles[node.type])}>
           {badgeLabels[node.type]}
