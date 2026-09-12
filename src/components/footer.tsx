@@ -88,7 +88,16 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col-reverse items-center justify-between gap-4 border-t pt-6 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            © {year} AI Patterns. MIT licensed.
+            © {year} AI Patterns. MIT licensed. Created by{" "}
+            <a
+              href="https://carlosmarch.es/"
+              target="_blank"
+              rel="noreferrer"
+              className="underline decoration-dotted underline-offset-2 transition-colors hover:text-foreground"
+            >
+              Carlos March
+            </a>
+            .
           </p>
           <div className="flex items-center gap-3">
             <ThemeToggle />
