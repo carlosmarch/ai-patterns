@@ -64,7 +64,7 @@ one-line description, not the Anatomy/Behavior/Accessibility contract.
 
 | slug | title | description | spec |
 | --- | --- | --- | --- |
-| `chat-bubble` | Chat Bubble with Actions | A message bubble with feedback thumbs, edit-and-resubmit, and regenerate. | [messages/chat-bubble.md](./messages/chat-bubble.md) |
+| `chat-bubble` | Chat Bubble with Actions | A message bubble with feedback thumbs, edit-and-resubmit, retry/regenerate, and a version stepper. | [messages/chat-bubble.md](./messages/chat-bubble.md) |
 
 ### navigation
 

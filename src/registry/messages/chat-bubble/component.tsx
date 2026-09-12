@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, Copy, Pencil, RotateCcw, ThumbsDown, ThumbsUp } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Copy, Pencil, RotateCcw, ThumbsDown, ThumbsUp } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -14,15 +14,31 @@ export interface ChatBubbleProps {
   onEditSubmit?: (content: string) => void;
   onRegenerate?: () => void;
   onFeedback?: (feedback: ChatFeedback) => void;
+  /** 0-based index of the version currently shown. Omit (with versionCount) to hide the stepper. */
+  versionIndex?: number;
+  /** Total number of versions (edits/regenerations) available for this message. */
+  versionCount?: number;
+  onVersionChange?: (index: number) => void;
   className?: string;
 }
 
-export function ChatBubble({ role, content, onEditSubmit, onRegenerate, onFeedback, className }: ChatBubbleProps) {
+export function ChatBubble({
+  role,
+  content,
+  onEditSubmit,
+  onRegenerate,
+  onFeedback,
+  versionIndex,
+  versionCount,
+  onVersionChange,
+  className,
+}: ChatBubbleProps) {
   const [editing, setEditing] = React.useState(false);
   const [draft, setDraft] = React.useState(content);
   const [feedback, setFeedback] = React.useState<ChatFeedback>(null);
   const [copied, setCopied] = React.useState(false);
   const isUser = role === "user";
+  const hasVersions = versionCount != null && versionCount > 1 && versionIndex != null && onVersionChange;
 
   function startEdit() {
     setDraft(content);
@@ -110,9 +126,19 @@ export function ChatBubble({ role, content, onEditSubmit, onRegenerate, onFeedba
           )}
         >
           {isUser ? (
-            <IconButton label="Edit message" onClick={startEdit}>
-              <Pencil className="size-3.5" />
-            </IconButton>
+            <>
+              {onRegenerate && (
+                <IconButton label="Retry" onClick={onRegenerate}>
+                  <RotateCcw className="size-3.5" />
+                </IconButton>
+              )}
+              <IconButton label="Edit message" onClick={startEdit}>
+                <Pencil className="size-3.5" />
+              </IconButton>
+              <IconButton label="Copy" onClick={handleCopy}>
+                {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+              </IconButton>
+            </>
           ) : (
             <>
               <IconButton label="Copy" onClick={handleCopy}>
@@ -129,8 +155,36 @@ export function ChatBubble({ role, content, onEditSubmit, onRegenerate, onFeedba
               </IconButton>
             </>
           )}
+
+          {hasVersions && (
+            <VersionNav index={versionIndex} count={versionCount} onChange={onVersionChange} />
+          )}
         </div>
       )}
+    </div>
+  );
+}
+
+function VersionNav({
+  index,
+  count,
+  onChange,
+}: {
+  index: number;
+  count: number;
+  onChange: (index: number) => void;
+}) {
+  return (
+    <div className="ml-0.5 flex items-center gap-0.5 border-l pl-1">
+      <IconButton label="Previous version" onClick={() => onChange(index - 1)} disabled={index <= 0}>
+        <ChevronLeft className="size-3.5" />
+      </IconButton>
+      <span className="min-w-[2.5ch] text-center text-xs tabular-nums text-muted-foreground">
+        {index + 1}/{count}
+      </span>
+      <IconButton label="Next version" onClick={() => onChange(index + 1)} disabled={index >= count - 1}>
+        <ChevronRight className="size-3.5" />
+      </IconButton>
     </div>
   );
 }
@@ -138,11 +192,13 @@ export function ChatBubble({ role, content, onEditSubmit, onRegenerate, onFeedba
 function IconButton({
   label,
   active,
+  disabled,
   onClick,
   children,
 }: {
   label: string;
   active?: boolean;
+  disabled?: boolean;
   onClick?: () => void;
   children: React.ReactNode;
 }) {
@@ -150,11 +206,13 @@ function IconButton({
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       aria-label={label}
       aria-pressed={active}
       className={cn(
         "rounded-md p-1.5 transition-colors hover:bg-accent hover:text-foreground",
-        active && "bg-accent text-foreground"
+        active && "bg-accent text-foreground",
+        disabled && "pointer-events-none opacity-40"
       )}
     >
       {children}
