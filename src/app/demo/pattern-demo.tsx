@@ -1,20 +1,8 @@
 "use client";
 
 import * as React from "react";
-import {
-  Bot,
-  Code2,
-  GitBranch,
-  Globe,
-  LayoutGrid,
-  PackagePlus,
-  RotateCcw,
-  Search,
-  ShieldCheck,
-  Sparkles,
-  Square,
-  TerminalSquare,
-} from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { GitBranch, RotateCcw, TerminalSquare } from "lucide-react";
 
 import { ChatBubble } from "@/registry/messages/chat-bubble/component";
 import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
@@ -30,28 +18,15 @@ import { FollowUpList } from "@/registry/text/follow-up-list/component";
 import { SelectionActions } from "@/registry/text/selection-actions/component";
 import { AttachmentTray, type Attachment } from "@/registry/uploads/attachment-chip/component";
 import { Flowchart, type FlowchartNode } from "@/registry/flowcharts/trigger-condition/component";
-import {
-  PromptBarPro,
-  type PromptBarItem,
-  type SessionSuggestion,
-} from "@/registry/composer/prompt-bar-pro/component";
+import { InlineCitation, type CitationSource } from "@/registry/text/inline-citation/component";
+import { RateLimit } from "@/registry/errors/rate-limit/component";
+import { PartialResponse, type PartialResponseReason } from "@/registry/errors/partial-response/component";
+import { PromptBarPro, type PromptBarItem } from "@/registry/composer/prompt-bar-pro/component";
+import { SUGGESTIONS } from "./suggestions";
 
 // ---------------------------------------------------------------------------
 // Demo data
 // ---------------------------------------------------------------------------
-
-const SUGGESTIONS: SessionSuggestion[] = [
-  { id: "diff", label: "Show me a diff", icon: Code2 },
-  { id: "terminal", label: "Stream a terminal run", icon: TerminalSquare },
-  { id: "trace", label: "Show your reasoning", icon: Sparkles },
-  { id: "agents", label: "Run a multi-agent workflow", icon: Bot },
-  { id: "approve", label: "Ask permission first", icon: ShieldCheck },
-  { id: "tools", label: "Chain a couple of tool calls", icon: Search },
-  { id: "sources", label: "Cite your sources", icon: Globe },
-  { id: "stop", label: "Give me a slow answer", icon: Square },
-  { id: "more", label: "Show me more patterns", icon: LayoutGrid },
-  { id: "skill", label: "How do I install this?", icon: PackagePlus },
-];
 
 const COMMANDS: PromptBarItem[] = SUGGESTIONS.map((s) => ({
   id: s.id,
@@ -163,6 +138,18 @@ const MORE_OUTRO_SEGMENTS = text(
   "That's the whole registry. Replay from the top, browse the catalogue yourself, or keep chatting."
 );
 
+const CITATION_INTRO_SEGMENTS = text(
+  "Long answers can cite sources inline as they're written, too — tap a number to see where it came from without leaving the page:"
+);
+
+const RATE_LIMIT_INTRO_SEGMENTS = text(
+  "Every product has a ceiling somewhere. Here's what hitting it looks like instead of a raw error:"
+);
+
+const PARTIAL_RESPONSE_INTRO_SEGMENTS = text(
+  "And when a response gets cut off, the partial content sticks around instead of vanishing — with a clear way back in:"
+);
+
 const DEMO_SOURCES: Source[] = [
   {
     title: "Tailwind CSS v4.0",
@@ -193,6 +180,24 @@ const DEMO_SOURCES: Source[] = [
 function favicon(domain: string) {
   return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
 }
+
+const CITATION_SOURCES: CitationSource[] = [
+  {
+    title: "Tailwind CSS v4.0",
+    domain: "tailwindcss.com",
+    snippet: "A ground-up rewrite of the framework, built for the modern web.",
+    url: "https://tailwindcss.com/blog/tailwindcss-v4",
+  },
+  {
+    title: "Motion for React",
+    domain: "motion.dev",
+    snippet: "A production-ready animation library for React and JavaScript.",
+    url: "https://motion.dev",
+  },
+];
+
+const PARTIAL_RESPONSE_CONTENT =
+  "The ai-patterns skill gives any Claude Code session access to the full pattern library. Once installed, you can reference patterns by name in your prompts — for example, \"use the Streaming Text pattern for the assistant reply\" or \"wire up the Tool Approval pattern before each shell command\". The skill exposes each pattern's UX spec, component source, and demo so Claude can";
 
 const DEMO_DIFF_FILES: DiffFile[] = [
   { id: "1", name: "src/app/demo/pattern-demo.tsx", additions: 482, deletions: 0 },
@@ -429,6 +434,21 @@ interface FollowUpsBlock {
   kind: "followups";
   suggestions: string[];
 }
+interface CitationBlock {
+  id: string;
+  kind: "citation";
+}
+interface RateLimitBlock {
+  id: string;
+  kind: "ratelimit";
+  resetAt: Date;
+}
+interface PartialBlock {
+  id: string;
+  kind: "partial";
+  content: string;
+  reason: PartialResponseReason;
+}
 
 type Block =
   | ChatBlock
@@ -445,7 +465,10 @@ type Block =
   | AttachmentBlock
   | FlowchartBlock
   | SelectionBlock
-  | FollowUpsBlock;
+  | FollowUpsBlock
+  | CitationBlock
+  | RateLimitBlock
+  | PartialBlock;
 
 let idCounter = 0;
 function nextId(prefix: string) {
@@ -576,6 +599,36 @@ function LiveAttachmentTray({ onDone }: { onDone?: () => void }) {
   }, [attachment.status]);
 
   return <AttachmentTray attachments={[attachment]} className="w-full max-w-sm" />;
+}
+
+function LivePartialResponse({ content, reason }: { content: string; reason: PartialResponseReason }) {
+  const [resuming, setResuming] = React.useState(false);
+  const [key, setKey] = React.useState(0);
+
+  function handleResume() {
+    setResuming(true);
+    window.setTimeout(() => {
+      setResuming(false);
+      setKey((k) => k + 1);
+    }, 1200);
+  }
+
+  function handleRetry() {
+    setResuming(false);
+    setKey((k) => k + 1);
+  }
+
+  return (
+    <PartialResponse
+      key={key}
+      content={content}
+      reason={reason}
+      onResume={handleResume}
+      onRetry={handleRetry}
+      resuming={resuming}
+      className="w-full max-w-md"
+    />
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -795,6 +848,36 @@ export function PatternDemo() {
   function showFollowUps(suggestions: string[]): StepFn {
     return (runId, done) => {
       addBlock({ id: nextId("followups"), kind: "followups", suggestions });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
+  function showCitation(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("citation"), kind: "citation" });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
+  function showRateLimit(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("ratelimit"), kind: "ratelimit", resetAt: new Date(Date.now() + 4 * 60 * 1000) });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
+  function showPartial(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("partial"), kind: "partial", content: PARTIAL_RESPONSE_CONTENT, reason: "interrupted" });
       schedule(() => {
         if (!isCurrent(runId)) return;
         done();
@@ -1033,6 +1116,75 @@ export function PatternDemo() {
     ]);
   }
 
+  function runUploadsFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(700), say(UPLOADS_INTRO_SEGMENTS), showAttachment()]);
+  }
+
+  function runFlowchartFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(700), say(FLOWCHART_INTRO_SEGMENTS), showFlowchart(FLOWCHART_NODES)]);
+  }
+
+  function runSelectionFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(700), say(SELECTION_INTRO_SEGMENTS), showSelectionActions()]);
+  }
+
+  function runCitationFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(700), say(CITATION_INTRO_SEGMENTS), showCitation()]);
+  }
+
+  function runRateLimitFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(700), say(RATE_LIMIT_INTRO_SEGMENTS), showRateLimit()]);
+  }
+
+  function runPartialFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(700), say(PARTIAL_RESPONSE_INTRO_SEGMENTS), showPartial()]);
+  }
+
+  function dispatchSuggestion(id: string, label: string) {
+    switch (id) {
+      case "diff":
+        return runDiffFlow(label);
+      case "terminal":
+        return runTerminalFlow(label);
+      case "trace":
+        return runTraceFlow(label);
+      case "agents":
+        return runAgentsFlow(label);
+      case "approve":
+        return runApproveFlow(label);
+      case "tools":
+        return runToolsFlow(label);
+      case "sources":
+        return runSourcesFlow(label);
+      case "citation":
+        return runCitationFlow(label);
+      case "stop":
+        return runStopFlow(label);
+      case "uploads":
+        return runUploadsFlow(label);
+      case "flowchart":
+        return runFlowchartFlow(label);
+      case "selection":
+        return runSelectionFlow(label);
+      case "ratelimit":
+        return runRateLimitFlow(label);
+      case "partial":
+        return runPartialFlow(label);
+      case "more":
+        return runMoreTour(label);
+      case "skill":
+        return runSkillFlow(label);
+      default:
+        return runReplyFlow(label);
+    }
+  }
+
   function replay() {
     clearTimers();
     runIdRef.current += 1;
@@ -1062,32 +1214,23 @@ export function PatternDemo() {
       return;
     }
 
-    switch (suggestion.id) {
-      case "diff":
-        return runDiffFlow(trimmed);
-      case "terminal":
-        return runTerminalFlow(trimmed);
-      case "trace":
-        return runTraceFlow(trimmed);
-      case "agents":
-        return runAgentsFlow(trimmed);
-      case "approve":
-        return runApproveFlow(trimmed);
-      case "tools":
-        return runToolsFlow(trimmed);
-      case "sources":
-        return runSourcesFlow(trimmed);
-      case "stop":
-        return runStopFlow(trimmed);
-      case "more":
-        return runMoreTour(trimmed);
-      case "skill":
-        return runSkillFlow(trimmed);
-    }
+    dispatchSuggestion(suggestion.id, trimmed);
   }
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   React.useEffect(() => {
-    schedule(() => runTour(), 0);
+    const flowId = searchParams.get("flow");
+    const question = searchParams.get("q");
+    const suggestion = flowId ? SUGGESTIONS.find((s) => s.id === flowId) : undefined;
+
+    if (suggestion || question) {
+      schedule(() => (suggestion ? dispatchSuggestion(suggestion.id, suggestion.label) : runReplyFlow(question!)), 0);
+      router.replace("/demo", { scroll: false });
+    } else {
+      schedule(() => runTour(), 0);
+    }
     return () => clearTimers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -1216,5 +1359,28 @@ function BlockView({
       return <SelectionActions text={SELECTION_PARAGRAPH} onRewrite={mockSelectionRewrite} onExplain={mockSelectionExplain} className="w-full max-w-md" />;
     case "followups":
       return <FollowUpList suggestions={block.suggestions} onSelect={onSelectFollowUp} className="w-full max-w-md" />;
+    case "citation":
+      return (
+        <p className="w-full max-w-md text-sm leading-relaxed text-foreground/90">
+          Tailwind v4 moved its configuration into CSS itself, dropping the old{" "}
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">tailwind.config.js</code> file entirely
+          <InlineCitation index={1} source={CITATION_SOURCES[0]} />. Motion, formerly Framer Motion, now ships a
+          smaller core bundle aimed specifically at this kind of micro-interaction
+          <InlineCitation index={2} source={CITATION_SOURCES[1]} />.
+        </p>
+      );
+    case "ratelimit":
+      return (
+        <RateLimit
+          label="Approaching weekly usage limit"
+          resetAt={block.resetAt}
+          upgradeLabel="Get more usage"
+          onUpgrade={() => {}}
+          onDismiss={() => {}}
+          className="w-full max-w-md"
+        />
+      );
+    case "partial":
+      return <LivePartialResponse content={block.content} reason={block.reason} />;
   }
 }
