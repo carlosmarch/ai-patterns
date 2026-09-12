@@ -225,7 +225,7 @@ export function SelectionActions({ text, onExplain, onRewrite, className }: Sele
 
   return (
     <div className={cn("relative w-full", className)}>
-      <p ref={containerRef} className="select-text text-base leading-relaxed text-foreground/90">
+      <p ref={containerRef} className="select-text text-sm leading-relaxed text-foreground/90">
         {renderContent(value, review, candidateRef)}
       </p>
 
