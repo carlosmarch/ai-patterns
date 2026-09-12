@@ -5,6 +5,7 @@ import { Origami } from "lucide-react";
 import "./globals.css";
 
 import { Footer } from "@/components/footer";
+import { SiteNav } from "@/components/site-nav";
 
 const THEME_INIT_SCRIPT = `
 (function () {
@@ -48,17 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Origami className="size-5" />
               AI Patterns
             </Link>
-            <nav className="flex items-center gap-6">
-              <Link href="/patterns" className="text-sm text-muted-foreground hover:text-foreground">
-                Patterns
-              </Link>
-              <Link href="/demo" className="text-sm text-muted-foreground hover:text-foreground">
-                Demo
-              </Link>
-              <Link href="/skill" className="text-sm text-muted-foreground hover:text-foreground">
-                Skill
-              </Link>
-            </nav>
+            <SiteNav />
           </div>
         </header>
         <div className="flex-1">{children}</div>
