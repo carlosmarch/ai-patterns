@@ -44,6 +44,7 @@ A conversational message bubble — user or assistant — with an inline action 
 
 ## Related patterns
 - Pairs with Streaming Text for the assistant reply while it's still generating; this pattern's action row is the equivalent post-stream toolbar for a persisted chat message rather than a one-off streamed answer.
+- For a voice-composed message, show a Live Transcript while the person is still speaking, then hand the finalized text off into a user bubble once the turn ends — don't run the transcript's interim/final styling inside the bubble itself.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 
