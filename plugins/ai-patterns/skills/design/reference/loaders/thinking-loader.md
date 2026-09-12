@@ -86,7 +86,7 @@ export function ThinkingLoader({
 
   return (
     <div
-      className={cn("flex items-center gap-3 px-4 py-3 text-muted-foreground", className)}
+      className={cn("flex items-center gap-1 px-4 py-3 text-muted-foreground", className)}
     >
       <Brain className="size-4 shrink-0" aria-hidden />
       <ShimmerWord word={word} />
