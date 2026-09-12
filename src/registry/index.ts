@@ -36,6 +36,8 @@ import MultiAgentTraceDemo from "./traces/multi-agent-trace/demo";
 import { pattern as multiAgentTracePattern } from "./traces/multi-agent-trace/pattern";
 import SourcesStackDemo from "./text/sources-stack/demo";
 import { pattern as sourcesStackPattern } from "./text/sources-stack/pattern";
+import SourceTrustCardDemo from "./text/source-trust-card/demo";
+import { pattern as sourceTrustCardPattern } from "./text/source-trust-card/pattern";
 import FollowUpListDemo from "./text/follow-up-list/demo";
 import { pattern as followUpListPattern } from "./text/follow-up-list/pattern";
 import SelectionActionsDemo from "./text/selection-actions/demo";
@@ -212,6 +214,14 @@ export const registry: RegistryEntry[] = [
     description: "An overlapping stack of source favicons with a count, expanding into a linked source list.",
     Demo: SourcesStackDemo,
     uxDoc: sourcesStackPattern,
+  },
+  {
+    slug: "source-trust-card",
+    category: "text",
+    title: "Source Trust Card",
+    description: "A paginated single-source card with a trust badge and domain pills for jumping between sources.",
+    Demo: SourceTrustCardDemo,
+    uxDoc: sourceTrustCardPattern,
   },
   {
     slug: "follow-up-list",
