@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
+import { SiteCommandPalette } from "@/components/site-command-palette";
 
 const links = [
   { href: "/patterns", label: "Patterns" },
@@ -33,6 +34,7 @@ export function SiteNav() {
           </Link>
         );
       })}
+      <SiteCommandPalette />
     </nav>
   );
 }
