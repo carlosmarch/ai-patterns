@@ -46,6 +46,12 @@ import ResponseCompareDemo from "./compare/response-compare/demo";
 import { pattern as responseComparePattern } from "./compare/response-compare/pattern";
 import ConfidenceIndicatorDemo from "./indicators/confidence-indicator/demo";
 import { pattern as confidenceIndicatorPattern } from "./indicators/confidence-indicator/pattern";
+import VoiceWaveformDemo from "./voice/voice-waveform/demo";
+import { pattern as voiceWaveformPattern } from "./voice/voice-waveform/pattern";
+import ListeningStateDemo from "./voice/listening-state/demo";
+import { pattern as listeningStatePattern } from "./voice/listening-state/pattern";
+import LiveTranscriptDemo from "./voice/live-transcript/demo";
+import { pattern as liveTranscriptPattern } from "./voice/live-transcript/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -242,6 +248,30 @@ export const registry: RegistryEntry[] = [
     description: "A badge or inline dot signaling how sure an AI answer or extraction is.",
     Demo: ConfidenceIndicatorDemo,
     uxDoc: confidenceIndicatorPattern,
+  },
+  {
+    slug: "voice-waveform",
+    category: "voice",
+    title: "Voice Waveform",
+    description: "A live amplitude waveform while the AI listens or speaks.",
+    Demo: VoiceWaveformDemo,
+    uxDoc: voiceWaveformPattern,
+  },
+  {
+    slug: "listening-state",
+    category: "voice",
+    title: "Listening State",
+    description: "A pulsing mic indicator showing the AI is actively listening.",
+    Demo: ListeningStateDemo,
+    uxDoc: listeningStatePattern,
+  },
+  {
+    slug: "live-transcript",
+    category: "voice",
+    title: "Live Transcript",
+    description: "A streaming, speaker-labeled transcription of a voice conversation.",
+    Demo: LiveTranscriptDemo,
+    uxDoc: liveTranscriptPattern,
   },
 ];
 
