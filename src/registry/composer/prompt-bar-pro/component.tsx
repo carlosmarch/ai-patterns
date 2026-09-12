@@ -272,7 +272,7 @@ export function PromptBarPro({
               <Plus className="size-4" />
             </button>
 
-            <div ref={environmentRef} className="relative shrink-0">
+            <div ref={environmentRef} className="relative hidden shrink-0 sm:block">
               <button
                 type="button"
                 onClick={() => setEnvironmentOpen((v) => !v)}

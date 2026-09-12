@@ -181,7 +181,7 @@ function FileRow({ file }: { file: DiffFile }) {
         className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-accent/50"
       >
         <Code2 className="size-4 shrink-0 text-muted-foreground" />
-        <span className="flex-1 truncate text-sm">{file.name}</span>
+        <span className="flex-1 truncate text-xs">{file.name}</span>
         <span className="shrink-0 font-mono text-xs">
           <span className="text-emerald-600 dark:text-emerald-400">+{file.additions}</span>
           <span className="ml-1.5 text-red-600 dark:text-red-400">-{file.deletions}</span>
