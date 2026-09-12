@@ -47,6 +47,7 @@ export interface FlowchartProps {
 }
 
 type ClauseTokenKey = "subject" | "field" | "value";
+type Offset = { dx: number; dy: number };
 
 const badgeStyles: Record<FlowchartNode["type"], string> = {
   trigger: "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300",
@@ -58,8 +59,106 @@ const badgeLabels: Record<FlowchartNode["type"], string> = {
   condition: "If / Else",
 };
 
+/* ── canvas layout constants ── */
+const CANVAS_PAD = 32;
+const ROW_GAP = 40;
+const CARD_MAX_WIDTH = 384;
+
+function estimateHeight(node: FlowchartNode) {
+  return node.type === "trigger" ? 116 : 96 + node.clauses.length * 56;
+}
+
 export function Flowchart({ nodes, className }: FlowchartProps) {
   const [nodeList, setNodeList] = React.useState(nodes);
+  const canvasRef = React.useRef<HTMLDivElement>(null);
+  const nodeRefs = React.useRef(new Map<string, HTMLDivElement>());
+  const [canvasWidth, setCanvasWidth] = React.useState(0);
+  const [heights, setHeights] = React.useState<Record<string, number>>(() =>
+    Object.fromEntries(nodes.map((node) => [node.id, estimateHeight(node)]))
+  );
+  const [offsets, setOffsets] = React.useState<Record<string, Offset>>({});
+  const [draggingId, setDraggingId] = React.useState<string | null>(null);
+
+  React.useLayoutEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const measure = () => {
+      setCanvasWidth(canvas.clientWidth);
+      setHeights((prev) => {
+        const next = { ...prev };
+        let changed = false;
+        nodeRefs.current.forEach((el, id) => {
+          const h = el.offsetHeight;
+          if (h && Math.abs(h - (next[id] ?? 0)) > 0.5) {
+            next[id] = h;
+            changed = true;
+          }
+        });
+        return changed ? next : prev;
+      });
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(canvas);
+    nodeRefs.current.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [nodeList]);
+
+  /* stacked base position for each node, ignoring drag offsets */
+  const baseTops = React.useMemo(() => {
+    const tops: Record<string, number> = {};
+    let y = CANVAS_PAD;
+    nodeList.forEach((node) => {
+      tops[node.id] = y;
+      y += (heights[node.id] ?? estimateHeight(node)) + ROW_GAP;
+    });
+    return tops;
+  }, [nodeList, heights]);
+
+  const lastNode = nodeList[nodeList.length - 1];
+  const canvasHeight = lastNode
+    ? baseTops[lastNode.id] + (heights[lastNode.id] ?? estimateHeight(lastNode)) + CANVAS_PAD
+    : CANVAS_PAD * 2;
+
+  const effectiveWidth = canvasWidth || CARD_MAX_WIDTH + CANVAS_PAD * 2;
+  const cardWidth = Math.max(Math.min(CARD_MAX_WIDTH, effectiveWidth - CANVAS_PAD * 2), 200);
+  const baseCenterX = effectiveWidth / 2;
+
+  function place(nodeId: string) {
+    const off = offsets[nodeId];
+    return {
+      cx: baseCenterX + (off?.dx ?? 0),
+      top: (baseTops[nodeId] ?? 0) + (off?.dy ?? 0),
+    };
+  }
+
+  function anchors(node: FlowchartNode) {
+    const { cx, top } = place(node.id);
+    const height = heights[node.id] ?? estimateHeight(node);
+    return {
+      top: { x: cx, y: top },
+      bottom: { x: cx, y: top + height },
+    };
+  }
+
+  function connector(from: FlowchartNode, to: FlowchartNode) {
+    const start = anchors(from).bottom;
+    const end = anchors(to).top;
+    const k = Math.min(Math.max(Math.abs(end.y - start.y) * 0.55, 24), 84);
+    return `M ${start.x} ${start.y} C ${start.x} ${start.y + k}, ${end.x} ${end.y - k}, ${end.x} ${end.y}`;
+  }
+
+  function handleDragMove(nodeId: string, node: FlowchartNode, dx: number, dy: number) {
+    const height = heights[nodeId] ?? estimateHeight(node);
+    const baseTop = baseTops[nodeId] ?? 0;
+    const minCx = cardWidth / 2 + CANVAS_PAD / 2;
+    const maxCx = Math.max(effectiveWidth - cardWidth / 2 - CANVAS_PAD / 2, minCx);
+    const cx = Math.min(Math.max(baseCenterX + dx, minCx), maxCx);
+    const top = Math.min(Math.max(baseTop + dy, 8), Math.max(canvasHeight - height - 8, 8));
+    setOffsets((current) => ({ ...current, [nodeId]: { dx: cx - baseCenterX, dy: top - baseTop } }));
+  }
 
   function handleClausesReorder(nodeId: string, clauses: FlowchartClause[]) {
     setNodeList((prev) =>
@@ -89,70 +188,124 @@ export function Flowchart({ nodes, className }: FlowchartProps) {
 
   return (
     <div
+      ref={canvasRef}
       className={cn(
-        "rounded-2xl border bg-muted/20 p-8",
+        "relative w-full rounded-2xl border bg-muted/20",
         "[background-image:radial-gradient(var(--color-border)_1px,transparent_1px)] [background-size:16px_16px]",
         className
       )}
+      style={{ height: canvasHeight }}
     >
-      <Reorder.Group
-        as="div"
-        axis="y"
-        values={nodeList}
-        onReorder={setNodeList}
-        className="mx-auto flex max-w-sm flex-col items-center"
-      >
-        {nodeList.map((node, i) => (
+      <svg width={effectiveWidth} height={canvasHeight} className="pointer-events-none absolute inset-0" aria-hidden>
+        {nodeList.slice(1).map((node, i) => (
+          <path
+            key={node.id}
+            d={connector(nodeList[i], node)}
+            fill="none"
+            stroke="var(--color-border)"
+            strokeWidth={1.5}
+          />
+        ))}
+      </svg>
+
+      {nodeList.map((node) => {
+        const { cx, top } = place(node.id);
+        return (
           <FlowchartNodeItem
             key={node.id}
             node={node}
-            isFirst={i === 0}
+            offset={offsets[node.id] ?? { dx: 0, dy: 0 }}
+            style={{
+              left: cx,
+              top,
+              width: cardWidth,
+              zIndex: draggingId === node.id ? 2 : 1,
+            }}
+            registerRef={(el) => {
+              if (el) nodeRefs.current.set(node.id, el);
+              else nodeRefs.current.delete(node.id);
+            }}
+            onDragStart={() => setDraggingId(node.id)}
+            onDragMove={(dx, dy) => handleDragMove(node.id, node, dx, dy)}
+            onDragEnd={() => setDraggingId(null)}
             onClausesReorder={(clauses) => handleClausesReorder(node.id, clauses)}
             onClauseTokenChange={(clauseId, key, token) =>
               handleClauseTokenChange(node.id, clauseId, key, token)
             }
           />
-        ))}
-      </Reorder.Group>
+        );
+      })}
     </div>
   );
 }
 
 function FlowchartNodeItem({
   node,
-  isFirst,
+  offset,
+  style,
+  registerRef,
+  onDragStart,
+  onDragMove,
+  onDragEnd,
   onClausesReorder,
   onClauseTokenChange,
 }: {
   node: FlowchartNode;
-  isFirst: boolean;
+  offset: Offset;
+  style: React.CSSProperties;
+  registerRef: (el: HTMLDivElement | null) => void;
+  onDragStart: () => void;
+  onDragMove: (dx: number, dy: number) => void;
+  onDragEnd: () => void;
   onClausesReorder: (clauses: FlowchartClause[]) => void;
   onClauseTokenChange: (clauseId: string, key: ClauseTokenKey, token: FlowchartToken) => void;
 }) {
-  const dragControls = useDragControls();
+  const drag = React.useRef<{ pointerId: number; startX: number; startY: number; baseDx: number; baseDy: number } | null>(
+    null
+  );
+
+  function handlePointerDown(event: React.PointerEvent<HTMLButtonElement>) {
+    drag.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      baseDx: offset.dx,
+      baseDy: offset.dy,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    onDragStart();
+  }
+
+  function handlePointerMove(event: React.PointerEvent<HTMLButtonElement>) {
+    const d = drag.current;
+    if (!d || d.pointerId !== event.pointerId) return;
+    onDragMove(d.baseDx + event.clientX - d.startX, d.baseDy + event.clientY - d.startY);
+  }
+
+  function handlePointerUp(event: React.PointerEvent<HTMLButtonElement>) {
+    if (drag.current?.pointerId === event.pointerId) {
+      drag.current = null;
+      onDragEnd();
+    }
+  }
 
   return (
-    <Reorder.Item
-      as="div"
-      value={node}
-      dragListener={false}
-      dragControls={dragControls}
-      className="relative flex w-full flex-col items-center"
+    <div
+      ref={registerRef}
+      className="absolute flex -translate-x-1/2 flex-col items-start gap-1.5"
+      style={style}
     >
-      {!isFirst && <div className="h-8 w-px bg-border" aria-hidden />}
-      <div className="mb-3 flex items-center gap-1.5">
-        <span
-          className={cn(
-            "rounded-md px-2.5 py-1 text-xs font-semibold",
-            badgeStyles[node.type]
-          )}
-        >
+      <div className="flex items-center gap-1.5">
+        <span className={cn("rounded-md px-2.5 py-1 text-xs font-semibold", badgeStyles[node.type])}>
           {badgeLabels[node.type]}
         </span>
         <button
           type="button"
-          onPointerDown={(e) => dragControls.start(e)}
-          aria-label="Drag to reorder this step"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          aria-label="Drag to move this step"
           className="flex size-5 shrink-0 touch-none items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:cursor-grabbing cursor-grab"
         >
           <GripVertical className="size-3.5" />
@@ -167,7 +320,7 @@ function FlowchartNodeItem({
           onClauseTokenChange={onClauseTokenChange}
         />
       )}
-    </Reorder.Item>
+    </div>
   );
 }
 
@@ -287,7 +440,7 @@ function TokenChip({
   const hasOptions = !!options?.length;
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative" data-ui>
       <button
         type="button"
         onClick={() => hasOptions && setOpen((v) => !v)}
