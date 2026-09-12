@@ -94,7 +94,8 @@ export const registry: RegistryEntry[] = [
     slug: "prompt-bar-pro",
     category: "composer",
     title: "Prompt Bar Pro",
-    description: "A first-run composer with suggestion chips, an environment picker, and an orchestrator picker.",
+    description:
+      "A first-run composer with suggestion chips, @ sources, / commands, an environment picker, and an orchestrator picker.",
     Demo: PromptBarProDemo,
     uxDoc: promptBarProPattern,
   },
