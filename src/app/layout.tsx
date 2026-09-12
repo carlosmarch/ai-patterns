@@ -27,7 +27,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "ai-patterns",
-  description: "A copy-paste library of animated UI components.",
+  description: "Production components for AI agent UIs — each with a UX spec the harness can read.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -47,8 +47,8 @@ export function Footer() {
               ai-patterns
             </Link>
             <p className="max-w-[26ch] text-sm text-muted-foreground">
-              A copy-paste library of animated UI patterns for AI products. Own the source, ship
-              it your way.
+              Production components for AI agent UIs — each with a UX spec the harness can read.
+              Guardrails baked in.
             </p>
             <p className="text-xs text-muted-foreground">
               {registry.length} patterns · {categories.length} categories
