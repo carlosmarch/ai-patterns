@@ -75,11 +75,22 @@ function ResponsePanel({
 
   return (
     <div
+      role="radio"
+      aria-checked={picked}
       aria-label={response.label}
+      tabIndex={0}
+      onClick={onPick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onPick();
+        }
+      }}
       className={cn(
-        "flex h-80 flex-col overflow-hidden rounded-2xl border bg-card transition-opacity",
-        picked ? "border-primary ring-1 ring-primary" : "border-border",
-        dimmed && "opacity-60"
+        "flex h-80 cursor-pointer flex-col overflow-hidden rounded-2xl border bg-card transition-opacity outline-none",
+        picked ? "border-primary ring-1 ring-primary" : "border-border hover:border-foreground/20",
+        dimmed && "opacity-60",
+        "focus-visible:ring-2 focus-visible:ring-ring"
       )}
     >
       <div className="flex items-center justify-between gap-2 border-b px-4 py-2.5">
@@ -102,18 +113,31 @@ function ResponsePanel({
 
       <div className="flex items-center justify-between gap-2 border-t px-3 py-2">
         <div className="flex items-center gap-0.5 text-muted-foreground">
-          <IconButton label="Copy" onClick={handleCopy}>
+          <IconButton
+            label="Copy"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCopy();
+            }}
+          >
             {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
           </IconButton>
-          <IconButton label={`Regenerate ${response.label}`} onClick={onRegenerate}>
+          <IconButton
+            label={`Regenerate ${response.label}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRegenerate();
+            }}
+          >
             <RotateCcw className="size-3.5" />
           </IconButton>
         </div>
         <button
           type="button"
-          role="radio"
-          aria-checked={picked}
-          onClick={onPick}
+          onClick={(e) => {
+            e.stopPropagation();
+            onPick();
+          }}
           className={cn(
             "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
             picked ? "border-primary bg-primary text-primary-foreground" : "hover:bg-accent"
@@ -132,7 +156,7 @@ function IconButton({
   children,
 }: {
   label: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   children: React.ReactNode;
 }) {
   return (
