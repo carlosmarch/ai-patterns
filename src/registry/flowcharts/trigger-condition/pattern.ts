@@ -4,7 +4,7 @@ export const pattern = `# Flowchart
 A read-at-a-glance diagram of a workflow's trigger and condition steps, laid out on a dotted canvas with a connecting line between nodes. Each step is a colored badge ("Trigger", "If / Else") above a white card, so the flow reads top-to-bottom by default like a sentence: "when this happens, and this is true, then...". Every card can be dragged freely to any position on the canvas — not just reordered vertically — and the connector redraws live to keep the two ends linked.
 
 ## When to use
-- Automation / workflow builders where a user assembles trigger + condition + action steps (e.g. "when a new order is created, if flavor is X and topping is Y").
+- Automation / workflow builders where a user assembles trigger + condition + action steps (e.g. "when a pull request is opened, if files changed is greater than 50 and path matches src/registry/**").
 - Summarizing a rule or pipeline for review, where the exact sequence and branching matters more than density.
 - When users benefit from spatially rearranging steps (e.g. to make room for annotations, or to group related steps) without that rearrangement changing execution order.
 
@@ -26,13 +26,13 @@ A read-at-a-glance diagram of a workflow's trigger and condition steps, laid out
 - The connector between two nodes recalculates on every drag frame, so it always runs from the bottom of the upstream card to the top of the downstream card no matter how far either has been moved.
 - Dragging is clamped to stay inside the canvas bounds so a card can never be dropped off-canvas or outside the connector's reach.
 - Field and value chips are dropdown triggers (chevron affixed) even in a read-only summary — they signal "this is configurable," not just descriptive text. They keep working normally after a card has been repositioned.
-- Long values (e.g. a long topping name) wrap onto their own line, indented to align under the row's first field chip rather than the card edge, so the row still reads as one clause.
+- Long values (e.g. a long file path) wrap onto their own line, indented to align under the row's first field chip rather than the card edge, so the row still reads as one clause.
 - The drag handle on each clause row implies clauses are reorderable within their card; only show it when reordering is actually supported.
 
 ## Content guidelines
 - Trigger titles are short event names ("New order created"); descriptions restate them as a plain sentence for users who need the extra context.
 - Connector words are lowercase ("if", "and", "or") to read as a natural sentence, not shouty labels.
-- Value chips show the selected option's label verbatim (e.g. a specific flavor or topping name), not a truncated or reformatted version.
+- Value chips show the selected option's label verbatim (e.g. a specific file path or category name), not a truncated or reformatted version.
 
 ## Accessibility
 - The dotted background is decorative only — mark it \`aria-hidden\` or apply it via CSS so it isn't announced.
