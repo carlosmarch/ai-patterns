@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { ChatBubble } from "../../messages/chat-bubble/component";
 import { LiveTranscript, type TranscriptSegment } from "./component";
 
 const SCRIPT: { speaker: TranscriptSegment["speaker"]; text: string }[] = [
@@ -16,12 +17,14 @@ function sleep(ms: number) {
 
 export default function LiveTranscriptDemo() {
   const [segments, setSegments] = React.useState<TranscriptSegment[]>([]);
+  const [settled, setSettled] = React.useState(false);
 
   React.useEffect(() => {
     let cancelled = false;
 
     async function run() {
       while (!cancelled) {
+        setSettled(false);
         setSegments([]);
         await sleep(400);
 
@@ -42,7 +45,10 @@ export default function LiveTranscriptDemo() {
           await sleep(600);
         }
 
-        await sleep(1500);
+        await sleep(1000);
+        if (cancelled) return;
+        setSettled(true);
+        await sleep(3000);
       }
     }
 
@@ -54,7 +60,15 @@ export default function LiveTranscriptDemo() {
 
   return (
     <div className="w-full max-w-md">
-      <LiveTranscript segments={segments} />
+      {settled ? (
+        <div className="space-y-4">
+          {SCRIPT.map((turn, i) => (
+            <ChatBubble key={i} role={turn.speaker} content={turn.text} />
+          ))}
+        </div>
+      ) : (
+        <LiveTranscript segments={segments} />
+      )}
     </div>
   );
 }
