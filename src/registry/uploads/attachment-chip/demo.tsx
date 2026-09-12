@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { RotateCcw } from "lucide-react";
 
 import { AttachmentTray, type Attachment } from "./component";
 
@@ -15,6 +16,7 @@ const initial: Attachment[] = [
 ];
 
 export default function AttachmentTrayDemo() {
+  const [run, setRun] = React.useState(0);
   const [attachments, setAttachments] = React.useState(initial);
 
   React.useEffect(() => {
@@ -28,18 +30,31 @@ export default function AttachmentTrayDemo() {
       );
     }, 400);
     return () => window.clearInterval(id);
-  }, []);
+  }, [run]);
 
   return (
-    <AttachmentTray
-      className="w-full max-w-sm"
-      attachments={attachments}
-      onRemove={(id) => setAttachments((prev) => prev.filter((a) => a.id !== id))}
-      onRetry={(id) =>
-        setAttachments((prev) =>
-          prev.map((a) => (a.id === id ? { ...a, status: "uploading", progress: 0 } : a))
-        )
-      }
-    />
+    <div className="flex w-full max-w-sm flex-col items-center gap-4">
+      <AttachmentTray
+        className="w-full"
+        attachments={attachments}
+        onRemove={(id) => setAttachments((prev) => prev.filter((a) => a.id !== id))}
+        onRetry={(id) =>
+          setAttachments((prev) =>
+            prev.map((a) => (a.id === id ? { ...a, status: "uploading", progress: 0 } : a))
+          )
+        }
+      />
+      <button
+        type="button"
+        onClick={() => {
+          setAttachments(initial);
+          setRun((r) => r + 1);
+        }}
+        className="mx-auto flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <RotateCcw className="size-3" />
+        Replay
+      </button>
+    </div>
   );
 }
