@@ -14,11 +14,7 @@ export default function VoiceWaveformDemo() {
   const [state, setState] = React.useState<VoiceWaveformState>("listening");
 
   return (
-    <div className="flex w-full max-w-sm flex-col items-center gap-6">
-      <div className="flex w-full items-center justify-center rounded-2xl border bg-card py-6">
-        <VoiceWaveform state={state} className="w-full" />
-      </div>
-
+    <div className="flex w-full max-w-sm flex-col gap-6">
       <div className="flex gap-2">
         {STATES.map((s) => (
           <button
@@ -35,6 +31,10 @@ export default function VoiceWaveformDemo() {
             {s.label}
           </button>
         ))}
+      </div>
+
+      <div className="flex w-full items-center justify-center rounded-2xl border bg-card py-6">
+        <VoiceWaveform state={state} className="w-full" />
       </div>
     </div>
   );
