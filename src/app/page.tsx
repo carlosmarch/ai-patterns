@@ -3,7 +3,6 @@ import { ArrowUpRight, Sparkles } from "lucide-react";
 
 import { registry } from "@/registry";
 import { HomeHero } from "./home-hero";
-import { CommandPaletteInlineDemo } from "@/registry/navigation/command-palette/demo";
 
 export default function Home() {
   const featured = registry.find((entry) => entry.slug === "prompt-bar-pro");
@@ -55,7 +54,7 @@ export default function Home() {
       <div className="mx-auto w-full max-w-3xl px-6 py-16">
         <div className="space-y-16">
           {rest.map((entry) => {
-            const Demo = entry.slug === "command-palette" ? CommandPaletteInlineDemo : entry.Demo;
+            const Demo = entry.Demo;
             return (
               <section key={entry.slug} className="space-y-3">
                 <div className="flex items-baseline justify-between gap-4">

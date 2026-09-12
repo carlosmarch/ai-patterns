@@ -1,9 +1,8 @@
 "use client";
 
-import * as React from "react";
 import { Code2, Plus } from "lucide-react";
 
-import { CommandPalette, CommandPaletteWindow, type CommandPaletteGroup } from "./component";
+import { CommandPaletteWindow, type CommandPaletteGroup } from "./component";
 
 const groups: CommandPaletteGroup[] = [
   {
@@ -23,21 +22,6 @@ const groups: CommandPaletteGroup[] = [
 ];
 
 export default function CommandPaletteDemo() {
-  const [open, setOpen] = React.useState(true);
-
-  return (
-    <CommandPalette
-      open={open}
-      onOpenChange={setOpen}
-      groups={groups}
-      placeholder="Search or start a session"
-      onSelect={(item) => console.log("selected", item)}
-    />
-  );
-}
-
-/** A contained, non-modal preview of the window for galleries that render many demos inline (e.g. the homepage) — no fixed backdrop stealing the whole page. */
-export function CommandPaletteInlineDemo() {
   return (
     <CommandPaletteWindow
       groups={groups}
