@@ -28,10 +28,10 @@ export default function Home() {
             Design patterns for AI agents
           </h1>
           <p className="mx-auto mt-4 max-w-md text-muted-foreground">
-            Animated React components for composers, loaders, traces, and more — you own the
-            source.{" "}
+            Production components for AI agent UIs — each ships with a UX spec the harness can
+            read. Guardrails for what to render, when, and why.{" "}
             <Link href="/skill" className="text-foreground underline underline-offset-4">
-              See how it works.
+              Use the skill.
             </Link>
           </p>
 
