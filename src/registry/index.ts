@@ -16,6 +16,12 @@ import PromptBarProDemo from "./composer/prompt-bar-pro/demo";
 import { pattern as promptBarProPattern } from "./composer/prompt-bar-pro/pattern";
 import FlowchartDemo from "./flowcharts/trigger-condition/demo";
 import { pattern as flowchartPattern } from "./flowcharts/trigger-condition/pattern";
+import ToolApprovalDemo from "./permissions/tool-approval/demo";
+import { pattern as toolApprovalPattern } from "./permissions/tool-approval/pattern";
+import ToolCallChipDemo from "./loaders/tool-call-chip/demo";
+import { pattern as toolCallChipPattern } from "./loaders/tool-call-chip/pattern";
+import AttachmentTrayDemo from "./uploads/attachment-chip/demo";
+import { pattern as attachmentChipPattern } from "./uploads/attachment-chip/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -91,6 +97,30 @@ export const registry: RegistryEntry[] = [
     description: "Workflow trigger and condition steps on a dotted canvas.",
     Demo: FlowchartDemo,
     uxDoc: flowchartPattern,
+  },
+  {
+    slug: "tool-approval",
+    category: "permissions",
+    title: "Tool Approval",
+    description: "An inline allow/deny prompt gating a tool call before it runs.",
+    Demo: ToolApprovalDemo,
+    uxDoc: toolApprovalPattern,
+  },
+  {
+    slug: "tool-call-chip",
+    category: "loaders",
+    title: "Tool Call Chip",
+    description: "An inline pill naming an in-flight tool call that resolves into a result summary.",
+    Demo: ToolCallChipDemo,
+    uxDoc: toolCallChipPattern,
+  },
+  {
+    slug: "attachment-chip",
+    category: "uploads",
+    title: "Attachment Chip",
+    description: "A composer's file/image attachment tray with drag-drop, upload progress, and inline preview.",
+    Demo: AttachmentTrayDemo,
+    uxDoc: attachmentChipPattern,
   },
 ];
 
