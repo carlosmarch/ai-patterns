@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { PatternDemo } from "./pattern-demo";
 
@@ -11,7 +12,9 @@ export default function DemoPage() {
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-6 py-8 sm:py-12">
       <h1 className="sr-only">Demo</h1>
-      <PatternDemo />
+      <Suspense>
+        <PatternDemo />
+      </Suspense>
     </main>
   );
 }

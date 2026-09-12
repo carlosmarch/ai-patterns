@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 
 import { registry } from "@/registry";
+import { HomeHero } from "./home-hero";
 
 export default function Home() {
   const featured = registry.find((entry) => entry.slug === "prompt-bar-pro");
@@ -37,7 +38,7 @@ export default function Home() {
 
           {featured && (
             <div className="mx-auto mt-10 max-w-lg text-left">
-              <featured.Demo />
+              <HomeHero />
               <Link
                 href={`/patterns/${featured.category}/${featured.slug}`}
                 className="mt-4 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
