@@ -38,6 +38,10 @@ import FollowUpListDemo from "./text/follow-up-list/demo";
 import { pattern as followUpListPattern } from "./text/follow-up-list/pattern";
 import SelectionActionsDemo from "./text/selection-actions/demo";
 import { pattern as selectionActionsPattern } from "./text/selection-actions/pattern";
+import RateLimitDemo from "./errors/rate-limit/demo";
+import { pattern as rateLimitPattern } from "./errors/rate-limit/pattern";
+import PartialResponseDemo from "./errors/partial-response/demo";
+import { pattern as partialResponsePattern } from "./errors/partial-response/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -202,6 +206,22 @@ export const registry: RegistryEntry[] = [
     description: "A floating toolbar on text selection for describing edits, explaining, or improving a passage.",
     Demo: SelectionActionsDemo,
     uxDoc: selectionActionsPattern,
+  },
+  {
+    slug: "rate-limit",
+    category: "errors",
+    title: "Rate Limit",
+    description: "A quota-exceeded state with a live countdown to when the user can send again.",
+    Demo: RateLimitDemo,
+    uxDoc: rateLimitPattern,
+  },
+  {
+    slug: "partial-response",
+    category: "errors",
+    title: "Partial Response",
+    description: "A cut-short assistant reply with Continue and Retry actions.",
+    Demo: PartialResponseDemo,
+    uxDoc: partialResponsePattern,
   },
 ];
 
