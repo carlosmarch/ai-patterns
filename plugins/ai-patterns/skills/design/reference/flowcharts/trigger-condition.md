@@ -230,13 +230,13 @@ function FlowchartNodeItem({
 function TriggerCard({ node }: { node: FlowchartTriggerNode }) {
   const Icon = node.icon;
   return (
-    <div className="flex w-full items-center gap-3 rounded-2xl border bg-card p-4 shadow-sm">
+    <div className="flex w-full items-center gap-3 rounded-2xl border bg-card p-4">
       <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300">
         <Icon className="size-5" />
       </span>
       <div className="min-w-0">
-        <p className="font-semibold">{node.title}</p>
-        <p className="text-sm text-muted-foreground">{node.description}</p>
+        <p className="text-sm font-semibold">{node.title}</p>
+        <p className="text-xs text-muted-foreground">{node.description}</p>
       </div>
     </div>
   );
@@ -252,7 +252,7 @@ function ConditionCard({
   onClauseTokenChange: (clauseId: string, key: ClauseTokenKey, token: FlowchartToken) => void;
 }) {
   return (
-    <div className="w-full rounded-2xl border bg-card p-4 shadow-sm">
+    <div className="w-full rounded-2xl border bg-card p-4">
       <Reorder.Group
         as="div"
         axis="y"
@@ -296,7 +296,7 @@ function ClauseRow({
         type="button"
         onPointerDown={(e) => dragControls.start(e)}
         aria-label="Drag to reorder this clause"
-        className="flex w-12 shrink-0 touch-none items-center gap-1 rounded pt-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing cursor-grab"
+        className="flex w-12 shrink-0 touch-none items-center gap-1 rounded pt-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing cursor-grab"
       >
         <GripVertical className="size-3.5 shrink-0" />
         {displayConnector}
@@ -314,7 +314,7 @@ function ClauseRow({
           options={clause.fieldOptions}
           onSelect={(token) => onTokenChange("field", token)}
         />
-        <span className="text-sm text-muted-foreground">is</span>
+        <span className="text-xs text-muted-foreground">is</span>
         <TokenChip
           variant="value"
           token={clause.value}
@@ -350,7 +350,7 @@ function TokenChip({
         aria-haspopup={hasOptions ? "listbox" : undefined}
         aria-expanded={hasOptions ? open : undefined}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-lg text-sm font-medium transition-colors",
+          "inline-flex items-center gap-1.5 rounded-lg text-xs font-medium transition-colors",
           variant === "field" ? "bg-muted px-2.5 py-1.5 hover:bg-accent" : "border px-3 py-1.5 hover:bg-accent",
           !hasOptions && "cursor-default"
         )}
@@ -370,7 +370,7 @@ function TokenChip({
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.12 }}
             role="listbox"
-            className="absolute left-0 top-full z-10 mt-2 min-w-40 overflow-hidden rounded-xl border bg-popover shadow-md"
+            className="absolute left-0 top-full z-10 mt-2 min-w-40 overflow-hidden rounded-xl border bg-popover"
           >
             {options!.map((option) => (
               <button
@@ -383,7 +383,7 @@ function TokenChip({
                   setOpen(false);
                 }}
                 className={cn(
-                  "flex w-full items-center gap-1.5 px-3 py-2 text-left text-sm hover:bg-accent",
+                  "flex w-full items-center gap-1.5 px-3 py-2 text-left text-xs hover:bg-accent",
                   option.id === token.id && "font-medium"
                 )}
               >

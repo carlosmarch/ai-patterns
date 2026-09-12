@@ -131,9 +131,10 @@ export function PromptBarPro({
     return () => window.clearTimeout(id);
   }, [generationState]);
 
-  function handleSubmit() {
-    if (!canSend || generationState === "generating") return;
-    onSubmit?.(value.trim());
+  function handleSubmit(overrideValue?: string) {
+    const next = (overrideValue ?? value).trim();
+    if (!next || generationState === "generating") return;
+    onSubmit?.(next);
     setValue("");
     setGenerationState("generating");
   }
@@ -152,8 +153,9 @@ export function PromptBarPro({
           <button
             key={s.id}
             type="button"
-            onClick={() => setValue(s.label)}
-            className="flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition-colors hover:bg-accent"
+            onClick={() => handleSubmit(s.label)}
+            disabled={generationState === "generating"}
+            className="flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
           >
             <s.icon className="size-4 text-muted-foreground" />
             {s.label}
@@ -293,7 +295,7 @@ export function PromptBarPro({
             <StopGenerationButton
               state={generationState}
               disabled={!canSend}
-              onSubmit={handleSubmit}
+              onSubmit={() => handleSubmit()}
               onStop={() => setGenerationState("idle")}
               className="size-9"
             />
