@@ -1,14 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { AnimatePresence, motion } from "motion/react";
 import {
   Bot,
   Code2,
   GitBranch,
   Globe,
   LayoutGrid,
-  Loader2,
   PackagePlus,
   RotateCcw,
   Search,
@@ -17,8 +15,6 @@ import {
   Square,
   TerminalSquare,
 } from "lucide-react";
-
-import { cn } from "@/lib/utils";
 
 import { ChatBubble } from "@/registry/messages/chat-bubble/component";
 import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
@@ -31,7 +27,6 @@ import { MultiAgentTrace, type Agent } from "@/registry/traces/multi-agent-trace
 import { StreamingText, type StreamSegment } from "@/registry/text/streaming-text/component";
 import { SourcesStack, type Source } from "@/registry/text/sources-stack/component";
 import { FollowUpList } from "@/registry/text/follow-up-list/component";
-import { StopGenerationButton } from "@/registry/buttons/stop-generation-button/component";
 import { SelectionActions } from "@/registry/text/selection-actions/component";
 import { AttachmentTray, type Attachment } from "@/registry/uploads/attachment-chip/component";
 import { Flowchart, type FlowchartNode } from "@/registry/flowcharts/trigger-condition/component";
@@ -1139,32 +1134,16 @@ export function PatternDemo() {
         ref={composerRef}
         className="sticky bottom-0 -mx-6 space-y-2 bg-gradient-to-t from-background from-65% to-transparent px-6 pb-6 pt-10"
       >
-        <AnimatePresence>
-          {generating && (
-            <motion.div
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 4 }}
-              transition={{ duration: 0.15 }}
-              className="mx-auto flex w-fit items-center gap-2 rounded-full bg-card py-1 pl-3 pr-1 text-xs text-muted-foreground shadow-sm"
-            >
-              <Loader2 className="size-3 animate-spin" aria-hidden />
-              Generating
-              <StopGenerationButton state="generating" onStop={stopGeneration} />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className={cn(generating && "pointer-events-none opacity-50")}>
-          <PromptBarPro
-            suggestions={SUGGESTIONS}
-            visibleCount={4}
-            sources={SOURCES}
-            commands={COMMANDS}
-            placeholder="Ask about a pattern, or try one below…"
-            onSubmit={handleSubmit}
-          />
-        </div>
+        <PromptBarPro
+          suggestions={SUGGESTIONS}
+          visibleCount={4}
+          sources={SOURCES}
+          commands={COMMANDS}
+          placeholder="Ask about a pattern, or try one below…"
+          onSubmit={handleSubmit}
+          generating={generating}
+          onStop={stopGeneration}
+        />
       </div>
     </div>
   );

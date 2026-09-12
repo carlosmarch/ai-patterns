@@ -6,6 +6,7 @@ import { ChevronDown, Mic, Monitor, Plus, Shuffle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { StopGenerationButton, type GenerationState } from "../../buttons/stop-generation-button/component";
+import { ThinkingLoader } from "../../loaders/thinking-loader/component";
 
 export interface SessionSuggestion {
   id: string;
@@ -33,6 +34,10 @@ export interface PromptBarProProps {
   commands?: PromptBarItem[];
   placeholder?: string;
   onSubmit?: (value: string) => void;
+  /** Controls the generating/idle state from outside (e.g. a parent tracking a whole run). When omitted, the composer manages it internally. */
+  generating?: boolean;
+  /** Called when Stop is clicked while `generating` is controlled from outside. */
+  onStop?: () => void;
   className?: string;
 }
 
@@ -90,6 +95,8 @@ export function PromptBarPro({
   commands = defaultCommands,
   placeholder = "Start a session",
   onSubmit,
+  generating,
+  onStop,
   className,
 }: PromptBarProProps) {
   const [visible, setVisible] = React.useState(() => suggestions.slice(0, visibleCount));
@@ -99,7 +106,9 @@ export function PromptBarPro({
   const [orchestrator, setOrchestrator] = React.useState(orchestrators[0]?.label ?? "");
   const [orchestratorOpen, setOrchestratorOpen] = React.useState(false);
   const [dictating, setDictating] = React.useState(false);
-  const [generationState, setGenerationState] = React.useState<GenerationState>("idle");
+  const [internalGenerationState, setInternalGenerationState] = React.useState<GenerationState>("idle");
+  const isControlled = generating !== undefined;
+  const generationState: GenerationState = isControlled ? (generating ? "generating" : "idle") : internalGenerationState;
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [suppressed, setSuppressed] = React.useState(false);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
@@ -134,17 +143,17 @@ export function PromptBarPro({
   }, [value]);
 
   React.useEffect(() => {
-    if (generationState !== "generating") return;
-    const id = window.setTimeout(() => setGenerationState("idle"), 2600);
+    if (isControlled || internalGenerationState !== "generating") return;
+    const id = window.setTimeout(() => setInternalGenerationState("idle"), 2600);
     return () => window.clearTimeout(id);
-  }, [generationState]);
+  }, [isControlled, internalGenerationState]);
 
   function handleSubmit(overrideValue?: string) {
     const next = (overrideValue ?? value).trim();
     if (!next || generationState === "generating") return;
     onSubmit?.(next);
     setValue("");
-    setGenerationState("generating");
+    if (!isControlled) setInternalGenerationState("generating");
   }
 
   function applyAutocomplete(item: PromptBarItem) {
@@ -244,16 +253,19 @@ export function PromptBarPro({
         </AnimatePresence>
 
         <div className="flex flex-col gap-3 rounded-2xl border bg-card p-3 shadow-sm">
-          <textarea
-            ref={textareaRef}
-            rows={1}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            disabled={generationState === "generating"}
-            className="max-h-40 min-h-14 w-full resize-none bg-transparent px-1 py-1 text-base outline-none placeholder:text-muted-foreground disabled:text-muted-foreground"
-          />
+          {generationState === "generating" ? (
+            <ThinkingLoader className="min-h-14 px-1 py-1" />
+          ) : (
+            <textarea
+              ref={textareaRef}
+              rows={1}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              className="max-h-40 min-h-14 w-full resize-none bg-transparent px-1 py-1 text-base outline-none placeholder:text-muted-foreground"
+            />
+          )}
 
           <div className="flex flex-wrap items-center gap-y-2 gap-x-1">
             <button
@@ -368,7 +380,7 @@ export function PromptBarPro({
                 state={generationState}
                 disabled={!canSend}
                 onSubmit={() => handleSubmit()}
-                onStop={() => setGenerationState("idle")}
+                onStop={() => (isControlled ? onStop?.() : setInternalGenerationState("idle"))}
                 className="size-9"
               />
             </div>
