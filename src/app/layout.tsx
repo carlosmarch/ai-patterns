@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import { Origami } from "lucide-react";
 import "./globals.css";
 
 import { Footer } from "@/components/footer";
@@ -26,7 +27,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ai-patterns",
+  title: "AI Patterns",
   description: "Production components for AI agent UIs — each with a UX spec the harness can read.",
 };
 
@@ -43,8 +44,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col font-sans">
         <header className="border-b">
           <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-            <Link href="/" className="font-semibold tracking-tight">
-              ai-patterns
+            <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+              <Origami className="size-5" />
+              AI Patterns
             </Link>
             <nav className="flex items-center gap-6">
               <Link href="/patterns" className="text-sm text-muted-foreground hover:text-foreground">
