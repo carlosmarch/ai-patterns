@@ -19,8 +19,10 @@ A side-by-side pair of full response panels answering the same prompt, letting t
 - A selection state: the chosen panel gets a visibly distinct border/highlight and a "Preferred" badge; the other panel recedes (reduced emphasis) without disappearing.
 
 ## Behavior
+- The whole panel is a single click/tap target for selecting it, not just the "Choose this" button — clicking anywhere on a panel's card (its header, body text, or empty space) picks it, the same as clicking the explicit button.
+- Copy and Regenerate stay independent actions that don't select the panel — clicking either one acts on that panel's content without also making it the preferred choice, so a person can copy or regenerate one side while still undecided.
 - Selecting a panel is a single choice between the two — choosing one always deselects the other; it is not two independent toggles.
-- The choice is changeable: picking the other panel after the fact swaps the preferred state, it doesn't require undoing the first choice explicitly.
+- The choice is changeable: picking the other panel (by clicking it anywhere, or its "Choose this" button) after the fact swaps the preferred state, it doesn't require undoing the first choice explicitly.
 - Regenerating one panel only replaces that panel's content and clears any existing selection — it never touches the other panel's content.
 - Both panels render at equal height with independently scrolling content, so a long response on one side doesn't push the other side's footer out of alignment or off-screen.
 - Copy acts on that panel's response text only.
@@ -30,10 +32,13 @@ A side-by-side pair of full response panels answering the same prompt, letting t
 - Keep the "Choose this" action's label consistent across both panels; don't rephrase it based on which one you'd expect to win.
 
 ## Accessibility
-- Group the two "Choose this" controls with \`role="radiogroup"\` and expose each as \`role="radio"\` with \`aria-checked\`, since exactly one of two mutually exclusive options can be selected.
+- Group the two panels with \`role="radiogroup"\` and expose each panel itself as \`role="radio"\` with \`aria-checked\` and a focusable \`tabindex\`, since the whole card — not just its "Choose this" button — is the selectable unit and exactly one of two options can be selected.
+- Each panel needs a visible hover/focus affordance (e.g. a border change, a focus ring) so the card reads as clickable, not just as a static container with buttons inside it.
+- The nested Copy and Regenerate buttons must stop click/keyboard events from also triggering the panel's own selection, so using them never has the side effect of picking that panel.
+- Selecting via keyboard must work on the panel itself (Enter or Space while it's focused), not only by tabbing all the way to the "Choose this" button.
 - Each panel's response text must be reachable by screen reader in a sensible order — visual left/right placement shouldn't be the only thing separating them; label each region (e.g. \`aria-label="Response A"\`) so assistive tech announces which one is being read.
 - The preferred badge's meaning must not rely on color/border alone — include visible text ("Preferred") or an icon with an accessible name.
-- All actions (Copy, Regenerate, Choose this) must be reachable and operable by keyboard.
+- All actions (Copy, Regenerate, Choose this, and selecting the panel itself) must be reachable and operable by keyboard.
 
 ## Related patterns
 - Chat Bubble with Actions — the single-response equivalent (thumbs up/down, Regenerate) for when there's one reply to judge rather than two to choose between.
