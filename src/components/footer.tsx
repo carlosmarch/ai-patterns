@@ -104,7 +104,7 @@ export function Footer() {
               rel="noreferrer"
               className="underline decoration-dotted underline-offset-2 transition-colors hover:text-foreground"
             >
-              Carlos March
+              👌 Carlos March
             </a>
             .
           </p>
