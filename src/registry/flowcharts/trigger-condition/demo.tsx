@@ -1,34 +1,34 @@
 "use client";
 
-import { IceCreamCone } from "lucide-react";
+import { GitBranch } from "lucide-react";
 
 import { Flowchart, type FlowchartNode } from "./component";
 
-const flavorOptions = [
-  { id: "rocky-road", label: "Rocky Road", dotColor: "bg-amber-500" },
-  { id: "mint-chip", label: "Mint Chip", dotColor: "bg-emerald-500" },
-  { id: "vanilla-bean", label: "Vanilla Bean", dotColor: "bg-slate-300" },
+const filesOptions = [
+  { id: "gt10", label: "> 10", dotColor: "bg-amber-500" },
+  { id: "gt50", label: "> 50", dotColor: "bg-red-500" },
+  { id: "gt100", label: "> 100", dotColor: "bg-red-700" },
 ];
 
-const toppingOptions = [
-  { id: "brown-butter-brittle", label: "Brown butter bourbon brittle crunch", dotColor: "bg-amber-500" },
-  { id: "hot-fudge", label: "Hot fudge", dotColor: "bg-orange-700" },
-  { id: "sprinkles", label: "Sprinkles", dotColor: "bg-pink-500" },
+const categoryOptions = [
+  { id: "registry", label: "src/registry/**", dotColor: "bg-blue-500" },
+  { id: "skill", label: "plugins/ai-patterns/**", dotColor: "bg-violet-500" },
+  { id: "app", label: "src/app/**", dotColor: "bg-emerald-500" },
 ];
 
 const fieldOptions = [
-  { id: "flavor", label: "flavor" },
-  { id: "topping", label: "topping" },
-  { id: "size", label: "size" },
+  { id: "files", label: "files changed" },
+  { id: "path", label: "path" },
+  { id: "author", label: "author" },
 ];
 
 const nodes: FlowchartNode[] = [
   {
     id: "trigger-1",
     type: "trigger",
-    icon: IceCreamCone,
-    title: "New order created",
-    description: "Trigger when a new order is created",
+    icon: GitBranch,
+    title: "New pull request opened",
+    description: "Trigger when a PR is opened against main",
   },
   {
     id: "condition-1",
@@ -37,24 +37,20 @@ const nodes: FlowchartNode[] = [
       {
         id: "clause-1",
         connector: "if",
-        subject: { id: "order", icon: IceCreamCone, label: "order" },
-        field: { id: "flavor", label: "flavor" },
+        subject: { id: "pr", icon: GitBranch, label: "PR" },
+        field: { id: "files", label: "files changed" },
         fieldOptions,
-        value: { id: "rocky-road", label: "Rocky Road", dotColor: "bg-amber-500" },
-        valueOptions: flavorOptions,
+        value: { id: "gt10", label: "> 10", dotColor: "bg-amber-500" },
+        valueOptions: filesOptions,
       },
       {
         id: "clause-2",
         connector: "and",
-        subject: { id: "order-2", icon: IceCreamCone, label: "order" },
-        field: { id: "topping", label: "topping" },
+        subject: { id: "pr-2", icon: GitBranch, label: "PR" },
+        field: { id: "path", label: "path" },
         fieldOptions,
-        value: {
-          id: "brown-butter-brittle",
-          label: "Brown butter bourbon brittle crunch",
-          dotColor: "bg-amber-500",
-        },
-        valueOptions: toppingOptions,
+        value: { id: "registry", label: "src/registry/**", dotColor: "bg-blue-500" },
+        valueOptions: categoryOptions,
       },
     ],
   },

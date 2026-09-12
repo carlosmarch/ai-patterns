@@ -6,46 +6,46 @@ function favicon(domain: string) {
 
 const SOURCES: Source[] = [
   {
-    title: "Creative Commons — About The Licenses",
-    domain: "creativecommons.org",
-    url: "https://creativecommons.org/licenses/",
-    faviconUrl: favicon("creativecommons.org"),
+    title: "Next.js Docs — App Router",
+    domain: "nextjs.org",
+    url: "https://nextjs.org/docs/app",
+    faviconUrl: favicon("nextjs.org"),
   },
   {
-    title: "PostgreSQL: Documentation",
-    domain: "postgresql.org",
-    url: "https://www.postgresql.org/docs/",
-    faviconUrl: favicon("postgresql.org"),
+    title: "Tailwind CSS v4.0",
+    domain: "tailwindcss.com",
+    url: "https://tailwindcss.com/blog/tailwindcss-v4",
+    faviconUrl: favicon("tailwindcss.com"),
   },
   {
-    title: "OWASP Top Ten",
-    domain: "owasp.org",
-    url: "https://owasp.org/www-project-top-ten/",
-    faviconUrl: favicon("owasp.org"),
+    title: "Motion for React",
+    domain: "motion.dev",
+    url: "https://motion.dev",
+    faviconUrl: favicon("motion.dev"),
+  },
+  {
+    title: "Radix UI Primitives",
+    domain: "radix-ui.com",
+    url: "https://www.radix-ui.com/primitives",
+    faviconUrl: favicon("radix-ui.com"),
+  },
+  {
+    title: "shadcn/ui",
+    domain: "ui.shadcn.com",
+    url: "https://ui.shadcn.com",
+    faviconUrl: favicon("ui.shadcn.com"),
+  },
+  {
+    title: "Shiki — Syntax Highlighter",
+    domain: "shiki.style",
+    url: "https://shiki.style",
+    faviconUrl: favicon("shiki.style"),
   },
   {
     title: "MDN Web Docs",
     domain: "developer.mozilla.org",
     url: "https://developer.mozilla.org/",
     faviconUrl: favicon("developer.mozilla.org"),
-  },
-  {
-    title: "Node.js Documentation",
-    domain: "nodejs.org",
-    url: "https://nodejs.org/en/docs",
-    faviconUrl: favicon("nodejs.org"),
-  },
-  {
-    title: "React Docs — Thinking in React",
-    domain: "react.dev",
-    url: "https://react.dev/learn/thinking-in-react",
-    faviconUrl: favicon("react.dev"),
-  },
-  {
-    title: "RFC 9110: HTTP Semantics",
-    domain: "rfc-editor.org",
-    url: "https://www.rfc-editor.org/rfc/rfc9110",
-    faviconUrl: favicon("rfc-editor.org"),
   },
 ];
 

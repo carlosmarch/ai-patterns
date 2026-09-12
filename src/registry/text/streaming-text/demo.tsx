@@ -9,17 +9,17 @@ const segments: StreamSegment[] = [
   {
     type: "text",
     content:
-      "Pistachio is your fastest-growing flavor — sales are up 23% this month and margins beat vanilla by 8 points. ",
+      "For a multi-step agent, pair the thinking loader with an expandable trace — it collapses into a one-line summary and expands into the full step list. ",
   },
-  { type: "source", label: "scoopdata.io" },
+  { type: "source", label: "docs" },
   {
     type: "text",
     content:
-      " Stone-fruit flavors are trending up too, so a limited pistachio-apricot swirl could ride both waves.",
+      " Add a stop-generation button so people can bail out mid-stream, and a follow-up list once the reply lands.",
   },
 ];
 
-const followUps = ["Show trend chart", "Compare margins", "Draft launch plan"];
+const followUps = ["Show me expandable-trace", "Show me thinking-loader", "How do I install the skill?"];
 
 export default function StreamingTextDemo() {
   const [run, setRun] = React.useState(0);

@@ -1,13 +1,14 @@
 "use client";
 
-import { FolderOpen, Sparkles } from "lucide-react";
+import { Bot, Code2, LayoutGrid, Sparkles } from "lucide-react";
 
 import { PromptBarPro, type PromptBarItem, type SessionSuggestion } from "./component";
 
 const suggestions: SessionSuggestion[] = [
-  { id: "designs", label: "Review my recent designs", icon: Sparkles },
-  { id: "drive", label: "Organize my Drive", icon: FolderOpen },
-  { id: "changes", label: "Summarize shared file changes", icon: Sparkles },
+  { id: "loading", label: "Add a loading state while the agent works", icon: Sparkles },
+  { id: "composer", label: "Design a composer for my chat app", icon: LayoutGrid },
+  { id: "diff", label: "Show a pattern for reviewing a diff", icon: Code2 },
+  { id: "agents", label: "Design a trace for a multi-agent run", icon: Bot },
 ];
 
 const sources: PromptBarItem[] = [

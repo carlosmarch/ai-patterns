@@ -26,10 +26,10 @@ export interface PromptBarProps {
 }
 
 const defaultSources: PromptBarItem[] = [
-  { id: "vanilla", label: "Vanilla" },
-  { id: "chocolate", label: "Chocolate" },
-  { id: "pistachio", label: "Pistachio" },
-  { id: "strawberry", label: "Strawberry" },
+  { id: "docs", label: "Docs" },
+  { id: "codebase", label: "Codebase" },
+  { id: "web", label: "Web" },
+  { id: "figma", label: "Figma" },
 ];
 
 const defaultCommands: PromptBarItem[] = [
@@ -39,9 +39,9 @@ const defaultCommands: PromptBarItem[] = [
 ];
 
 const defaultModels: PromptBarItem[] = [
-  { id: "sprinkles-5", label: "Sprinkles 5" },
-  { id: "sprinkles-5-mini", label: "Sprinkles 5 mini" },
-  { id: "waffle-3", label: "Waffle 3" },
+  { id: "model-5", label: "Model 5" },
+  { id: "model-5-mini", label: "Model 5 mini" },
+  { id: "model-4", label: "Model 4" },
 ];
 
 interface Trigger {

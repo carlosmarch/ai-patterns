@@ -32,7 +32,7 @@ import { StreamingText, type StreamSegment } from "@/registry/text/streaming-tex
 import { SourcesStack, type Source } from "@/registry/text/sources-stack/component";
 import { FollowUpList } from "@/registry/text/follow-up-list/component";
 import { StopGenerationButton } from "@/registry/buttons/stop-generation-button/component";
-import { ShinyButton } from "@/registry/buttons/shiny-button/component";
+import { SelectionActions } from "@/registry/text/selection-actions/component";
 import { AttachmentTray, type Attachment } from "@/registry/uploads/attachment-chip/component";
 import { Flowchart, type FlowchartNode } from "@/registry/flowcharts/trigger-condition/component";
 import {
@@ -126,7 +126,35 @@ const FLOWCHART_INTRO_SEGMENTS = text(
   "Building an automation instead of a chat? Triggers and conditions get their own visual flow:"
 );
 
-const SHINY_INTRO_SEGMENTS = text("Even a plain call-to-action can carry a little delight:");
+const SELECTION_INTRO_SEGMENTS = text(
+  "Answers don't have to be static, either — highlight any passage below and ask for a rewrite, or just hit Explain:"
+);
+
+const SELECTION_PARAGRAPH =
+  "Every block in this tour is a real registry component streaming into the transcript, not a canned screenshot — the same code you'd drop straight into your own chat interface.";
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function mockSelectionRewrite(selection: string, instruction: string) {
+  await delay(700);
+  const lower = instruction.toLowerCase();
+
+  if (lower.includes("formal")) {
+    return selection.replace(/\bcanned\b/, "staged").replace(/\bdrop straight\b/, "integrate directly");
+  }
+  if (lower.includes("shorten") || lower.includes("clarity") || lower.includes("improve")) {
+    return selection.replace(/\bstreaming into the transcript, not a canned screenshot\b/, "live, not a screenshot");
+  }
+  return selection;
+}
+
+async function mockSelectionExplain(selection: string) {
+  await delay(400);
+  void selection;
+  return "This line is making the point that the whole tour runs the actual registry components live, so what you see here is exactly what ships in the code tab.";
+}
 
 const SKILL_INTRO_SEGMENTS = text(
   "And this whole catalogue also ships as a Claude Code skill, so your coding agent can reach for it directly:"
@@ -397,9 +425,9 @@ interface FlowchartBlock {
   kind: "flowchart";
   nodes: FlowchartNode[];
 }
-interface ShinyBlock {
+interface SelectionBlock {
   id: string;
-  kind: "shiny";
+  kind: "selection";
 }
 interface FollowUpsBlock {
   id: string;
@@ -421,7 +449,7 @@ type Block =
   | SourcesBlock
   | AttachmentBlock
   | FlowchartBlock
-  | ShinyBlock
+  | SelectionBlock
   | FollowUpsBlock;
 
 let idCounter = 0;
@@ -759,9 +787,9 @@ export function PatternDemo() {
     };
   }
 
-  function showShinyButton(): StepFn {
+  function showSelectionActions(): StepFn {
     return (runId, done) => {
-      addBlock({ id: nextId("shiny"), kind: "shiny" });
+      addBlock({ id: nextId("selection"), kind: "selection" });
       schedule(() => {
         if (!isCurrent(runId)) return;
         done();
@@ -879,8 +907,8 @@ export function PatternDemo() {
       say(FLOWCHART_INTRO_SEGMENTS),
       showFlowchart(FLOWCHART_NODES),
       pause(400),
-      say(SHINY_INTRO_SEGMENTS),
-      showShinyButton(),
+      say(SELECTION_INTRO_SEGMENTS),
+      showSelectionActions(),
       pause(500),
       say(SKILL_INTRO_SEGMENTS),
       showTerminal("/plugin install ai-patterns@ai-patterns", SKILL_INSTALL_SCRIPT),
@@ -1205,8 +1233,8 @@ function BlockView({
       return <LiveAttachmentTray onDone={block.onDone} />;
     case "flowchart":
       return <Flowchart nodes={block.nodes} className="w-full max-w-md" />;
-    case "shiny":
-      return <ShinyButton>Ship it</ShinyButton>;
+    case "selection":
+      return <SelectionActions text={SELECTION_PARAGRAPH} onRewrite={mockSelectionRewrite} onExplain={mockSelectionExplain} className="w-full max-w-md" />;
     case "followups":
       return <FollowUpList suggestions={block.suggestions} onSelect={onSelectFollowUp} className="w-full max-w-md" />;
   }
