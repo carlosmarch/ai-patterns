@@ -91,18 +91,20 @@ function ShimmerWord({ word }: { word: string }) {
       animate={{ backgroundPositionX: "-50%" }}
       transition={{ repeat: Infinity, repeatType: "loop", duration: 1.4, ease: "linear", repeatDelay: 0.8 }}
     >
-      <AnimatePresence mode="wait">
-        <motion.span
-          key={word}
-          initial={{ y: 6, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -6, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="inline-block"
-        >
-          {word}
-        </motion.span>
-      </AnimatePresence>
+      <span className="relative inline-block">
+        <AnimatePresence initial={false}>
+          <motion.span
+            key={word}
+            initial={{ y: 6, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -6, opacity: 0, position: "absolute" }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="inline-block whitespace-nowrap"
+          >
+            {word}
+          </motion.span>
+        </AnimatePresence>
+      </span>
     </motion.span>
   );
 }
