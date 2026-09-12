@@ -249,13 +249,13 @@ export function PromptBar({
 
       <div
         className={cn(
-          "flex items-end gap-1.5 border bg-card p-2.5 shadow-sm sm:gap-1 sm:p-2",
-          variant === "pill" ? "rounded-full" : "rounded-2xl"
+          "flex flex-wrap items-end gap-1.5 border bg-card p-2.5 shadow-sm sm:flex-nowrap sm:gap-1 sm:p-2",
+          variant === "pill" ? "rounded-3xl sm:rounded-full" : "rounded-2xl"
         )}
       >
         <button
           type="button"
-          className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="order-2 flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:order-none"
           aria-label="Add attachment"
         >
           <Plus className="size-4" />
@@ -269,10 +269,10 @@ export function PromptBar({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={generationState === "generating"}
-          className="max-h-40 flex-1 resize-none bg-transparent py-1.5 text-sm outline-none placeholder:text-muted-foreground disabled:text-muted-foreground"
+          className="order-1 max-h-40 w-full basis-full resize-none bg-transparent py-1.5 text-sm outline-none placeholder:text-muted-foreground disabled:text-muted-foreground sm:order-none sm:w-auto sm:flex-1"
         />
 
-        <div ref={modelMenuRef} className="relative shrink-0">
+        <div ref={modelMenuRef} className="relative order-2 ml-auto shrink-0 sm:order-none sm:ml-0">
           <button
             type="button"
             onClick={() => setModelOpen((v) => !v)}
@@ -317,7 +317,7 @@ export function PromptBar({
           aria-pressed={dictating}
           aria-label="Toggle dictation"
           className={cn(
-            "relative flex size-8 shrink-0 items-center justify-center rounded-full transition-colors",
+            "relative order-2 flex size-8 shrink-0 items-center justify-center rounded-full transition-colors sm:order-none",
             dictating ? "text-destructive" : "text-muted-foreground hover:bg-accent hover:text-foreground"
           )}
         >
@@ -336,6 +336,7 @@ export function PromptBar({
           disabled={!canSend}
           onSubmit={handleSubmit}
           onStop={() => setGenerationState("idle")}
+          className="order-2 sm:order-none"
         />
       </div>
     </div>
