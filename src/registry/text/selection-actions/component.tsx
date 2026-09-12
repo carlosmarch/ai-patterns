@@ -295,7 +295,7 @@ const FloatingToolbar = React.forwardRef<
           }}
           placeholder="Describe edits"
           aria-label="Describe edits"
-          className="min-w-0 flex-1 bg-transparent px-2 py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          className="min-w-0 flex-1 bg-transparent px-2 py-1 text-xs text-foreground outline-none placeholder:text-muted-foreground"
         />
         {hasExplain && (
           <>
@@ -331,7 +331,7 @@ const FloatingToolbar = React.forwardRef<
                 key={q}
                 type="button"
                 onClick={() => onQuickEdit(q)}
-                className="block w-full px-3 py-2 text-left text-sm text-foreground/90 hover:bg-accent"
+                className="block w-full px-3 py-2 text-left text-xs text-foreground/90 hover:bg-accent"
               >
                 {q}
               </button>
@@ -348,7 +348,7 @@ const FloatingToolbar = React.forwardRef<
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="mt-1.5 rounded-xl border bg-popover p-3 text-sm text-foreground/90 shadow-md"
+            className="mt-1.5 rounded-xl border bg-popover p-3 text-xs text-foreground/90 shadow-md"
           >
             {explanation}
           </motion.div>
@@ -371,7 +371,7 @@ function ToolbarButton({
     <button
       type="button"
       onClick={onClick}
-      className="flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+      className="flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
     >
       <Icon className="size-4" aria-hidden />
       {label}

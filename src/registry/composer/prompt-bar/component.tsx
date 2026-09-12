@@ -194,7 +194,7 @@ export function PromptBar({
 
       <div
         className={cn(
-          "flex items-end gap-1 border bg-card p-2 shadow-sm",
+          "flex items-end gap-1.5 border bg-card p-2.5 shadow-sm sm:gap-1 sm:p-2",
           variant === "pill" ? "rounded-full" : "rounded-2xl"
         )}
       >
