@@ -22,21 +22,21 @@ export function ListeningState({
 }: ListeningStateProps) {
   return (
     <div className={cn("flex flex-col items-center gap-3", className)}>
-      <div className="relative flex size-16 shrink-0 items-center justify-center">
-        {active && (
-          <>
-            <Ripple delay={0} />
-            <Ripple delay={0.9} />
-          </>
+      <div
+        className={cn(
+          "relative flex size-12 shrink-0 items-center justify-center rounded-full transition-colors",
+          active ? "bg-sky-500 text-white" : "bg-muted text-muted-foreground"
         )}
-        <div
-          className={cn(
-            "relative z-10 flex size-12 items-center justify-center rounded-full transition-colors",
-            active ? "bg-sky-500 text-white" : "bg-muted text-muted-foreground"
-          )}
-        >
-          <Mic className="size-5" aria-hidden />
-        </div>
+      >
+        {active && (
+          <motion.span
+            aria-hidden
+            className="absolute inset-0 rounded-full bg-sky-500/40"
+            animate={{ scale: [1, 1.4], opacity: [0.6, 0] }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
+          />
+        )}
+        <Mic className="size-5" aria-hidden />
       </div>
 
       <div className="flex items-center gap-2">
@@ -55,17 +55,5 @@ export function ListeningState({
         )}
       </div>
     </div>
-  );
-}
-
-function Ripple({ delay }: { delay: number }) {
-  return (
-    <motion.span
-      aria-hidden
-      className="absolute inset-0 rounded-full bg-sky-500/40"
-      initial={{ scale: 0.8, opacity: 0.6 }}
-      animate={{ scale: 1.9, opacity: 0 }}
-      transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut", delay }}
-    />
   );
 }

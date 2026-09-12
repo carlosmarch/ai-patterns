@@ -19,7 +19,7 @@ A dedicated visual state — a pulsing mic glyph with an outward ripple, a statu
 
 ## Anatomy
 - Mic glyph: a solid-filled circular button with a microphone icon, tinted with an accent color while active and muted gray when paused.
-- Ripple: one or more concentric rings expanding outward from the glyph and fading to nothing, looped and staggered so a new ring starts before the previous one fully fades.
+- Ripple: a single ring, sized and centered on the glyph itself (not a separate oversized container), that expands outward a short distance and fades to nothing, looping continuously. Keep the ripple's max size close to the glyph's own footprint — a ring that balloons far past it can visually collide with the label sitting just below.
 - Status label: a short live-updating phrase ("Listening…", "Paused") directly below the glyph.
 - Stop control: a small button beside the label that ends capture — always reachable without needing to find a separate toolbar.
 
@@ -28,6 +28,7 @@ A dedicated visual state — a pulsing mic glyph with an outward ripple, a statu
 - Clicking stop ends the capture session immediately — no confirmation step, since capture is easy to restart and holding it hostage behind a dialog adds friction to a moment that's meant to feel instant.
 - The label updates in place (no layout shift) when switching between active and paused text.
 - On resume, restart the ripple animation from its initial state rather than resuming mid-cycle, so the "just started listening" cue is clear each time.
+- Drive the ripple with a plain keyframe `animate` (e.g. scale `[1, 1.4]`, opacity `[0.6, 0]`) rather than a separate `initial` prop plus a per-instance `delay` — the same technique Prompt Bar's dictation mic uses. Staggering multiple rings via `delay` on an infinitely-repeating animation is fragile and prone to drifting out of sync; one ring on a clean loop reads just as clearly as "listening."
 
 ## Content guidelines
 - Keep the label to a short present-participle phrase ("Listening…"); avoid restating instructions the user already knows ("Speak now to ask a question").
@@ -40,6 +41,7 @@ A dedicated visual state — a pulsing mic glyph with an outward ripple, a statu
 - Never rely on the ripple animation alone to convey "active" — the accent color and label both carry that meaning independently.
 
 ## Related patterns
+- Prompt Bar / Prompt Bar Pro — their composer's dictation mic button uses this same single-ring ripple technique at a smaller scale; keep both in sync if the ripple's timing or easing ever changes.
 - Voice Waveform — shows the live amplitude of the audio this state confirms is being captured; often shown together, with the waveform inside or beside the mic glyph.
 - Live Transcript — shows what capture actually produced once speech is recognized; this state covers the moment before or alongside that text appearing.
 
@@ -78,21 +80,21 @@ export function ListeningState({
 }: ListeningStateProps) {
   return (
     <div className={cn("flex flex-col items-center gap-3", className)}>
-      <div className="relative flex size-16 shrink-0 items-center justify-center">
-        {active && (
-          <>
-            <Ripple delay={0} />
-            <Ripple delay={0.9} />
-          </>
+      <div
+        className={cn(
+          "relative flex size-12 shrink-0 items-center justify-center rounded-full transition-colors",
+          active ? "bg-sky-500 text-white" : "bg-muted text-muted-foreground"
         )}
-        <div
-          className={cn(
-            "relative z-10 flex size-12 items-center justify-center rounded-full transition-colors",
-            active ? "bg-sky-500 text-white" : "bg-muted text-muted-foreground"
-          )}
-        >
-          <Mic className="size-5" aria-hidden />
-        </div>
+      >
+        {active && (
+          <motion.span
+            aria-hidden
+            className="absolute inset-0 rounded-full bg-sky-500/40"
+            animate={{ scale: [1, 1.4], opacity: [0.6, 0] }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
+          />
+        )}
+        <Mic className="size-5" aria-hidden />
       </div>
 
       <div className="flex items-center gap-2">
@@ -111,18 +113,6 @@ export function ListeningState({
         )}
       </div>
     </div>
-  );
-}
-
-function Ripple({ delay }: { delay: number }) {
-  return (
-    <motion.span
-      aria-hidden
-      className="absolute inset-0 rounded-full bg-sky-500/40"
-      initial={{ scale: 0.8, opacity: 0.6 }}
-      animate={{ scale: 1.9, opacity: 0 }}
-      transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut", delay }}
-    />
   );
 }
 ```
