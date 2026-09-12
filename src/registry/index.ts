@@ -42,6 +42,8 @@ import RateLimitDemo from "./errors/rate-limit/demo";
 import { pattern as rateLimitPattern } from "./errors/rate-limit/pattern";
 import PartialResponseDemo from "./errors/partial-response/demo";
 import { pattern as partialResponsePattern } from "./errors/partial-response/pattern";
+import ResponseCompareDemo from "./compare/response-compare/demo";
+import { pattern as responseComparePattern } from "./compare/response-compare/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -222,6 +224,14 @@ export const registry: RegistryEntry[] = [
     description: "A cut-short assistant reply with Continue and Retry actions.",
     Demo: PartialResponseDemo,
     uxDoc: partialResponsePattern,
+  },
+  {
+    slug: "response-compare",
+    category: "compare",
+    title: "Response Compare",
+    description: "A side-by-side pair of response panels with independent regenerate and a single preferred pick.",
+    Demo: ResponseCompareDemo,
+    uxDoc: responseComparePattern,
   },
 ];
 
