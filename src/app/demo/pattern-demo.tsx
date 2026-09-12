@@ -1,0 +1,949 @@
+"use client";
+
+import * as React from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { Loader2, RotateCcw, TerminalSquare } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+
+import { ChatBubble } from "@/registry/messages/chat-bubble/component";
+import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
+import { ToolCallChip, type ToolCallKind, type ToolCallStatus } from "@/registry/loaders/tool-call-chip/component";
+import { ExpandableTrace, type TraceStep } from "@/registry/traces/expandable-trace/component";
+import { TerminalStream, type LogLine, type TerminalStatus } from "@/registry/code/terminal-stream/component";
+import { DiffSummaryCard, type DiffFile } from "@/registry/code/diff-summary/component";
+import { ToolApproval } from "@/registry/permissions/tool-approval/component";
+import { MultiAgentTrace, type Agent } from "@/registry/traces/multi-agent-trace/component";
+import { StreamingText, type StreamSegment } from "@/registry/text/streaming-text/component";
+import { SourcesStack, type Source } from "@/registry/text/sources-stack/component";
+import { StopGenerationButton } from "@/registry/buttons/stop-generation-button/component";
+import { PromptBar, type PromptBarItem } from "@/registry/composer/prompt-bar/component";
+
+// ---------------------------------------------------------------------------
+// Demo data
+// ---------------------------------------------------------------------------
+
+const COMMANDS: PromptBarItem[] = [
+  { id: "diff", label: "/diff", description: "Show a batch of file edits" },
+  { id: "terminal", label: "/terminal", description: "Stream a command's output" },
+  { id: "trace", label: "/trace", description: "Show step-by-step reasoning" },
+  { id: "agents", label: "/agents", description: "Run a multi-agent workflow" },
+  { id: "approve", label: "/approve", description: "Ask permission before running a tool" },
+  { id: "tools", label: "/tools", description: "Chain a couple of tool calls" },
+  { id: "sources", label: "/sources", description: "Answer with cited sources" },
+  { id: "stop", label: "/stop", description: "A slow reply you can interrupt" },
+  { id: "reset", label: "/reset", description: "Clear the conversation" },
+];
+
+const AT_MENTIONS: PromptBarItem[] = [
+  { id: "roadmap", label: "roadmap.md" },
+  { id: "codebase", label: "codebase" },
+  { id: "design", label: "design-system" },
+];
+
+const GENERIC_REPLIES = [
+  "Here's what I found — it lines up with what you described. Want me to go a level deeper?",
+  "Noted. I can turn that into a task, a draft, or a quick trace of my reasoning — just say the word.",
+  "Good question. Given what's already in the project, I'd start small and iterate rather than plan the whole thing up front.",
+];
+
+function pickReply(exclude?: string) {
+  const options = GENERIC_REPLIES.filter((r) => r !== exclude);
+  return options[Math.floor(Math.random() * options.length)] ?? GENERIC_REPLIES[0];
+}
+
+const RELEASE_SEGMENTS: StreamSegment[] = [
+  {
+    type: "text",
+    content:
+      "Good news — CI is green and the two release-blocking PRs merged this morning. ",
+  },
+  { type: "source", label: "ci/checks" },
+  {
+    type: "text",
+    content: " One PR is still open, but it's a docs-only change, so it shouldn't hold things up.",
+  },
+];
+
+const SOURCES_SEGMENTS: StreamSegment[] = [
+  {
+    type: "text",
+    content:
+      "A couple of things worth citing here: Tailwind v4 moved its configuration into CSS, and Motion now ships a smaller core bundle aimed at exactly this kind of micro-interaction. ",
+  },
+  { type: "source", label: "docs" },
+];
+
+function favicon(domain: string) {
+  return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+}
+
+const DEMO_SOURCES: Source[] = [
+  {
+    title: "Tailwind CSS v4.0",
+    domain: "tailwindcss.com",
+    url: "https://tailwindcss.com/blog/tailwindcss-v4",
+    faviconUrl: favicon("tailwindcss.com"),
+  },
+  {
+    title: "Motion for React",
+    domain: "motion.dev",
+    url: "https://motion.dev",
+    faviconUrl: favicon("motion.dev"),
+  },
+  {
+    title: "React Docs — Thinking in React",
+    domain: "react.dev",
+    url: "https://react.dev/learn/thinking-in-react",
+    faviconUrl: favicon("react.dev"),
+  },
+  {
+    title: "MDN Web Docs",
+    domain: "developer.mozilla.org",
+    url: "https://developer.mozilla.org/",
+    faviconUrl: favicon("developer.mozilla.org"),
+  },
+];
+
+const DEMO_DIFF_FILES: DiffFile[] = [
+  { id: "1", name: "src/app/demo/pattern-demo.tsx", additions: 482, deletions: 0 },
+  { id: "2", name: "src/app/demo/page.tsx", additions: 24, deletions: 0 },
+  { id: "3", name: "src/app/layout.tsx", additions: 3, deletions: 0 },
+  { id: "4", name: "src/app/page.tsx", additions: 4, deletions: 1 },
+  { id: "5", name: "CHANGELOG.md", additions: 6, deletions: 0 },
+];
+
+const BUILD_SCRIPT: Omit<LogLine, "id">[] = [
+  { text: "$ npm run build", level: "default" },
+  { text: "▲ Next.js 16.3.5 (Turbopack)", level: "info" },
+  { text: "Creating an optimized production build ...", level: "default" },
+  { text: "✓ Compiled successfully in 7.4s", level: "success" },
+  { text: "Running TypeScript ...", level: "default" },
+  { text: "✓ Finished TypeScript in 2.4s", level: "success" },
+  { text: "Generating static pages (19/19)", level: "default" },
+  { text: "✓ Build completed", level: "success" },
+];
+
+const INSTALL_SCRIPT: Omit<LogLine, "id">[] = [
+  { text: "$ npm install lodash", level: "default" },
+  { text: "added 1 package, and audited 214 packages in 1.4s", level: "default" },
+  { text: "found 0 vulnerabilities", level: "default" },
+  { text: "✓ Installed lodash@4.17.21", level: "success" },
+];
+
+const TRACE_STEPS: TraceStep[] = [
+  { label: "Weighing two ways to structure the flow" },
+  { label: "Checking it against the existing patterns" },
+  { label: "Picking the simpler option", meta: "fewer moving parts" },
+  { label: "Drafting the final answer" },
+];
+
+const AGENTS_INITIAL: Agent[] = [
+  {
+    id: "research",
+    name: "Research agent",
+    status: "running",
+    currentStep: "Searching recent changelogs",
+    elapsedSeconds: 0,
+    steps: [{ label: "Reading project docs" }],
+  },
+  { id: "code", name: "Code agent", status: "queued", elapsedSeconds: 0, steps: [] },
+  { id: "review", name: "Review agent", status: "queued", elapsedSeconds: 0, steps: [] },
+];
+
+function tickAgents(prev: Agent[]): Agent[] {
+  return prev.map((agent) => {
+    if (agent.status === "done" || agent.status === "error") return agent;
+    const elapsed = (agent.elapsedSeconds ?? 0) + 1;
+
+    if (agent.id === "research") {
+      if (elapsed >= 4) {
+        return {
+          ...agent,
+          status: "done",
+          currentStep: undefined,
+          elapsedSeconds: elapsed,
+          steps: [...agent.steps, { label: "Compiled findings", meta: "6 sources" }],
+        };
+      }
+      return { ...agent, status: "running", elapsedSeconds: elapsed };
+    }
+
+    if (agent.id === "code") {
+      if (elapsed < 2) return { ...agent, elapsedSeconds: elapsed };
+      if (elapsed >= 6) {
+        return {
+          ...agent,
+          status: "done",
+          currentStep: undefined,
+          elapsedSeconds: elapsed,
+          steps: [...agent.steps, { label: "Opened a pull request" }],
+        };
+      }
+      return {
+        ...agent,
+        status: "running",
+        currentStep: "Editing component.tsx",
+        elapsedSeconds: elapsed,
+        steps: elapsed === 2 ? [{ label: "Reading component.tsx" }] : agent.steps,
+      };
+    }
+
+    if (agent.id === "review") {
+      if (elapsed < 5) return { ...agent, elapsedSeconds: elapsed };
+      return {
+        ...agent,
+        status: "error",
+        currentStep: undefined,
+        elapsedSeconds: elapsed,
+        steps: [...agent.steps, { label: "Lint check failed", meta: "2 errors" }],
+      };
+    }
+
+    return agent;
+  });
+}
+
+function estimateStreamMs(segments: StreamSegment[], speed = 18) {
+  const chars = segments.reduce((n, s) => n + (s.type === "text" ? s.content.length : 6), 0);
+  return chars * speed + 400;
+}
+
+// ---------------------------------------------------------------------------
+// Transcript blocks
+// ---------------------------------------------------------------------------
+
+interface ChatBlock {
+  id: string;
+  kind: "chat";
+  role: "user" | "assistant";
+  content: string;
+  regenerating?: boolean;
+}
+interface NoteBlock {
+  id: string;
+  kind: "note";
+  content: string;
+}
+interface ThinkingBlock {
+  id: string;
+  kind: "thinking";
+}
+interface ToolCallBlock {
+  id: string;
+  kind: "tool-call";
+  toolKind: ToolCallKind;
+  verb: string;
+  target: string;
+  result: string;
+  duration?: number;
+  onDone?: () => void;
+}
+interface TraceBlock {
+  id: string;
+  kind: "trace";
+  steps: TraceStep[];
+  duration: number;
+}
+interface TerminalBlock {
+  id: string;
+  kind: "terminal";
+  command: string;
+  script: Omit<LogLine, "id">[];
+  onDone?: () => void;
+}
+interface DiffBlock {
+  id: string;
+  kind: "diff";
+  files: DiffFile[];
+}
+interface ApprovalBlock {
+  id: string;
+  kind: "approval";
+  toolName: string;
+  summary: string;
+  detail?: string;
+  onAllow: () => void;
+  onDeny: () => void;
+}
+interface AgentsBlock {
+  id: string;
+  kind: "agents";
+  onDone?: () => void;
+}
+interface StreamingBlock {
+  id: string;
+  kind: "streaming";
+  segments: StreamSegment[];
+  followUps?: string[];
+}
+interface SourcesBlock {
+  id: string;
+  kind: "sources";
+  sources: Source[];
+}
+
+type Block =
+  | ChatBlock
+  | NoteBlock
+  | ThinkingBlock
+  | ToolCallBlock
+  | TraceBlock
+  | TerminalBlock
+  | DiffBlock
+  | ApprovalBlock
+  | AgentsBlock
+  | StreamingBlock
+  | SourcesBlock;
+
+let idCounter = 0;
+function nextId(prefix: string) {
+  idCounter += 1;
+  return `${prefix}-${idCounter}`;
+}
+
+function useLatest<T>(value: T) {
+  const ref = React.useRef(value);
+  React.useEffect(() => {
+    ref.current = value;
+  });
+  return ref;
+}
+
+// ---------------------------------------------------------------------------
+// Live wrappers — self-contained animation, notify the transcript when done
+// ---------------------------------------------------------------------------
+
+function LiveToolCallChip({
+  toolKind,
+  verb,
+  target,
+  result,
+  duration = 1500,
+  onDone,
+}: {
+  toolKind: ToolCallKind;
+  verb: string;
+  target: string;
+  result: string;
+  duration?: number;
+  onDone?: () => void;
+}) {
+  const [status, setStatus] = React.useState<ToolCallStatus>("running");
+  const onDoneRef = useLatest(onDone);
+
+  React.useEffect(() => {
+    const t = window.setTimeout(() => {
+      setStatus("success");
+      onDoneRef.current?.();
+    }, duration);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [duration]);
+
+  return (
+    <ToolCallChip kind={toolKind} verb={verb} target={target} status={status} result={result} className="w-full max-w-md" />
+  );
+}
+
+function LiveTerminalStream({
+  command,
+  script,
+  lineDelay = 380,
+  onDone,
+}: {
+  command: string;
+  script: Omit<LogLine, "id">[];
+  lineDelay?: number;
+  onDone?: () => void;
+}) {
+  const [lines, setLines] = React.useState<LogLine[]>([]);
+  const onDoneRef = useLatest(onDone);
+  const status: TerminalStatus = lines.length >= script.length ? "done" : "running";
+
+  React.useEffect(() => {
+    if (lines.length >= script.length) {
+      onDoneRef.current?.();
+      return;
+    }
+    const t = window.setTimeout(() => {
+      setLines((prev) => [...prev, { ...script[prev.length], id: String(prev.length) }]);
+    }, lineDelay);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lines, script, lineDelay]);
+
+  return <TerminalStream command={command} lines={lines} status={status} className="w-full max-w-md" />;
+}
+
+function LiveMultiAgentTrace({ onDone }: { onDone?: () => void }) {
+  const [agents, setAgents] = React.useState<Agent[]>(AGENTS_INITIAL);
+  const onDoneRef = useLatest(onDone);
+  const notifiedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    const id = window.setInterval(() => setAgents(tickAgents), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  React.useEffect(() => {
+    const allResolved = agents.every((a) => a.status === "done" || a.status === "error");
+    if (allResolved && !notifiedRef.current) {
+      notifiedRef.current = true;
+      onDoneRef.current?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agents]);
+
+  return <MultiAgentTrace agents={agents} className="w-full max-w-md" />;
+}
+
+// ---------------------------------------------------------------------------
+// The playground
+// ---------------------------------------------------------------------------
+
+export function PatternDemo() {
+  const [blocks, setBlocks] = React.useState<Block[]>([]);
+  const [generating, setGenerating] = React.useState(false);
+  const runIdRef = React.useRef(0);
+  const timeoutsRef = React.useRef<number[]>([]);
+  const bottomRef = React.useRef<HTMLDivElement>(null);
+
+  const clearTimers = React.useCallback(() => {
+    timeoutsRef.current.forEach((t) => window.clearTimeout(t));
+    timeoutsRef.current = [];
+  }, []);
+
+  const schedule = React.useCallback((fn: () => void, ms: number) => {
+    timeoutsRef.current.push(window.setTimeout(fn, ms));
+  }, []);
+
+  function addBlock(block: Block) {
+    setBlocks((prev) => [...prev, block]);
+  }
+
+  function removeBlock(id: string) {
+    setBlocks((prev) => prev.filter((b) => b.id !== id));
+  }
+
+  function isCurrent(runId: number) {
+    return runIdRef.current === runId;
+  }
+
+  function beginRun() {
+    clearTimers();
+    runIdRef.current += 1;
+    setGenerating(true);
+    return runIdRef.current;
+  }
+
+  function endRun(runId: number) {
+    if (isCurrent(runId)) setGenerating(false);
+  }
+
+  function stopGeneration() {
+    clearTimers();
+    runIdRef.current += 1;
+    setGenerating(false);
+    setBlocks((prev) => [
+      ...prev.filter((b) => b.kind !== "thinking"),
+      { id: nextId("note"), kind: "note", content: "Stopped generating." },
+    ]);
+  }
+
+  function addUserMessage(text: string) {
+    addBlock({ id: nextId("u"), kind: "chat", role: "user", content: text });
+  }
+
+  function handleEditUser(id: string, next: string) {
+    setBlocks((prev) => {
+      const idx = prev.findIndex((b) => b.id === id);
+      if (idx === -1) return prev;
+      return prev.slice(0, idx + 1).map((b) => (b.id === id ? { ...b, content: next } : b));
+    });
+    appendAssistantReply();
+  }
+
+  function handleRegenerate(id: string) {
+    let previous = "";
+    setBlocks((prev) =>
+      prev.map((b) => {
+        if (b.id === id && b.kind === "chat") {
+          previous = b.content;
+          return { ...b, content: "Thinking…", regenerating: true };
+        }
+        return b;
+      })
+    );
+    const runId = beginRun();
+    schedule(() => {
+      if (!isCurrent(runId)) return;
+      setBlocks((prev) =>
+        prev.map((b) => (b.id === id && b.kind === "chat" ? { ...b, content: pickReply(previous), regenerating: false } : b))
+      );
+      endRun(runId);
+    }, 700);
+  }
+
+  function appendAssistantReply() {
+    const runId = beginRun();
+    const thinkId = nextId("think");
+    addBlock({ id: thinkId, kind: "thinking" });
+    schedule(() => {
+      if (!isCurrent(runId)) return;
+      removeBlock(thinkId);
+      addBlock({ id: nextId("a"), kind: "chat", role: "assistant", content: pickReply() });
+      endRun(runId);
+    }, 1100);
+  }
+
+  function runReplyFlow(text: string) {
+    addUserMessage(text);
+    appendAssistantReply();
+  }
+
+  function runDefaultScene() {
+    const runId = beginRun();
+    addUserMessage("Can you check whether the release is ready to ship?");
+    const thinkId = nextId("think");
+    addBlock({ id: thinkId, kind: "thinking" });
+    schedule(() => {
+      if (!isCurrent(runId)) return;
+      removeBlock(thinkId);
+      addBlock({
+        id: nextId("tool"),
+        kind: "tool-call",
+        toolKind: "search",
+        verb: "Searching",
+        target: "open PRs and CI status",
+        result: "Searched — 3 open PRs, CI green",
+        duration: 1500,
+        onDone: () => {
+          if (!isCurrent(runId)) return;
+          addBlock({
+            id: nextId("stream"),
+            kind: "streaming",
+            segments: RELEASE_SEGMENTS,
+            followUps: ["Show the diff", "Run the deploy", "Who approved it?"],
+          });
+          schedule(() => endRun(runId), estimateStreamMs(RELEASE_SEGMENTS));
+        },
+      });
+    }, 1300);
+  }
+
+  function runDiffFlow(text: string) {
+    addUserMessage(text);
+    const runId = beginRun();
+    const thinkId = nextId("think");
+    addBlock({ id: thinkId, kind: "thinking" });
+    schedule(() => {
+      if (!isCurrent(runId)) return;
+      removeBlock(thinkId);
+      addBlock({
+        id: nextId("tool"),
+        kind: "tool-call",
+        toolKind: "code",
+        verb: "Editing",
+        target: "5 files for the demo page",
+        result: "Edited 5 files",
+        duration: 1400,
+        onDone: () => {
+          if (!isCurrent(runId)) return;
+          addBlock({ id: nextId("diff"), kind: "diff", files: DEMO_DIFF_FILES });
+          schedule(() => {
+            if (!isCurrent(runId)) return;
+            addBlock({
+              id: nextId("a"),
+              kind: "chat",
+              role: "assistant",
+              content: "Done — mostly additive changes, nothing destructive. Want me to open a PR?",
+            });
+            endRun(runId);
+          }, 500);
+        },
+      });
+    }, 900);
+  }
+
+  function runTerminalFlow(text: string) {
+    addUserMessage(text);
+    const runId = beginRun();
+    const thinkId = nextId("think");
+    addBlock({ id: thinkId, kind: "thinking" });
+    schedule(() => {
+      if (!isCurrent(runId)) return;
+      removeBlock(thinkId);
+      addBlock({
+        id: nextId("terminal"),
+        kind: "terminal",
+        command: "npm run build",
+        script: BUILD_SCRIPT,
+        onDone: () => {
+          if (!isCurrent(runId)) return;
+          addBlock({
+            id: nextId("a"),
+            kind: "chat",
+            role: "assistant",
+            content: "Build's green. Ready to deploy whenever you are.",
+          });
+          endRun(runId);
+        },
+      });
+    }, 700);
+  }
+
+  function runTraceFlow(text: string) {
+    addUserMessage(text);
+    const runId = beginRun();
+    const thinkId = nextId("think");
+    addBlock({ id: thinkId, kind: "thinking" });
+    schedule(() => {
+      if (!isCurrent(runId)) return;
+      removeBlock(thinkId);
+      addBlock({ id: nextId("trace"), kind: "trace", steps: TRACE_STEPS, duration: 6 });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        addBlock({
+          id: nextId("a"),
+          kind: "chat",
+          role: "assistant",
+          content: "Landed on the simplest option that still covers the edge cases we talked about.",
+        });
+        endRun(runId);
+      }, 500);
+    }, 900);
+  }
+
+  function runAgentsFlow(text: string) {
+    addUserMessage(text);
+    const runId = beginRun();
+    const thinkId = nextId("think");
+    addBlock({ id: thinkId, kind: "thinking" });
+    schedule(() => {
+      if (!isCurrent(runId)) return;
+      removeBlock(thinkId);
+      addBlock({
+        id: nextId("agents"),
+        kind: "agents",
+        onDone: () => {
+          if (!isCurrent(runId)) return;
+          addBlock({
+            id: nextId("a"),
+            kind: "chat",
+            role: "assistant",
+            content: "Research and coding wrapped up cleanly — review flagged a couple of lint errors to fix before merging.",
+          });
+          endRun(runId);
+        },
+      });
+    }, 700);
+  }
+
+  function runApproveFlow(text: string) {
+    addUserMessage(text);
+    const runId = beginRun();
+    const thinkId = nextId("think");
+    addBlock({ id: thinkId, kind: "thinking" });
+    schedule(() => {
+      if (!isCurrent(runId)) return;
+      removeBlock(thinkId);
+      addBlock({
+        id: nextId("approval"),
+        kind: "approval",
+        toolName: "Bash",
+        summary: "Run a shell command",
+        detail: "npm install lodash",
+        onAllow: () => {
+          const nextRunId = beginRun();
+          addBlock({
+            id: nextId("terminal"),
+            kind: "terminal",
+            command: "npm install lodash",
+            script: INSTALL_SCRIPT,
+            onDone: () => {
+              if (!isCurrent(nextRunId)) return;
+              addBlock({ id: nextId("a"), kind: "chat", role: "assistant", content: "Installed. You're set to commit." });
+              endRun(nextRunId);
+            },
+          });
+        },
+        onDeny: () => {
+          addBlock({ id: nextId("a"), kind: "chat", role: "assistant", content: "Understood — I won't run that command." });
+        },
+      });
+      endRun(runId);
+    }, 700);
+  }
+
+  function runToolsFlow(text: string) {
+    addUserMessage(text);
+    const runId = beginRun();
+    const thinkId = nextId("think");
+    addBlock({ id: thinkId, kind: "thinking" });
+    schedule(() => {
+      if (!isCurrent(runId)) return;
+      removeBlock(thinkId);
+      addBlock({
+        id: nextId("tool1"),
+        kind: "tool-call",
+        toolKind: "search",
+        verb: "Searching",
+        target: "how the composer menu filters items",
+        result: "Searched — 2 matches",
+        duration: 1300,
+        onDone: () => {
+          if (!isCurrent(runId)) return;
+          addBlock({
+            id: nextId("tool2"),
+            kind: "tool-call",
+            toolKind: "file",
+            verb: "Reading",
+            target: "prompt-bar/component.tsx",
+            result: "Read 297 lines",
+            duration: 1200,
+            onDone: () => {
+              if (!isCurrent(runId)) return;
+              addBlock({
+                id: nextId("a"),
+                kind: "chat",
+                role: "assistant",
+                content: "Found it — the menu filters on a case-insensitive substring match against the label.",
+              });
+              endRun(runId);
+            },
+          });
+        },
+      });
+    }, 700);
+  }
+
+  function runSourcesFlow(text: string) {
+    addUserMessage(text);
+    const runId = beginRun();
+    const thinkId = nextId("think");
+    addBlock({ id: thinkId, kind: "thinking" });
+    schedule(() => {
+      if (!isCurrent(runId)) return;
+      removeBlock(thinkId);
+      addBlock({ id: nextId("stream"), kind: "streaming", segments: SOURCES_SEGMENTS });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        addBlock({ id: nextId("sources"), kind: "sources", sources: DEMO_SOURCES });
+        endRun(runId);
+      }, estimateStreamMs(SOURCES_SEGMENTS));
+    }, 900);
+  }
+
+  function runStopFlow(text: string) {
+    addUserMessage(text);
+    const runId = beginRun();
+    const thinkId = nextId("think");
+    addBlock({ id: thinkId, kind: "thinking" });
+    schedule(() => {
+      if (!isCurrent(runId)) return;
+      removeBlock(thinkId);
+      addBlock({
+        id: nextId("tool"),
+        kind: "tool-call",
+        toolKind: "network",
+        verb: "Fetching",
+        target: "changelogs across a dozen dependencies",
+        result: "Fetched 12 changelogs",
+        duration: 2200,
+        onDone: () => {
+          if (!isCurrent(runId)) return;
+          addBlock({
+            id: nextId("a"),
+            kind: "chat",
+            role: "assistant",
+            content: "Here's the full rundown of what changed across all twelve packages…",
+          });
+          endRun(runId);
+        },
+      });
+      // long thinking phase on purpose — plenty of time to hit Stop below.
+    }, 5000);
+  }
+
+  function resetDemo() {
+    clearTimers();
+    runIdRef.current += 1;
+    setGenerating(false);
+    setBlocks([]);
+    schedule(() => runDefaultScene(), 150);
+  }
+
+  function handleSubmit(value: string) {
+    if (generating) return;
+    const trimmed = value.trim();
+    if (!trimmed) return;
+
+    const command = COMMANDS.find(
+      (c) => trimmed === c.label || trimmed.toLowerCase().startsWith(`${c.label.toLowerCase()} `)
+    );
+
+    if (!command) {
+      runReplyFlow(trimmed);
+      return;
+    }
+
+    switch (command.id) {
+      case "diff":
+        return runDiffFlow(trimmed);
+      case "terminal":
+        return runTerminalFlow(trimmed);
+      case "trace":
+        return runTraceFlow(trimmed);
+      case "agents":
+        return runAgentsFlow(trimmed);
+      case "approve":
+        return runApproveFlow(trimmed);
+      case "tools":
+        return runToolsFlow(trimmed);
+      case "sources":
+        return runSourcesFlow(trimmed);
+      case "stop":
+        return runStopFlow(trimmed);
+      case "reset":
+        return resetDemo();
+    }
+  }
+
+  React.useEffect(() => {
+    schedule(() => runDefaultScene(), 0);
+    return () => clearTimers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [blocks.length]);
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">
+          Try <span className="font-mono text-foreground">/diff</span>,{" "}
+          <span className="font-mono text-foreground">/agents</span>, or{" "}
+          <span className="font-mono text-foreground">/approve</span> — or just say something.
+        </p>
+        <button
+          type="button"
+          onClick={resetDemo}
+          className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <RotateCcw className="size-3" />
+          Reset
+        </button>
+      </div>
+
+      <div className="flex min-h-[320px] flex-col gap-5 rounded-2xl border bg-muted/20 p-4 sm:p-6">
+        {blocks.map((block) => (
+          <BlockView
+            key={block.id}
+            block={block}
+            onEditUser={handleEditUser}
+            onRegenerate={handleRegenerate}
+          />
+        ))}
+        <div ref={bottomRef} />
+      </div>
+
+      <div className="space-y-2">
+        <AnimatePresence>
+          {generating && (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 4 }}
+              transition={{ duration: 0.15 }}
+              className="mx-auto flex w-fit items-center gap-2 rounded-full border bg-card py-1 pl-3 pr-1 text-xs text-muted-foreground shadow-sm"
+            >
+              <Loader2 className="size-3 animate-spin" aria-hidden />
+              Generating
+              <StopGenerationButton state="generating" onStop={stopGeneration} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className={cn(generating && "pointer-events-none opacity-50")}>
+          <PromptBar
+            placeholder="Message the assistant, or type / for a command…"
+            commands={COMMANDS}
+            sources={AT_MENTIONS}
+            onSubmit={handleSubmit}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BlockView({
+  block,
+  onEditUser,
+  onRegenerate,
+}: {
+  block: Block;
+  onEditUser: (id: string, next: string) => void;
+  onRegenerate: (id: string) => void;
+}) {
+  switch (block.kind) {
+    case "chat":
+      return (
+        <ChatBubble
+          role={block.role}
+          content={block.content}
+          onEditSubmit={block.role === "user" ? (next) => onEditUser(block.id, next) : undefined}
+          onRegenerate={block.role === "assistant" ? () => onRegenerate(block.id) : undefined}
+        />
+      );
+    case "note":
+      return <p className="text-center text-xs text-muted-foreground">{block.content}</p>;
+    case "thinking":
+      return <ThinkingLoader className="w-full max-w-sm" />;
+    case "tool-call":
+      return (
+        <LiveToolCallChip
+          toolKind={block.toolKind}
+          verb={block.verb}
+          target={block.target}
+          result={block.result}
+          duration={block.duration}
+          onDone={block.onDone}
+        />
+      );
+    case "trace":
+      return (
+        <div className="w-full max-w-md overflow-hidden rounded-2xl border bg-card shadow-sm">
+          <ExpandableTrace steps={block.steps} durationSeconds={block.duration} defaultOpen />
+        </div>
+      );
+    case "terminal":
+      return <LiveTerminalStream command={block.command} script={block.script} onDone={block.onDone} />;
+    case "diff":
+      return <DiffSummaryCard files={block.files} className="w-full max-w-md" />;
+    case "approval":
+      return (
+        <ToolApproval
+          icon={TerminalSquare}
+          toolName={block.toolName}
+          summary={block.summary}
+          detail={block.detail}
+          className="w-full max-w-md"
+          onDecision={(decision) => (decision === "deny" ? block.onDeny() : block.onAllow())}
+        />
+      );
+    case "agents":
+      return <LiveMultiAgentTrace onDone={block.onDone} />;
+    case "streaming":
+      return (
+        <div className="w-full max-w-md rounded-xl border bg-card p-4">
+          <StreamingText segments={block.segments} followUps={block.followUps} />
+        </div>
+      );
+    case "sources":
+      return <SourcesStack sources={block.sources} />;
+  }
+}

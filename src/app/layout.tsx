@@ -50,6 +50,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/patterns" className="text-sm text-muted-foreground hover:text-foreground">
                 Patterns
               </Link>
+              <Link href="/demo" className="text-sm text-muted-foreground hover:text-foreground">
+                Demo
+              </Link>
               <Link href="/skill" className="text-sm text-muted-foreground hover:text-foreground">
                 Skill
               </Link>
