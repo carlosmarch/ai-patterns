@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GitFork, Origami } from "lucide-react";
+import { Github, Origami } from "lucide-react";
 
 import { getCategories, registry } from "@/registry";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -108,7 +108,7 @@ export function Footer() {
               aria-label="View source on GitHub"
               className="flex size-8 items-center justify-center rounded-full border text-muted-foreground transition-colors hover:text-foreground"
             >
-              <GitFork className="size-4" />
+              <Github className="size-4" />
             </a>
           </div>
         </div>
