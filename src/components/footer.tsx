@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GitFork } from "lucide-react";
+import { GitFork, Origami } from "lucide-react";
 
 import { getCategories, registry } from "@/registry";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -43,8 +43,9 @@ export function Footer() {
       <div className="mx-auto max-w-3xl px-6 py-16">
         <div className="grid gap-10 sm:grid-cols-[1.2fr_repeat(3,1fr)]">
           <div className="space-y-3">
-            <Link href="/" className="font-semibold tracking-tight">
-              ai-patterns
+            <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+              <Origami className="size-5" />
+              AI Patterns
             </Link>
             <p className="max-w-[26ch] text-sm text-muted-foreground">
               Production components for AI agent UIs — each with a UX spec the harness can read.
@@ -87,7 +88,7 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col-reverse items-center justify-between gap-4 border-t pt-6 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            © {year} ai-patterns. MIT licensed.
+            © {year} AI Patterns. MIT licensed.
           </p>
           <div className="flex items-center gap-3">
             <ThemeToggle />
