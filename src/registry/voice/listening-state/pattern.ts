@@ -14,8 +14,8 @@ A dedicated visual state — a pulsing mic glyph with an outward ripple, a statu
 - Stacked with a second, separate ripple/pulse indicator for the same mic state — one active listening indicator per view.
 
 ## Anatomy
-- Mic glyph: a solid-filled circular button with a microphone icon, tinted with an accent color while active and muted gray when paused.
-- Ripple: a single ring, sized and centered on the glyph itself (not a separate oversized container), that expands outward a short distance and fades to nothing, looping continuously. Keep the ripple's max size close to the glyph's own footprint — a ring that balloons far past it can visually collide with the label sitting just below.
+- Mic glyph: a plain (unfilled) microphone icon, tinted with an accent color while active and muted gray when paused — not a solid-filled badge. This mirrors Prompt Bar's dictation mic exactly, so the two read as the same control at any size.
+- Ripple: a single translucent ring, sized and centered on the glyph itself (not a separate oversized container), that expands outward a short distance and fades to nothing, looping continuously. Because the glyph has no opaque fill behind it, the full ring is visible from the start of each cycle, not just the portion that clears a solid background.
 - Status label: a short live-updating phrase ("Listening…", "Paused") directly below the glyph.
 - Stop control: a small button beside the label that ends capture — always reachable without needing to find a separate toolbar.
 
@@ -24,7 +24,7 @@ A dedicated visual state — a pulsing mic glyph with an outward ripple, a statu
 - Clicking stop ends the capture session immediately — no confirmation step, since capture is easy to restart and holding it hostage behind a dialog adds friction to a moment that's meant to feel instant.
 - The label updates in place (no layout shift) when switching between active and paused text.
 - On resume, restart the ripple animation from its initial state rather than resuming mid-cycle, so the "just started listening" cue is clear each time.
-- Drive the ripple with a plain keyframe \`animate\` (e.g. scale \`[1, 1.4]\`, opacity \`[0.6, 0]\`) rather than a separate \`initial\` prop plus a per-instance \`delay\` — the same technique Prompt Bar's dictation mic uses. Staggering multiple rings via \`delay\` on an infinitely-repeating animation is fragile and prone to drifting out of sync; one ring on a clean loop reads just as clearly as "listening."
+- Drive the ripple with a plain keyframe \`animate\` (scale \`[1, 1.4]\`, opacity \`[0.6, 0]\`, 1.2s, \`easeOut\`, infinite repeat, no separate \`initial\` or per-instance \`delay\`) — this is copied verbatim from Prompt Bar's dictation mic, down to the ring's low-alpha color treatment (\`/20\`). Staggering multiple rings via \`delay\` on an infinitely-repeating animation is fragile and prone to drifting out of sync; one ring on a clean loop reads just as clearly as "listening."
 
 ## Content guidelines
 - Keep the label to a short present-participle phrase ("Listening…"); avoid restating instructions the user already knows ("Speak now to ask a question").

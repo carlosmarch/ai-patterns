@@ -25,18 +25,18 @@ export function ListeningState({
       <div
         className={cn(
           "relative flex size-12 shrink-0 items-center justify-center rounded-full transition-colors",
-          active ? "bg-sky-500 text-white" : "bg-muted text-muted-foreground"
+          active ? "text-sky-500" : "text-muted-foreground"
         )}
       >
         {active && (
           <motion.span
             aria-hidden
-            className="absolute inset-0 rounded-full bg-sky-500/40"
+            className="absolute inset-0 rounded-full bg-sky-500/20"
             animate={{ scale: [1, 1.4], opacity: [0.6, 0] }}
             transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
           />
         )}
-        <Mic className="size-5" aria-hidden />
+        <Mic className="size-6" aria-hidden />
       </div>
 
       <div className="flex items-center gap-2">
