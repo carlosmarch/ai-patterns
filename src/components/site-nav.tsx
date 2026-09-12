@@ -27,7 +27,8 @@ export function SiteNav() {
             aria-current={isActive ? "page" : undefined}
             className={cn(
               "text-sm transition-colors hover:text-foreground",
-              isActive ? "font-medium text-foreground" : "text-muted-foreground"
+              isActive ? "font-medium text-foreground" : "text-muted-foreground",
+              href === "/patterns" && "hidden sm:inline-block"
             )}
           >
             {label}
