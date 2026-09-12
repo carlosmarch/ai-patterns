@@ -53,9 +53,10 @@ instead of copying these Tailwind classes or the Motion API.
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { AudioLines, ChevronDown, Mic, Monitor, Plus, Shuffle } from "lucide-react";
+import { ChevronDown, Mic, Monitor, Plus, Shuffle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { StopGenerationButton, type GenerationState } from "../../buttons/stop-generation-button/component";
 
 export interface SessionSuggestion {
   id: string;
@@ -110,6 +111,7 @@ export function PromptBarPro({
   const [orchestrator, setOrchestrator] = React.useState(orchestrators[0]?.label ?? "");
   const [orchestratorOpen, setOrchestratorOpen] = React.useState(false);
   const [dictating, setDictating] = React.useState(false);
+  const [generationState, setGenerationState] = React.useState<GenerationState>("idle");
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const environmentRef = useClickOutside<HTMLDivElement>(() => setEnvironmentOpen(false));
   const orchestratorRef = useClickOutside<HTMLDivElement>(() => setOrchestratorOpen(false));
@@ -123,10 +125,17 @@ export function PromptBarPro({
     el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
   }, [value]);
 
+  React.useEffect(() => {
+    if (generationState !== "generating") return;
+    const id = window.setTimeout(() => setGenerationState("idle"), 2600);
+    return () => window.clearTimeout(id);
+  }, [generationState]);
+
   function handleSubmit() {
-    if (!canSend) return;
+    if (!canSend || generationState === "generating") return;
     onSubmit?.(value.trim());
     setValue("");
+    setGenerationState("generating");
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -168,7 +177,8 @@ export function PromptBarPro({
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="max-h-40 min-h-14 w-full resize-none bg-transparent px-1 py-1 text-base outline-none placeholder:text-muted-foreground"
+          disabled={generationState === "generating"}
+          className="max-h-40 min-h-14 w-full resize-none bg-transparent px-1 py-1 text-base outline-none placeholder:text-muted-foreground disabled:text-muted-foreground"
         />
 
         <div className="flex flex-wrap items-center gap-y-2 gap-x-1">
@@ -280,18 +290,13 @@ export function PromptBarPro({
               <Mic className="size-4" />
             </button>
 
-            <button
-              type="button"
-              onClick={handleSubmit}
+            <StopGenerationButton
+              state={generationState}
               disabled={!canSend}
-              aria-label="Start session"
-              className={cn(
-                "flex size-9 shrink-0 items-center justify-center rounded-full transition-colors",
-                canSend ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
-              )}
-            >
-              <AudioLines className="size-4" />
-            </button>
+              onSubmit={handleSubmit}
+              onStop={() => setGenerationState("idle")}
+              className="size-9"
+            />
           </div>
         </div>
       </div>
