@@ -42,6 +42,8 @@ import RateLimitDemo from "./errors/rate-limit/demo";
 import { pattern as rateLimitPattern } from "./errors/rate-limit/pattern";
 import PartialResponseDemo from "./errors/partial-response/demo";
 import { pattern as partialResponsePattern } from "./errors/partial-response/pattern";
+import ConfidenceIndicatorDemo from "./indicators/confidence-indicator/demo";
+import { pattern as confidenceIndicatorPattern } from "./indicators/confidence-indicator/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -222,6 +224,14 @@ export const registry: RegistryEntry[] = [
     description: "A cut-short assistant reply with Continue and Retry actions.",
     Demo: PartialResponseDemo,
     uxDoc: partialResponsePattern,
+  },
+  {
+    slug: "confidence-indicator",
+    category: "indicators",
+    title: "Confidence Indicator",
+    description: "A badge or inline dot signaling how sure an AI answer or extraction is.",
+    Demo: ConfidenceIndicatorDemo,
+    uxDoc: confidenceIndicatorPattern,
   },
 ];
 
