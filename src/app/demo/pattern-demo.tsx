@@ -2,7 +2,21 @@
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Bot, Code2, Globe, Loader2, RotateCcw, Search, ShieldCheck, Sparkles, Square, TerminalSquare } from "lucide-react";
+import {
+  Bot,
+  Code2,
+  GitBranch,
+  Globe,
+  LayoutGrid,
+  Loader2,
+  PackagePlus,
+  RotateCcw,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Square,
+  TerminalSquare,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,7 +30,11 @@ import { ToolApproval } from "@/registry/permissions/tool-approval/component";
 import { MultiAgentTrace, type Agent } from "@/registry/traces/multi-agent-trace/component";
 import { StreamingText, type StreamSegment } from "@/registry/text/streaming-text/component";
 import { SourcesStack, type Source } from "@/registry/text/sources-stack/component";
+import { FollowUpList } from "@/registry/text/follow-up-list/component";
 import { StopGenerationButton } from "@/registry/buttons/stop-generation-button/component";
+import { ShinyButton } from "@/registry/buttons/shiny-button/component";
+import { AttachmentTray, type Attachment } from "@/registry/uploads/attachment-chip/component";
+import { Flowchart, type FlowchartNode } from "@/registry/flowcharts/trigger-condition/component";
 import { PromptBarPro, type SessionSuggestion } from "@/registry/composer/prompt-bar-pro/component";
 
 // ---------------------------------------------------------------------------
@@ -32,6 +50,8 @@ const SUGGESTIONS: SessionSuggestion[] = [
   { id: "tools", label: "Chain a couple of tool calls", icon: Search },
   { id: "sources", label: "Cite your sources", icon: Globe },
   { id: "stop", label: "Give me a slow answer", icon: Square },
+  { id: "more", label: "Show me more patterns", icon: LayoutGrid },
+  { id: "skill", label: "How do I install this?", icon: PackagePlus },
 ];
 
 const GENERIC_REPLIES = [
@@ -76,7 +96,31 @@ const SOURCES_INTRO_SEGMENTS: StreamSegment[] = [
 ];
 
 const OUTRO_SEGMENTS = text(
-  "That's most of the registry. Try one of the suggestions below, type your own message to chat with me directly, or hit stop mid-response — the whole thing is wired up here, not just this tour."
+  "That's the core of it — and everything above is a real, working component, not a mockup. There's more where that came from. Want to keep going?"
+);
+
+const MORE_INTRO_SEGMENTS = text("Sure — here's more of the catalogue.");
+
+const UPLOADS_INTRO_SEGMENTS = text(
+  "The composer handles attachments too — drop a file in and its upload tracks inline:"
+);
+
+const FLOWCHART_INTRO_SEGMENTS = text(
+  "Building an automation instead of a chat? Triggers and conditions get their own visual flow:"
+);
+
+const SHINY_INTRO_SEGMENTS = text("Even a plain call-to-action can carry a little delight:");
+
+const SKILL_INTRO_SEGMENTS = text(
+  "And this whole catalogue also ships as a Claude Code skill, so your coding agent can reach for it directly:"
+);
+
+const SKILL_OUTRO_SEGMENTS = text(
+  "From there, just ask it to design a screen — it'll shortlist patterns from here and scaffold the one that actually fits."
+);
+
+const MORE_OUTRO_SEGMENTS = text(
+  "That's the whole registry. Replay from the top, browse the catalogue yourself, or keep chatting."
 );
 
 const DEMO_SOURCES: Source[] = [
@@ -134,6 +178,45 @@ const INSTALL_SCRIPT: Omit<LogLine, "id">[] = [
   { text: "added 1 package, and audited 214 packages in 1.4s", level: "default" },
   { text: "found 0 vulnerabilities", level: "default" },
   { text: "✓ Installed lodash@4.17.21", level: "success" },
+];
+
+const SKILL_INSTALL_SCRIPT: Omit<LogLine, "id">[] = [
+  { text: "$ /plugin marketplace add carlosmarch/ai-patterns", level: "default" },
+  { text: 'Added marketplace "ai-patterns"', level: "info" },
+  { text: "$ /plugin install ai-patterns@ai-patterns", level: "default" },
+  { text: "Installing ai-patterns ...", level: "default" },
+  { text: '✓ Installed — try "Use ai-patterns to design this screen."', level: "success" },
+];
+
+const FLOWCHART_NODES: FlowchartNode[] = [
+  {
+    id: "trigger-1",
+    type: "trigger",
+    icon: GitBranch,
+    title: "New pull request opened",
+    description: "Trigger when a PR is opened against main",
+  },
+  {
+    id: "condition-1",
+    type: "condition",
+    clauses: [
+      {
+        id: "clause-1",
+        connector: "if",
+        subject: { id: "pr", icon: GitBranch, label: "PR" },
+        field: { id: "files", label: "files changed" },
+        fieldOptions: [
+          { id: "files", label: "files changed" },
+          { id: "author", label: "author" },
+        ],
+        value: { id: "gt10", label: "> 10" },
+        valueOptions: [
+          { id: "gt10", label: "> 10" },
+          { id: "gt50", label: "> 50" },
+        ],
+      },
+    ],
+  },
 ];
 
 const TRACE_STEPS: TraceStep[] = [
@@ -287,6 +370,25 @@ interface SourcesBlock {
   kind: "sources";
   sources: Source[];
 }
+interface AttachmentBlock {
+  id: string;
+  kind: "attachment";
+  onDone?: () => void;
+}
+interface FlowchartBlock {
+  id: string;
+  kind: "flowchart";
+  nodes: FlowchartNode[];
+}
+interface ShinyBlock {
+  id: string;
+  kind: "shiny";
+}
+interface FollowUpsBlock {
+  id: string;
+  kind: "followups";
+  suggestions: string[];
+}
 
 type Block =
   | ChatBlock
@@ -299,7 +401,11 @@ type Block =
   | ApprovalBlock
   | AgentsBlock
   | StreamingBlock
-  | SourcesBlock;
+  | SourcesBlock
+  | AttachmentBlock
+  | FlowchartBlock
+  | ShinyBlock
+  | FollowUpsBlock;
 
 let idCounter = 0;
 function nextId(prefix: string) {
@@ -401,6 +507,35 @@ function LiveMultiAgentTrace({ onDone }: { onDone?: () => void }) {
   }, [agents]);
 
   return <MultiAgentTrace agents={agents} className="w-full max-w-md" />;
+}
+
+function LiveAttachmentTray({ onDone }: { onDone?: () => void }) {
+  const [attachment, setAttachment] = React.useState<Attachment>({
+    id: "1",
+    name: "brand-guidelines.pdf",
+    size: 2_400_000,
+    progress: 0,
+    status: "uploading",
+  });
+  const onDoneRef = useLatest(onDone);
+
+  React.useEffect(() => {
+    if (attachment.status !== "uploading") return;
+    const t = window.setTimeout(() => {
+      setAttachment((prev) => {
+        const progress = Math.min(100, prev.progress + 22);
+        return progress >= 100 ? { ...prev, progress, status: "done" } : { ...prev, progress };
+      });
+    }, 260);
+    return () => window.clearTimeout(t);
+  }, [attachment.status, attachment.progress]);
+
+  React.useEffect(() => {
+    if (attachment.status === "done") onDoneRef.current?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attachment.status]);
+
+  return <AttachmentTray attachments={[attachment]} className="w-full max-w-sm" />;
 }
 
 // ---------------------------------------------------------------------------
@@ -584,6 +719,49 @@ export function PatternDemo() {
     };
   }
 
+  function showAttachment(): StepFn {
+    return (runId, done) => {
+      addBlock({
+        id: nextId("attachment"),
+        kind: "attachment",
+        onDone: () => {
+          if (!isCurrent(runId)) return;
+          done();
+        },
+      });
+    };
+  }
+
+  function showFlowchart(nodes: FlowchartNode[]): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("flowchart"), kind: "flowchart", nodes });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
+  function showShinyButton(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("shiny"), kind: "shiny" });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
+  function showFollowUps(suggestions: string[]): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("followups"), kind: "followups", suggestions });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
   function addUserMessage(content: string) {
     addBlock({ id: nextId("u"), kind: "chat", role: "user", content });
   }
@@ -668,7 +846,41 @@ export function PatternDemo() {
       say(SOURCES_INTRO_SEGMENTS),
       showSources(DEMO_SOURCES),
       pause(400),
-      say(OUTRO_SEGMENTS, SUGGESTIONS.slice(0, 3).map((s) => s.label)),
+      say(OUTRO_SEGMENTS),
+      showFollowUps(["Show me more patterns", "Show me a diff", "Give me a slow answer"]),
+    ]);
+  }
+
+  function runMoreTour(userText: string) {
+    addUserMessage(userText);
+    runSteps([
+      say(MORE_INTRO_SEGMENTS),
+      pause(300),
+      say(UPLOADS_INTRO_SEGMENTS),
+      showAttachment(),
+      pause(400),
+      say(FLOWCHART_INTRO_SEGMENTS),
+      showFlowchart(FLOWCHART_NODES),
+      pause(400),
+      say(SHINY_INTRO_SEGMENTS),
+      showShinyButton(),
+      pause(500),
+      say(SKILL_INTRO_SEGMENTS),
+      showTerminal("/plugin install ai-patterns@ai-patterns", SKILL_INSTALL_SCRIPT),
+      say(SKILL_OUTRO_SEGMENTS),
+      pause(300),
+      say(MORE_OUTRO_SEGMENTS),
+      showFollowUps(["Replay from the start", "Show me a diff", "Ask permission first"]),
+    ]);
+  }
+
+  function runSkillFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([
+      thinking(700),
+      say(SKILL_INTRO_SEGMENTS),
+      showTerminal("/plugin install ai-patterns@ai-patterns", SKILL_INSTALL_SCRIPT),
+      say(SKILL_OUTRO_SEGMENTS),
     ]);
   }
 
@@ -794,6 +1006,11 @@ export function PatternDemo() {
     const trimmed = value.trim();
     if (!trimmed) return;
 
+    if (trimmed.toLowerCase() === "replay from the start") {
+      replay();
+      return;
+    }
+
     const suggestion = SUGGESTIONS.find((s) => s.label.toLowerCase() === trimmed.toLowerCase());
 
     if (!suggestion) {
@@ -818,6 +1035,10 @@ export function PatternDemo() {
         return runSourcesFlow(trimmed);
       case "stop":
         return runStopFlow(trimmed);
+      case "more":
+        return runMoreTour(trimmed);
+      case "skill":
+        return runSkillFlow(trimmed);
     }
   }
 
@@ -841,8 +1062,7 @@ export function PatternDemo() {
 
   return (
     <div className="flex flex-col">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">Try a suggestion below, or just say something.</p>
+      <div className="mb-2 flex justify-end">
         <button
           type="button"
           onClick={replay}
@@ -855,7 +1075,13 @@ export function PatternDemo() {
 
       <div className="space-y-5 pb-8">
         {blocks.map((block) => (
-          <BlockView key={block.id} block={block} onEditUser={handleEditUser} onRegenerate={handleRegenerate} />
+          <BlockView
+            key={block.id}
+            block={block}
+            onEditUser={handleEditUser}
+            onRegenerate={handleRegenerate}
+            onSelectFollowUp={handleSubmit}
+          />
         ))}
         <div ref={bottomRef} style={{ scrollMarginBottom: composerHeight + 24 }} />
       </div>
@@ -897,10 +1123,12 @@ function BlockView({
   block,
   onEditUser,
   onRegenerate,
+  onSelectFollowUp,
 }: {
   block: Block;
   onEditUser: (id: string, next: string) => void;
   onRegenerate: (id: string) => void;
+  onSelectFollowUp: (suggestion: string) => void;
 }) {
   switch (block.kind) {
     case "chat":
@@ -950,5 +1178,13 @@ function BlockView({
       return <StreamingText segments={block.segments} followUps={block.followUps} className="w-full max-w-md" />;
     case "sources":
       return <SourcesStack sources={block.sources} />;
+    case "attachment":
+      return <LiveAttachmentTray onDone={block.onDone} />;
+    case "flowchart":
+      return <Flowchart nodes={block.nodes} className="w-full max-w-md" />;
+    case "shiny":
+      return <ShinyButton>Ship it</ShinyButton>;
+    case "followups":
+      return <FollowUpList suggestions={block.suggestions} onSelect={onSelectFollowUp} className="w-full max-w-md" />;
   }
 }
