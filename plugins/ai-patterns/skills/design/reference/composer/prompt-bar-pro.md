@@ -171,7 +171,7 @@ export function PromptBarPro({
           className="max-h-40 min-h-14 w-full resize-none bg-transparent px-1 py-1 text-base outline-none placeholder:text-muted-foreground"
         />
 
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-y-2 gap-x-1">
           <button
             type="button"
             className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
