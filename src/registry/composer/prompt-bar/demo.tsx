@@ -22,8 +22,8 @@ export default function PromptBarDemo() {
       <PromptBar onSubmit={(v) => setMessages((prev) => [...prev, v])} className="w-full" />
 
       <p className="text-center text-xs text-muted-foreground">
-        Try typing <span className="font-mono">@</span> for flavors or <span className="font-mono">/</span> for
-        commands.
+        Try typing <span className="font-mono">@</span> to reference a source or <span className="font-mono">/</span>{" "}
+        for commands.
       </p>
     </div>
   );

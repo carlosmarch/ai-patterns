@@ -5,7 +5,7 @@ import * as React from "react";
 import { SelectionActions } from "./component";
 
 const PARAGRAPH =
-  "Pistachio holds the top slot all weekend. Churn pistachio first thing Saturday so the batch has time to fully firm before the afternoon rush.";
+  "Turn on the thinking loader the moment the agent starts a step, and keep it up until the trace is fully ready to show so users never sit through a blank pause.";
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -16,10 +16,10 @@ async function mockRewrite(selection: string, instruction: string) {
   const lower = instruction.toLowerCase();
 
   if (lower.includes("formal")) {
-    return selection.replace(/\bChurn\b/, "Begin churning");
+    return selection.replace(/\bTurn on\b/, "Enable");
   }
   if (lower.includes("shorten") || lower.includes("clarity") || lower.includes("improve")) {
-    return selection.replace(/\bChurn pistachio\b/, "Churn it").replace(/\bfully firm\b/, "firm up");
+    return selection.replace(/\bTurn on the thinking loader\b/, "Show the loader").replace(/\bfully ready\b/, "ready");
   }
   return selection;
 }
@@ -27,7 +27,7 @@ async function mockRewrite(selection: string, instruction: string) {
 async function mockExplain(selection: string) {
   await delay(500);
   void selection;
-  return "This sentence tells the team when to start the pistachio batch and why the timing matters for Saturday's rush.";
+  return "This sentence explains when to trigger the thinking loader and how long to keep it visible so the interface never looks stuck.";
 }
 
 export default function SelectionActionsDemo() {

@@ -1,10 +1,10 @@
 import { ExpandableTrace, type TraceStep } from "./component";
 
 const steps: TraceStep[] = [
-  { label: "Reading flavor briefs" },
-  { label: "Scanning supplier lists" },
-  { label: "Comparing tasting notes", meta: "6 flavors" },
-  { label: "Writing the scoop report" },
+  { label: "Reading the component's UX doc" },
+  { label: "Comparing it against similar patterns" },
+  { label: "Checking accessibility notes", meta: "keyboard + reduced motion" },
+  { label: "Scaffolding the component" },
 ];
 
 export default function ExpandableTraceDemo() {
