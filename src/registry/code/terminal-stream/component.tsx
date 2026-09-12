@@ -89,7 +89,7 @@ export function TerminalStream({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="relative overflow-hidden border-t border-neutral-800"
+            className="relative overflow-hidden"
           >
             <div
               ref={bodyRef}
