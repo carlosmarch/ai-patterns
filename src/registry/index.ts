@@ -36,6 +36,8 @@ import SourcesStackDemo from "./text/sources-stack/demo";
 import { pattern as sourcesStackPattern } from "./text/sources-stack/pattern";
 import FollowUpListDemo from "./text/follow-up-list/demo";
 import { pattern as followUpListPattern } from "./text/follow-up-list/pattern";
+import SelectionActionsDemo from "./text/selection-actions/demo";
+import { pattern as selectionActionsPattern } from "./text/selection-actions/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -191,6 +193,14 @@ export const registry: RegistryEntry[] = [
     description: "A vertical list of suggested next questions shown after a response, each sendable with a tap.",
     Demo: FollowUpListDemo,
     uxDoc: followUpListPattern,
+  },
+  {
+    slug: "selection-actions",
+    category: "text",
+    title: "Selection Actions",
+    description: "A floating toolbar on text selection for describing edits, explaining, or improving a passage.",
+    Demo: SelectionActionsDemo,
+    uxDoc: selectionActionsPattern,
   },
 ];
 
