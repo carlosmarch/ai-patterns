@@ -35,21 +35,21 @@ export function DiffSummaryCard({
   const rest = files.slice(visibleCount);
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card shadow-sm", className)}>
+    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card", className)}>
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
-        <p className="text-sm font-medium">Edited {files.length} files</p>
+        <p className="text-xs font-medium">Edited {files.length} files</p>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onUndo}
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
             Undo
           </button>
           <button
             type="button"
             onClick={onViewChanges}
-            className="rounded-full border px-3 py-1 text-sm font-medium transition-colors hover:bg-accent"
+            className="rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:bg-accent"
           >
             View changes
           </button>

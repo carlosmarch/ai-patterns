@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowUp, ChevronDown, Mic, Plus } from "lucide-react";
+import { ChevronDown, Mic, Plus } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { StopGenerationButton, type GenerationState } from "../../buttons/stop-generation-button/component";
 
 export type PromptBarVariant = "rounded" | "pill";
 
@@ -75,6 +76,7 @@ export function PromptBar({
   const [dictating, setDictating] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [suppressed, setSuppressed] = React.useState(false);
+  const [generationState, setGenerationState] = React.useState<GenerationState>("idle");
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const modelMenuRef = useClickOutside<HTMLDivElement>(() => setModelOpen(false));
 
@@ -105,6 +107,12 @@ export function PromptBar({
     el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
   }, [value]);
 
+  React.useEffect(() => {
+    if (generationState !== "generating") return;
+    const id = window.setTimeout(() => setGenerationState("idle"), 2600);
+    return () => window.clearTimeout(id);
+  }, [generationState]);
+
   function applySuggestion(item: PromptBarItem) {
     if (!trigger) return;
     const insert = trigger.type === "source" ? `@${item.label}` : item.label;
@@ -113,9 +121,10 @@ export function PromptBar({
   }
 
   function handleSubmit() {
-    if (!canSend) return;
+    if (!canSend || generationState === "generating") return;
     onSubmit?.(value.trim());
     setValue("");
+    setGenerationState("generating");
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -204,7 +213,8 @@ export function PromptBar({
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="max-h-40 flex-1 resize-none bg-transparent py-1.5 text-sm outline-none placeholder:text-muted-foreground"
+          disabled={generationState === "generating"}
+          className="max-h-40 flex-1 resize-none bg-transparent py-1.5 text-sm outline-none placeholder:text-muted-foreground disabled:text-muted-foreground"
         />
 
         <div ref={modelMenuRef} className="relative shrink-0">
@@ -266,18 +276,12 @@ export function PromptBar({
           <Mic className="size-4" />
         </button>
 
-        <button
-          type="button"
-          onClick={handleSubmit}
+        <StopGenerationButton
+          state={generationState}
           disabled={!canSend}
-          aria-label="Send message"
-          className={cn(
-            "flex size-8 shrink-0 items-center justify-center rounded-full transition-colors",
-            canSend ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
-          )}
-        >
-          <ArrowUp className="size-4" />
-        </button>
+          onSubmit={handleSubmit}
+          onStop={() => setGenerationState("idle")}
+        />
       </div>
     </div>
   );

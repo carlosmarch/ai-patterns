@@ -58,20 +58,20 @@ export function ToolApproval({
   }
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card shadow-sm", className)}>
+    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card", className)}>
       <div className="flex items-start gap-3 px-4 py-3.5">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
           <Icon className="size-4.5" />
         </span>
         <div className="min-w-0 flex-1 pt-0.5">
-          <p className="font-semibold">{toolName}</p>
-          <p className="text-sm text-muted-foreground">{summary}</p>
+          <p className="text-sm font-semibold">{toolName}</p>
+          <p className="text-xs text-muted-foreground">{summary}</p>
         </div>
       </div>
 
       {detail && (
         <div className="px-4 pb-3.5">
-          <code className="block overflow-x-auto rounded-lg bg-muted px-3 py-2 font-mono text-sm">{detail}</code>
+          <code className="block overflow-x-auto rounded-lg bg-muted px-3 py-2 font-mono text-xs">{detail}</code>
         </div>
       )}
 
@@ -79,7 +79,7 @@ export function ToolApproval({
         <button
           type="button"
           onClick={() => resolve("deny")}
-          className="rounded-full px-3.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="rounded-full px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           Deny
         </button>
@@ -90,7 +90,7 @@ export function ToolApproval({
               <button
                 type="button"
                 onClick={() => resolve("always-allow", scopes[0])}
-                className="px-3.5 py-1.5 text-sm font-medium transition-colors hover:bg-accent"
+                className="px-3.5 py-1.5 text-xs font-medium transition-colors hover:bg-accent"
               >
                 Always allow
               </button>
@@ -113,7 +113,7 @@ export function ToolApproval({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 4 }}
                   transition={{ duration: 0.12 }}
-                  className="absolute bottom-full right-0 z-10 mb-2 w-44 overflow-hidden rounded-xl border bg-popover shadow-md"
+                  className="absolute bottom-full right-0 z-10 mb-2 w-44 overflow-hidden rounded-xl border bg-popover"
                 >
                   {scopes.map((scope) => (
                     <button
@@ -121,7 +121,7 @@ export function ToolApproval({
                       type="button"
                       role="menuitem"
                       onClick={() => resolve("always-allow", scope)}
-                      className="block w-full px-3 py-2 text-left text-sm hover:bg-accent"
+                      className="block w-full px-3 py-2 text-left text-xs hover:bg-accent"
                     >
                       Always allow for {scope.label}
                     </button>
@@ -134,7 +134,7 @@ export function ToolApproval({
           <button
             type="button"
             onClick={() => resolve("allow")}
-            className="rounded-full bg-foreground px-4 py-1.5 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+            className="rounded-full bg-foreground px-4 py-1.5 text-xs font-medium text-background transition-colors hover:bg-foreground/90"
           >
             Allow
           </button>
@@ -161,7 +161,7 @@ function ResolvedRow({
         : "Allowed";
 
   return (
-    <div className={cn("flex items-center gap-3 rounded-2xl border bg-card px-4 py-3 shadow-sm", className)}>
+    <div className={cn("flex items-center gap-3 rounded-2xl border bg-card px-4 py-3", className)}>
       <span
         className={cn(
           "flex size-8 shrink-0 items-center justify-center rounded-full",
@@ -179,8 +179,8 @@ function ResolvedRow({
         )}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium">{toolName}</p>
-        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-xs font-medium">{toolName}</p>
+        <p className="text-[11px] text-muted-foreground">{label}</p>
       </div>
     </div>
   );
