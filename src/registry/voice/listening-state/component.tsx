@@ -32,7 +32,7 @@ export function ListeningState({
           <motion.span
             aria-hidden
             className="absolute inset-0 rounded-full bg-sky-500/20"
-            animate={{ scale: [1, 1.4], opacity: [0.6, 0] }}
+            animate={{ scale: [1, 1.4], opacity: [0, 0.6, 0] }}
             transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
           />
         )}
