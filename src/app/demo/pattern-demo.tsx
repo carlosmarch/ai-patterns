@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Loader2, RotateCcw, TerminalSquare } from "lucide-react";
+import { Bot, Code2, Globe, Loader2, RotateCcw, Search, ShieldCheck, Sparkles, Square, TerminalSquare } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -17,28 +17,21 @@ import { MultiAgentTrace, type Agent } from "@/registry/traces/multi-agent-trace
 import { StreamingText, type StreamSegment } from "@/registry/text/streaming-text/component";
 import { SourcesStack, type Source } from "@/registry/text/sources-stack/component";
 import { StopGenerationButton } from "@/registry/buttons/stop-generation-button/component";
-import { PromptBar, type PromptBarItem } from "@/registry/composer/prompt-bar/component";
+import { PromptBarPro, type SessionSuggestion } from "@/registry/composer/prompt-bar-pro/component";
 
 // ---------------------------------------------------------------------------
 // Demo data
 // ---------------------------------------------------------------------------
 
-const COMMANDS: PromptBarItem[] = [
-  { id: "diff", label: "/diff", description: "Show a batch of file edits" },
-  { id: "terminal", label: "/terminal", description: "Stream a command's output" },
-  { id: "trace", label: "/trace", description: "Show step-by-step reasoning" },
-  { id: "agents", label: "/agents", description: "Run a multi-agent workflow" },
-  { id: "approve", label: "/approve", description: "Ask permission before running a tool" },
-  { id: "tools", label: "/tools", description: "Chain a couple of tool calls" },
-  { id: "sources", label: "/sources", description: "Answer with cited sources" },
-  { id: "stop", label: "/stop", description: "A slow reply you can interrupt" },
-  { id: "reset", label: "/reset", description: "Clear the conversation" },
-];
-
-const AT_MENTIONS: PromptBarItem[] = [
-  { id: "roadmap", label: "roadmap.md" },
-  { id: "codebase", label: "codebase" },
-  { id: "design", label: "design-system" },
+const SUGGESTIONS: SessionSuggestion[] = [
+  { id: "diff", label: "Show me a diff", icon: Code2 },
+  { id: "terminal", label: "Stream a terminal run", icon: TerminalSquare },
+  { id: "trace", label: "Show your reasoning", icon: Sparkles },
+  { id: "agents", label: "Run a multi-agent workflow", icon: Bot },
+  { id: "approve", label: "Ask permission first", icon: ShieldCheck },
+  { id: "tools", label: "Chain a couple of tool calls", icon: Search },
+  { id: "sources", label: "Cite your sources", icon: Globe },
+  { id: "stop", label: "Give me a slow answer", icon: Square },
 ];
 
 const GENERIC_REPLIES = [
@@ -52,31 +45,39 @@ function pickReply(exclude?: string) {
   return options[Math.floor(Math.random() * options.length)] ?? GENERIC_REPLIES[0];
 }
 
-const RELEASE_SEGMENTS: StreamSegment[] = [
-  {
-    type: "text",
-    content:
-      "Good news — CI is green and the two release-blocking PRs merged this morning. ",
-  },
-  { type: "source", label: "ci/checks" },
-  {
-    type: "text",
-    content: " One PR is still open, but it's a docs-only change, so it shouldn't hold things up.",
-  },
-];
-
-const SOURCES_SEGMENTS: StreamSegment[] = [
-  {
-    type: "text",
-    content:
-      "A couple of things worth citing here: Tailwind v4 moved its configuration into CSS, and Motion now ships a smaller core bundle aimed at exactly this kind of micro-interaction. ",
-  },
-  { type: "source", label: "docs" },
-];
-
-function favicon(domain: string) {
-  return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+function text(content: string): StreamSegment[] {
+  return [{ type: "text", content }];
 }
+
+const INTRO_SEGMENTS = text(
+  "Hey — welcome to ai-patterns. Instead of describing the components, I'm just going to show you, live, right here in this conversation."
+);
+
+const TOOLCALL_INTRO_SEGMENTS = text(
+  "First up — tool calls. When I go look something up, you get a live status chip like this one:"
+);
+
+const TRACE_INTRO_SEGMENTS = text(
+  "For anything that takes a few steps of reasoning, I can show my work in a collapsible trace instead of a wall of text:"
+);
+
+const AGENTS_INTRO_SEGMENTS = text(
+  "Bigger jobs get split across agents that run in parallel, each with its own status:"
+);
+
+const CODE_INTRO_SEGMENTS = text(
+  "When I touch your codebase, you get a diff you can undo or expand, plus a live terminal stream while commands run:"
+);
+
+const SOURCES_INTRO_SEGMENTS: StreamSegment[] = [
+  { type: "text", content: "Answers can cite sources inline as they stream — " },
+  { type: "source", label: "docs" },
+  { type: "text", content: " — and collapse into a linked source list underneath." },
+];
+
+const OUTRO_SEGMENTS = text(
+  "That's most of the registry. Try one of the suggestions below, type your own message to chat with me directly, or hit stop mid-response — the whole thing is wired up here, not just this tour."
+);
 
 const DEMO_SOURCES: Source[] = [
   {
@@ -104,6 +105,10 @@ const DEMO_SOURCES: Source[] = [
     faviconUrl: favicon("developer.mozilla.org"),
   },
 ];
+
+function favicon(domain: string) {
+  return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+}
 
 const DEMO_DIFF_FILES: DiffFile[] = [
   { id: "1", name: "src/app/demo/pattern-demo.tsx", additions: 482, deletions: 0 },
@@ -402,12 +407,16 @@ function LiveMultiAgentTrace({ onDone }: { onDone?: () => void }) {
 // The playground
 // ---------------------------------------------------------------------------
 
+type StepFn = (runId: number, done: () => void) => void;
+
 export function PatternDemo() {
   const [blocks, setBlocks] = React.useState<Block[]>([]);
   const [generating, setGenerating] = React.useState(false);
   const runIdRef = React.useRef(0);
   const timeoutsRef = React.useRef<number[]>([]);
   const bottomRef = React.useRef<HTMLDivElement>(null);
+  const composerRef = React.useRef<HTMLDivElement>(null);
+  const [composerHeight, setComposerHeight] = React.useState(0);
 
   const clearTimers = React.useCallback(() => {
     timeoutsRef.current.forEach((t) => window.clearTimeout(t));
@@ -451,8 +460,132 @@ export function PatternDemo() {
     ]);
   }
 
-  function addUserMessage(text: string) {
-    addBlock({ id: nextId("u"), kind: "chat", role: "user", content: text });
+  // Runs a list of steps back to back under one generation run, so Stop
+  // (which bumps runIdRef) cancels whatever's left in the queue.
+  function runSteps(steps: StepFn[], runId: number = beginRun()) {
+    function go(i: number) {
+      if (!isCurrent(runId)) return;
+      if (i >= steps.length) {
+        endRun(runId);
+        return;
+      }
+      steps[i](runId, () => go(i + 1));
+    }
+    go(0);
+    return runId;
+  }
+
+  function thinking(ms = 900): StepFn {
+    return (runId, done) => {
+      const id = nextId("think");
+      addBlock({ id, kind: "thinking" });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        removeBlock(id);
+        done();
+      }, ms);
+    };
+  }
+
+  function pause(ms: number): StepFn {
+    return (runId, done) => {
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, ms);
+    };
+  }
+
+  function say(segments: StreamSegment[], followUps?: string[]): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("stream"), kind: "streaming", segments, followUps });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, estimateStreamMs(segments));
+    };
+  }
+
+  function showToolCall(opts: {
+    toolKind: ToolCallKind;
+    verb: string;
+    target: string;
+    result: string;
+    duration?: number;
+  }): StepFn {
+    return (runId, done) => {
+      addBlock({
+        id: nextId("tool"),
+        kind: "tool-call",
+        ...opts,
+        onDone: () => {
+          if (!isCurrent(runId)) return;
+          done();
+        },
+      });
+    };
+  }
+
+  function showTrace(steps: TraceStep[], duration: number): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("trace"), kind: "trace", steps, duration });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
+  function showAgents(): StepFn {
+    return (runId, done) => {
+      addBlock({
+        id: nextId("agents"),
+        kind: "agents",
+        onDone: () => {
+          if (!isCurrent(runId)) return;
+          done();
+        },
+      });
+    };
+  }
+
+  function showDiff(files: DiffFile[]): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("diff"), kind: "diff", files });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
+  function showTerminal(command: string, script: Omit<LogLine, "id">[]): StepFn {
+    return (runId, done) => {
+      addBlock({
+        id: nextId("terminal"),
+        kind: "terminal",
+        command,
+        script,
+        onDone: () => {
+          if (!isCurrent(runId)) return;
+          done();
+        },
+      });
+    };
+  }
+
+  function showSources(sources: Source[]): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("sources"), kind: "sources", sources });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
+  function addUserMessage(content: string) {
+    addBlock({ id: nextId("u"), kind: "chat", role: "user", content });
   }
 
   function handleEditUser(id: string, next: string) {
@@ -497,281 +630,163 @@ export function PatternDemo() {
     }, 1100);
   }
 
-  function runReplyFlow(text: string) {
-    addUserMessage(text);
+  function runReplyFlow(userText: string) {
+    addUserMessage(userText);
     appendAssistantReply();
   }
 
-  function runDefaultScene() {
-    const runId = beginRun();
-    addUserMessage("Can you check whether the release is ready to ship?");
-    const thinkId = nextId("think");
-    addBlock({ id: thinkId, kind: "thinking" });
-    schedule(() => {
-      if (!isCurrent(runId)) return;
-      removeBlock(thinkId);
-      addBlock({
-        id: nextId("tool"),
-        kind: "tool-call",
+  function runTour() {
+    runSteps([
+      say(INTRO_SEGMENTS),
+      pause(300),
+      say(TOOLCALL_INTRO_SEGMENTS),
+      showToolCall({
         toolKind: "search",
         verb: "Searching",
         target: "open PRs and CI status",
         result: "Searched — 3 open PRs, CI green",
-        duration: 1500,
-        onDone: () => {
-          if (!isCurrent(runId)) return;
-          addBlock({
-            id: nextId("stream"),
-            kind: "streaming",
-            segments: RELEASE_SEGMENTS,
-            followUps: ["Show the diff", "Run the deploy", "Who approved it?"],
-          });
-          schedule(() => endRun(runId), estimateStreamMs(RELEASE_SEGMENTS));
-        },
-      });
-    }, 1300);
+        duration: 1600,
+      }),
+      pause(400),
+      say(TRACE_INTRO_SEGMENTS),
+      showTrace(TRACE_STEPS, 6),
+      pause(400),
+      say(AGENTS_INTRO_SEGMENTS),
+      showAgents(),
+      pause(400),
+      say(CODE_INTRO_SEGMENTS),
+      showToolCall({
+        toolKind: "code",
+        verb: "Editing",
+        target: "5 files for the demo page",
+        result: "Edited 5 files",
+        duration: 1300,
+      }),
+      showDiff(DEMO_DIFF_FILES),
+      showTerminal("npm run build", BUILD_SCRIPT),
+      pause(400),
+      say(SOURCES_INTRO_SEGMENTS),
+      showSources(DEMO_SOURCES),
+      pause(400),
+      say(OUTRO_SEGMENTS, SUGGESTIONS.slice(0, 3).map((s) => s.label)),
+    ]);
   }
 
-  function runDiffFlow(text: string) {
-    addUserMessage(text);
-    const runId = beginRun();
-    const thinkId = nextId("think");
-    addBlock({ id: thinkId, kind: "thinking" });
-    schedule(() => {
-      if (!isCurrent(runId)) return;
-      removeBlock(thinkId);
-      addBlock({
-        id: nextId("tool"),
-        kind: "tool-call",
+  function runDiffFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([
+      thinking(900),
+      showToolCall({
         toolKind: "code",
         verb: "Editing",
         target: "5 files for the demo page",
         result: "Edited 5 files",
         duration: 1400,
-        onDone: () => {
-          if (!isCurrent(runId)) return;
-          addBlock({ id: nextId("diff"), kind: "diff", files: DEMO_DIFF_FILES });
-          schedule(() => {
-            if (!isCurrent(runId)) return;
-            addBlock({
-              id: nextId("a"),
-              kind: "chat",
-              role: "assistant",
-              content: "Done — mostly additive changes, nothing destructive. Want me to open a PR?",
-            });
-            endRun(runId);
-          }, 500);
-        },
-      });
-    }, 900);
+      }),
+      showDiff(DEMO_DIFF_FILES),
+      say(text("Done — mostly additive changes, nothing destructive. Want me to open a PR?")),
+    ]);
   }
 
-  function runTerminalFlow(text: string) {
-    addUserMessage(text);
-    const runId = beginRun();
-    const thinkId = nextId("think");
-    addBlock({ id: thinkId, kind: "thinking" });
-    schedule(() => {
-      if (!isCurrent(runId)) return;
-      removeBlock(thinkId);
-      addBlock({
-        id: nextId("terminal"),
-        kind: "terminal",
-        command: "npm run build",
-        script: BUILD_SCRIPT,
-        onDone: () => {
-          if (!isCurrent(runId)) return;
-          addBlock({
-            id: nextId("a"),
-            kind: "chat",
-            role: "assistant",
-            content: "Build's green. Ready to deploy whenever you are.",
-          });
-          endRun(runId);
-        },
-      });
-    }, 700);
+  function runTerminalFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([
+      thinking(700),
+      showTerminal("npm run build", BUILD_SCRIPT),
+      say(text("Build's green. Ready to deploy whenever you are.")),
+    ]);
   }
 
-  function runTraceFlow(text: string) {
-    addUserMessage(text);
-    const runId = beginRun();
-    const thinkId = nextId("think");
-    addBlock({ id: thinkId, kind: "thinking" });
-    schedule(() => {
-      if (!isCurrent(runId)) return;
-      removeBlock(thinkId);
-      addBlock({ id: nextId("trace"), kind: "trace", steps: TRACE_STEPS, duration: 6 });
-      schedule(() => {
-        if (!isCurrent(runId)) return;
+  function runTraceFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([
+      thinking(900),
+      showTrace(TRACE_STEPS, 6),
+      say(text("Landed on the simplest option that still covers the edge cases we talked about.")),
+    ]);
+  }
+
+  function runAgentsFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([
+      thinking(700),
+      showAgents(),
+      say(text("Research and coding wrapped up cleanly — review flagged a couple of lint errors to fix before merging.")),
+    ]);
+  }
+
+  function runApproveFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([
+      thinking(700),
+      (runId, done) => {
         addBlock({
-          id: nextId("a"),
-          kind: "chat",
-          role: "assistant",
-          content: "Landed on the simplest option that still covers the edge cases we talked about.",
+          id: nextId("approval"),
+          kind: "approval",
+          toolName: "Bash",
+          summary: "Run a shell command",
+          detail: "npm install lodash",
+          onAllow: () => {
+            runSteps([showTerminal("npm install lodash", INSTALL_SCRIPT), say(text("Installed. You're set to commit."))]);
+          },
+          onDeny: () => {
+            addBlock({ id: nextId("a"), kind: "chat", role: "assistant", content: "Understood — I won't run that command." });
+          },
         });
-        endRun(runId);
-      }, 500);
-    }, 900);
+        done();
+      },
+    ]);
   }
 
-  function runAgentsFlow(text: string) {
-    addUserMessage(text);
-    const runId = beginRun();
-    const thinkId = nextId("think");
-    addBlock({ id: thinkId, kind: "thinking" });
-    schedule(() => {
-      if (!isCurrent(runId)) return;
-      removeBlock(thinkId);
-      addBlock({
-        id: nextId("agents"),
-        kind: "agents",
-        onDone: () => {
-          if (!isCurrent(runId)) return;
-          addBlock({
-            id: nextId("a"),
-            kind: "chat",
-            role: "assistant",
-            content: "Research and coding wrapped up cleanly — review flagged a couple of lint errors to fix before merging.",
-          });
-          endRun(runId);
-        },
-      });
-    }, 700);
-  }
-
-  function runApproveFlow(text: string) {
-    addUserMessage(text);
-    const runId = beginRun();
-    const thinkId = nextId("think");
-    addBlock({ id: thinkId, kind: "thinking" });
-    schedule(() => {
-      if (!isCurrent(runId)) return;
-      removeBlock(thinkId);
-      addBlock({
-        id: nextId("approval"),
-        kind: "approval",
-        toolName: "Bash",
-        summary: "Run a shell command",
-        detail: "npm install lodash",
-        onAllow: () => {
-          const nextRunId = beginRun();
-          addBlock({
-            id: nextId("terminal"),
-            kind: "terminal",
-            command: "npm install lodash",
-            script: INSTALL_SCRIPT,
-            onDone: () => {
-              if (!isCurrent(nextRunId)) return;
-              addBlock({ id: nextId("a"), kind: "chat", role: "assistant", content: "Installed. You're set to commit." });
-              endRun(nextRunId);
-            },
-          });
-        },
-        onDeny: () => {
-          addBlock({ id: nextId("a"), kind: "chat", role: "assistant", content: "Understood — I won't run that command." });
-        },
-      });
-      endRun(runId);
-    }, 700);
-  }
-
-  function runToolsFlow(text: string) {
-    addUserMessage(text);
-    const runId = beginRun();
-    const thinkId = nextId("think");
-    addBlock({ id: thinkId, kind: "thinking" });
-    schedule(() => {
-      if (!isCurrent(runId)) return;
-      removeBlock(thinkId);
-      addBlock({
-        id: nextId("tool1"),
-        kind: "tool-call",
+  function runToolsFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([
+      thinking(700),
+      showToolCall({
         toolKind: "search",
         verb: "Searching",
         target: "how the composer menu filters items",
         result: "Searched — 2 matches",
         duration: 1300,
-        onDone: () => {
-          if (!isCurrent(runId)) return;
-          addBlock({
-            id: nextId("tool2"),
-            kind: "tool-call",
-            toolKind: "file",
-            verb: "Reading",
-            target: "prompt-bar/component.tsx",
-            result: "Read 297 lines",
-            duration: 1200,
-            onDone: () => {
-              if (!isCurrent(runId)) return;
-              addBlock({
-                id: nextId("a"),
-                kind: "chat",
-                role: "assistant",
-                content: "Found it — the menu filters on a case-insensitive substring match against the label.",
-              });
-              endRun(runId);
-            },
-          });
-        },
-      });
-    }, 700);
+      }),
+      showToolCall({
+        toolKind: "file",
+        verb: "Reading",
+        target: "prompt-bar/component.tsx",
+        result: "Read 297 lines",
+        duration: 1200,
+      }),
+      say(text("Found it — the menu filters on a case-insensitive substring match against the label.")),
+    ]);
   }
 
-  function runSourcesFlow(text: string) {
-    addUserMessage(text);
-    const runId = beginRun();
-    const thinkId = nextId("think");
-    addBlock({ id: thinkId, kind: "thinking" });
-    schedule(() => {
-      if (!isCurrent(runId)) return;
-      removeBlock(thinkId);
-      addBlock({ id: nextId("stream"), kind: "streaming", segments: SOURCES_SEGMENTS });
-      schedule(() => {
-        if (!isCurrent(runId)) return;
-        addBlock({ id: nextId("sources"), kind: "sources", sources: DEMO_SOURCES });
-        endRun(runId);
-      }, estimateStreamMs(SOURCES_SEGMENTS));
-    }, 900);
+  function runSourcesFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(900), say(SOURCES_INTRO_SEGMENTS), showSources(DEMO_SOURCES)]);
   }
 
-  function runStopFlow(text: string) {
-    addUserMessage(text);
-    const runId = beginRun();
-    const thinkId = nextId("think");
-    addBlock({ id: thinkId, kind: "thinking" });
-    schedule(() => {
-      if (!isCurrent(runId)) return;
-      removeBlock(thinkId);
-      addBlock({
-        id: nextId("tool"),
-        kind: "tool-call",
+  function runStopFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([
+      // long thinking phase on purpose — plenty of time to hit Stop below.
+      thinking(5000),
+      showToolCall({
         toolKind: "network",
         verb: "Fetching",
         target: "changelogs across a dozen dependencies",
         result: "Fetched 12 changelogs",
         duration: 2200,
-        onDone: () => {
-          if (!isCurrent(runId)) return;
-          addBlock({
-            id: nextId("a"),
-            kind: "chat",
-            role: "assistant",
-            content: "Here's the full rundown of what changed across all twelve packages…",
-          });
-          endRun(runId);
-        },
-      });
-      // long thinking phase on purpose — plenty of time to hit Stop below.
-    }, 5000);
+      }),
+      say(text("Here's the full rundown of what changed across all twelve packages…")),
+    ]);
   }
 
-  function resetDemo() {
+  function replay() {
     clearTimers();
     runIdRef.current += 1;
     setGenerating(false);
     setBlocks([]);
-    schedule(() => runDefaultScene(), 150);
+    schedule(() => runTour(), 150);
   }
 
   function handleSubmit(value: string) {
@@ -779,16 +794,14 @@ export function PatternDemo() {
     const trimmed = value.trim();
     if (!trimmed) return;
 
-    const command = COMMANDS.find(
-      (c) => trimmed === c.label || trimmed.toLowerCase().startsWith(`${c.label.toLowerCase()} `)
-    );
+    const suggestion = SUGGESTIONS.find((s) => s.label.toLowerCase() === trimmed.toLowerCase());
 
-    if (!command) {
+    if (!suggestion) {
       runReplyFlow(trimmed);
       return;
     }
 
-    switch (command.id) {
+    switch (suggestion.id) {
       case "diff":
         return runDiffFlow(trimmed);
       case "terminal":
@@ -805,15 +818,21 @@ export function PatternDemo() {
         return runSourcesFlow(trimmed);
       case "stop":
         return runStopFlow(trimmed);
-      case "reset":
-        return resetDemo();
     }
   }
 
   React.useEffect(() => {
-    schedule(() => runDefaultScene(), 0);
+    schedule(() => runTour(), 0);
     return () => clearTimers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(() => {
+    const el = composerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => setComposerHeight(entries[0].contentRect.height));
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   React.useEffect(() => {
@@ -821,36 +840,30 @@ export function PatternDemo() {
   }, [blocks.length]);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-muted-foreground">
-          Try <span className="font-mono text-foreground">/diff</span>,{" "}
-          <span className="font-mono text-foreground">/agents</span>, or{" "}
-          <span className="font-mono text-foreground">/approve</span> — or just say something.
-        </p>
+    <div className="flex flex-col">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">Try a suggestion below, or just say something.</p>
         <button
           type="button"
-          onClick={resetDemo}
+          onClick={replay}
           className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
           <RotateCcw className="size-3" />
-          Reset
+          Replay
         </button>
       </div>
 
-      <div className="flex min-h-[320px] flex-col gap-5 rounded-2xl border bg-muted/20 p-4 sm:p-6">
+      <div className="space-y-5 pb-8">
         {blocks.map((block) => (
-          <BlockView
-            key={block.id}
-            block={block}
-            onEditUser={handleEditUser}
-            onRegenerate={handleRegenerate}
-          />
+          <BlockView key={block.id} block={block} onEditUser={handleEditUser} onRegenerate={handleRegenerate} />
         ))}
-        <div ref={bottomRef} />
+        <div ref={bottomRef} style={{ scrollMarginBottom: composerHeight + 24 }} />
       </div>
 
-      <div className="space-y-2">
+      <div
+        ref={composerRef}
+        className="sticky bottom-0 -mx-6 space-y-2 bg-gradient-to-t from-background from-65% to-transparent px-6 pb-6 pt-10"
+      >
         <AnimatePresence>
           {generating && (
             <motion.div
@@ -858,7 +871,7 @@ export function PatternDemo() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 4 }}
               transition={{ duration: 0.15 }}
-              className="mx-auto flex w-fit items-center gap-2 rounded-full border bg-card py-1 pl-3 pr-1 text-xs text-muted-foreground shadow-sm"
+              className="mx-auto flex w-fit items-center gap-2 rounded-full bg-card py-1 pl-3 pr-1 text-xs text-muted-foreground shadow-sm"
             >
               <Loader2 className="size-3 animate-spin" aria-hidden />
               Generating
@@ -868,10 +881,10 @@ export function PatternDemo() {
         </AnimatePresence>
 
         <div className={cn(generating && "pointer-events-none opacity-50")}>
-          <PromptBar
-            placeholder="Message the assistant, or type / for a command…"
-            commands={COMMANDS}
-            sources={AT_MENTIONS}
+          <PromptBarPro
+            suggestions={SUGGESTIONS}
+            visibleCount={4}
+            placeholder="Ask about a pattern, or try one below…"
             onSubmit={handleSubmit}
           />
         </div>
@@ -915,11 +928,7 @@ function BlockView({
         />
       );
     case "trace":
-      return (
-        <div className="w-full max-w-md overflow-hidden rounded-2xl border bg-card shadow-sm">
-          <ExpandableTrace steps={block.steps} durationSeconds={block.duration} defaultOpen />
-        </div>
-      );
+      return <ExpandableTrace steps={block.steps} durationSeconds={block.duration} defaultOpen className="w-full max-w-md" />;
     case "terminal":
       return <LiveTerminalStream command={block.command} script={block.script} onDone={block.onDone} />;
     case "diff":
@@ -938,11 +947,7 @@ function BlockView({
     case "agents":
       return <LiveMultiAgentTrace onDone={block.onDone} />;
     case "streaming":
-      return (
-        <div className="w-full max-w-md rounded-xl border bg-card p-4">
-          <StreamingText segments={block.segments} followUps={block.followUps} />
-        </div>
-      );
+      return <StreamingText segments={block.segments} followUps={block.followUps} className="w-full max-w-md" />;
     case "sources":
       return <SourcesStack sources={block.sources} />;
   }
