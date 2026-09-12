@@ -1,6 +1,6 @@
 ---
 name: design
-description: Design-engineering expert for building AI product prototypes and agent-facing UI (composers, thinking/loading states, agent traces, streaming answers, diff summaries, trigger/condition flowcharts, and similar). Backed by a growing, generated pattern catalogue with a UX spec (when to use, anatomy, behavior, accessibility) and a default implementation per pattern. Use this whenever someone is prototyping, designing, or scaffolding a screen or flow for an AI/agent product — even if they just say "build a prompt bar," "add a loading state," "show the agent's steps," or describe a new AI feature without naming a specific pattern. Works with any design system the host project already uses; defaults to the catalogue's own Tailwind + Radix + Motion look only when nothing else is established.
+description: Design-engineering expert for building AI product prototypes and agent-facing UI (composers, thinking/loading states, agent traces, streaming answers, diff summaries, trigger/condition flowcharts, and similar). Backed by a growing, generated pattern catalogue with a UX spec (when to use, anatomy, behavior, accessibility) and a default implementation per pattern. Use this whenever someone is prototyping, designing, or scaffolding a screen or flow for an AI/agent product — even if they just say "build a prompt bar," "add a loading state," "show the agent's steps," or describe a new AI feature without naming a specific pattern. Also covers listing the full catalogue ("list all patterns"), auditing an existing project for UI a pattern could replace ("review my project" — read-only), and applying a named or auto-detected pattern to the current screen. Works with any design system the host project already uses; defaults to the catalogue's own Tailwind + Radix + Motion look only when nothing else is established.
 ---
 
 # ai-patterns design skill
@@ -31,6 +31,37 @@ This reference material is generated from the `ai-patterns` GitHub repo's
 `src/registry/`, not hand-written — so it grows every time a pattern is
 added there and the maintainer re-runs the generator. Don't edit these files
 directly even if something looks incomplete; that fix belongs upstream.
+
+## Commands
+
+### patterns list
+
+List every pattern currently in the catalogue as a numbered list, grouped by
+category — handy when you've forgotten what's already in `reference/index.md`
+or just want a quick inventory before shortlisting. Phrases like "list all
+patterns", "what patterns are available", or "show me the catalogue" route
+here too.
+
+### patterns review
+
+Scan the whole project for hand-rolled UI that duplicates something already
+in the catalogue — a custom spinner where Thinking Loader would do, a
+bespoke chat bubble, an ad-hoc composer — then output a per-file list of
+where one of the catalogue's patterns would slot in, citing the spec section
+(usually `When to use`) that justifies the swap. **Read-only — nothing gets
+edited.** Also triggers on "review my project" or "audit my UI for reusable
+patterns".
+
+### patterns apply
+
+Auto-detect the best-fit pattern for the task or screen you're describing,
+propose it with a one-line rationale grounded in that pattern's `When to
+use` / `When not to use`, then scaffold it once you confirm. Name a pattern
+directly to skip detection — for example, "apply shiny-button here" instead
+of "add the right pattern here". Also triggers on requests that don't name
+the skill at all, like "add a loading state while the agent is working" or
+"design this composer". The detection-and-scaffolding procedure below is
+this command's full workflow.
 
 ## Workflow
 
@@ -107,3 +138,10 @@ cheaper than scaffolding in the wrong system and redoing it.
 New categories will appear in `reference/index.md` as the catalogue grows —
 treat that table, not this list, as the source of truth for what currently
 exists.
+
+## Try it
+
+- List all patterns in the ai-patterns catalogue
+- Review my project for UI that a catalogue pattern could replace
+- Add the right ai-patterns component to this composer
+- Use ai-patterns to add a loading state while the agent is working
