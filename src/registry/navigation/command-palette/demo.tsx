@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Code2, Plus } from "lucide-react";
 
-import { CommandPalette, type CommandPaletteGroup } from "./component";
+import { CommandPalette, CommandPaletteWindow, type CommandPaletteGroup } from "./component";
 
 const groups: CommandPaletteGroup[] = [
   {
@@ -23,24 +23,27 @@ const groups: CommandPaletteGroup[] = [
 ];
 
 export default function CommandPaletteDemo() {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
 
   return (
-    <div className="flex w-full max-w-md flex-col items-center gap-3">
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary/90"
-      >
-        Search or start a session
-      </button>
-      <CommandPalette
-        open={open}
-        onOpenChange={setOpen}
-        groups={groups}
-        placeholder="Search or start a session"
-        onSelect={(item) => console.log("selected", item)}
-      />
-    </div>
+    <CommandPalette
+      open={open}
+      onOpenChange={setOpen}
+      groups={groups}
+      placeholder="Search or start a session"
+      onSelect={(item) => console.log("selected", item)}
+    />
+  );
+}
+
+/** A contained, non-modal preview of the window for galleries that render many demos inline (e.g. the homepage) — no fixed backdrop stealing the whole page. */
+export function CommandPaletteInlineDemo() {
+  return (
+    <CommandPaletteWindow
+      groups={groups}
+      placeholder="Search or start a session"
+      className="max-w-md"
+      onSelect={(item) => console.log("selected", item)}
+    />
   );
 }
