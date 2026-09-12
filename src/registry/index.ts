@@ -24,6 +24,14 @@ import ToolCallChipDemo from "./loaders/tool-call-chip/demo";
 import { pattern as toolCallChipPattern } from "./loaders/tool-call-chip/pattern";
 import AttachmentTrayDemo from "./uploads/attachment-chip/demo";
 import { pattern as attachmentChipPattern } from "./uploads/attachment-chip/pattern";
+import StopGenerationButtonDemo from "./buttons/stop-generation-button/demo";
+import { pattern as stopGenerationButtonPattern } from "./buttons/stop-generation-button/pattern";
+import TerminalStreamDemo from "./code/terminal-stream/demo";
+import { pattern as terminalStreamPattern } from "./code/terminal-stream/pattern";
+import InlineCitationDemo from "./text/inline-citation/demo";
+import { pattern as inlineCitationPattern } from "./text/inline-citation/pattern";
+import MultiAgentTraceDemo from "./traces/multi-agent-trace/demo";
+import { pattern as multiAgentTracePattern } from "./traces/multi-agent-trace/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -131,6 +139,38 @@ export const registry: RegistryEntry[] = [
     description: "A composer's file/image attachment tray with drag-drop, upload progress, and inline preview.",
     Demo: AttachmentTrayDemo,
     uxDoc: attachmentChipPattern,
+  },
+  {
+    slug: "stop-generation-button",
+    category: "buttons",
+    title: "Stop Generation Button",
+    description: "A send button that morphs into a stop control mid-stream and back on completion.",
+    Demo: StopGenerationButtonDemo,
+    uxDoc: stopGenerationButtonPattern,
+  },
+  {
+    slug: "terminal-stream",
+    category: "code",
+    title: "Terminal Stream",
+    description: "An auto-scrolling, collapsible panel streaming raw command output line by line.",
+    Demo: TerminalStreamDemo,
+    uxDoc: terminalStreamPattern,
+  },
+  {
+    slug: "inline-citation",
+    category: "text",
+    title: "Inline Citation",
+    description: "A hoverable, clickable footnote-style source marker inline within text.",
+    Demo: InlineCitationDemo,
+    uxDoc: inlineCitationPattern,
+  },
+  {
+    slug: "multi-agent-trace",
+    category: "traces",
+    title: "Multi-Agent Trace",
+    description: "A tree of parallel sub-agent tasks, each with its own status and step list.",
+    Demo: MultiAgentTraceDemo,
+    uxDoc: multiAgentTracePattern,
   },
 ];
 
