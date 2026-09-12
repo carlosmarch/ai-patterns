@@ -5,6 +5,7 @@ import { Origami } from "lucide-react";
 import "./globals.css";
 
 import { Footer } from "@/components/footer";
+import { SiteCommandPalette } from "@/components/site-command-palette";
 
 const THEME_INIT_SCRIPT = `
 (function () {
@@ -58,6 +59,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/skill" className="text-sm text-muted-foreground hover:text-foreground">
                 Skill
               </Link>
+              <SiteCommandPalette />
             </nav>
           </div>
         </header>

@@ -54,6 +54,8 @@ import ListeningStateDemo from "./voice/listening-state/demo";
 import { pattern as listeningStatePattern } from "./voice/listening-state/pattern";
 import LiveTranscriptDemo from "./voice/live-transcript/demo";
 import { pattern as liveTranscriptPattern } from "./voice/live-transcript/pattern";
+import CommandPaletteDemo from "./navigation/command-palette/demo";
+import { pattern as commandPalettePattern } from "./navigation/command-palette/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -282,6 +284,14 @@ export const registry: RegistryEntry[] = [
     description: "A streaming, speaker-labeled transcription of a voice conversation.",
     Demo: LiveTranscriptDemo,
     uxDoc: liveTranscriptPattern,
+  },
+  {
+    slug: "command-palette",
+    category: "navigation",
+    title: "Command Palette",
+    description: "A searchable ⌘K overlay for jumping to sessions or running quick actions.",
+    Demo: CommandPaletteDemo,
+    uxDoc: commandPalettePattern,
   },
 ];
 
