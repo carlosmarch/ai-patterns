@@ -2,9 +2,9 @@ export const pattern = `# Source Trust Card
 
 ## Summary
 A paginated card for a single cited source, showing its favicon, title, and
-snippet, plus an optional trust badge that tells the reader why the source
-is credible. A row of domain pills below lets the reader jump straight to
-any source in the set.
+snippet, plus an optional "Trusted" badge that reveals why the source is
+credible on hover. A row of domain pills below lets the reader jump
+straight to any source in the set.
 
 ## When to use
 - An AI answer cites a small set of web sources (roughly 2–6) and the
@@ -31,8 +31,10 @@ any source in the set.
   "N sources" label.
 - Source body (clickable, opens the source): favicon, domain, title,
   short description/snippet.
-- Trust badge (optional, only when a source is verified): shield icon,
-  "Trusted" label, one sentence explaining why, and a "Learn more" link.
+- Trust badge (optional, only when a source is verified): a small shield
+  icon + "Trusted" pill pinned above the domain; hovering or focusing it
+  reveals a tooltip with one sentence explaining why, and a "Learn more"
+  link.
 - Domain pill row (only when there's more than one source): one pill per
   source for direct navigation; the active pill is visually distinct.
 
@@ -42,9 +44,15 @@ any source in the set.
 - Clicking a domain pill jumps directly to that source, sliding in the
   correct direction (forward if later in the set, backward if earlier).
 - The whole source body (favicon, title, description) is a single link
-  that opens the source in a new tab.
+  that opens the source in a new tab; the trust badge sits outside that
+  link so it can be hovered or focused independently.
 - The trust badge only renders when the current source has a trust
   reason — most sources in a set will not have one, and that's expected.
+  It stays collapsed to the "Trusted" pill until hovered or focused, so it
+  never pushes the card's height around.
+- The tooltip opens on hover or keyboard focus, closes on mouse leave,
+  blur, or Escape, and flips above or below the badge depending on
+  available viewport space.
 - Favicon falls back to a generic globe icon if the image is missing or
   fails to load.
 
@@ -64,8 +72,11 @@ any source in the set.
   and position without relying on the visual pagination alone.
 - Domain pills use \`aria-current\` on the active source so assistive tech
   can tell which one is showing.
+- The trust badge is a real \`button\`, reachable by keyboard: focusing it
+  opens the tooltip the same way hovering does, and the tooltip is linked
+  back to the badge with \`aria-describedby\` so screen readers announce it.
 - Respect \`prefers-reduced-motion\`: reduce or remove the slide transition
-  between sources.
+  between sources and the tooltip's fade-in.
 
 ## Related patterns
 - \`Sources Stack\` — better for larger sets browsed as a single list
