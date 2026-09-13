@@ -82,6 +82,15 @@ and the plugin entry in `.claude-plugin/marketplace.json`, and push. Anyone
 with the plugin installed picks up the new pattern via `/plugin marketplace
 update` + `/plugin update ai-patterns@ai-patterns`.
 
+**Each pattern is versioned too.** Every catalogue entry carries its own
+semver (`RegistryEntry.version`) for the exported props/types in its
+`component.tsx` — the part a project that scaffolded the pattern actually
+depends on. `npm run check:patterns` fails the build if that surface
+changes in a breaking way without a matching major-version bump, so a
+breaking prop change can't merge silently and become invisible to every
+project that already installed the skill. See "Versioning a pattern's
+props" in `CLAUDE.md` for the mechanics.
+
 ## Roadmap
 
 - [x] Registry convention + Preview/Code doc template

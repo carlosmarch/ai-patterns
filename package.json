@@ -4,10 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npm run check:patterns",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "skill:build": "node scripts/build-skill.mjs"
+    "skill:build": "node scripts/build-skill.mjs",
+    "check:patterns": "node scripts/check-pattern-versions.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.3.3",

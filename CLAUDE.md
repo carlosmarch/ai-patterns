@@ -20,8 +20,8 @@ Each pattern lives under `src/registry/<category>/<slug>/`:
   `src/registry/buttons/shiny-button/pattern.ts` as the reference shape.
 
 Register the new entry in `src/registry/index.ts` (import the `Demo` and
-`pattern`, add a `RegistryEntry`) — this is what makes it appear on
-`/patterns` and `/patterns/<category>/<slug>`.
+`pattern`, add a `RegistryEntry` including a starting `version: "1.0.0"`) —
+this is what makes it appear on `/patterns` and `/patterns/<category>/<slug>`.
 
 After adding or changing a pattern, regenerate the design skill's
 reference docs:
@@ -33,12 +33,32 @@ npm run skill:build
 then bump `version` in both `plugins/ai-patterns/.claude-plugin/plugin.json`
 and the plugin entry in `.claude-plugin/marketplace.json`.
 
+### Versioning a pattern's props
+
+Every pattern's `RegistryEntry.version` (in `src/registry/index.ts`) is a
+semver for that pattern's exported API — the Props interface/type (and
+anything exported alongside it) in its `component.tsx`. Projects that
+installed the `ai-patterns` skill hold a copy of that API, so a change to it
+isn't a private refactor.
+
+If you change a pattern's exported types in a way that breaks existing
+usage — removing or renaming an export, dropping a prop, making a
+previously-optional prop required, changing a prop's type — bump that
+pattern's major version. `npm run check:patterns` enforces this: it diffs
+each pattern's current exports against a committed snapshot
+(`scripts/pattern-api-snapshot.json`) and fails if it finds a breaking
+change with no version bump. It runs automatically before `npm run build`
+(via `prebuild`); run it directly after bumping a version to update the
+snapshot, and commit the result alongside your change. Non-breaking
+changes (a new optional prop, a new export) don't require a bump.
+
 ## Commands
 
 - `npm run dev` — start the site at localhost:3000
 - `npm run lint` — ESLint
-- `npm run build` — production build
+- `npm run build` — production build (runs `check:patterns` first)
 - `npm run skill:build` — regenerate `plugins/ai-patterns/skills/design/reference/` from `src/registry/`
+- `npm run check:patterns` — guardrail: fails if a pattern's exported props/types changed breakingly without a version bump
 
 There is no test suite/script in this repo yet.
 

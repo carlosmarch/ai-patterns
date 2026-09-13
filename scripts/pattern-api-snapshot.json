@@ -1,0 +1,1755 @@
+{
+  "buttons/shiny-button": {
+    "version": "1.0.0",
+    "api": {
+      "ShinyButtonProps": {
+        "kind": "interface",
+        "heritage": "extends Omit<HTMLMotionProps<\"button\">, \"ref\">",
+        "members": [
+          {
+            "name": "children",
+            "optional": false,
+            "type": "React.ReactNode"
+          }
+        ]
+      }
+    }
+  },
+  "loaders/thinking-loader": {
+    "version": "1.0.0",
+    "api": {
+      "ThinkingLoaderProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "words",
+            "optional": true,
+            "type": "string[]"
+          },
+          {
+            "name": "interval",
+            "optional": true,
+            "type": "number"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "traces/expandable-trace": {
+    "version": "1.0.0",
+    "api": {
+      "TraceStep": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "label",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "meta",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      },
+      "ExpandableTraceProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "durationSeconds",
+            "optional": true,
+            "type": "number"
+          },
+          {
+            "name": "steps",
+            "optional": false,
+            "type": "TraceStep[]"
+          },
+          {
+            "name": "defaultOpen",
+            "optional": true,
+            "type": "boolean"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "text/streaming-text": {
+    "version": "1.0.0",
+    "api": {
+      "StreamSegment": {
+        "kind": "type-union",
+        "members": [
+          "{ type: \"source\"; label: string }",
+          "{ type: \"text\"; content: string }"
+        ]
+      },
+      "StreamingTextProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "segments",
+            "optional": false,
+            "type": "StreamSegment[]"
+          },
+          {
+            "name": "speed",
+            "optional": true,
+            "type": "number"
+          },
+          {
+            "name": "followUps",
+            "optional": true,
+            "type": "string[]"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "composer/prompt-bar": {
+    "version": "1.0.0",
+    "api": {
+      "PromptBarVariant": {
+        "kind": "type-union",
+        "members": [
+          "\"pill\"",
+          "\"rounded\""
+        ]
+      },
+      "PromptBarItem": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "label",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      },
+      "PromptBarProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "variant",
+            "optional": true,
+            "type": "PromptBarVariant"
+          },
+          {
+            "name": "placeholder",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "sources",
+            "optional": true,
+            "type": "PromptBarItem[]"
+          },
+          {
+            "name": "commands",
+            "optional": true,
+            "type": "PromptBarItem[]"
+          },
+          {
+            "name": "models",
+            "optional": true,
+            "type": "PromptBarItem[]"
+          },
+          {
+            "name": "onSubmit",
+            "optional": true,
+            "type": "(value: string) => void"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "composer/prompt-bar-pro": {
+    "version": "1.0.0",
+    "api": {
+      "SessionSuggestion": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "label",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "icon",
+            "optional": false,
+            "type": "React.ComponentType<{ className?: string }>"
+          }
+        ]
+      },
+      "SessionOption": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "label",
+            "optional": false,
+            "type": "string"
+          }
+        ]
+      },
+      "PromptBarItem": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "label",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      },
+      "PromptBarProProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "suggestions",
+            "optional": false,
+            "type": "SessionSuggestion[]"
+          },
+          {
+            "name": "visibleCount",
+            "optional": true,
+            "type": "number"
+          },
+          {
+            "name": "environments",
+            "optional": true,
+            "type": "SessionOption[]"
+          },
+          {
+            "name": "orchestrators",
+            "optional": true,
+            "type": "SessionOption[]"
+          },
+          {
+            "name": "sources",
+            "optional": true,
+            "type": "PromptBarItem[]"
+          },
+          {
+            "name": "commands",
+            "optional": true,
+            "type": "PromptBarItem[]"
+          },
+          {
+            "name": "placeholder",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "onSubmit",
+            "optional": true,
+            "type": "(value: string) => void"
+          },
+          {
+            "name": "generating",
+            "optional": true,
+            "type": "boolean"
+          },
+          {
+            "name": "onStop",
+            "optional": true,
+            "type": "() => void"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "code/diff-summary": {
+    "version": "1.0.0",
+    "api": {
+      "DiffFile": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "additions",
+            "optional": false,
+            "type": "number"
+          },
+          {
+            "name": "deletions",
+            "optional": false,
+            "type": "number"
+          }
+        ]
+      },
+      "DiffSummaryCardProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "files",
+            "optional": false,
+            "type": "DiffFile[]"
+          },
+          {
+            "name": "visibleCount",
+            "optional": true,
+            "type": "number"
+          },
+          {
+            "name": "timestamp",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "onUndo",
+            "optional": true,
+            "type": "() => void"
+          },
+          {
+            "name": "onViewChanges",
+            "optional": true,
+            "type": "() => void"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "code/diff-tabs": {
+    "version": "1.0.0",
+    "api": {
+      "DiffLine": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "type",
+            "optional": false,
+            "type": "\"context\" | \"add\" | \"remove\""
+          },
+          {
+            "name": "content",
+            "optional": false,
+            "type": "string"
+          }
+        ]
+      },
+      "DiffTabFile": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "additions",
+            "optional": false,
+            "type": "number"
+          },
+          {
+            "name": "deletions",
+            "optional": false,
+            "type": "number"
+          },
+          {
+            "name": "lines",
+            "optional": false,
+            "type": "DiffLine[]"
+          }
+        ]
+      },
+      "DiffTabsProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "files",
+            "optional": false,
+            "type": "DiffTabFile[]"
+          },
+          {
+            "name": "defaultFileId",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "flowcharts/trigger-condition": {
+    "version": "1.0.0",
+    "api": {
+      "FlowchartToken": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "icon",
+            "optional": true,
+            "type": "React.ComponentType<{ className?: string }>"
+          },
+          {
+            "name": "label",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "dotColor",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      },
+      "FlowchartClause": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "connector",
+            "optional": false,
+            "type": "\"if\" | \"and\" | \"or\""
+          },
+          {
+            "name": "subject",
+            "optional": false,
+            "type": "FlowchartToken"
+          },
+          {
+            "name": "subjectOptions",
+            "optional": true,
+            "type": "FlowchartToken[]"
+          },
+          {
+            "name": "field",
+            "optional": false,
+            "type": "FlowchartToken"
+          },
+          {
+            "name": "fieldOptions",
+            "optional": true,
+            "type": "FlowchartToken[]"
+          },
+          {
+            "name": "value",
+            "optional": false,
+            "type": "FlowchartToken"
+          },
+          {
+            "name": "valueOptions",
+            "optional": true,
+            "type": "FlowchartToken[]"
+          }
+        ]
+      },
+      "FlowchartTriggerNode": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "optional": false,
+            "type": "\"trigger\""
+          },
+          {
+            "name": "icon",
+            "optional": false,
+            "type": "React.ComponentType<{ className?: string }>"
+          },
+          {
+            "name": "title",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "optional": false,
+            "type": "string"
+          }
+        ]
+      },
+      "FlowchartConditionNode": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "optional": false,
+            "type": "\"condition\""
+          },
+          {
+            "name": "clauses",
+            "optional": false,
+            "type": "FlowchartClause[]"
+          }
+        ]
+      },
+      "FlowchartNode": {
+        "kind": "type-union",
+        "members": [
+          "FlowchartConditionNode",
+          "FlowchartTriggerNode"
+        ]
+      },
+      "FlowchartProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "nodes",
+            "optional": false,
+            "type": "FlowchartNode[]"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "messages/chat-bubble": {
+    "version": "1.0.0",
+    "api": {
+      "ChatRole": {
+        "kind": "type-union",
+        "members": [
+          "\"assistant\"",
+          "\"user\""
+        ]
+      },
+      "ChatFeedback": {
+        "kind": "type-union",
+        "members": [
+          "\"down\"",
+          "\"up\"",
+          "null"
+        ]
+      },
+      "ChatBubbleProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "role",
+            "optional": false,
+            "type": "ChatRole"
+          },
+          {
+            "name": "content",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "onEditSubmit",
+            "optional": true,
+            "type": "(content: string) => void"
+          },
+          {
+            "name": "onRegenerate",
+            "optional": true,
+            "type": "() => void"
+          },
+          {
+            "name": "onFeedback",
+            "optional": true,
+            "type": "(feedback: ChatFeedback) => void"
+          },
+          {
+            "name": "versionIndex",
+            "optional": true,
+            "type": "number"
+          },
+          {
+            "name": "versionCount",
+            "optional": true,
+            "type": "number"
+          },
+          {
+            "name": "onVersionChange",
+            "optional": true,
+            "type": "(index: number) => void"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "permissions/tool-approval": {
+    "version": "1.0.0",
+    "api": {
+      "ToolApprovalDecision": {
+        "kind": "type-union",
+        "members": [
+          "\"allow\"",
+          "\"always-allow\"",
+          "\"deny\""
+        ]
+      },
+      "ToolApprovalScope": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "label",
+            "optional": false,
+            "type": "string"
+          }
+        ]
+      },
+      "ToolApprovalProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "icon",
+            "optional": false,
+            "type": "React.ComponentType<{ className?: string }>"
+          },
+          {
+            "name": "toolName",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "summary",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "detail",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "scopes",
+            "optional": true,
+            "type": "ToolApprovalScope[]"
+          },
+          {
+            "name": "onDecision",
+            "optional": true,
+            "type": "(decision: ToolApprovalDecision, scope?: ToolApprovalScope) => void"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "loaders/tool-call-chip": {
+    "version": "1.0.0",
+    "api": {
+      "ToolCallKind": {
+        "kind": "type-opaque",
+        "text": "keyof typeof ICONS"
+      },
+      "ToolCallStatus": {
+        "kind": "type-union",
+        "members": [
+          "\"error\"",
+          "\"running\"",
+          "\"success\""
+        ]
+      },
+      "ToolCallChipProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "kind",
+            "optional": true,
+            "type": "ToolCallKind"
+          },
+          {
+            "name": "verb",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "target",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "optional": false,
+            "type": "ToolCallStatus"
+          },
+          {
+            "name": "result",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "uploads/attachment-chip": {
+    "version": "1.0.0",
+    "api": {
+      "Attachment": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "size",
+            "optional": false,
+            "type": "number"
+          },
+          {
+            "name": "progress",
+            "optional": false,
+            "type": "number"
+          },
+          {
+            "name": "status",
+            "optional": false,
+            "type": "\"uploading\" | \"done\" | \"error\""
+          },
+          {
+            "name": "previewUrl",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      },
+      "AttachmentTrayProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "attachments",
+            "optional": false,
+            "type": "Attachment[]"
+          },
+          {
+            "name": "onRemove",
+            "optional": true,
+            "type": "(id: string) => void"
+          },
+          {
+            "name": "onRetry",
+            "optional": true,
+            "type": "(id: string) => void"
+          },
+          {
+            "name": "onDropFiles",
+            "optional": true,
+            "type": "(files: FileList) => void"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "buttons/stop-generation-button": {
+    "version": "1.0.0",
+    "api": {
+      "GenerationState": {
+        "kind": "type-union",
+        "members": [
+          "\"generating\"",
+          "\"idle\""
+        ]
+      },
+      "StopGenerationButtonProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "state",
+            "optional": false,
+            "type": "GenerationState"
+          },
+          {
+            "name": "disabled",
+            "optional": true,
+            "type": "boolean"
+          },
+          {
+            "name": "onSubmit",
+            "optional": true,
+            "type": "() => void"
+          },
+          {
+            "name": "onStop",
+            "optional": true,
+            "type": "() => void"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "code/terminal-stream": {
+    "version": "1.0.0",
+    "api": {
+      "LogLine": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "text",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "level",
+            "optional": true,
+            "type": "\"default\" | \"info\" | \"warn\" | \"error\" | \"success\""
+          }
+        ]
+      },
+      "TerminalStatus": {
+        "kind": "type-union",
+        "members": [
+          "\"done\"",
+          "\"error\"",
+          "\"running\""
+        ]
+      },
+      "TerminalStreamProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "command",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "lines",
+            "optional": false,
+            "type": "LogLine[]"
+          },
+          {
+            "name": "status",
+            "optional": false,
+            "type": "TerminalStatus"
+          },
+          {
+            "name": "defaultOpen",
+            "optional": true,
+            "type": "boolean"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "text/inline-citation": {
+    "version": "1.0.0",
+    "api": {
+      "CitationSource": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "title",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "domain",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "snippet",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "url",
+            "optional": false,
+            "type": "string"
+          }
+        ]
+      },
+      "InlineCitationProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "index",
+            "optional": false,
+            "type": "number"
+          },
+          {
+            "name": "source",
+            "optional": false,
+            "type": "CitationSource"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "traces/multi-agent-trace": {
+    "version": "1.0.0",
+    "api": {
+      "AgentStep": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "label",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "meta",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      },
+      "AgentStatus": {
+        "kind": "type-union",
+        "members": [
+          "\"done\"",
+          "\"error\"",
+          "\"queued\"",
+          "\"running\""
+        ]
+      },
+      "Agent": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "optional": false,
+            "type": "AgentStatus"
+          },
+          {
+            "name": "currentStep",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "elapsedSeconds",
+            "optional": true,
+            "type": "number"
+          },
+          {
+            "name": "steps",
+            "optional": false,
+            "type": "AgentStep[]"
+          }
+        ]
+      },
+      "MultiAgentTraceProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "agents",
+            "optional": false,
+            "type": "Agent[]"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "text/sources-stack": {
+    "version": "1.0.0",
+    "api": {
+      "Source": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "title",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "domain",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "url",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "faviconUrl",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      },
+      "SourcesStackProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "sources",
+            "optional": false,
+            "type": "Source[]"
+          },
+          {
+            "name": "visibleCount",
+            "optional": true,
+            "type": "number"
+          },
+          {
+            "name": "defaultOpen",
+            "optional": true,
+            "type": "boolean"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "text/source-trust-card": {
+    "version": "1.0.0",
+    "api": {
+      "TrustedSource": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "title",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "domain",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "url",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "faviconUrl",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "trustReason",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      },
+      "SourceTrustCardProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "sources",
+            "optional": false,
+            "type": "TrustedSource[]"
+          },
+          {
+            "name": "defaultIndex",
+            "optional": true,
+            "type": "number"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "text/follow-up-list": {
+    "version": "1.0.0",
+    "api": {
+      "FollowUpListProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "suggestions",
+            "optional": false,
+            "type": "string[]"
+          },
+          {
+            "name": "onSelect",
+            "optional": true,
+            "type": "(suggestion: string) => void"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "text/selection-actions": {
+    "version": "1.0.0",
+    "api": {
+      "SelectionActionsProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "text",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "onExplain",
+            "optional": true,
+            "type": "(selection: string) => string | Promise<string>"
+          },
+          {
+            "name": "onRewrite",
+            "optional": false,
+            "type": "(selection: string, instruction: string) => string | Promise<string>"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "errors/rate-limit": {
+    "version": "1.0.0",
+    "api": {
+      "RateLimitProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "label",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "resetTime",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "resetAt",
+            "optional": true,
+            "type": "Date"
+          },
+          {
+            "name": "upgradeLabel",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "onUpgrade",
+            "optional": true,
+            "type": "() => void"
+          },
+          {
+            "name": "onDismiss",
+            "optional": true,
+            "type": "() => void"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "errors/partial-response": {
+    "version": "1.0.0",
+    "api": {
+      "PartialResponseReason": {
+        "kind": "type-union",
+        "members": [
+          "\"error\"",
+          "\"interrupted\"",
+          "\"max-tokens\""
+        ]
+      },
+      "PartialResponseProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "content",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "reason",
+            "optional": true,
+            "type": "PartialResponseReason"
+          },
+          {
+            "name": "onResume",
+            "optional": true,
+            "type": "() => void"
+          },
+          {
+            "name": "onRetry",
+            "optional": true,
+            "type": "() => void"
+          },
+          {
+            "name": "resuming",
+            "optional": true,
+            "type": "boolean"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "compare/response-compare": {
+    "version": "1.0.0",
+    "api": {
+      "CompareResponse": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "label",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "content",
+            "optional": false,
+            "type": "string"
+          }
+        ]
+      },
+      "ResponseCompareProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "prompt",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "responses",
+            "optional": false,
+            "type": "[CompareResponse, CompareResponse]"
+          },
+          {
+            "name": "onPick",
+            "optional": true,
+            "type": "(id: string) => void"
+          },
+          {
+            "name": "onRegenerate",
+            "optional": true,
+            "type": "(id: string) => void"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "indicators/confidence-indicator": {
+    "version": "1.0.0",
+    "api": {
+      "ConfidenceLevel": {
+        "kind": "type-union",
+        "members": [
+          "\"high\"",
+          "\"low\"",
+          "\"medium\""
+        ]
+      },
+      "ConfidenceIndicatorProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "level",
+            "optional": false,
+            "type": "ConfidenceLevel"
+          },
+          {
+            "name": "label",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "reason",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "percentage",
+            "optional": true,
+            "type": "number"
+          },
+          {
+            "name": "variant",
+            "optional": true,
+            "type": "\"badge\" | \"dot\""
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "voice/voice-waveform": {
+    "version": "1.0.0",
+    "api": {
+      "VoiceWaveformState": {
+        "kind": "type-union",
+        "members": [
+          "\"idle\"",
+          "\"listening\"",
+          "\"speaking\""
+        ]
+      },
+      "VoiceWaveformProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "state",
+            "optional": false,
+            "type": "VoiceWaveformState"
+          },
+          {
+            "name": "levels",
+            "optional": true,
+            "type": "number[]"
+          },
+          {
+            "name": "barCount",
+            "optional": true,
+            "type": "number"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "voice/listening-state": {
+    "version": "1.0.0",
+    "api": {
+      "ListeningStateProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "active",
+            "optional": true,
+            "type": "boolean"
+          },
+          {
+            "name": "label",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "onStop",
+            "optional": true,
+            "type": "() => void"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "voice/live-transcript": {
+    "version": "1.0.0",
+    "api": {
+      "TranscriptSegment": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "speaker",
+            "optional": false,
+            "type": "\"user\" | \"assistant\""
+          },
+          {
+            "name": "text",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "final",
+            "optional": true,
+            "type": "boolean"
+          }
+        ]
+      },
+      "LiveTranscriptProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "segments",
+            "optional": false,
+            "type": "TranscriptSegment[]"
+          },
+          {
+            "name": "active",
+            "optional": true,
+            "type": "boolean"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  },
+  "navigation/command-palette": {
+    "version": "1.0.0",
+    "api": {
+      "CommandPaletteItem": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "id",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "label",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "icon",
+            "optional": true,
+            "type": "React.ComponentType<{ className?: string }>"
+          },
+          {
+            "name": "meta",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      },
+      "CommandPaletteGroup": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "label",
+            "optional": false,
+            "type": "string"
+          },
+          {
+            "name": "items",
+            "optional": false,
+            "type": "CommandPaletteItem[]"
+          }
+        ]
+      },
+      "CommandPaletteProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "open",
+            "optional": false,
+            "type": "boolean"
+          },
+          {
+            "name": "onOpenChange",
+            "optional": false,
+            "type": "(open: boolean) => void"
+          },
+          {
+            "name": "groups",
+            "optional": false,
+            "type": "CommandPaletteGroup[]"
+          },
+          {
+            "name": "placeholder",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "emptyLabel",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "onSelect",
+            "optional": true,
+            "type": "(item: CommandPaletteItem) => void"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      },
+      "CommandPaletteWindowProps": {
+        "kind": "interface",
+        "heritage": null,
+        "members": [
+          {
+            "name": "groups",
+            "optional": false,
+            "type": "CommandPaletteGroup[]"
+          },
+          {
+            "name": "placeholder",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "emptyLabel",
+            "optional": true,
+            "type": "string"
+          },
+          {
+            "name": "onSelect",
+            "optional": true,
+            "type": "(item: CommandPaletteItem) => void"
+          },
+          {
+            "name": "onClose",
+            "optional": true,
+            "type": "() => void"
+          },
+          {
+            "name": "autoFocus",
+            "optional": true,
+            "type": "boolean"
+          },
+          {
+            "name": "className",
+            "optional": true,
+            "type": "string"
+          }
+        ]
+      }
+    }
+  }
+}

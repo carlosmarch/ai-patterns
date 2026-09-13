@@ -8,104 +8,104 @@ one-line description, not the Anatomy/Behavior/Accessibility contract.
 
 ### buttons
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `shiny-button` | Shiny Button | A button with an animated light sweep across its surface. | [buttons/shiny-button.md](./buttons/shiny-button.md) |
-| `stop-generation-button` | Stop Generation Button | A send button that morphs into a stop control mid-stream and back on completion. | [buttons/stop-generation-button.md](./buttons/stop-generation-button.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `shiny-button` | 1.0.0 | Shiny Button | A button with an animated light sweep across its surface. | [buttons/shiny-button.md](./buttons/shiny-button.md) |
+| `stop-generation-button` | 1.0.0 | Stop Generation Button | A send button that morphs into a stop control mid-stream and back on completion. | [buttons/stop-generation-button.md](./buttons/stop-generation-button.md) |
 
 ### code
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `diff-summary` | Diff Summary Card | A collapsed summary of a batch of file edits, with undo and an overflow list. | [code/diff-summary.md](./code/diff-summary.md) |
-| `diff-tabs` | Diff Tabs | Per-file chips that switch an inline diff viewer between a batch of changed files. | [code/diff-tabs.md](./code/diff-tabs.md) |
-| `terminal-stream` | Terminal Stream | An auto-scrolling, collapsible panel streaming raw command output line by line. | [code/terminal-stream.md](./code/terminal-stream.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `diff-summary` | 1.0.0 | Diff Summary Card | A collapsed summary of a batch of file edits, with undo and an overflow list. | [code/diff-summary.md](./code/diff-summary.md) |
+| `diff-tabs` | 1.0.0 | Diff Tabs | Per-file chips that switch an inline diff viewer between a batch of changed files. | [code/diff-tabs.md](./code/diff-tabs.md) |
+| `terminal-stream` | 1.0.0 | Terminal Stream | An auto-scrolling, collapsible panel streaming raw command output line by line. | [code/terminal-stream.md](./code/terminal-stream.md) |
 
 ### compare
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `response-compare` | Response Compare | A side-by-side pair of response panels with independent regenerate and a single preferred pick. | [compare/response-compare.md](./compare/response-compare.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `response-compare` | 1.0.0 | Response Compare | A side-by-side pair of response panels with independent regenerate and a single preferred pick. | [compare/response-compare.md](./compare/response-compare.md) |
 
 ### composer
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `prompt-bar` | Prompt Bar | A composer with @ sources, / commands, a model picker, and dictation. | [composer/prompt-bar.md](./composer/prompt-bar.md) |
-| `prompt-bar-pro` | Prompt Bar Pro | A first-run composer with suggestion chips, @ sources, / commands, an environment picker, and an orchestrator picker. | [composer/prompt-bar-pro.md](./composer/prompt-bar-pro.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `prompt-bar` | 1.0.0 | Prompt Bar | A composer with @ sources, / commands, a model picker, and dictation. | [composer/prompt-bar.md](./composer/prompt-bar.md) |
+| `prompt-bar-pro` | 1.0.0 | Prompt Bar Pro | A first-run composer with suggestion chips, @ sources, / commands, an environment picker, and an orchestrator picker. | [composer/prompt-bar-pro.md](./composer/prompt-bar-pro.md) |
 
 ### errors
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `partial-response` | Partial Response | A cut-short assistant reply with Continue and Retry actions. | [errors/partial-response.md](./errors/partial-response.md) |
-| `rate-limit` | Rate Limit | A quota-exceeded state with a live countdown to when the user can send again. | [errors/rate-limit.md](./errors/rate-limit.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `partial-response` | 1.0.0 | Partial Response | A cut-short assistant reply with Continue and Retry actions. | [errors/partial-response.md](./errors/partial-response.md) |
+| `rate-limit` | 1.0.0 | Rate Limit | A quota-exceeded state with a live countdown to when the user can send again. | [errors/rate-limit.md](./errors/rate-limit.md) |
 
 ### flowcharts
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `trigger-condition` | Flowchart | Workflow trigger and condition steps on a dotted canvas. | [flowcharts/trigger-condition.md](./flowcharts/trigger-condition.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `trigger-condition` | 1.0.0 | Flowchart | Workflow trigger and condition steps on a dotted canvas. | [flowcharts/trigger-condition.md](./flowcharts/trigger-condition.md) |
 
 ### indicators
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `confidence-indicator` | Confidence Indicator | A badge or inline dot signaling how sure an AI answer or extraction is. | [indicators/confidence-indicator.md](./indicators/confidence-indicator.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `confidence-indicator` | 1.0.0 | Confidence Indicator | A badge or inline dot signaling how sure an AI answer or extraction is. | [indicators/confidence-indicator.md](./indicators/confidence-indicator.md) |
 
 ### loaders
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `thinking-loader` | Thinking Loader | A loader with a shimmering label and a live elapsed-time counter. | [loaders/thinking-loader.md](./loaders/thinking-loader.md) |
-| `tool-call-chip` | Tool Call Chip | An inline pill naming an in-flight tool call that resolves into a result summary. | [loaders/tool-call-chip.md](./loaders/tool-call-chip.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `thinking-loader` | 1.0.0 | Thinking Loader | A loader with a shimmering label and a live elapsed-time counter. | [loaders/thinking-loader.md](./loaders/thinking-loader.md) |
+| `tool-call-chip` | 1.0.0 | Tool Call Chip | An inline pill naming an in-flight tool call that resolves into a result summary. | [loaders/tool-call-chip.md](./loaders/tool-call-chip.md) |
 
 ### messages
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `chat-bubble` | Chat Bubble with Actions | A message bubble with feedback thumbs, edit-and-resubmit, retry/regenerate, and a version stepper. | [messages/chat-bubble.md](./messages/chat-bubble.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `chat-bubble` | 1.0.0 | Chat Bubble with Actions | A message bubble with feedback thumbs, edit-and-resubmit, retry/regenerate, and a version stepper. | [messages/chat-bubble.md](./messages/chat-bubble.md) |
 
 ### navigation
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `command-palette` | Command Palette | A searchable ⌘K overlay for jumping to sessions or running quick actions. | [navigation/command-palette.md](./navigation/command-palette.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `command-palette` | 1.0.0 | Command Palette | A searchable ⌘K overlay for jumping to sessions or running quick actions. | [navigation/command-palette.md](./navigation/command-palette.md) |
 
 ### permissions
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `tool-approval` | Tool Approval | A pending tool-call prompt with allow, always-allow, and deny actions. | [permissions/tool-approval.md](./permissions/tool-approval.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `tool-approval` | 1.0.0 | Tool Approval | A pending tool-call prompt with allow, always-allow, and deny actions. | [permissions/tool-approval.md](./permissions/tool-approval.md) |
 
 ### text
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `follow-up-list` | Follow-Up List | A vertical list of suggested next questions shown after a response, each sendable with a tap. | [text/follow-up-list.md](./text/follow-up-list.md) |
-| `inline-citation` | Inline Citation | A hoverable, clickable footnote-style source marker inline within text. | [text/inline-citation.md](./text/inline-citation.md) |
-| `selection-actions` | Selection Actions | A floating toolbar on text selection for describing edits, explaining, or improving a passage. | [text/selection-actions.md](./text/selection-actions.md) |
-| `source-trust-card` | Source Trust Card | A paginated single-source card with a trust badge and domain pills for jumping between sources. | [text/source-trust-card.md](./text/source-trust-card.md) |
-| `sources-stack` | Sources Stack | An overlapping stack of source favicons with a count, expanding into a linked source list. | [text/sources-stack.md](./text/sources-stack.md) |
-| `streaming-text` | Streaming Text | A streamed answer with inline sources, actions, and follow-ups. | [text/streaming-text.md](./text/streaming-text.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `follow-up-list` | 1.0.0 | Follow-Up List | A vertical list of suggested next questions shown after a response, each sendable with a tap. | [text/follow-up-list.md](./text/follow-up-list.md) |
+| `inline-citation` | 1.0.0 | Inline Citation | A hoverable, clickable footnote-style source marker inline within text. | [text/inline-citation.md](./text/inline-citation.md) |
+| `selection-actions` | 1.0.0 | Selection Actions | A floating toolbar on text selection for describing edits, explaining, or improving a passage. | [text/selection-actions.md](./text/selection-actions.md) |
+| `source-trust-card` | 1.0.0 | Source Trust Card | A paginated single-source card with a trust badge and domain pills for jumping between sources. | [text/source-trust-card.md](./text/source-trust-card.md) |
+| `sources-stack` | 1.0.0 | Sources Stack | An overlapping stack of source favicons with a count, expanding into a linked source list. | [text/sources-stack.md](./text/sources-stack.md) |
+| `streaming-text` | 1.0.0 | Streaming Text | A streamed answer with inline sources, actions, and follow-ups. | [text/streaming-text.md](./text/streaming-text.md) |
 
 ### traces
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `expandable-trace` | Expandable Trace | A collapsible "Thought for Xs" summary that expands into a step-by-step trace. | [traces/expandable-trace.md](./traces/expandable-trace.md) |
-| `multi-agent-trace` | Multi-Agent Trace | A tree of parallel sub-agent tasks, each with its own status and step list. | [traces/multi-agent-trace.md](./traces/multi-agent-trace.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `expandable-trace` | 1.0.0 | Expandable Trace | A collapsible "Thought for Xs" summary that expands into a step-by-step trace. | [traces/expandable-trace.md](./traces/expandable-trace.md) |
+| `multi-agent-trace` | 1.0.0 | Multi-Agent Trace | A tree of parallel sub-agent tasks, each with its own status and step list. | [traces/multi-agent-trace.md](./traces/multi-agent-trace.md) |
 
 ### uploads
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `attachment-chip` | Attachment Chip | A composer's file/image attachment tray with drag-drop, upload progress, and inline preview. | [uploads/attachment-chip.md](./uploads/attachment-chip.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `attachment-chip` | 1.0.0 | Attachment Chip | A composer's file/image attachment tray with drag-drop, upload progress, and inline preview. | [uploads/attachment-chip.md](./uploads/attachment-chip.md) |
 
 ### voice
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `listening-state` | Listening State | A pulsing mic indicator showing the AI is actively listening. | [voice/listening-state.md](./voice/listening-state.md) |
-| `live-transcript` | Live Transcript | A streaming, speaker-labeled transcription of a voice conversation. | [voice/live-transcript.md](./voice/live-transcript.md) |
-| `voice-waveform` | Voice Waveform | A live amplitude waveform while the AI listens or speaks. | [voice/voice-waveform.md](./voice/voice-waveform.md) |
+| slug | version | title | description | spec |
+| --- | --- | --- | --- | --- |
+| `listening-state` | 1.0.0 | Listening State | A pulsing mic indicator showing the AI is actively listening. | [voice/listening-state.md](./voice/listening-state.md) |
+| `live-transcript` | 1.0.0 | Live Transcript | A streaming, speaker-labeled transcription of a voice conversation. | [voice/live-transcript.md](./voice/live-transcript.md) |
+| `voice-waveform` | 1.0.0 | Voice Waveform | A live amplitude waveform while the AI listens or speaks. | [voice/voice-waveform.md](./voice/voice-waveform.md) |
