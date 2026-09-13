@@ -22,12 +22,19 @@ export function ComponentPreview({
       </TabsList>
       <TabsContent
         value="preview"
-        className="flex min-h-[280px] items-center justify-center rounded-lg border bg-muted/30 p-10"
+        forceMount
+        className="flex min-h-[280px] items-center justify-center rounded-lg border bg-muted/30 p-10 data-[state=inactive]:hidden"
       >
         {preview}
       </TabsContent>
-      <TabsContent value="code">{code}</TabsContent>
-      {pattern && <TabsContent value="pattern">{pattern}</TabsContent>}
+      <TabsContent value="code" forceMount className="data-[state=inactive]:hidden">
+        {code}
+      </TabsContent>
+      {pattern && (
+        <TabsContent value="pattern" forceMount className="data-[state=inactive]:hidden">
+          {pattern}
+        </TabsContent>
+      )}
     </Tabs>
   );
 }
