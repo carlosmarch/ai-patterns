@@ -9,6 +9,23 @@ import { getCategories, registry } from "@/registry";
 const INSTALL_COMMAND = `/plugin marketplace add carlosmarch/ai-patterns
 /plugin install ai-patterns@ai-patterns`;
 
+const BEFORE_CODE = `function LoadingState() {
+  return (
+    <div className="flex items-center gap-2 text-sm text-gray-500">
+      <Spinner className="h-4 w-4 animate-spin" />
+      Loading...
+    </div>
+  );
+}`;
+
+const AFTER_CODE = `import { ThinkingLoader } from "@/components/thinking-loader";
+
+function AgentStatus() {
+  // Elapsed-time counter, truthful cycling label — swapped for a
+  // completed-state summary the instant the response is ready.
+  return <ThinkingLoader />;
+}`;
+
 export default async function SkillPage() {
   const pluginJson = JSON.parse(
     await fs.readFile(
@@ -141,6 +158,41 @@ export default async function SkillPage() {
             </li>
           ))}
         </ol>
+      </div>
+
+      {/* Before / after */}
+      <div className="mt-16">
+        <h2 className="text-xl font-semibold tracking-tight">Before / after</h2>
+        <p className="mt-2 text-muted-foreground">
+          Same prompt to the same agent —{" "}
+          <span className="font-mono text-foreground">&quot;Add a loading state while the
+          agent is working.&quot;</span> — with and without the skill installed.
+        </p>
+        <div className="mt-6 grid gap-6 sm:grid-cols-2">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Without ai-patterns</p>
+            <div className="mt-2">
+              <CodeBlock code={BEFORE_CODE} lang="tsx" />
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              A generic spinner and a static &quot;Loading…&quot; string — reasonable-looking,
+              but it never tells the user how long the agent has been working, and it says
+              nothing once the response is ready.
+            </p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">With ai-patterns</p>
+            <div className="mt-2">
+              <CodeBlock code={AFTER_CODE} lang="tsx" />
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              The skill matches the request to Thinking Loader — an elapsed-time counter and a
+              truthful, cycling status label — and flags in its own spec that the component
+              must be swapped for a completed-state summary the instant work finishes, instead
+              of being left running.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Catalogue stats */}
