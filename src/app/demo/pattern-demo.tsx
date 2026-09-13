@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { GitBranch, RotateCcw, TerminalSquare } from "lucide-react";
+import { BadgeCheck, Columns2, GitBranch, Gauge, LayoutGrid, Mic, RotateCcw, TerminalSquare } from "lucide-react";
 
 import { ChatBubble } from "@/registry/messages/chat-bubble/component";
 import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
@@ -22,6 +22,19 @@ import { InlineCitation, type CitationSource } from "@/registry/text/inline-cita
 import { RateLimit } from "@/registry/errors/rate-limit/component";
 import { PartialResponse, type PartialResponseReason } from "@/registry/errors/partial-response/component";
 import { PromptBarPro, type PromptBarItem } from "@/registry/composer/prompt-bar-pro/component";
+import { ResponseCompare, type CompareResponse } from "@/registry/compare/response-compare/component";
+import { ConfidenceIndicator } from "@/registry/indicators/confidence-indicator/component";
+import { SourceTrustCard, type TrustedSource } from "@/registry/text/source-trust-card/component";
+import { DiffTabs, type DiffTabFile } from "@/registry/code/diff-tabs/component";
+import {
+  CommandPaletteWindow,
+  type CommandPaletteGroup,
+  type CommandPaletteItem,
+} from "@/registry/navigation/command-palette/component";
+import { ListeningState } from "@/registry/voice/listening-state/component";
+import { LiveTranscript, type TranscriptSegment } from "@/registry/voice/live-transcript/component";
+import { VoiceWaveform } from "@/registry/voice/voice-waveform/component";
+import { ShinyButton } from "@/registry/buttons/shiny-button/component";
 import { SUGGESTIONS } from "./suggestions";
 
 // ---------------------------------------------------------------------------
@@ -82,6 +95,10 @@ const SOURCES_INTRO_SEGMENTS: StreamSegment[] = [
   { type: "text", content: " — and collapse into a linked source list underneath." },
 ];
 
+const CITATION_COMBO_INTRO_SEGMENTS = text(
+  "Individual claims can carry their own citation too — hover the small superscript for a quick preview, or for something richer, a full trust card:"
+);
+
 const OUTRO_SEGMENTS = text(
   "That's the core of it — and everything above is a real, working component, not a mockup. There's more where that came from. Want to keep going?"
 );
@@ -98,6 +115,30 @@ const FLOWCHART_INTRO_SEGMENTS = text(
 
 const SELECTION_INTRO_SEGMENTS = text(
   "Answers don't have to be static, either — highlight any passage below and ask for a rewrite, or just hit Explain:"
+);
+
+const DIFFTABS_INTRO_SEGMENTS = text(
+  "Bigger changes get their own tabbed diff instead of one long scroll — flip between files without losing your place:"
+);
+
+const COMPARE_INTRO_SEGMENTS = text(
+  "Want two takes before picking one? I can draft both and let you choose:"
+);
+
+const CONFIDENCE_INTRO_SEGMENTS = text(
+  "Not every claim deserves equal trust, either — a confidence indicator can sit right on the number in question:"
+);
+
+const TRUST_INTRO_SEGMENTS = text(
+  "Sources can carry a trust reason of their own too, right alongside the citation:"
+);
+
+const PALETTE_INTRO_SEGMENTS = text(
+  "Need to jump somewhere fast? A command palette drops straight into the transcript — try selecting one:"
+);
+
+const VOICE_INTRO_SEGMENTS = text(
+  "And if this were voice instead of text, the same exchange gets its own components — listening, live transcript, then a waveform while I answer:"
 );
 
 const SELECTION_PARAGRAPH =
@@ -194,6 +235,89 @@ const CITATION_SOURCES: CitationSource[] = [
     snippet: "A production-ready animation library for React and JavaScript.",
     url: "https://motion.dev",
   },
+];
+
+const COMPARE_RESPONSES: [CompareResponse, CompareResponse] = [
+  {
+    id: "a",
+    label: "Response A",
+    content:
+      "The Confidence Indicator surfaces how sure the model is about one specific claim — a small badge or inline dot next to the number in question, not a blanket disclaimer at the top of the answer.",
+  },
+  {
+    id: "b",
+    label: "Response B",
+    content:
+      "Confidence Indicator shows certainty at a glance using color and a short label — high, medium, or low — so you know which parts of a response are worth double-checking.",
+  },
+];
+
+const TRUST_SOURCES: TrustedSource[] = [
+  {
+    title: "Next.js Docs — App Router",
+    domain: "nextjs.org",
+    description:
+      "The official Next.js documentation for the App Router — layouts, server components, and file-based routing.",
+    url: "https://nextjs.org/docs/app",
+    faviconUrl: favicon("nextjs.org"),
+    trustReason: "is trusted for official framework documentation, maintained directly by the Next.js core team.",
+  },
+  {
+    title: "Motion for React",
+    domain: "motion.dev",
+    description: "The animation library behind every looping sheen and staged transition in this registry.",
+    url: "https://motion.dev",
+    faviconUrl: favicon("motion.dev"),
+  },
+];
+
+const DIFF_TABS_FILES: DiffTabFile[] = [
+  {
+    id: "component",
+    name: "voice-waveform/component.tsx",
+    additions: 5,
+    deletions: 1,
+    lines: [
+      { type: "context", content: "  const active = levels ?? synthetic;" },
+      { type: "remove", content: "  return (" },
+      { type: "add", content: '  return (' },
+      { type: "add", content: '    <div role="img" aria-label={STATE_LABEL[state]}>' },
+    ],
+  },
+  {
+    id: "pattern",
+    name: "voice-waveform/pattern.ts",
+    additions: 2,
+    deletions: 0,
+    lines: [
+      { type: "context", content: "## Accessibility" },
+      {
+        type: "add",
+        content: "- Bars are decorative; expose state through role=\"img\" and an aria-label instead of per-bar text.",
+      },
+    ],
+  },
+];
+
+const PALETTE_GROUPS: CommandPaletteGroup[] = [
+  {
+    label: "Jump to a pattern",
+    items: [
+      { id: "compare/response-compare", label: "Response Compare", icon: Columns2 },
+      { id: "indicators/confidence-indicator", label: "Confidence Indicator", icon: Gauge },
+      { id: "text/source-trust-card", label: "Source Trust Card", icon: BadgeCheck },
+      { id: "voice/live-transcript", label: "Live Transcript", icon: Mic },
+    ],
+  },
+  {
+    label: "Quick actions",
+    items: [{ id: "browse-all", label: "Browse the full registry", icon: LayoutGrid }],
+  },
+];
+
+const VOICE_SCRIPT: { speaker: TranscriptSegment["speaker"]; text: string }[] = [
+  { speaker: "user", text: "Can I use these patterns for a voice assistant?" },
+  { speaker: "assistant", text: "Yes — Listening State, Live Transcript, and Voice Waveform cover the whole exchange." },
 ];
 
 const PARTIAL_RESPONSE_CONTENT =
@@ -438,6 +562,10 @@ interface CitationBlock {
   id: string;
   kind: "citation";
 }
+interface CitationComboBlock {
+  id: string;
+  kind: "citationCombo";
+}
 interface RateLimitBlock {
   id: string;
   kind: "ratelimit";
@@ -448,6 +576,38 @@ interface PartialBlock {
   kind: "partial";
   content: string;
   reason: PartialResponseReason;
+}
+interface CompareBlock {
+  id: string;
+  kind: "compare";
+}
+interface ConfidenceBlock {
+  id: string;
+  kind: "confidence";
+}
+interface TrustBlock {
+  id: string;
+  kind: "trust";
+}
+interface DiffTabsBlock {
+  id: string;
+  kind: "difftabs";
+}
+interface PaletteBlock {
+  id: string;
+  kind: "palette";
+  onSelect: (item: CommandPaletteItem) => void;
+}
+interface VoiceBlock {
+  id: string;
+  kind: "voice";
+  onDone?: () => void;
+}
+interface CtaBlock {
+  id: string;
+  kind: "cta";
+  label: string;
+  onClick: () => void;
 }
 
 type Block =
@@ -468,7 +628,15 @@ type Block =
   | FollowUpsBlock
   | CitationBlock
   | RateLimitBlock
-  | PartialBlock;
+  | PartialBlock
+  | CitationComboBlock
+  | CompareBlock
+  | ConfidenceBlock
+  | TrustBlock
+  | DiffTabsBlock
+  | PaletteBlock
+  | VoiceBlock
+  | CtaBlock;
 
 let idCounter = 0;
 function nextId(prefix: string) {
@@ -599,6 +767,97 @@ function LiveAttachmentTray({ onDone }: { onDone?: () => void }) {
   }, [attachment.status]);
 
   return <AttachmentTray attachments={[attachment]} className="w-full max-w-sm" />;
+}
+
+function HoverTrustCitation({ index, source }: { index: number; source: TrustedSource }) {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <span className="relative inline-block">
+      <button
+        type="button"
+        aria-expanded={open}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        className="mx-0.5 inline-flex size-4 -translate-y-1.5 items-center justify-center rounded-full bg-muted align-super text-[10px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+      >
+        {index}
+      </button>
+      {open && (
+        <span className="absolute bottom-full left-1/2 z-50 mb-2 w-72 -translate-x-1/2">
+          <SourceTrustCard sources={[source]} />
+        </span>
+      )}
+    </span>
+  );
+}
+
+function LiveVoiceExchange({ onDone }: { onDone?: () => void }) {
+  const [phase, setPhase] = React.useState<"listening" | "transcript" | "speaking">("listening");
+  const [segments, setSegments] = React.useState<TranscriptSegment[]>([]);
+  const onDoneRef = useLatest(onDone);
+
+  React.useEffect(() => {
+    if (phase !== "listening") return;
+    const t = window.setTimeout(() => setPhase("transcript"), 1400);
+    return () => window.clearTimeout(t);
+  }, [phase]);
+
+  React.useEffect(() => {
+    if (phase !== "transcript") return;
+    let cancelled = false;
+
+    async function run() {
+      for (let turn = 0; turn < VOICE_SCRIPT.length; turn++) {
+        const { speaker, text: line } = VOICE_SCRIPT[turn];
+        const id = `voice-${turn}`;
+        const words = line.split(" ");
+        for (let i = 1; i <= words.length; i++) {
+          if (cancelled) return;
+          const partial = words.slice(0, i).join(" ");
+          setSegments((prev) => [
+            ...prev.filter((s) => s.id !== id),
+            { id, speaker, text: partial, final: i === words.length },
+          ]);
+          await delay(55);
+        }
+      }
+      if (!cancelled) setPhase("speaking");
+    }
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [phase]);
+
+  React.useEffect(() => {
+    if (phase !== "speaking") return;
+    const t = window.setTimeout(() => onDoneRef.current?.(), 1400);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
+
+  if (phase === "listening") {
+    return (
+      <div className="flex w-full max-w-sm items-center justify-center rounded-2xl border bg-card py-8">
+        <ListeningState label="Listening…" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex w-full max-w-md flex-col gap-3">
+      <LiveTranscript segments={segments} active={phase === "transcript"} />
+      {phase === "speaking" && (
+        <div className="flex items-center justify-center rounded-2xl border bg-card py-4">
+          <VoiceWaveform state="speaking" className="w-full" />
+        </div>
+      )}
+    </div>
+  );
 }
 
 function LivePartialResponse({ content, reason }: { content: string; reason: PartialResponseReason }) {
@@ -865,6 +1124,16 @@ export function PatternDemo() {
     };
   }
 
+  function showCitationCombo(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("citation-combo"), kind: "citationCombo" });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
   function showRateLimit(): StepFn {
     return (runId, done) => {
       addBlock({ id: nextId("ratelimit"), kind: "ratelimit", resetAt: new Date(Date.now() + 4 * 60 * 1000) });
@@ -882,6 +1151,89 @@ export function PatternDemo() {
         if (!isCurrent(runId)) return;
         done();
       }, 400);
+    };
+  }
+
+  function showCompare(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("compare"), kind: "compare" });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
+  function showConfidence(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("confidence"), kind: "confidence" });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
+  function showTrust(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("trust"), kind: "trust" });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
+  function showDiffTabs(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("difftabs"), kind: "difftabs" });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
+  function showPalette(): StepFn {
+    return (runId, done) => {
+      addBlock({
+        id: nextId("palette"),
+        kind: "palette",
+        onSelect: (item) => {
+          if (item.id === "browse-all") {
+            router.push("/patterns");
+            return;
+          }
+          router.push(`/patterns/${item.id}`);
+        },
+      });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 400);
+    };
+  }
+
+  function showVoice(): StepFn {
+    return (runId, done) => {
+      addBlock({
+        id: nextId("voice"),
+        kind: "voice",
+        onDone: () => {
+          if (!isCurrent(runId)) return;
+          done();
+        },
+      });
+    };
+  }
+
+  function showCta(label: string, onClick: () => void): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("cta"), kind: "cta", label, onClick });
+      schedule(() => {
+        if (!isCurrent(runId)) return;
+        done();
+      }, 300);
     };
   }
 
@@ -969,6 +1321,9 @@ export function PatternDemo() {
       say(SOURCES_INTRO_SEGMENTS),
       showSources(DEMO_SOURCES),
       pause(400),
+      say(CITATION_COMBO_INTRO_SEGMENTS),
+      showCitationCombo(),
+      pause(400),
       say(OUTRO_SEGMENTS),
       showFollowUps(["Show me more patterns", "Show me a diff", "Give me a slow answer"]),
     ]);
@@ -987,13 +1342,32 @@ export function PatternDemo() {
       pause(400),
       say(SELECTION_INTRO_SEGMENTS),
       showSelectionActions(),
+      pause(400),
+      say(DIFFTABS_INTRO_SEGMENTS),
+      showDiffTabs(),
+      pause(400),
+      say(COMPARE_INTRO_SEGMENTS),
+      showCompare(),
+      pause(400),
+      say(CONFIDENCE_INTRO_SEGMENTS),
+      showConfidence(),
+      pause(400),
+      say(TRUST_INTRO_SEGMENTS),
+      showTrust(),
+      pause(400),
+      say(PALETTE_INTRO_SEGMENTS),
+      showPalette(),
+      pause(400),
+      say(VOICE_INTRO_SEGMENTS),
+      showVoice(),
       pause(500),
       say(SKILL_INTRO_SEGMENTS),
       showTerminal("/plugin install ai-patterns@ai-patterns", SKILL_INSTALL_SCRIPT),
       say(SKILL_OUTRO_SEGMENTS),
       pause(300),
       say(MORE_OUTRO_SEGMENTS),
-      showFollowUps(["Replay from the start", "Show me a diff", "Ask permission first"]),
+      showCta("Browse the full registry", () => router.push("/patterns")),
+      showFollowUps(["Replay from the start", "Compare two answers", "Talk instead of type"]),
     ]);
   }
 
@@ -1146,6 +1520,36 @@ export function PatternDemo() {
     runSteps([thinking(700), say(PARTIAL_RESPONSE_INTRO_SEGMENTS), showPartial()]);
   }
 
+  function runDiffTabsFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(700), say(DIFFTABS_INTRO_SEGMENTS), showDiffTabs()]);
+  }
+
+  function runCompareFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(900), say(COMPARE_INTRO_SEGMENTS), showCompare()]);
+  }
+
+  function runConfidenceFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(700), say(CONFIDENCE_INTRO_SEGMENTS), showConfidence()]);
+  }
+
+  function runTrustFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(700), say(TRUST_INTRO_SEGMENTS), showTrust()]);
+  }
+
+  function runPaletteFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(500), say(PALETTE_INTRO_SEGMENTS), showPalette()]);
+  }
+
+  function runVoiceFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(500), say(VOICE_INTRO_SEGMENTS), showVoice()]);
+  }
+
   function dispatchSuggestion(id: string, label: string) {
     switch (id) {
       case "diff":
@@ -1176,6 +1580,18 @@ export function PatternDemo() {
         return runRateLimitFlow(label);
       case "partial":
         return runPartialFlow(label);
+      case "difftabs":
+        return runDiffTabsFlow(label);
+      case "compare":
+        return runCompareFlow(label);
+      case "confidence":
+        return runConfidenceFlow(label);
+      case "trust":
+        return runTrustFlow(label);
+      case "palette":
+        return runPaletteFlow(label);
+      case "voice":
+        return runVoiceFlow(label);
       case "more":
         return runMoreTour(label);
       case "skill":
@@ -1369,6 +1785,15 @@ function BlockView({
           <InlineCitation index={2} source={CITATION_SOURCES[1]} />.
         </p>
       );
+    case "citationCombo":
+      return (
+        <div className="w-full max-w-md text-sm leading-relaxed text-foreground/90">
+          Tailwind v4 is a ground-up rewrite of the framework
+          <InlineCitation index={1} source={CITATION_SOURCES[0]} />, and every animation on this page runs on
+          Motion
+          <HoverTrustCitation index={2} source={TRUST_SOURCES[1]} />.
+        </div>
+      );
     case "ratelimit":
       return (
         <RateLimit
@@ -1382,5 +1807,60 @@ function BlockView({
       );
     case "partial":
       return <LivePartialResponse content={block.content} reason={block.reason} />;
+    case "compare":
+      return (
+        <ResponseCompare
+          prompt="Draft a one-line description of the Confidence Indicator pattern."
+          responses={COMPARE_RESPONSES}
+          className="w-full"
+        />
+      );
+    case "confidence":
+      return (
+        <div className="flex w-full max-w-md flex-col gap-3 rounded-2xl border bg-card p-4">
+          <p className="text-sm leading-relaxed text-foreground/90">
+            The rate limit card reads{" "}
+            <span className="font-medium">
+              &ldquo;Resets in 4 minutes&rdquo;
+              <ConfidenceIndicator
+                level="high"
+                variant="dot"
+                reason="Computed directly from the resetAt prop, not estimated."
+                className="ml-1"
+              />
+            </span>
+            {" "}— but whether people actually read it before retrying is{" "}
+            <ConfidenceIndicator level="low" variant="dot" reason="No usage data on this yet — it's a guess." className="ml-0.5" />
+            .
+          </p>
+          <ConfidenceIndicator
+            level="medium"
+            reason="Based on the two similar patterns we shipped last quarter."
+            percentage={61}
+          />
+        </div>
+      );
+    case "trust":
+      return <SourceTrustCard sources={TRUST_SOURCES} />;
+    case "difftabs":
+      return <DiffTabs files={DIFF_TABS_FILES} className="w-full max-w-md" />;
+    case "palette":
+      return (
+        <CommandPaletteWindow
+          groups={PALETTE_GROUPS}
+          placeholder="Search patterns…"
+          emptyLabel="No matches"
+          onSelect={block.onSelect}
+          className="w-full max-w-md"
+        />
+      );
+    case "voice":
+      return <LiveVoiceExchange onDone={block.onDone} />;
+    case "cta":
+      return (
+        <div className="flex w-full max-w-md justify-start">
+          <ShinyButton onClick={block.onClick}>{block.label}</ShinyButton>
+        </div>
+      );
   }
 }
