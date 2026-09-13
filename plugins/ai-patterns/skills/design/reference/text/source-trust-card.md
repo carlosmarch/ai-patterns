@@ -6,9 +6,9 @@
 
 ## Summary
 A paginated card for a single cited source, showing its favicon, title, and
-snippet, plus an optional trust badge that tells the reader why the source
-is credible. A row of domain pills below lets the reader jump straight to
-any source in the set.
+snippet, plus an optional "Trusted" badge that reveals why the source is
+credible on hover. A row of domain pills below lets the reader jump
+straight to any source in the set.
 
 ## When to use
 - An AI answer cites a small set of web sources (roughly 2–6) and the
@@ -35,8 +35,10 @@ any source in the set.
   "N sources" label.
 - Source body (clickable, opens the source): favicon, domain, title,
   short description/snippet.
-- Trust badge (optional, only when a source is verified): shield icon,
-  "Trusted" label, one sentence explaining why, and a "Learn more" link.
+- Trust badge (optional, only when a source is verified): a small shield
+  icon + "Trusted" pill pinned above the domain; hovering or focusing it
+  reveals a tooltip with one sentence explaining why, and a "Learn more"
+  link.
 - Domain pill row (only when there's more than one source): one pill per
   source for direct navigation; the active pill is visually distinct.
 
@@ -46,9 +48,15 @@ any source in the set.
 - Clicking a domain pill jumps directly to that source, sliding in the
   correct direction (forward if later in the set, backward if earlier).
 - The whole source body (favicon, title, description) is a single link
-  that opens the source in a new tab.
+  that opens the source in a new tab; the trust badge sits outside that
+  link so it can be hovered or focused independently.
 - The trust badge only renders when the current source has a trust
   reason — most sources in a set will not have one, and that's expected.
+  It stays collapsed to the "Trusted" pill until hovered or focused, so it
+  never pushes the card's height around.
+- The tooltip opens on hover or keyboard focus, closes on mouse leave,
+  blur, or Escape, and flips above or below the badge depending on
+  available viewport space.
 - Favicon falls back to a generic globe icon if the image is missing or
   fails to load.
 
@@ -68,8 +76,11 @@ any source in the set.
   and position without relying on the visual pagination alone.
 - Domain pills use `aria-current` on the active source so assistive tech
   can tell which one is showing.
+- The trust badge is a real `button`, reachable by keyboard: focusing it
+  opens the tooltip the same way hovering does, and the tooltip is linked
+  back to the badge with `aria-describedby` so screen readers announce it.
 - Respect `prefers-reduced-motion`: reduce or remove the slide transition
-  between sources.
+  between sources and the tooltip's fade-in.
 
 ## Related patterns
 - `Sources Stack` — better for larger sets browsed as a single list
@@ -91,6 +102,7 @@ instead of copying these Tailwind classes or the Motion API.
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Globe, ShieldCheck } from "lucide-react";
 
@@ -103,7 +115,7 @@ export interface TrustedSource {
   url: string;
   /** Falls back to a globe icon when omitted or when the image fails to load. */
   faviconUrl?: string;
-  /** Shows the trust badge and, when given, why the source is trusted. */
+  /** Shows a "Trusted" badge; hovering or focusing it reveals why the source is trusted. */
   trustReason?: string;
 }
 
@@ -169,43 +181,31 @@ export function SourceTrustCard({ sources, defaultIndex = 0, className }: Source
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="p-3"
           >
-            <a
-              href={source.url}
-              target="_blank"
-              rel="noreferrer"
-              className="-m-1 flex items-start gap-2.5 rounded-lg p-1 transition-colors hover:bg-accent/50"
-            >
-              <Favicon source={source} />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-xs text-muted-foreground">{source.domain}</span>
-                <span className="mt-0.5 block line-clamp-2 text-sm font-medium leading-snug text-foreground">
-                  {source.title}
+            <div className="relative">
+              <a
+                href={source.url}
+                target="_blank"
+                rel="noreferrer"
+                className="-m-1 flex items-start gap-2.5 rounded-lg p-1 transition-colors hover:bg-accent/50"
+              >
+                <Favicon source={source} />
+                <span className="min-w-0 flex-1">
+                  <span className={cn("block truncate text-xs text-muted-foreground", source.trustReason && "pr-16")}>
+                    {source.domain}
+                  </span>
+                  <span className="mt-0.5 block line-clamp-2 text-sm font-medium leading-snug text-foreground">
+                    {source.title}
+                  </span>
+                  <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                    {source.description}
+                  </span>
                 </span>
-                <span className="mt-1 block line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                  {source.description}
-                </span>
-              </span>
-            </a>
+              </a>
 
-            {source.trustReason && (
-              <div className="mt-3 border-t pt-3">
-                <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-                  <ShieldCheck className="size-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden />
-                  Trusted
-                </div>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  <span className="font-medium text-foreground/80">{source.domain}</span> {source.trustReason}
-                </p>
-                <a
-                  href={source.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1.5 inline-block text-xs font-medium text-primary hover:underline"
-                >
-                  Learn more
-                </a>
-              </div>
-            )}
+              {source.trustReason && (
+                <TrustBadge domain={source.domain} reason={source.trustReason} url={source.url} />
+              )}
+            </div>
           </motion.div>
         </AnimatePresence>
       </div>
@@ -247,6 +247,137 @@ function Favicon({ source }: { source: TrustedSource }) {
         <Globe className="size-4 text-muted-foreground" aria-hidden />
       )}
     </span>
+  );
+}
+
+const TOOLTIP_WIDTH = 224;
+const MARGIN = 8;
+
+interface Position {
+  top: number;
+  left: number;
+  placement: "top" | "bottom";
+}
+
+function TrustBadge({ domain, reason, url }: { domain: string; reason: string; url: string }) {
+  const [open, setOpen] = React.useState(false);
+  const [position, setPosition] = React.useState<Position | null>(null);
+  const mounted = useMounted();
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const tooltipRef = React.useRef<HTMLDivElement>(null);
+  const tooltipId = React.useId();
+
+  const reposition = React.useCallback(() => {
+    const rect = triggerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const placement: Position["placement"] = rect.top > 140 ? "top" : "bottom";
+    const left = Math.min(
+      Math.max(rect.right, TOOLTIP_WIDTH + MARGIN),
+      window.innerWidth - MARGIN
+    );
+    setPosition({ top: placement === "top" ? rect.top - MARGIN : rect.bottom + MARGIN, left, placement });
+  }, []);
+
+  function show() {
+    reposition();
+    setOpen(true);
+  }
+  function hide() {
+    setOpen(false);
+  }
+
+  React.useEffect(() => {
+    if (!open) return;
+
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("keydown", handleKey);
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("resize", reposition);
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      window.removeEventListener("scroll", reposition, true);
+      window.removeEventListener("resize", reposition);
+    };
+  }, [open, reposition]);
+
+  return (
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-describedby={open ? tooltipId : undefined}
+        aria-expanded={open}
+        onMouseEnter={show}
+        onMouseLeave={hide}
+        onFocus={show}
+        onBlur={hide}
+        className="absolute right-0 top-0 inline-flex items-center gap-1 rounded-full border border-emerald-600/30 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-400 dark:hover:bg-emerald-950/70"
+      >
+        <ShieldCheck className="size-3" aria-hidden />
+        Trusted
+      </button>
+
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {open && position && (
+              <div
+                ref={tooltipRef}
+                style={{
+                  position: "fixed",
+                  top: position.top,
+                  left: position.left,
+                  width: TOOLTIP_WIDTH,
+                  transform:
+                    position.placement === "top"
+                      ? `translate(-100%, -100%)`
+                      : `translate(-100%, 0)`,
+                }}
+                className="z-50"
+              >
+                <motion.div
+                  id={tooltipId}
+                  role="tooltip"
+                  initial={{ opacity: 0, y: position.placement === "top" ? 4 : -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: position.placement === "top" ? 4 : -4 }}
+                  transition={{ duration: 0.12 }}
+                  className="rounded-xl border bg-popover p-3 text-left shadow-md"
+                >
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
+                    <ShieldCheck className="size-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden />
+                    Trusted
+                  </div>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    <span className="font-medium text-foreground/80">{domain}</span> {reason}
+                  </p>
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1.5 inline-block text-xs font-medium text-primary hover:underline"
+                  >
+                    Learn more
+                  </a>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
+    </>
+  );
+}
+
+/** True only once the client has rendered — lets a portal target `document.body` without an SSR mismatch. */
+function useMounted() {
+  return React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
   );
 }
 ```
