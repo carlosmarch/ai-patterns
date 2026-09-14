@@ -1,7 +1,7 @@
 export const pattern = `# Connectivity Error
 
 ## Summary
-A dismissible card that surfaces a network connectivity failure with a short description and two recovery actions — "View details" and "Try again". Appears inline in the layout, not as a toast or modal, and exits with a fade when dismissed or retried.
+A dismissible banner that surfaces a network connectivity failure with a short description and two recovery actions — "View details" and "Try again". Spans the full width of its container as a single row, appears inline in the layout (not as a toast or modal), and exits with a fade when dismissed or retried.
 
 ## When to use
 - When the AI product loses its connection to the backend mid-session or on page load, and the user needs to know before submitting another prompt.
@@ -14,12 +14,13 @@ A dismissible card that surfaces a network connectivity failure with a short des
 - When there is no meaningful "View details" target — omit that action rather than linking to a dead end.
 
 ## Anatomy
-- **Icon**: \`WifiOff\` (or similar offline icon) at 16px, next to the title. Decorative — \`aria-hidden\`.
-- **Title**: Short, factual label ("Connection lost"). Medium-bold, text-foreground.
-- **Close button**: Icon-only × button at the top-right, hidden if \`onClose\` is not provided.
-- **Description**: One sentence explaining what may have caused the issue and what the user can do. Muted text.
-- **View details button**: Secondary bordered button, left-aligned in the footer row. Omitted if \`onViewDetails\` is not provided.
-- **Try again button**: Secondary bordered button, right-aligned in the footer row. Omitted if \`onRetry\` is not provided.
+- **Container**: Single row, full width, small border radius, no shadow — reads as a slim banner rather than a card.
+- **Icon**: \`WifiOff\` (or similar offline icon) at 14px, next to the title. Decorative — \`aria-hidden\`.
+- **Title**: Short, factual label ("Connection lost"). Small, semibold, text-foreground.
+- **Description**: One short sentence, inline after the title on the same row. Small, muted text, truncates if the row runs out of space.
+- **View details button**: Small secondary bordered button in the trailing action group. Omitted if \`onViewDetails\` is not provided.
+- **Try again button**: Small secondary bordered button in the trailing action group. Omitted if \`onRetry\` is not provided.
+- **Close button**: Icon-only × button at the far right of the action group, hidden if \`onClose\` is not provided.
 
 ## Behavior
 - Mounts with a short upward fade (opacity 0→1, y −6→0, 200 ms ease-out).
