@@ -68,6 +68,8 @@ import CollaborativePresenceDemo from "./collaboration/collaborative-presence/de
 import { pattern as collaborativePresencePattern } from "./collaboration/collaborative-presence/pattern";
 import InviteMembersDemo from "./access/invite-members/demo";
 import { pattern as inviteMembersPattern } from "./access/invite-members/pattern";
+import AnalysisListDemo from "./loaders/analysis-list/demo";
+import { pattern as analysisListPattern } from "./loaders/analysis-list/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -354,6 +356,14 @@ export const registry: RegistryEntry[] = [
       "A two-step modal for searching or emailing people to a record and assigning each a role, with a live current-members list.",
     Demo: InviteMembersDemo,
     uxDoc: inviteMembersPattern,
+  },
+  {
+    slug: "analysis-list",
+    category: "loaders",
+    title: "Analysis List",
+    description: "A full-width indeterminate progress bar over a list whose items resolve from skeletons one by one.",
+    Demo: AnalysisListDemo,
+    uxDoc: analysisListPattern,
   },
 ];
 
