@@ -72,26 +72,31 @@ function useElapsedSeconds() {
   return elapsed;
 }
 
-/**
- * The shimmer sweeps once, pauses, then repeats — like the Shiny Button's
- * light sweep — on this outer span; the word inside it swaps instantly with
- * no transition, so cycling never looks laggy against the sweep.
- */
 function ShimmerWord({ word }: { word: string }) {
   return (
-    <motion.span
-      className="inline-block bg-clip-text text-sm font-medium text-transparent"
-      style={{
-        backgroundImage:
-          "linear-gradient(90deg, var(--muted-foreground) 30%, var(--foreground) 50%, var(--muted-foreground) 70%)",
-        backgroundSize: "200% 100%",
-      }}
-      initial={{ backgroundPositionX: "150%" }}
-      animate={{ backgroundPositionX: "-50%" }}
-      transition={{ repeat: Infinity, repeatType: "loop", duration: 1.4, ease: "linear", repeatDelay: 0.8 }}
-    >
-      <span className="inline-block whitespace-nowrap">{word}</span>
-    </motion.span>
+    <span className="relative inline-block h-[1.2em] overflow-hidden text-sm font-medium">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={word}
+          className="inline-block whitespace-nowrap bg-clip-text text-transparent"
+          style={{
+            backgroundImage:
+              "linear-gradient(90deg, var(--muted-foreground) 30%, var(--foreground) 50%, var(--muted-foreground) 70%)",
+            backgroundSize: "200% 100%",
+          }}
+          initial={{ y: 10, opacity: 0, backgroundPositionX: "150%" }}
+          animate={{ y: 0, opacity: 1, backgroundPositionX: "-50%" }}
+          exit={{ y: -10, opacity: 0 }}
+          transition={{
+            y: { duration: 0.08, ease: "easeOut" },
+            opacity: { duration: 0.08, ease: "easeOut" },
+            backgroundPositionX: { repeat: Infinity, repeatType: "loop", duration: 1.4, ease: "linear", repeatDelay: 0.8 },
+          }}
+        >
+          {word}
+        </motion.span>
+      </AnimatePresence>
+    </span>
   );
 }
 
