@@ -17,6 +17,12 @@ const THEME_INIT_SCRIPT = `
 })();
 `;
 
+const SCROLL_RESTORATION_SCRIPT = `
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+`;
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -41,6 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: SCROLL_RESTORATION_SCRIPT }} />
       </head>
       <body className="flex min-h-full flex-col font-sans">
         <header className="border-b">
