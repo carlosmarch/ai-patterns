@@ -31,24 +31,35 @@ export default async function Home() {
         />
 
         <div className="mx-auto w-full max-w-3xl px-6 pt-20 pb-16 text-center">
-          <Link
-            href="/skill"
-            className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
+          <div className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
             <Sparkles className="size-3.5" />
-            Also ships as a Claude Code skill
-          </Link>
+            A portable UX contract, not a skin
+          </div>
 
           <h1 className="mt-6 text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
-            Design patterns for AI agents
+            The pattern language for agentic UI
           </h1>
           <p className="mx-auto mt-4 max-w-md text-muted-foreground">
-            Production components for AI agent UIs — each ships with a UX spec the harness can
-            read. Guardrails for what to render, when, and why.{" "}
-            <Link href="/skill" className="text-foreground underline underline-offset-4">
-              Use the skill.
-            </Link>
+            Each pattern ships with a UX spec the harness can read, not just markup — guardrails
+            for what to render, when, and why.
           </p>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/patterns"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
+            >
+              Browse as a developer
+              <ArrowUpRight className="size-3.5" />
+            </Link>
+            <Link
+              href="/skill"
+              className="inline-flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              Install as a Claude Code skill
+              <ArrowUpRight className="size-3.5" />
+            </Link>
+          </div>
 
           {featured && (
             <div className="mx-auto mt-10 max-w-lg text-left">
