@@ -36,6 +36,7 @@ import { LiveTranscript, type TranscriptSegment } from "@/registry/voice/live-tr
 import { VoiceWaveform } from "@/registry/voice/voice-waveform/component";
 import { ShinyButton } from "@/registry/buttons/shiny-button/component";
 import { SUGGESTIONS } from "./suggestions";
+import { trackDemoPromptSubmitted } from "@/lib/analytics";
 
 // ---------------------------------------------------------------------------
 // Demo data
@@ -1381,6 +1382,11 @@ export function PatternDemo() {
     ]);
   }
 
+  function runTourFlow(userText: string) {
+    addUserMessage(userText);
+    runTour();
+  }
+
   function runDiffFlow(userText: string) {
     addUserMessage(userText);
     runSteps([
@@ -1552,6 +1558,8 @@ export function PatternDemo() {
 
   function dispatchSuggestion(id: string, label: string) {
     switch (id) {
+      case "tour":
+        return runTourFlow(label);
       case "diff":
         return runDiffFlow(label);
       case "terminal":
@@ -1624,6 +1632,8 @@ export function PatternDemo() {
       SUGGESTIONS.find((s) => s.label.toLowerCase() === raw.toLowerCase()) ??
       (command ? SUGGESTIONS.find((s) => s.id === command.id) : undefined);
     const trimmed = suggestion?.label ?? raw;
+
+    trackDemoPromptSubmitted({ is_suggestion: !!suggestion, suggestion_id: suggestion?.id });
 
     if (!suggestion) {
       runReplyFlow(trimmed);

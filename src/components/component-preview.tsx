@@ -1,8 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { trackTabChanged } from "@/lib/analytics";
 
 export function ComponentPreview({
   preview,
@@ -13,8 +15,17 @@ export function ComponentPreview({
   code: ReactNode;
   pattern?: ReactNode;
 }) {
+  const pathname = usePathname();
+
+  function handleTabChange(tab: string) {
+    const match = pathname?.match(/\/patterns\/([^/]+)\/([^/]+)/);
+    if (match) {
+      trackTabChanged({ tab, category: match[1], slug: match[2] });
+    }
+  }
+
   return (
-    <Tabs defaultValue="preview">
+    <Tabs defaultValue="preview" onValueChange={handleTabChange}>
       <TabsList>
         <TabsTrigger value="preview">Preview</TabsTrigger>
         <TabsTrigger value="code">Code</TabsTrigger>

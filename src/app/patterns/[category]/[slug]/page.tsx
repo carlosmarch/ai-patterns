@@ -42,7 +42,7 @@ export default async function PatternPage({
 
       <ComponentPreview
         preview={<Demo />}
-        code={<CodeBlock code={source} />}
+        code={<CodeBlock code={source} trackAs="component" />}
         pattern={
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-4">
@@ -55,7 +55,7 @@ export default async function PatternPage({
                 className="shrink-0"
               />
             </div>
-            <CodeBlock code={entry.uxDoc} lang="markdown" wrap />
+            <CodeBlock code={entry.uxDoc} lang="markdown" wrap trackAs="spec" />
           </div>
         }
       />

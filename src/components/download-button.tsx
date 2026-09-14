@@ -1,8 +1,10 @@
 "use client";
 
 import { Download } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { trackSpecDownloaded } from "@/lib/analytics";
 
 export function DownloadButton({
   filename,
@@ -13,6 +15,8 @@ export function DownloadButton({
   content: string;
   className?: string;
 }) {
+  const pathname = usePathname();
+
   function handleDownload() {
     const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -23,6 +27,11 @@ export function DownloadButton({
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+
+    const match = pathname?.match(/\/patterns\/([^/]+)\/([^/]+)/);
+    if (match) {
+      trackSpecDownloaded({ category: match[1], slug: match[2] });
+    }
   }
 
   return (
