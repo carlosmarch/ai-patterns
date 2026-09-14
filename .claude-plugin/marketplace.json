@@ -10,7 +10,7 @@
       "name": "ai-patterns",
       "source": "./plugins/ai-patterns",
       "description": "Design-engineering expert for AI product prototypes. Recommends and scaffolds screens from the ai-patterns catalogue, defaulting to its demoed Tailwind + Radix + Motion look but adapting to any host design system.",
-      "version": "0.11.8",
+      "version": "0.11.9",
       "author": {
         "name": "carlosmarch"
       },
