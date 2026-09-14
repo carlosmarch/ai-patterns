@@ -6,36 +6,11 @@ import { RotateCcw } from "lucide-react";
 import { AnalysisList, type AnalysisItem } from "./component";
 
 const RESULTS: Omit<AnalysisItem, "status">[] = [
-  {
-    id: "1",
-    imageUrl: "https://picsum.photos/seed/analysis-bridge/96",
-    title: "Golden Gate Bridge",
-    info: "Landmark · San Francisco, CA",
-  },
-  {
-    id: "2",
-    imageUrl: "https://picsum.photos/seed/analysis-trail/96",
-    title: "Trail map.pdf",
-    info: "Document · 3 pages",
-  },
-  {
-    id: "3",
-    imageUrl: "https://picsum.photos/seed/analysis-sunset/96",
-    title: "Sunset over the bay",
-    info: "Photo · Shot on iPhone 15",
-  },
-  {
-    id: "4",
-    imageUrl: "https://picsum.photos/seed/analysis-offsite/96",
-    title: "Team offsite.mov",
-    info: "Video · 2m 14s",
-  },
-  {
-    id: "5",
-    imageUrl: "https://picsum.photos/seed/analysis-receipt/96",
-    title: "Expense receipt",
-    info: "Document · scanned",
-  },
+  { id: "1", title: "components/StopButton.tsx", info: "Matches Stop Generation Button" },
+  { id: "2", title: "components/ToolBadge.tsx", info: "Matches Tool Call Chip" },
+  { id: "3", title: "components/ChatMessage.tsx", info: "Matches Chat Bubble" },
+  { id: "4", title: "components/UploadTray.tsx", info: "Matches Attachment Chip" },
+  { id: "5", title: "components/CommandMenu.tsx", info: "Matches Command Palette" },
 ];
 
 function initialItems(): AnalysisItem[] {

@@ -19,7 +19,7 @@ A batch-processing loader: a full-width indeterminate progress bar sits above a 
 ## Anatomy
 - Indeterminate bar: a thin (4px), full-width track at the top of the list container with a short filled segment sweeping back and forth.
 - Item rows, each with:
-  - Thumbnail (fixed square, rounded corners).
+  - Thumbnail (fixed square, rounded corners); falls back to a generic icon when the item has no image or it fails to load — never a broken-image glyph.
   - Title line.
   - Secondary info line (smaller, muted).
   - Trailing status glyph: nothing while queued, a spinner while loading, a check once done.
@@ -29,16 +29,17 @@ A batch-processing loader: a full-width indeterminate progress bar sits above a 
 - A "pending" item's thumbnail and text render as static (non-animated), dimmed (~50% opacity) skeleton blocks — visually queued, not yet being worked on.
 - A "loading" item's skeleton blocks switch to a pulsing animation and its trailing glyph shows a spinner — this is the one item actively resolving.
 - The instant an item's real data is available, its skeletons are replaced by the actual thumbnail, title, and info text in place (no layout shift — skeleton and content occupy the same dimensions), the spinner is replaced by a check, and the next item flips from "pending" to "loading".
-- The top progress bar keeps sweeping for as long as any item is not yet "done". The moment the last item finishes, stop and remove the bar (collapse or fade it out) rather than leaving it sweeping over a finished list.
+- The top progress bar keeps sweeping for as long as any item is not yet "done". The moment the last item finishes, unmount the bar entirely (collapse its height, don't just stop the sweep) — a finished list has no loading affordance left on screen.
 - Rows never reorder during the process — position is stable; only each row's content state changes.
 
 ## Content guidelines
 - Title: the item's real name/subject once known — a filename, a detected object, a person's name. Keep it one line, truncate with ellipsis rather than wrap.
-- Info line: one short classification or metadata fragment ("Document · 3 pages", "Landmark · San Francisco, CA"), not a full sentence.
+- Info line: one short classification or metadata fragment ("Document · 3 pages", "Matches Tool Call Chip"), not a full sentence.
 - Never show placeholder text ("Loading...", "TBD") inside a skeleton block — the skeleton shape itself communicates "not ready yet."
+- Row text runs small (title and info are both secondary to the thumbnail/status glyph) — this is a scan list, not prose; keep both lines short enough that truncation is rare.
 
 ## Accessibility
-- Mark the progress bar `role="progressbar"` and omit `aria-valuenow` (it's indeterminate); set `aria-valuetext` to a human state ("In progress" / "Complete").
+- Mark the progress bar `role="progressbar"` and omit `aria-valuenow` (it's indeterminate); set `aria-valuetext` to "In progress" while it's mounted.
 - Wrap the item list in an `aria-live="polite"` region so each reveal is announced without interrupting the user; mark a row `aria-busy="true"` while it is the active loading item.
 - Respect `prefers-reduced-motion`: keep the skeleton-to-content swap (it's informational) but reduce the sweeping bar and pulsing skeleton to a static or much subtler state.
 - Thumbnail images use empty `alt=""` when the adjacent title already names the item, to avoid redundant announcements.
@@ -62,7 +63,7 @@ instead of copying these Tailwind classes or the Motion API.
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Check, Loader2 } from "lucide-react";
+import { Check, FileCode2, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -70,7 +71,7 @@ export type AnalysisItemStatus = "pending" | "loading" | "done";
 
 export interface AnalysisItem {
   id: string;
-  /** Revealed once status is "done". Ignored (skeleton shown instead) otherwise. */
+  /** Revealed once status is "done". Ignored (skeleton shown instead) otherwise. Falls back to a generic icon when omitted or when the image fails to load. */
   imageUrl?: string;
   title?: string;
   info?: string;
@@ -97,67 +98,81 @@ export function AnalysisList({ items, analyzing, className }: AnalysisListProps)
   );
 }
 
+/** Unmounts entirely once analysis finishes — a finished list shouldn't keep showing a loading affordance. */
 function IndeterminateBar({ active }: { active: boolean }) {
   return (
-    <div
-      role="progressbar"
-      aria-label="Analyzing"
-      aria-valuetext={active ? "In progress" : "Complete"}
-      className="relative h-1 w-full shrink-0 overflow-hidden bg-muted"
-    >
-      <AnimatePresence>
-        {active && (
+    <AnimatePresence initial={false}>
+      {active && (
+        <motion.div
+          key="bar"
+          role="progressbar"
+          aria-label="Analyzing"
+          aria-valuetext="In progress"
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: 4, opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+          className="relative w-full shrink-0 overflow-hidden bg-muted"
+        >
           <motion.div
-            key="sweep"
             className="absolute inset-y-0 w-1/3 rounded-full bg-foreground/70"
             initial={{ x: "-100%" }}
             animate={{ x: ["-100%", "300%"] }}
-            exit={{ opacity: 0 }}
             transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
           />
-        )}
-      </AnimatePresence>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
 function AnalysisRow({ item }: { item: AnalysisItem }) {
   const revealed = item.status === "done";
   const loading = item.status === "loading";
+  const [imageErrored, setImageErrored] = React.useState(false);
 
   return (
     <li
       aria-busy={loading}
       className={cn(
-        "flex items-center gap-3 px-4 py-3 transition-opacity duration-300",
+        "flex items-center gap-2.5 px-3.5 py-2.5 transition-opacity duration-300",
         item.status === "pending" && "opacity-50"
       )}
     >
-      <div className="size-10 shrink-0 overflow-hidden rounded-lg bg-muted">
-        {revealed && item.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.imageUrl} alt="" className="size-full object-cover" />
+      <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
+        {revealed ? (
+          item.imageUrl && !imageErrored ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={item.imageUrl}
+              alt=""
+              className="size-full object-cover"
+              onError={() => setImageErrored(true)}
+            />
+          ) : (
+            <FileCode2 className="size-4 text-muted-foreground" aria-hidden />
+          )
         ) : (
           <Skeleton className="size-full" active={loading} />
         )}
       </div>
 
-      <div className="min-w-0 flex-1 space-y-1.5">
+      <div className="min-w-0 flex-1 space-y-1">
         {revealed && item.title ? (
-          <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
+          <p className="truncate text-xs font-medium text-foreground">{item.title}</p>
         ) : (
-          <Skeleton className="h-3.5 w-2/3 rounded" active={loading} />
+          <Skeleton className="h-3 w-2/3 rounded" active={loading} />
         )}
         {revealed && item.info ? (
-          <p className="truncate text-xs text-muted-foreground">{item.info}</p>
+          <p className="truncate text-[11px] text-muted-foreground">{item.info}</p>
         ) : (
-          <Skeleton className="h-3 w-2/5 rounded" active={loading} />
+          <Skeleton className="h-2.5 w-2/5 rounded" active={loading} />
         )}
       </div>
 
       <span className="flex size-4 shrink-0 items-center justify-center" aria-hidden>
         {loading && <Loader2 className="size-3.5 animate-spin text-muted-foreground" />}
-        {revealed && <Check className="size-4 text-emerald-600 dark:text-emerald-400" />}
+        {revealed && <Check className="size-3.5 text-emerald-600 dark:text-emerald-400" />}
       </span>
     </li>
   );
