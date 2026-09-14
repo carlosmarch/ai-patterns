@@ -203,7 +203,7 @@ function RolePicker({
                         setOpen(false);
                       }}
                       className={cn(
-                        "w-full px-3 py-2 text-left text-sm transition-colors hover:bg-accent",
+                        "w-full px-3 py-2 text-left text-xs transition-colors hover:bg-accent",
                         role.id === value && "font-semibold",
                       )}
                     >
@@ -425,7 +425,7 @@ function GeneralAccessSection({
                     >
                       <opt.Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                       <span>
-                        <span className="block text-sm">{opt.label}</span>
+                        <span className="block text-xs">{opt.label}</span>
                         <span className="block text-xs text-muted-foreground">{opt.description}</span>
                       </span>
                     </button>
@@ -644,7 +644,7 @@ function InviteModal({
                         <PlusCircle className="size-3.5 text-muted-foreground" aria-hidden />
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate text-sm font-medium text-foreground">
+                        <span className="block truncate text-xs font-medium text-foreground">
                           {query.trim() ? query.trim() : "Type an email to invite"}
                         </span>
                         <span className="block text-xs text-muted-foreground">
@@ -667,7 +667,7 @@ function InviteModal({
                           >
                             <Avatar id={member.id} name={member.name} size="sm" />
                             <span className="min-w-0 flex-1">
-                              <span className="block truncate text-sm font-medium">{member.name}</span>
+                              <span className="block truncate text-xs font-medium">{member.name}</span>
                               <span className="block truncate text-xs text-muted-foreground">{member.email}</span>
                             </span>
                           </button>
