@@ -37,20 +37,19 @@ export default async function Home() {
           </div>
 
           <h1 className="mt-6 text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
-            The pattern language for agentic UI
+            The pattern language for AI agents
           </h1>
           <p className="mx-auto mt-4 max-w-md text-muted-foreground">
-            Each pattern ships with a UX spec the harness can read, not just markup — guardrails
-            for what to render, when, and why.
+            Agentic patterns with machine-readable specs. Each pattern ships with a UX spec the
+            harness can read, not just markup — guardrails for what to render, when, and why.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link
-              href="/patterns"
+              href="#first-demo"
               className="inline-flex items-center gap-1.5 rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
             >
-              Browse as a developer
-              <ArrowUpRight className="size-3.5" />
+              Browse the catalogue →
             </Link>
             <Link
               href="/skill"
@@ -82,7 +81,11 @@ export default async function Home() {
             const Demo = entry.Demo;
             const source = sources[i];
             return (
-              <section key={entry.slug} className="space-y-3">
+              <section
+                key={entry.slug}
+                id={i === 0 ? "first-demo" : undefined}
+                className="space-y-3 scroll-mt-6"
+              >
                 <div className="flex items-baseline justify-between gap-4">
                   <div>
                     <h2 className="font-medium">{entry.title}</h2>

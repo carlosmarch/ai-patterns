@@ -18,7 +18,7 @@ export function ComponentPreview({
       <TabsList>
         <TabsTrigger value="preview">Preview</TabsTrigger>
         <TabsTrigger value="code">Code</TabsTrigger>
-        {pattern && <TabsTrigger value="pattern">Pattern</TabsTrigger>}
+        {pattern && <TabsTrigger value="pattern">Guardrails</TabsTrigger>}
       </TabsList>
       <TabsContent
         value="preview"
