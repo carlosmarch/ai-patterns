@@ -11,6 +11,7 @@ export interface StreamingTextProps {
   /** Milliseconds between each revealed character. */
   speed?: number;
   followUps?: string[];
+  onComplete?: () => void;
   className?: string;
 }
 
@@ -28,7 +29,7 @@ function tokenize(segments: StreamSegment[]): Token[] {
   return tokens;
 }
 
-export function StreamingText({ segments, speed = 18, followUps, className }: StreamingTextProps) {
+export function StreamingText({ segments, speed = 18, followUps, onComplete, className }: StreamingTextProps) {
   const tokens = React.useMemo(() => tokenize(segments), [segments]);
   const [count, setCount] = React.useState(0);
   const done = count >= tokens.length;
@@ -38,6 +39,11 @@ export function StreamingText({ segments, speed = 18, followUps, className }: St
     const id = window.setTimeout(() => setCount((c) => c + 1), speed);
     return () => window.clearTimeout(id);
   }, [count, tokens.length, speed]);
+
+  React.useEffect(() => {
+    if (done) onComplete?.();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
 
   const nodes: React.ReactNode[] = [];
   let buffer = "";

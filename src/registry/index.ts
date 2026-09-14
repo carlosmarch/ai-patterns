@@ -48,6 +48,10 @@ import PartialResponseDemo from "./errors/partial-response/demo";
 import { pattern as partialResponsePattern } from "./errors/partial-response/pattern";
 import GenerationErrorDemo from "./errors/generation-error/demo";
 import { pattern as generationErrorPattern } from "./errors/generation-error/pattern";
+import ConsoleErrorCardDemo from "./errors/console-error-card/demo";
+import { pattern as consoleErrorCardPattern } from "./errors/console-error-card/pattern";
+import ConnectivityErrorDemo from "./errors/connectivity-error/demo";
+import { pattern as connectivityErrorPattern } from "./errors/connectivity-error/pattern";
 import ResponseCompareDemo from "./compare/response-compare/demo";
 import { pattern as responseComparePattern } from "./compare/response-compare/pattern";
 import ConfidenceIndicatorDemo from "./indicators/confidence-indicator/demo";
@@ -268,6 +272,22 @@ export const registry: RegistryEntry[] = [
     description: "A console-style error card for a failed generation, with details and retry.",
     Demo: GenerationErrorDemo,
     uxDoc: generationErrorPattern,
+  },
+  {
+    slug: "console-error-card",
+    category: "errors",
+    title: "Console Error Card",
+    description: "A structured card surfacing a browser console error with a code frame, call stack, and navigation.",
+    Demo: ConsoleErrorCardDemo,
+    uxDoc: consoleErrorCardPattern,
+  },
+  {
+    slug: "connectivity-error",
+    category: "errors",
+    title: "Connectivity Error",
+    description: "A dismissible card surfacing a network connection failure with a description and retry/details actions.",
+    Demo: ConnectivityErrorDemo,
+    uxDoc: connectivityErrorPattern,
   },
   {
     slug: "response-compare",
