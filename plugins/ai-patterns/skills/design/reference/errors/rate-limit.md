@@ -13,7 +13,7 @@ A dismissible horizontal banner that warns the user their usage is approaching o
 - When a reset time is known (either a specific clock time or a duration), always show it — it transforms a hard stop into a temporary state.
 
 ## When not to use
-- Transient server errors or network failures — use the Generation Error pattern.
+- Transient server errors or network failures — use the Generation Error pattern instead.
 - Hard blocks where the user truly cannot proceed (account suspended, payment failed) — those warrant a modal or full-page state, not a dismissible banner.
 - Per-request throttling (HTTP 429 with immediate retry-after < 60s) — show a brief inline message rather than a persistent banner.
 

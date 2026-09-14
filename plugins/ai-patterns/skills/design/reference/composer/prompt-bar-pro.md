@@ -129,16 +129,19 @@ interface Trigger {
   start: number;
 }
 
-function getActiveTrigger(value: string): Trigger | null {
-  const match = value.match(/(?:^|\s)([@/])(\S*)$/);
+function getActiveTrigger(text: string): Trigger | null {
+  const match = text.match(/(?:^|\s)([@/])(\S*)$/);
   if (!match) return null;
   const [full, symbol, query] = match;
   return {
     type: symbol === "@" ? "source" : "command",
     query: query.toLowerCase(),
-    start: value.length - full.length + full.indexOf(symbol),
+    start: text.length - full.length + full.indexOf(symbol),
   };
 }
+
+const CHIP_CLASS =
+  "inline-block rounded-sm bg-primary/10 text-primary px-1.5 py-1 text-xs font-medium leading-none select-none align-middle mx-px mb-1 mr-1";
 
 export function PromptBarPro({
   suggestions,
@@ -154,7 +157,6 @@ export function PromptBarPro({
   className,
 }: PromptBarProProps) {
   const [visible, setVisible] = React.useState(() => suggestions.slice(0, visibleCount));
-  const [value, setValue] = React.useState("");
   const [environment, setEnvironment] = React.useState(environments[0]?.label ?? "");
   const [environmentOpen, setEnvironmentOpen] = React.useState(false);
   const [orchestrator, setOrchestrator] = React.useState(orchestrators[0]?.label ?? "");
@@ -165,11 +167,15 @@ export function PromptBarPro({
   const generationState: GenerationState = isControlled ? (generating ? "generating" : "idle") : internalGenerationState;
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [suppressed, setSuppressed] = React.useState(false);
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const [textBeforeCursor, setTextBeforeCursor] = React.useState("");
+  const [hasContent, setHasContent] = React.useState(false);
+  const editorRef = React.useRef<HTMLDivElement>(null);
   const environmentRef = useClickOutside<HTMLDivElement>(() => setEnvironmentOpen(false));
   const orchestratorRef = useClickOutside<HTMLDivElement>(() => setOrchestratorOpen(false));
 
-  const trigger = getActiveTrigger(value);
+  const isDisabled = generationState === "generating";
+
+  const trigger = getActiveTrigger(textBeforeCursor);
   const autocompleteSuggestions = trigger
     ? (trigger.type === "source" ? sources : commands).filter((item) =>
         item.label
@@ -179,7 +185,7 @@ export function PromptBarPro({
       )
     : [];
   const showAutocomplete = Boolean(trigger) && !suppressed && autocompleteSuggestions.length > 0;
-  const canSend = value.trim().length > 0;
+  const canSend = hasContent;
 
   const triggerKey = trigger ? `${trigger.type}:${trigger.start}` : null;
   const prevTriggerKeyRef = React.useRef(triggerKey);
@@ -190,34 +196,125 @@ export function PromptBarPro({
   }
 
   React.useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
-  }, [value]);
-
-  React.useEffect(() => {
     if (isControlled || internalGenerationState !== "generating") return;
     const id = window.setTimeout(() => setInternalGenerationState("idle"), 2600);
     return () => window.clearTimeout(id);
   }, [isControlled, internalGenerationState]);
 
+  function getTextBeforeCursor(): string {
+    const sel = window.getSelection();
+    const el = editorRef.current;
+    if (!sel?.rangeCount || !el) return "";
+    const cursorRange = sel.getRangeAt(0);
+    const range = document.createRange();
+    range.setStart(el, 0);
+    range.setEnd(cursorRange.startContainer, cursorRange.startOffset);
+    const frag = range.cloneContents();
+    let text = "";
+    frag.childNodes.forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        text += node.textContent ?? "";
+      } else if (node instanceof HTMLElement && node.dataset.chip === "true") {
+        text += `@${node.dataset.label}`;
+      }
+    });
+    return text;
+  }
+
+  function serializeEditor(): string {
+    const el = editorRef.current;
+    if (!el) return "";
+    let text = "";
+    el.childNodes.forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        text += node.textContent ?? "";
+      } else if (node instanceof HTMLElement && node.dataset.chip === "true") {
+        text += `@${node.dataset.label}`;
+      }
+    });
+    return text.trim();
+  }
+
+  function updateEditorState() {
+    const el = editorRef.current;
+    if (!el) return;
+    const hasText = (el.textContent ?? "").trim().length > 0;
+    const hasChips = el.querySelector("[data-chip]") !== null;
+    setHasContent(hasText || hasChips);
+    setTextBeforeCursor(getTextBeforeCursor());
+  }
+
+  function handlePaste(e: React.ClipboardEvent<HTMLDivElement>) {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
+  }
+
+  function insertChip(item: PromptBarItem) {
+    const sel = window.getSelection();
+    const el = editorRef.current;
+    if (!sel?.rangeCount || !el) return;
+
+    const range = sel.getRangeAt(0);
+    const container = range.startContainer;
+    const offset = range.startOffset;
+
+    // Delete the @query text from the current text node
+    if (container.nodeType === Node.TEXT_NODE) {
+      const text = container.textContent ?? "";
+      const textBefore = text.slice(0, offset);
+      const atIndex = textBefore.lastIndexOf("@");
+      if (atIndex !== -1) {
+        container.textContent = text.slice(0, atIndex) + text.slice(offset);
+        const newRange = document.createRange();
+        newRange.setStart(container, atIndex);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+      }
+    }
+
+    const chip = document.createElement("span");
+    chip.contentEditable = "false";
+    chip.dataset.chip = "true";
+    chip.dataset.label = item.label;
+    chip.textContent = `@${item.label}`;
+    chip.className = CHIP_CLASS;
+
+    const insertRange = sel.getRangeAt(0);
+    insertRange.insertNode(chip);
+
+    // Place cursor in a text node right after the chip
+    const space = document.createTextNode(" ");
+    const afterRange = document.createRange();
+    afterRange.setStartAfter(chip);
+    afterRange.insertNode(space);
+    afterRange.setStartAfter(space);
+    afterRange.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(afterRange);
+
+    updateEditorState();
+    el.focus();
+  }
+
   function handleSubmit(overrideValue?: string) {
-    const next = (overrideValue ?? value).trim();
-    if (!next || generationState === "generating") return;
-    onSubmit?.(next);
-    setValue("");
+    if (isDisabled) return;
+    if (overrideValue) {
+      onSubmit?.(overrideValue);
+      if (!isControlled) setInternalGenerationState("generating");
+      return;
+    }
+    const content = serializeEditor();
+    if (!content) return;
+    onSubmit?.(content);
+    if (editorRef.current) editorRef.current.innerHTML = "";
+    setHasContent(false);
+    setTextBeforeCursor("");
     if (!isControlled) setInternalGenerationState("generating");
   }
 
-  function applyAutocomplete(item: PromptBarItem) {
-    if (!trigger) return;
-    const insert = trigger.type === "source" ? `@${item.label}` : item.label;
-    setValue(`${value.slice(0, trigger.start)}${insert} `);
-    textareaRef.current?.focus();
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (showAutocomplete) {
       if (e.key === "ArrowDown") {
         e.preventDefault();
@@ -231,7 +328,7 @@ export function PromptBarPro({
       }
       if (e.key === "Enter" || e.key === "Tab") {
         e.preventDefault();
-        applyAutocomplete(autocompleteSuggestions[activeIndex]);
+        insertChip(autocompleteSuggestions[activeIndex]);
         return;
       }
       if (e.key === "Escape") {
@@ -254,7 +351,7 @@ export function PromptBarPro({
             key={s.id}
             type="button"
             onClick={() => handleSubmit(s.label)}
-            disabled={generationState === "generating"}
+            disabled={isDisabled}
             className="flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
           >
             <s.icon className="size-4 text-muted-foreground" />
@@ -287,7 +384,7 @@ export function PromptBarPro({
                   type="button"
                   onMouseDown={(e) => {
                     e.preventDefault();
-                    applyAutocomplete(item);
+                    insertChip(item);
                   }}
                   className={cn(
                     "flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm",
@@ -307,16 +404,28 @@ export function PromptBarPro({
         </AnimatePresence>
 
         <div className="flex flex-col gap-3 rounded-2xl border bg-card p-3 shadow-sm">
-          <textarea
-            ref={textareaRef}
-            rows={1}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            disabled={generationState === "generating"}
-            className="max-h-40 min-h-14 w-full resize-none bg-transparent px-1 py-1 text-base outline-none placeholder:text-muted-foreground disabled:text-muted-foreground"
-          />
+          <div className="relative w-full">
+            <div
+              ref={editorRef}
+              contentEditable={!isDisabled}
+              suppressContentEditableWarning
+              role="textbox"
+              aria-multiline="true"
+              aria-label={placeholder}
+              onInput={updateEditorState}
+              onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
+              className={cn(
+                "max-h-40 min-h-14 w-full overflow-x-hidden overflow-y-auto break-words bg-transparent px-1 py-1 text-base outline-none leading-normal",
+                isDisabled && "pointer-events-none text-muted-foreground"
+              )}
+            />
+            {!hasContent && (
+              <span className="pointer-events-none absolute left-1 top-1 text-base text-muted-foreground">
+                {placeholder}
+              </span>
+            )}
+          </div>
 
           <div className="flex flex-wrap items-center gap-y-2 gap-x-1">
             <button

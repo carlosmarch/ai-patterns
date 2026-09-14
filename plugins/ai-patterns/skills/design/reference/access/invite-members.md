@@ -23,59 +23,65 @@ A two-step modal for adding people to any record — an assessment, workspace, o
 - **Empty state**: Outlined dashed button with a user-plus icon and "Invite users" label.
 - **Populated state**: A row of up to four circular avatars — initials on a color-coded background for known users, envelope icon for email-only invites — followed by a "+N" overflow chip when there are more than four. Clicking either state opens the modal.
 
-### Modal — Step 1: Search
+### Modal — Step 1: Manage access
+The default view when the modal opens.
+
 - **Search field**: Full-width, placeholder "Search by name or invite by email…". Opens a dropdown on focus or typing.
 - **Dropdown**:
   - **Invite by email row** (always pinned at top): plus-circle icon; email typed so far as the primary label, or "Type an email to invite" when the field is empty; sub-text "They'll receive an email invitation to join." Disabled when field is empty.
-  - **Org member rows**: avatar with initials, name, email — filtered live. Members already assigned or already chipped are excluded.
-- No role selector, no message in this step.
+  - **Org member rows**: avatar with initials, name, email — filtered live. Members already assigned are excluded.
+- **People with access**: Scrollable list below the search field, visible only when the record already has assignees. Each row: avatar, name, email, compact inline role selector, status badge ("Confirmed", "Invite sent", "Awaiting"), resend icon, remove icon. The role selector takes effect immediately. Resend shows a brief spinning animation then resets. Remove opens a nested confirmation.
+- **General access**: Always visible at the bottom of step 1. A row with an icon, a label button ("Restricted" or "Anyone with the link"), and a description. Switching to "Anyone with the link" adds a compact role selector on the right of the row. Options: "Restricted — only people added can access this project" and "Anyone with the link — anyone with the link can view this project."
+- **Footer**: A single "Done" button that closes the modal.
 
-### Modal — Step 2: Compose
-Reached automatically when the first chip is added.
+### Modal — Step 2: Compose invite
+Reached automatically when the first chip is added from the dropdown.
+
 - **Header**: Gains a back arrow. Pressing it clears all new chips and returns to step 1 without sending anything.
-- **Search field**: Carries forward and now contains chips for everyone added so far. New people can still be added.
-- **Role selector**: Sits beside the search field; sets the role for whoever is added next; defaults to the least-privileged role (index 0 of the roles array). Does not retroactively change existing chips.
-- **Chips**: Each chip = avatar/envelope + truncated name + role label (clickable) + remove ×. Clicking the role label opens a compact per-chip picker that changes only that chip's role. Removing all chips returns to step 1.
+- **Search + chips field**: The search field carries forward and now shows chips for everyone being invited. Placeholder changes to "Add more people…" once at least one chip exists. New people can still be added.
+- **Chips**: Each chip = avatar/envelope + truncated name + remove ×. No role label inside the chip.
+- **Role selector**: Sits beside the search field, outside the chips. Sets the role that will be applied to the next person added. Defaults to the least-privileged role (index 0 of the roles array). Does not retroactively change chips already in the field.
 - **Invite message**: Textarea below the search area, pre-filled with a caller-supplied default, fully editable.
-- **Current members**: Visible only when the record already has assignees. Each row: avatar, name, email, compact inline role selector, status badge, resend icon, remove icon.
+- **Footer**: "Cancel" (discards chips, closes) and "Send invite" (saves, closes).
 
 ### Nested remove confirmation
-Overlays the modal when the remove icon is clicked on a current member. Shows the person's name, "Cancel", and a destructive "Remove" button.
+Overlays the modal when the remove icon is clicked on a current member. Shows the person's name and the message "[Name] will lose access to this project.", with "Cancel" and a destructive "Remove" button.
 
 ## Behavior
 - Adding the first chip automatically advances from step 1 to step 2.
 - Removing all chips in step 2 returns to step 1.
 - The role selector beside the search field only affects people added after it is changed.
-- The per-chip role picker changes that one chip only and closes after selection.
-- The inline role selector in "Current members" takes effect immediately; no separate save step.
-- Resending shows a brief spinning animation on the resend icon, then resets.
-- Pressing Escape: closes an open picker or confirmation first, then closes the modal.
+- The inline role selector in "People with access" takes effect immediately; no separate save step.
+- Resending an invite shows a brief spinning animation on the resend icon, then resets.
+- Pressing Escape: closes an open remove confirmation first, then closes the modal.
 - Backspace in an empty search field removes the last chip.
 - Enter on a non-empty field adds the typed value as an email chip.
-- Footer "Done" (step 1) closes without notification. "Send invite" (step 2) saves and closes. Cancel or ✕ discards unsent chips and closes.
-- Role changes on current members notify via an in-app confirmation rather than a new invite email.
+- Footer "Done" (step 1) closes without notification. "Send invite" (step 2) saves and closes. "Cancel" or ✕ discards unsent chips and closes without changes.
+- Switching general access from "Anyone with the link" back to "Restricted" hides the role selector; the previously chosen link-role is remembered if the user switches back again.
 
 ## Content guidelines
 - Entry point label: "Invite users" — not "Share", "Assign", or "Add collaborators".
 - Modal title: "Invite members" — consistent regardless of which roles are available.
 - Step 1 placeholder: "Search by name or invite by email…"
+- Step 2 placeholder (chips present): "Add more people…"
 - Invite-by-email sub-text: "They'll receive an email invitation to join." One sentence.
 - Default invite message: caller-supplied; should be contextual, not generic.
-- Status labels: "Confirmed", "Invite sent", "Awaiting response" — sentence case; past-tense for the sent state.
-- Remove dialog body: "[Name] will be unassigned from this record." — specific, not vague.
-- If only one role exists, the selector and chip labels still render with that single role; they are never hidden.
+- Status labels: "Confirmed", "Invite sent", "Awaiting" — sentence case.
+- Remove dialog body: "[Name] will lose access to this project." — specific, not vague.
+- If only one role exists, the selector still renders; it is never hidden.
 
 ## Accessibility
 - Modal: `role="dialog"`, `aria-modal`, `aria-label="Invite members"`.
-- Focus moves to the search input when the modal opens and when step advances.
-- Escape closes open pickers or confirmations first, then the modal.
-- Role selectors use `aria-haspopup="listbox"` and `aria-expanded`.
+- Focus moves to the search input when the modal opens and when advancing to step 2.
+- Escape closes an open remove confirmation first, then the modal.
+- Role selectors use `aria-haspopup="listbox"` and `aria-expanded`; their dropdowns are portal-rendered to avoid clipping.
 - Chip remove buttons carry `aria-label="Remove [name]"`.
-- Resend button `aria-label` changes to "Invite resent" during feedback.
+- Resend button `aria-label` changes to "Invite resent" during the feedback window.
 - Avatar stack trigger carries `aria-label="N member(s) — click to manage"`.
 - Reduce motion: use opacity-only transitions; skip scale and y transforms.
 
 ## Related patterns
+- Collaborative Presence — shows the same assignees as a live avatar stack; pairs naturally as the read view for what Invite Members writes
 - Tool Approval — another modal-adjacent permission flow with confirm/deny actions
 - Attachment Chip — chip removal shares the same backspace-to-remove and × affordance
 
@@ -98,6 +104,8 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowLeft,
   ChevronDown,
+  Globe,
+  Lock,
   Mail,
   PlusCircle,
   RefreshCw,
@@ -129,21 +137,24 @@ export interface Assignee {
 export interface PendingChip {
   key: string;
   type: "user" | "email";
-  /** Populated for org members. */
   id?: string;
   name: string;
   email: string;
   roleId: string;
 }
 
+export type GeneralAccessLevel = "restricted" | "anyone";
+
 export interface InviteMembersProps {
-  /** Ordered least-privileged first (e.g. Viewer → Editor → Admin). Defaults the role selector to index 0. */
+  /** Ordered least-privileged first. Defaults the role selector to index 0. */
   roles: Role[];
   orgMembers?: OrgMember[];
   initialAssignees?: Assignee[];
   defaultMessage?: string;
+  initialGeneralAccess?: GeneralAccessLevel;
   onSend?: (chips: PendingChip[], message: string) => void;
   onAssigneesChange?: (assignees: Assignee[]) => void;
+  onGeneralAccessChange?: (level: GeneralAccessLevel) => void;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -203,10 +214,7 @@ function Avatar({
     >
       {emailOnly ? (
         <Mail
-          className={cn(
-            "text-muted-foreground",
-            size === "sm" ? "size-3" : "size-3.5",
-          )}
+          className={cn("text-muted-foreground", size === "sm" ? "size-3" : "size-3.5")}
           aria-hidden
         />
       ) : (
@@ -216,7 +224,7 @@ function Avatar({
   );
 }
 
-// ─── Role picker ─────────────────────────────────────────────────────────────
+// ─── Role picker (portal-based so it's never clipped) ────────────────────────
 
 function RolePicker({
   roles,
@@ -230,24 +238,32 @@ function RolePicker({
   compact?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
+  const [dropPos, setDropPos] = React.useState<{ top: number; right: number } | null>(null);
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+  const mounted = useMounted();
   const current = roles.find((r) => r.id === value);
-  const ref = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (!open) return;
     function handle(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
+      if (!btnRef.current?.contains(e.target as Node)) setOpen(false);
     }
     document.addEventListener("mousedown", handle);
     return () => document.removeEventListener("mousedown", handle);
   }, [open]);
 
+  function toggle() {
+    const rect = btnRef.current?.getBoundingClientRect();
+    if (rect) setDropPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+    setOpen((o) => !o);
+  }
+
   return (
-    <div ref={ref} className="relative shrink-0">
+    <div className="shrink-0">
       <button
+        ref={btnRef}
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggle}
         aria-haspopup="listbox"
         aria-expanded={open}
         className={cn(
@@ -261,55 +277,50 @@ function RolePicker({
         <ChevronDown className="size-3 shrink-0 opacity-60" aria-hidden />
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.ul
-            role="listbox"
-            initial={{ opacity: 0, y: -4, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.97 }}
-            transition={{ duration: 0.1 }}
-            className="absolute right-0 top-full z-30 mt-1 min-w-[120px] overflow-hidden rounded-lg border bg-popover shadow-md"
-          >
-            {roles.map((role) => (
-              <li key={role.id}>
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={role.id === value}
-                  onClick={() => {
-                    onChange(role.id);
-                    setOpen(false);
-                  }}
-                  className={cn(
-                    "w-full px-3 py-2 text-left text-sm transition-colors hover:bg-accent",
-                    role.id === value && "font-semibold",
-                  )}
-                >
-                  {role.label}
-                </button>
-              </li>
-            ))}
-          </motion.ul>
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {open && dropPos && (
+              <motion.ul
+                role="listbox"
+                style={{ position: "fixed", top: dropPos.top, right: dropPos.right, zIndex: 200 }}
+                initial={{ opacity: 0, y: -4, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -4, scale: 0.97 }}
+                transition={{ duration: 0.1 }}
+                className="min-w-[120px] overflow-hidden rounded-lg border bg-popover shadow-md"
+              >
+                {roles.map((role) => (
+                  <li key={role.id}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={role.id === value}
+                      onClick={() => {
+                        onChange(role.id);
+                        setOpen(false);
+                      }}
+                      className={cn(
+                        "w-full px-3 py-2 text-left text-xs transition-colors hover:bg-accent",
+                        role.id === value && "font-semibold",
+                      )}
+                    >
+                      {role.label}
+                    </button>
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
     </div>
   );
 }
 
 // ─── Chip ────────────────────────────────────────────────────────────────────
 
-function Chip({
-  chip,
-  roles,
-  onRoleChange,
-  onRemove,
-}: {
-  chip: PendingChip;
-  roles: Role[];
-  onRoleChange: (roleId: string) => void;
-  onRemove: () => void;
-}) {
+function Chip({ chip, onRemove }: { chip: PendingChip; onRemove: () => void }) {
   return (
     <span className="inline-flex items-center gap-1 rounded-full border bg-muted/60 py-0.5 pl-0.5 pr-1 text-xs">
       <Avatar
@@ -319,12 +330,6 @@ function Chip({
         size="sm"
       />
       <span className="max-w-[100px] truncate font-medium">{chip.name}</span>
-      <RolePicker
-        roles={roles}
-        value={chip.roleId}
-        onChange={onRoleChange}
-        compact
-      />
       <button
         type="button"
         onClick={onRemove}
@@ -342,7 +347,7 @@ function Chip({
 const STATUS_LABEL: Record<string, string> = {
   confirmed: "Confirmed",
   invited: "Invite sent",
-  awaiting: "Awaiting response",
+  awaiting: "Awaiting",
 };
 
 const STATUS_CLASS: Record<string, string> = {
@@ -380,17 +385,10 @@ function AssigneeRow({
         size="sm"
       />
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium">{assignee.name}</div>
-        <div className="truncate text-xs text-muted-foreground">
-          {assignee.email}
-        </div>
+        <div className="truncate text-xs font-medium">{assignee.name}</div>
+        <div className="truncate text-xs text-muted-foreground">{assignee.email}</div>
       </div>
-      <RolePicker
-        roles={roles}
-        value={assignee.roleId}
-        onChange={onRoleChange}
-        compact
-      />
+      <RolePicker roles={roles} value={assignee.roleId} onChange={onRoleChange} compact />
       <span
         className={cn(
           "shrink-0 rounded-full border px-2 py-0.5 text-[10px]",
@@ -411,10 +409,7 @@ function AssigneeRow({
             : "text-muted-foreground hover:bg-accent hover:text-foreground",
         )}
       >
-        <RefreshCw
-          className={cn("size-3.5", resending && "animate-spin")}
-          aria-hidden
-        />
+        <RefreshCw className={cn("size-3.5", resending && "animate-spin")} aria-hidden />
       </button>
       <button
         type="button"
@@ -428,6 +423,121 @@ function AssigneeRow({
   );
 }
 
+// ─── General access ──────────────────────────────────────────────────────────
+
+const GENERAL_ACCESS_OPTIONS = [
+  {
+    level: "restricted" as const,
+    label: "Restricted",
+    description: "Only people added can access this project",
+    Icon: Lock,
+  },
+  {
+    level: "anyone" as const,
+    label: "Anyone with the link",
+    description: "Anyone with the link can view this project",
+    Icon: Globe,
+  },
+];
+
+function GeneralAccessSection({
+  roles,
+  value,
+  onValueChange,
+  roleId,
+  onRoleChange,
+}: {
+  roles: Role[];
+  value: GeneralAccessLevel;
+  onValueChange: (v: GeneralAccessLevel) => void;
+  roleId: string;
+  onRoleChange: (id: string) => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [dropPos, setDropPos] = React.useState<{ top: number; left: number } | null>(null);
+  const btnRef = React.useRef<HTMLButtonElement>(null);
+  const mounted = useMounted();
+  const current = GENERAL_ACCESS_OPTIONS.find((o) => o.level === value)!;
+  const Icon = current.Icon;
+
+  React.useEffect(() => {
+    if (!open) return;
+    function handle(e: MouseEvent) {
+      if (!btnRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [open]);
+
+  function toggle() {
+    const rect = btnRef.current?.getBoundingClientRect();
+    if (rect) setDropPos({ top: rect.bottom + 4, left: rect.left });
+    setOpen((o) => !o);
+  }
+
+  return (
+    <div className="flex items-center gap-3 px-4 py-3">
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
+        <Icon className="size-4 text-muted-foreground" aria-hidden />
+      </div>
+      <div className="min-w-0 flex-1">
+        <button
+          ref={btnRef}
+          type="button"
+          onClick={toggle}
+          className="inline-flex items-center gap-0.5 rounded text-xs font-medium transition-colors hover:text-muted-foreground"
+        >
+          {current.label}
+          <ChevronDown className="size-3 opacity-60" aria-hidden />
+        </button>
+        <p className="text-xs text-muted-foreground">{current.description}</p>
+      </div>
+      {value === "anyone" && (
+        <RolePicker roles={roles} value={roleId} onChange={onRoleChange} compact />
+      )}
+
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {open && dropPos && (
+              <motion.ul
+                style={{ position: "fixed", top: dropPos.top, left: dropPos.left, zIndex: 200 }}
+                initial={{ opacity: 0, y: -4, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -4, scale: 0.97 }}
+                transition={{ duration: 0.1 }}
+                className="min-w-[200px] overflow-hidden rounded-lg border bg-popover shadow-md"
+              >
+                {GENERAL_ACCESS_OPTIONS.map((opt) => (
+                  <li key={opt.level}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onValueChange(opt.level);
+                        setOpen(false);
+                      }}
+                      className={cn(
+                        "flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-accent",
+                        opt.level === value && "font-semibold",
+                      )}
+                    >
+                      <opt.Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                      <span>
+                        <span className="block text-xs">{opt.label}</span>
+                        <span className="block text-xs text-muted-foreground">{opt.description}</span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>,
+          document.body,
+        )}
+    </div>
+  );
+}
+
 // ─── Modal ───────────────────────────────────────────────────────────────────
 
 interface InviteModalProps {
@@ -435,9 +545,11 @@ interface InviteModalProps {
   orgMembers: OrgMember[];
   assignees: Assignee[];
   defaultMessage: string;
+  generalAccess: GeneralAccessLevel;
   onSend: (chips: PendingChip[], message: string) => void;
   onRoleChange: (id: string, roleId: string) => void;
   onRemove: (id: string) => void;
+  onGeneralAccessChange: (level: GeneralAccessLevel) => void;
   onClose: () => void;
 }
 
@@ -446,9 +558,11 @@ function InviteModal({
   orgMembers,
   assignees,
   defaultMessage,
+  generalAccess,
   onSend,
   onRoleChange,
   onRemove,
+  onGeneralAccessChange,
   onClose,
 }: InviteModalProps) {
   const [step, setStep] = React.useState<1 | 2>(1);
@@ -458,9 +572,8 @@ function InviteModal({
   const [message, setMessage] = React.useState(defaultMessage);
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
   const [removeConfirm, setRemoveConfirm] = React.useState<string | null>(null);
-  const [resendFeedback, setResendFeedback] = React.useState<string | null>(
-    null,
-  );
+  const [resendFeedback, setResendFeedback] = React.useState<string | null>(null);
+  const [generalAccessRole, setGeneralAccessRole] = React.useState(roles[0]?.id ?? "");
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const chipKeyRef = React.useRef(0);
@@ -472,10 +585,7 @@ function InviteModal({
   React.useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        if (removeConfirm) {
-          setRemoveConfirm(null);
-          return;
-        }
+        if (removeConfirm) { setRemoveConfirm(null); return; }
         onClose();
       }
     }
@@ -507,8 +617,7 @@ function InviteModal({
     const email = query.trim();
     if (!email) return;
     const match = orgMembers.find(
-      (m) =>
-        m.email.toLowerCase() === email.toLowerCase() && !excludedIds.has(m.id),
+      (m) => m.email.toLowerCase() === email.toLowerCase() && !excludedIds.has(m.id),
     );
     if (match) {
       addChip({ type: "user", id: match.id, name: match.name, email: match.email });
@@ -554,7 +663,7 @@ function InviteModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center gap-1 border-b px-4 py-3">
+        <div className="flex items-center gap-1 px-4 py-3">
           <AnimatePresence mode="popLayout">
             {step === 2 && (
               <motion.button
@@ -564,11 +673,7 @@ function InviteModal({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -8 }}
                 transition={{ duration: 0.15 }}
-                onClick={() => {
-                  setChips([]);
-                  setQuery("");
-                  setStep(1);
-                }}
+                onClick={() => { setChips([]); setQuery(""); setStep(1); }}
                 aria-label="Back to search"
                 className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
@@ -587,203 +692,173 @@ function InviteModal({
           </button>
         </div>
 
-        <div className="max-h-[calc(100vh-14rem)] overflow-y-auto">
-          {/* Search area */}
-          <div className="border-b px-4 py-3">
-            <div className="flex items-start gap-2">
-              {/* Chip + search field */}
-              <div
-                className="relative flex min-h-[38px] flex-1 cursor-text flex-wrap items-center gap-1 rounded-lg border bg-background px-2 py-1.5 focus-within:ring-2 focus-within:ring-ring"
-                onClick={() => inputRef.current?.focus()}
-              >
-                {chips.map((chip) => (
-                  <Chip
-                    key={chip.key}
-                    chip={chip}
-                    roles={roles}
-                    onRoleChange={(roleId) =>
-                      setChips((prev) =>
-                        prev.map((c) =>
-                          c.key === chip.key ? { ...c, roleId } : c,
-                        ),
-                      )
-                    }
-                    onRemove={() => removeChip(chip.key)}
-                  />
-                ))}
+        {/* Search area — outside scroll container so dropdown is never clipped */}
+        <div className="px-4 py-3">
+          <div className="flex items-start gap-2">
+            {/* Chip + search field */}
+            <div
+              className="relative flex min-h-[38px] flex-1 cursor-text flex-wrap items-center gap-1 rounded-lg border bg-background px-2 py-1.5 focus-within:ring-2 focus-within:ring-ring"
+              onClick={() => inputRef.current?.focus()}
+            >
+              {chips.map((chip) => (
+                <Chip key={chip.key} chip={chip} onRemove={() => removeChip(chip.key)} />
+              ))}
 
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={query}
-                  onChange={(e) => {
-                    setQuery(e.target.value);
-                    setDropdownOpen(true);
-                  }}
-                  onFocus={() => setDropdownOpen(true)}
-                  onBlur={() =>
-                    window.setTimeout(() => setDropdownOpen(false), 150)
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => { setQuery(e.target.value); setDropdownOpen(true); }}
+                onFocus={() => setDropdownOpen(true)}
+                onBlur={() => window.setTimeout(() => setDropdownOpen(false), 150)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { e.preventDefault(); if (query.trim()) addEmailChip(); }
+                  if (e.key === "Backspace" && !query && chips.length > 0) {
+                    removeChip(chips[chips.length - 1].key);
                   }
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      if (query.trim()) addEmailChip();
-                    }
-                    if (e.key === "Backspace" && !query && chips.length > 0) {
-                      removeChip(chips[chips.length - 1].key);
-                    }
-                  }}
-                  placeholder={
-                    chips.length === 0
-                      ? "Search by name or invite by email…"
-                      : ""
-                  }
-                  aria-label="Search members or enter email"
-                  className="min-w-[140px] flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                />
+                }}
+                placeholder={chips.length === 0 ? "Search by name or invite by email…" : "Add more people…"}
+                aria-label="Search members or enter email"
+                className="min-w-[140px] flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              />
 
-                {/* Dropdown */}
-                <AnimatePresence>
-                  {dropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.1 }}
-                      className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-xl border bg-popover shadow-lg"
-                    >
-                      {/* Invite by email (always pinned at top) */}
-                      <button
-                        type="button"
-                        onMouseDown={(e) => {
-                          e.preventDefault(); // keep input focused so blur doesn't race
-                          addEmailChip();
-                        }}
-                        disabled={!query.trim()}
-                        className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-40"
-                      >
-                        <span className="flex size-7 shrink-0 items-center justify-center rounded-full border bg-muted">
-                          <PlusCircle
-                            className="size-3.5 text-muted-foreground"
-                            aria-hidden
-                          />
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-sm font-medium text-foreground">
-                            {query.trim() ? query.trim() : "Type an email to invite"}
-                          </span>
-                          <span className="block text-xs text-muted-foreground">
-                            They&apos;ll receive an email invitation to join.
-                          </span>
-                        </span>
-                      </button>
-
-                      {/* Org member results */}
-                      {filtered.length > 0 && (
-                        <div className="border-t">
-                          {filtered.slice(0, 8).map((member) => (
-                            <button
-                              key={member.id}
-                              type="button"
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                addChip({
-                                  type: "user",
-                                  id: member.id,
-                                  name: member.name,
-                                  email: member.email,
-                                });
-                              }}
-                              className="flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-accent"
-                            >
-                              <Avatar
-                                id={member.id}
-                                name={member.name}
-                                size="sm"
-                              />
-                              <span className="min-w-0 flex-1">
-                                <span className="block truncate text-sm font-medium">
-                                  {member.name}
-                                </span>
-                                <span className="block truncate text-xs text-muted-foreground">
-                                  {member.email}
-                                </span>
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Role selector for next invitee (step 2 only) */}
+              {/* Dropdown — not clipped since parent has no overflow restriction */}
               <AnimatePresence>
-                {step === 2 && (
+                {dropdownOpen && (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.15 }}
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.1 }}
+                    className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-xl border bg-popover shadow-lg"
                   >
-                    <RolePicker
-                      roles={roles}
-                      value={roleForNext}
-                      onChange={setRoleForNext}
-                    />
+                    <button
+                      type="button"
+                      onMouseDown={(e) => { e.preventDefault(); addEmailChip(); }}
+                      disabled={!query.trim()}
+                      className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-40"
+                    >
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded-full border bg-muted">
+                        <PlusCircle className="size-3.5 text-muted-foreground" aria-hidden />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-xs font-medium text-foreground">
+                          {query.trim() ? query.trim() : "Type an email to invite"}
+                        </span>
+                        <span className="block text-xs text-muted-foreground">
+                          They&apos;ll receive an email invitation to join.
+                        </span>
+                      </span>
+                    </button>
+
+                    {filtered.length > 0 && (
+                      <div className="border-t">
+                        {filtered.slice(0, 8).map((member) => (
+                          <button
+                            key={member.id}
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              addChip({ type: "user", id: member.id, name: member.name, email: member.email });
+                            }}
+                            className="flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-accent"
+                          >
+                            <Avatar id={member.id} name={member.name} size="sm" />
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-xs font-medium">{member.name}</span>
+                              <span className="block truncate text-xs text-muted-foreground">{member.email}</span>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Invite message (step 2 only) */}
+            {/* Role selector for pending invitees */}
             <AnimatePresence>
               {step === 2 && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
                 >
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    rows={3}
-                    aria-label="Invite message"
-                    className="mt-3 w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
+                  <RolePicker roles={roles} value={roleForNext} onChange={setRoleForNext} />
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          {/* Current assignees */}
-          {assignees.length > 0 && (
-            <div className="px-4 py-3">
-              <h3 className="mb-2 text-xs font-medium text-muted-foreground">
-                Current members
-              </h3>
-              <div className="space-y-0.5">
-                {assignees.map((a) => (
-                  <AssigneeRow
-                    key={a.id}
-                    assignee={a}
-                    roles={roles}
-                    resending={resendFeedback === a.id}
-                    onRoleChange={(roleId) => onRoleChange(a.id, roleId)}
-                    onResend={() => handleResend(a.id)}
-                    onRemove={() => setRemoveConfirm(a.id)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Invite message */}
+          <AnimatePresence>
+            {step === 2 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows={3}
+                  aria-label="Invite message"
+                  className="mt-3 w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
+        {/* People with access — step 1 only */}
+        {step === 1 && assignees.length > 0 && (
+          <div className="max-h-52 overflow-y-auto">
+            <p className="px-4 pb-1 pt-2.5 text-xs font-medium text-muted-foreground">
+              People with access
+            </p>
+            <div className="px-2 pb-2">
+              <AnimatePresence initial={false}>
+                {assignees.map((assignee) => (
+                  <motion.div
+                    key={assignee.id}
+                    layout
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <AssigneeRow
+                      assignee={assignee}
+                      roles={roles}
+                      resending={resendFeedback === assignee.id}
+                      onRoleChange={(roleId) => onRoleChange(assignee.id, roleId)}
+                      onResend={() => handleResend(assignee.id)}
+                      onRemove={() => setRemoveConfirm(assignee.id)}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
+
+        {/* General access — step 1 only */}
+        {step === 1 && (
+          <GeneralAccessSection
+            roles={roles}
+            value={generalAccess}
+            onValueChange={onGeneralAccessChange}
+            roleId={generalAccessRole}
+            onRoleChange={setGeneralAccessRole}
+          />
+        )}
+
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 border-t px-4 py-3">
+        <div className="flex items-center justify-end gap-2 px-4 py-3">
           <button
             type="button"
             onClick={onClose}
@@ -803,7 +878,7 @@ function InviteModal({
           )}
         </div>
 
-        {/* Nested remove confirmation */}
+        {/* Remove confirmation overlay */}
         <AnimatePresence>
           {removeConfirm && (
             <>
@@ -822,8 +897,8 @@ function InviteModal({
               >
                 <p className="text-sm font-semibold">Remove member?</p>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  {assignees.find((a) => a.id === removeConfirm)?.name ?? "This person"}{" "}
-                  will be unassigned from this record.
+                  {assignees.find((a) => a.id === removeConfirm)?.name ?? "This person"} will be
+                  will lose access to this project.
                 </p>
                 <div className="mt-4 flex justify-end gap-2">
                   <button
@@ -835,10 +910,7 @@ function InviteModal({
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      onRemove(removeConfirm);
-                      setRemoveConfirm(null);
-                    }}
+                    onClick={() => { onRemove(removeConfirm); setRemoveConfirm(null); }}
                     className="rounded-md bg-destructive px-3 py-1.5 text-sm font-medium text-destructive-foreground transition-opacity hover:opacity-90"
                   >
                     Remove
@@ -855,13 +927,7 @@ function InviteModal({
 
 // ─── Entry point trigger ──────────────────────────────────────────────────────
 
-function Trigger({
-  assignees,
-  onClick,
-}: {
-  assignees: Assignee[];
-  onClick: () => void;
-}) {
+function Trigger({ assignees, onClick }: { assignees: Assignee[]; onClick: () => void }) {
   const visible = assignees.slice(0, 4);
   const overflow = assignees.length - 4;
 
@@ -886,13 +952,7 @@ function Trigger({
       className="flex items-center -space-x-1.5 transition-opacity hover:opacity-80"
     >
       {visible.map((a) => (
-        <Avatar
-          key={a.id}
-          id={a.id}
-          name={a.name}
-          emailOnly={a.status === "invited"}
-          size="sm"
-        />
+        <Avatar key={a.id} id={a.id} name={a.name} emailOnly={a.status === "invited"} size="sm" />
       ))}
       {overflow > 0 && (
         <span className="relative z-10 flex size-7 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium text-muted-foreground">
@@ -909,12 +969,15 @@ export function InviteMembers({
   roles,
   orgMembers = [],
   initialAssignees = [],
-  defaultMessage = "I'd like to invite you to collaborate on this record.",
+  defaultMessage = "I'd like to invite you to collaborate on this project.",
+  initialGeneralAccess = "restricted",
   onSend,
   onAssigneesChange,
+  onGeneralAccessChange,
 }: InviteMembersProps) {
   const [open, setOpen] = React.useState(false);
   const [assignees, setAssignees] = React.useState<Assignee[]>(initialAssignees);
+  const [generalAccess, setGeneralAccess] = React.useState<GeneralAccessLevel>(initialGeneralAccess);
   const mounted = useMounted();
 
   function handleSend(chips: PendingChip[], msg: string) {
@@ -933,9 +996,7 @@ export function InviteMembers({
   }
 
   function handleRoleChange(id: string, roleId: string) {
-    const updated = assignees.map((a) =>
-      a.id === id ? { ...a, roleId } : a,
-    );
+    const updated = assignees.map((a) => (a.id === id ? { ...a, roleId } : a));
     setAssignees(updated);
     onAssigneesChange?.(updated);
   }
@@ -944,6 +1005,11 @@ export function InviteMembers({
     const updated = assignees.filter((a) => a.id !== id);
     setAssignees(updated);
     onAssigneesChange?.(updated);
+  }
+
+  function handleGeneralAccessChange(level: GeneralAccessLevel) {
+    setGeneralAccess(level);
+    onGeneralAccessChange?.(level);
   }
 
   const trigger = <Trigger assignees={assignees} onClick={() => setOpen(true)} />;
@@ -961,9 +1027,11 @@ export function InviteMembers({
               orgMembers={orgMembers}
               assignees={assignees}
               defaultMessage={defaultMessage}
+              generalAccess={generalAccess}
               onSend={handleSend}
               onRoleChange={handleRoleChange}
               onRemove={handleRemove}
+              onGeneralAccessChange={handleGeneralAccessChange}
               onClose={() => setOpen(false)}
             />
           )}

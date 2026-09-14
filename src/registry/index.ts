@@ -46,6 +46,8 @@ import RateLimitDemo from "./errors/rate-limit/demo";
 import { pattern as rateLimitPattern } from "./errors/rate-limit/pattern";
 import PartialResponseDemo from "./errors/partial-response/demo";
 import { pattern as partialResponsePattern } from "./errors/partial-response/pattern";
+import GenerationErrorDemo from "./errors/generation-error/demo";
+import { pattern as generationErrorPattern } from "./errors/generation-error/pattern";
 import ResponseCompareDemo from "./compare/response-compare/demo";
 import { pattern as responseComparePattern } from "./compare/response-compare/pattern";
 import ConfidenceIndicatorDemo from "./indicators/confidence-indicator/demo";
@@ -258,6 +260,14 @@ export const registry: RegistryEntry[] = [
     description: "A cut-short assistant reply with Continue and Retry actions.",
     Demo: PartialResponseDemo,
     uxDoc: partialResponsePattern,
+  },
+  {
+    slug: "generation-error",
+    category: "errors",
+    title: "Generation Error",
+    description: "A console-style error card for a failed generation, with details and retry.",
+    Demo: GenerationErrorDemo,
+    uxDoc: generationErrorPattern,
   },
   {
     slug: "response-compare",

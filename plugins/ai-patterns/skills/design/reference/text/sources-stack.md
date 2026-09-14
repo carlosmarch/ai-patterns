@@ -91,19 +91,19 @@ export function SourcesStack({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={listId}
-        className="flex w-full items-center gap-2 rounded-full border bg-card py-1.5 pl-1.5 pr-3 text-sm transition-colors hover:bg-accent/50"
+        className="flex w-full items-center gap-2 rounded-full py-1.5 pl-1.5 pr-3 transition-colors hover:bg-accent/50"
       >
         <span aria-hidden className="flex -space-x-2">
           {stacked.map((source, i) => (
             <Favicon key={source.url} source={source} style={{ zIndex: stacked.length - i }} />
           ))}
         </span>
-        <span className="text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           {sources.length} source{sources.length === 1 ? "" : "s"}
         </span>
         <ChevronDown
           className={cn(
-            "ml-auto size-3.5 shrink-0 text-muted-foreground transition-transform duration-200",
+            "size-3.5 shrink-0 text-muted-foreground transition-transform duration-200",
             open && "rotate-180"
           )}
         />
