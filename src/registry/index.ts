@@ -70,6 +70,8 @@ import InviteMembersDemo from "./access/invite-members/demo";
 import { pattern as inviteMembersPattern } from "./access/invite-members/pattern";
 import AnalysisListDemo from "./loaders/analysis-list/demo";
 import { pattern as analysisListPattern } from "./loaders/analysis-list/pattern";
+import SetupChecklistDemo from "./navigation/setup-checklist/demo";
+import { pattern as setupChecklistPattern } from "./navigation/setup-checklist/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -364,6 +366,14 @@ export const registry: RegistryEntry[] = [
     description: "A full-width indeterminate progress bar over a list whose items resolve from skeletons one by one.",
     Demo: AnalysisListDemo,
     uxDoc: analysisListPattern,
+  },
+  {
+    slug: "setup-checklist",
+    category: "navigation",
+    title: "Setup Checklist",
+    description: "A stepped onboarding card with circular arc progress, dashed-circle pending states, and strikethrough for completed steps.",
+    Demo: SetupChecklistDemo,
+    uxDoc: setupChecklistPattern,
   },
 ];
 
