@@ -58,6 +58,10 @@ import LiveTranscriptDemo from "./voice/live-transcript/demo";
 import { pattern as liveTranscriptPattern } from "./voice/live-transcript/pattern";
 import CommandPaletteDemo from "./navigation/command-palette/demo";
 import { pattern as commandPalettePattern } from "./navigation/command-palette/pattern";
+import CollaborativePresenceDemo from "./collaboration/collaborative-presence/demo";
+import { pattern as collaborativePresencePattern } from "./collaboration/collaborative-presence/pattern";
+import InviteMembersDemo from "./access/invite-members/demo";
+import { pattern as inviteMembersPattern } from "./access/invite-members/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -302,6 +306,24 @@ export const registry: RegistryEntry[] = [
     description: "A searchable ⌘K overlay for jumping to sessions or running quick actions.",
     Demo: CommandPaletteDemo,
     uxDoc: commandPalettePattern,
+  },
+  {
+    slug: "collaborative-presence",
+    category: "collaboration",
+    title: "Collaborative Presence",
+    description:
+      "An avatar stack showing who has access to a shared record and who is actively viewing it right now.",
+    Demo: CollaborativePresenceDemo,
+    uxDoc: collaborativePresencePattern,
+  },
+  {
+    slug: "invite-members",
+    category: "access",
+    title: "Invite Members",
+    description:
+      "A two-step modal for searching or emailing people to a record and assigning each a role, with a live current-members list.",
+    Demo: InviteMembersDemo,
+    uxDoc: inviteMembersPattern,
   },
 ];
 
