@@ -6,6 +6,7 @@ import "./globals.css";
 
 import { Footer } from "@/components/footer";
 import { SiteNav } from "@/components/site-nav";
+import { ScrollRestoration } from "@/components/scroll-restoration";
 
 const THEME_INIT_SCRIPT = `
 (function () {
@@ -17,6 +18,9 @@ const THEME_INIT_SCRIPT = `
 })();
 `;
 
+// Take over scroll restoration ourselves (see <ScrollRestoration>) instead of
+// letting the browser's native "auto" restore race the app router's async
+// re-render on back/forward navigation.
 const SCROLL_RESTORATION_SCRIPT = `
 if ("scrollRestoration" in history) {
   history.scrollRestoration = "manual";
@@ -50,6 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: SCROLL_RESTORATION_SCRIPT }} />
       </head>
       <body className="flex min-h-full flex-col font-sans">
+        <ScrollRestoration />
         <header className="border-b">
           <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
             <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">

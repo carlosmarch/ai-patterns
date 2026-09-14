@@ -181,7 +181,13 @@ export function CommandPaletteWindow({
     }
   }, [autoFocus]);
 
+  const prevActiveIndexRef = React.useRef<number | null>(null);
+
   React.useEffect(() => {
+    const prevActiveIndex = prevActiveIndexRef.current;
+    prevActiveIndexRef.current = activeIndex;
+    if (prevActiveIndex === null || prevActiveIndex === activeIndex) return;
+
     const row = listRef.current?.querySelector<HTMLElement>(`[data-index="${activeIndex}"]`);
     row?.scrollIntoView({ block: "nearest" });
   }, [activeIndex]);
