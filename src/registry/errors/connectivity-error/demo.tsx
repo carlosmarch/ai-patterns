@@ -8,7 +8,7 @@ export default function ConnectivityErrorDemo() {
   const [key, setKey] = React.useState(0);
 
   return (
-    <div className="flex w-full max-w-sm flex-col gap-4">
+    <div className="flex w-full max-w-2xl flex-col gap-4">
       <ConnectivityError
         key={key}
         title="Connection lost"
