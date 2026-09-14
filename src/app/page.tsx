@@ -1,12 +1,26 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import Link from "next/link";
 import { ArrowUpRight, Sparkles } from "lucide-react";
 
 import { registry } from "@/registry";
+import { CodeBlock } from "@/components/code-block";
+import { ComponentPreview } from "@/components/component-preview";
+import { DownloadButton } from "@/components/download-button";
 import { HomeHero } from "./home-hero";
 
-export default function Home() {
+export default async function Home() {
   const featured = registry.find((entry) => entry.slug === "prompt-bar-pro");
   const rest = registry.filter((entry) => entry.slug !== featured?.slug);
+
+  const sources = await Promise.all(
+    rest.map((entry) =>
+      fs.readFile(
+        path.join(process.cwd(), "src/registry", entry.category, entry.slug, "component.tsx"),
+        "utf-8"
+      )
+    )
+  );
 
   return (
     <main>
@@ -53,8 +67,9 @@ export default function Home() {
 
       <div className="mx-auto w-full max-w-3xl px-6 py-16">
         <div className="space-y-16">
-          {rest.map((entry) => {
+          {rest.map((entry, i) => {
             const Demo = entry.Demo;
+            const source = sources[i];
             return (
               <section key={entry.slug} className="space-y-3">
                 <div className="flex items-baseline justify-between gap-4">
@@ -69,9 +84,25 @@ export default function Home() {
                     View details →
                   </Link>
                 </div>
-                <div className="flex min-h-[220px] items-center justify-center rounded-xl border bg-muted/30 p-10">
-                  <Demo />
-                </div>
+                <ComponentPreview
+                  preview={<Demo />}
+                  code={<CodeBlock code={source} />}
+                  pattern={
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <p className="text-sm text-muted-foreground">
+                          A UX spec for this pattern — written for agents implementing or reusing it, not the code.
+                        </p>
+                        <DownloadButton
+                          filename={`${entry.slug}.pattern.md`}
+                          content={entry.uxDoc}
+                          className="shrink-0"
+                        />
+                      </div>
+                      <CodeBlock code={entry.uxDoc} lang="markdown" wrap />
+                    </div>
+                  }
+                />
               </section>
             );
           })}
