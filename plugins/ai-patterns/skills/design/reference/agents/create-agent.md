@@ -71,8 +71,11 @@ import {
   ChevronRight,
   GitBranch,
   Layers,
+  Plus,
   Rocket,
   Sparkles,
+  Webhook,
+  X,
   Zap,
 } from "lucide-react";
 
@@ -185,11 +188,18 @@ export interface SelectedTrigger {
   config: Record<string, string>;
 }
 
+export interface CustomTrigger {
+  id: string;
+  name: string;
+  event: string;
+}
+
 export interface CreateAgentPayload {
   name: string;
   instructions: string;
   iconId: AgentIconId;
   triggers: SelectedTrigger[];
+  customTriggers: CustomTrigger[];
 }
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -211,6 +221,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
   const [triggerConfigs, setTriggerConfigs] = React.useState<
     Partial<Record<TriggerSourceId, Record<string, string>>>
   >({});
+  const [customTriggers, setCustomTriggers] = React.useState<CustomTrigger[]>([]);
 
   const selectedIcon = AGENT_ICONS.find((i) => i.id === iconId)!;
   const SelectedIconComp = selectedIcon.icon;
@@ -238,6 +249,23 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
     }));
   }
 
+  function addCustomTrigger() {
+    setCustomTriggers((prev) => [
+      ...prev,
+      { id: `custom-${Date.now()}`, name: "", event: "" },
+    ]);
+  }
+
+  function updateCustomTrigger(id: string, field: keyof Omit<CustomTrigger, "id">, value: string) {
+    setCustomTriggers((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, [field]: value } : t))
+    );
+  }
+
+  function removeCustomTrigger(id: string) {
+    setCustomTriggers((prev) => prev.filter((t) => t.id !== id));
+  }
+
   function buildPayload(): CreateAgentPayload {
     return {
       name: name.trim() || "Unnamed Agent",
@@ -247,6 +275,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
         sourceId,
         config: triggerConfigs[sourceId] ?? {},
       })),
+      customTriggers,
     };
   }
 
@@ -452,7 +481,75 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                 })}
               </ul>
 
-              <div className="mt-4 flex gap-2">
+              {/* Custom triggers */}
+              <AnimatePresence initial={false}>
+                {customTriggers.map((ct) => (
+                  <motion.div
+                    key={ct.id}
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.15, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-2 rounded-xl border border-foreground/20 bg-muted/40">
+                      <div className="flex items-center gap-2 px-3 py-2.5">
+                        <span className="flex size-7 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                          <Webhook className="size-3.5" />
+                        </span>
+                        <span className="flex-1 text-xs font-medium text-muted-foreground">
+                          Custom trigger
+                        </span>
+                        <button
+                          type="button"
+                          aria-label="Remove custom trigger"
+                          onClick={() => removeCustomTrigger(ct.id)}
+                          className="flex size-5 items-center justify-center rounded text-muted-foreground/50 transition-colors hover:text-foreground"
+                        >
+                          <X className="size-3.5" />
+                        </button>
+                      </div>
+                      <div className="flex flex-col gap-2 border-t px-3 pb-3 pt-2.5">
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[11px] font-medium text-muted-foreground">
+                            Name
+                          </label>
+                          <input
+                            type="text"
+                            value={ct.name}
+                            onChange={(e) => updateCustomTrigger(ct.id, "name", e.target.value)}
+                            placeholder="e.g. Webhook received"
+                            className="w-full rounded-md border bg-background px-2.5 py-1.5 text-xs outline-none ring-ring placeholder:text-muted-foreground/40 focus-visible:ring-2"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[11px] font-medium text-muted-foreground">
+                            Event source
+                          </label>
+                          <input
+                            type="text"
+                            value={ct.event}
+                            onChange={(e) => updateCustomTrigger(ct.id, "event", e.target.value)}
+                            placeholder="e.g. POST /webhooks/my-agent"
+                            className="w-full rounded-md border bg-background px-2.5 py-1.5 text-xs outline-none ring-ring placeholder:text-muted-foreground/40 focus-visible:ring-2"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              <button
+                type="button"
+                onClick={addCustomTrigger}
+                className="mt-2 flex w-full items-center gap-1.5 rounded-lg border border-dashed px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
+              >
+                <Plus className="size-3.5" />
+                Add custom trigger
+              </button>
+
+              <div className="mt-3 flex gap-2">
                 <button
                   type="button"
                   onClick={goToStep0}

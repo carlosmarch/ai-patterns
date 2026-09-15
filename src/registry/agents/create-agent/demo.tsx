@@ -12,9 +12,12 @@ export default function CreateAgentDemo() {
       <div className="flex flex-col items-center gap-3 text-center">
         <p className="text-sm font-semibold">{created.name} created</p>
         <p className="max-w-[220px] text-xs text-muted-foreground">
-          {created.triggers.length === 0
+          {created.triggers.length === 0 && created.customTriggers.length === 0
             ? "No triggers configured yet."
-            : `Listening on ${created.triggers.map((t) => t.sourceId).join(", ")}.`}
+            : [
+                ...created.triggers.map((t) => t.sourceId),
+                ...created.customTriggers.map((t) => t.name || "Custom"),
+              ].join(", ") + "."}
         </p>
         <button
           type="button"
