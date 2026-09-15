@@ -78,28 +78,95 @@ import {
 
 import { cn } from "@/lib/utils";
 
+// ── Trigger sources ──────────────────────────────────────────────────────────
+
+interface TriggerField {
+  id: string;
+  label: string;
+  type: "text" | "select";
+  placeholder?: string;
+  options?: { value: string; label: string }[];
+}
+
 export const TRIGGER_SOURCES = [
   {
     id: "github" as const,
     label: "GitHub",
     icon: GitBranch,
     description: "Issues, pull requests, and labels",
+    fields: [
+      {
+        id: "repo",
+        label: "Repository",
+        type: "text" as const,
+        placeholder: "carlosmarch/ai-patterns",
+      },
+      {
+        id: "event",
+        label: "Event",
+        type: "select" as const,
+        options: [
+          { value: "issue-labeled", label: "Issue labeled" },
+          { value: "pr-opened", label: "PR opened" },
+          { value: "pr-merged", label: "PR merged" },
+        ],
+      },
+    ] satisfies TriggerField[],
   },
   {
     id: "slack" as const,
     label: "Slack",
     icon: AtSign,
     description: "Mentions, messages, and reactions",
+    fields: [
+      {
+        id: "channel",
+        label: "Channel",
+        type: "text" as const,
+        placeholder: "#design-requests",
+      },
+      {
+        id: "event",
+        label: "Trigger on",
+        type: "select" as const,
+        options: [
+          { value: "mention", label: "Agent mentioned" },
+          { value: "keyword", label: "Keyword match" },
+        ],
+      },
+    ] satisfies TriggerField[],
   },
   {
     id: "figma" as const,
     label: "Figma",
     icon: Layers,
     description: "Frame status changes and comments",
+    fields: [
+      {
+        id: "scope",
+        label: "Files",
+        type: "select" as const,
+        options: [
+          { value: "any", label: "Any Figma file" },
+          { value: "specific", label: "Specific file URL" },
+        ],
+      },
+      {
+        id: "event",
+        label: "Event",
+        type: "select" as const,
+        options: [
+          { value: "ready-for-dev", label: "Frame ready for dev" },
+          { value: "comment", label: "New comment" },
+        ],
+      },
+    ] satisfies TriggerField[],
   },
 ] as const;
 
 export type TriggerSourceId = (typeof TRIGGER_SOURCES)[number]["id"];
+
+// ── Agent icons ───────────────────────────────────────────────────────────────
 
 export const AGENT_ICONS = [
   { id: "bot" as const, icon: Bot, label: "Bot" },
@@ -111,23 +178,39 @@ export const AGENT_ICONS = [
 
 export type AgentIconId = (typeof AGENT_ICONS)[number]["id"];
 
+// ── Payload ───────────────────────────────────────────────────────────────────
+
+export interface SelectedTrigger {
+  sourceId: TriggerSourceId;
+  config: Record<string, string>;
+}
+
 export interface CreateAgentPayload {
   name: string;
+  instructions: string;
   iconId: AgentIconId;
-  triggerSources: TriggerSourceId[];
+  triggers: SelectedTrigger[];
 }
+
+// ── Props ─────────────────────────────────────────────────────────────────────
 
 export interface CreateAgentProps {
   onCreateAgent?: (payload: CreateAgentPayload) => void;
   className?: string;
 }
 
+// ── Component ─────────────────────────────────────────────────────────────────
+
 export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
   const [step, setStep] = React.useState<0 | 1>(0);
   const [direction, setDirection] = React.useState<1 | -1>(1);
   const [name, setName] = React.useState("");
+  const [instructions, setInstructions] = React.useState("");
   const [iconId, setIconId] = React.useState<AgentIconId>("bot");
   const [selectedSources, setSelectedSources] = React.useState<TriggerSourceId[]>([]);
+  const [triggerConfigs, setTriggerConfigs] = React.useState<
+    Partial<Record<TriggerSourceId, Record<string, string>>>
+  >({});
 
   const selectedIcon = AGENT_ICONS.find((i) => i.id === iconId)!;
   const SelectedIconComp = selectedIcon.icon;
@@ -148,8 +231,23 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
     );
   }
 
-  function handleCreate() {
-    onCreateAgent?.({ name: name.trim() || "Unnamed Agent", iconId, triggerSources: selectedSources });
+  function setTriggerField(sourceId: TriggerSourceId, fieldId: string, value: string) {
+    setTriggerConfigs((prev) => ({
+      ...prev,
+      [sourceId]: { ...prev[sourceId], [fieldId]: value },
+    }));
+  }
+
+  function buildPayload(): CreateAgentPayload {
+    return {
+      name: name.trim() || "Unnamed Agent",
+      instructions: instructions.trim(),
+      iconId,
+      triggers: selectedSources.map((sourceId) => ({
+        sourceId,
+        config: triggerConfigs[sourceId] ?? {},
+      })),
+    };
   }
 
   const variants = {
@@ -160,7 +258,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
 
   return (
     <div className={cn("w-full max-w-xs overflow-hidden rounded-2xl border bg-card", className)}>
-      {/* Header preview row */}
+      {/* Header preview */}
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
           <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
@@ -183,7 +281,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
         </div>
       </div>
 
-      {/* Step content */}
+      {/* Steps */}
       <div className="relative overflow-hidden">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           {step === 0 ? (
@@ -199,7 +297,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
             >
               <p className="text-sm font-semibold">Name your agent</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Give it a name and pick an icon to identify it.
+                Give it a name, instructions, and an icon.
               </p>
 
               <input
@@ -209,6 +307,15 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                 placeholder="e.g. Pattern Bot"
                 aria-label="Agent name"
                 className="mt-3 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-ring placeholder:text-muted-foreground/50 focus-visible:ring-2"
+              />
+
+              <textarea
+                value={instructions}
+                onChange={(e) => setInstructions(e.target.value)}
+                placeholder="e.g. When a GitHub issue is labeled pattern-request, analyze it and suggest a matching component from the registry."
+                aria-label="Agent instructions"
+                rows={3}
+                className="mt-2 w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-ring placeholder:text-muted-foreground/50 focus-visible:ring-2"
               />
 
               <div className="mt-3 flex items-center gap-1.5">
@@ -239,6 +346,14 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                 Choose triggers
                 <ChevronRight className="size-3.5" />
               </button>
+
+              <button
+                type="button"
+                onClick={() => onCreateAgent?.(buildPayload())}
+                className="mt-2 w-full text-center text-xs text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Skip triggers
+              </button>
             </motion.div>
           ) : (
             <motion.div
@@ -257,30 +372,25 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
               </p>
 
               <ul className="mt-3 flex flex-col gap-2">
-                {TRIGGER_SOURCES.map(({ id, label, icon: Icon, description }) => {
+                {TRIGGER_SOURCES.map(({ id, label, icon: Icon, description, fields }) => {
                   const isSelected = selectedSources.includes(id);
+                  const config = triggerConfigs[id] ?? {};
+
                   return (
-                    <li key={id}>
+                    <li key={id} className={cn("rounded-xl border transition-colors", isSelected ? "border-foreground/20 bg-muted/40" : "")}>
+                      {/* Toggle row */}
                       <button
                         type="button"
-                        role="button"
                         aria-pressed={isSelected}
                         onClick={() => toggleSource(id)}
-                        className={cn(
-                          "flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors",
-                          isSelected
-                            ? "border-foreground/20 bg-muted/60"
-                            : "hover:bg-muted/40"
-                        )}
+                        className="flex w-full items-center gap-3 px-3 py-2.5 text-left"
                       >
                         <span className="flex size-7 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground">
                           <Icon className="size-3.5" />
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block text-xs font-medium">{label}</span>
-                          <span className="block text-[11px] text-muted-foreground">
-                            {description}
-                          </span>
+                          <span className="block text-[11px] text-muted-foreground">{description}</span>
                         </span>
                         <span
                           className={cn(
@@ -293,6 +403,50 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                           {isSelected && <Check className="size-2.5" strokeWidth={3} />}
                         </span>
                       </button>
+
+                      {/* Expanded config */}
+                      <AnimatePresence initial={false}>
+                        {isSelected && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.15, ease: "easeInOut" }}
+                            className="overflow-hidden"
+                          >
+                            <div className="flex flex-col gap-2 border-t px-3 pb-3 pt-2.5">
+                              {fields.map((field) => (
+                                <div key={field.id} className="flex flex-col gap-1">
+                                  <label className="text-[11px] font-medium text-muted-foreground">
+                                    {field.label}
+                                  </label>
+                                  {field.type === "text" ? (
+                                    <input
+                                      type="text"
+                                      value={config[field.id] ?? ""}
+                                      onChange={(e) => setTriggerField(id, field.id, e.target.value)}
+                                      placeholder={field.placeholder}
+                                      className="w-full rounded-md border bg-background px-2.5 py-1.5 text-xs outline-none ring-ring placeholder:text-muted-foreground/40 focus-visible:ring-2"
+                                    />
+                                  ) : (
+                                    <select
+                                      value={config[field.id] ?? field.options?.[0]?.value ?? ""}
+                                      onChange={(e) => setTriggerField(id, field.id, e.target.value)}
+                                      className="w-full rounded-md border bg-background px-2.5 py-1.5 text-xs outline-none ring-ring focus-visible:ring-2"
+                                    >
+                                      {field.options?.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>
+                                          {opt.label}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </li>
                   );
                 })}
@@ -308,7 +462,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                 </button>
                 <button
                   type="button"
-                  onClick={handleCreate}
+                  onClick={() => onCreateAgent?.(buildPayload())}
                   className="flex-1 rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
                 >
                   Create agent
