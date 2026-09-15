@@ -7,23 +7,23 @@ import { MultiAgentTrace, type Agent } from "./component";
 
 const INITIAL: Agent[] = [
   {
-    id: "research",
-    name: "Research agent",
+    id: "triage",
+    name: "Triage agent",
     status: "running",
-    currentStep: "Searching recent changelogs",
+    currentStep: "Reading issue #pattern-request",
     elapsedSeconds: 0,
-    steps: [{ label: "Reading project docs" }],
+    steps: [{ label: "Fetched issue from carlosmarch/ai-patterns" }],
   },
   {
-    id: "code",
-    name: "Code agent",
+    id: "recommender",
+    name: "Recommender agent",
     status: "queued",
     elapsedSeconds: 0,
     steps: [],
   },
   {
-    id: "review",
-    name: "Review agent",
+    id: "pr",
+    name: "PR agent",
     status: "queued",
     elapsedSeconds: 0,
     steps: [],
@@ -41,20 +41,20 @@ export default function MultiAgentTraceDemo() {
           if (agent.status === "done" || agent.status === "error") return agent;
           const elapsed = (agent.elapsedSeconds ?? 0) + 1;
 
-          if (agent.id === "research") {
+          if (agent.id === "triage") {
             if (elapsed >= 4) {
               return {
                 ...agent,
                 status: "done",
                 currentStep: undefined,
                 elapsedSeconds: elapsed,
-                steps: [...agent.steps, { label: "Compiled findings", meta: "6 sources" }],
+                steps: [...agent.steps, { label: "Matched to Agent Triggers pattern", meta: "0.91 score" }],
               };
             }
             return { ...agent, status: "running", elapsedSeconds: elapsed };
           }
 
-          if (agent.id === "code") {
+          if (agent.id === "recommender") {
             if (elapsed < 2) return { ...agent, elapsedSeconds: elapsed };
             if (elapsed >= 6) {
               return {
@@ -62,26 +62,26 @@ export default function MultiAgentTraceDemo() {
                 status: "done",
                 currentStep: undefined,
                 elapsedSeconds: elapsed,
-                steps: [...agent.steps, { label: "Opened a pull request" }],
+                steps: [...agent.steps, { label: "Drafted component spec" }],
               };
             }
             return {
               ...agent,
               status: "running",
-              currentStep: "Editing component.tsx",
+              currentStep: "Scanning registry index",
               elapsedSeconds: elapsed,
-              steps: elapsed === 2 ? [{ label: "Reading component.tsx" }] : agent.steps,
+              steps: elapsed === 2 ? [{ label: "Loaded 38 patterns" }] : agent.steps,
             };
           }
 
-          if (agent.id === "review") {
+          if (agent.id === "pr") {
             if (elapsed < 5) return { ...agent, elapsedSeconds: elapsed };
             return {
               ...agent,
-              status: "error",
+              status: "done",
               currentStep: undefined,
               elapsedSeconds: elapsed,
-              steps: [...agent.steps, { label: "Lint check failed", meta: "2 errors" }],
+              steps: [...agent.steps, { label: "Opened PR #84", meta: "carlosmarch/ai-patterns" }],
             };
           }
 

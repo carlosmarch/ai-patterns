@@ -16,7 +16,7 @@ A configuration panel listing the external events that cause an agent to run aut
 ## Anatomy
 - Header: a title ("Triggers") and a subtitle ("When should this agent run?") scoped to the agent being configured.
 - Run agent button: an outlined play button in the header that fires the agent manually, independent of any trigger. It enters a transient "Running…" state while the agent executes.
-- Trigger list: one row per trigger, each containing an icon that identifies the source, an event name in medium weight followed by a muted location context ("in Slack", "in dm-cmarch/ai-patterns"), and a toggle on the trailing edge.
+- Trigger list: one row per trigger, each containing an icon that identifies the source, an event name in medium weight followed by a muted location context ("in Slack", "in carlosmarch/ai-patterns"), and a toggle on the trailing edge.
 - Finish setup label: a small underlined text link that appears before the toggle when a trigger has been added but not yet fully configured. Enables the trigger rather than completing setup inline — that flow belongs in a dedicated integration modal.
 - Add trigger footer: a "＋ Add trigger" text button plus icon shortcuts for common source platforms (GitHub, Slack, Figma). Both lead to the same source-picker; the icons are just accelerators for recognized integrations.
 
@@ -29,7 +29,7 @@ A configuration panel listing the external events that cause an agent to run aut
 
 ## Content guidelines
 - Event names are short noun phrases or gerunds that describe the inbound event, not the agent's response to it: "Issue labeled pattern-request", "Frame marked ready for dev". Start with the noun (Issue, Frame, Message) so items scan consistently when the list grows.
-- The context string names the specific location in sentence-case with no trailing period: "in dm-cmarch/ai-patterns", "in any Figma file".
+- The context string names the specific location in sentence-case with no trailing period: "in carlosmarch/ai-patterns", "in any Figma file".
 - Platform icons should match the brand icon for the integration, not a generic glyph. When a brand icon isn't available, use a domain-appropriate generic (a hashtag for channels, an @ for mention events).
 
 ## Accessibility

@@ -89,6 +89,30 @@ export interface RegistryEntry {
 
 export const registry: RegistryEntry[] = [
   {
+    slug: "create-agent",
+    category: "agents",
+    title: "Create Agent",
+    description: "A two-step wizard card for naming an agent, picking its icon, and selecting which event sources activate it.",
+    Demo: CreateAgentDemo,
+    uxDoc: createAgentPattern,
+  },
+  {
+    slug: "agent-triggers",
+    category: "agents",
+    title: "Agent Triggers",
+    description: "A configuration panel for listing and toggling the external events that activate an agent, with a manual run control.",
+    Demo: AgentTriggersDemo,
+    uxDoc: agentTriggersPattern,
+  },
+  {
+    slug: "multi-agent-trace",
+    category: "traces",
+    title: "Multi-Agent Trace",
+    description: "A tree of parallel sub-agent tasks, each with its own status and step list.",
+    Demo: MultiAgentTraceDemo,
+    uxDoc: multiAgentTracePattern,
+  },
+  {
     slug: "shiny-button",
     category: "buttons",
     title: "Shiny Button",
@@ -216,14 +240,6 @@ export const registry: RegistryEntry[] = [
     description: "A hoverable, clickable footnote-style source marker inline within text.",
     Demo: InlineCitationDemo,
     uxDoc: inlineCitationPattern,
-  },
-  {
-    slug: "multi-agent-trace",
-    category: "traces",
-    title: "Multi-Agent Trace",
-    description: "A tree of parallel sub-agent tasks, each with its own status and step list.",
-    Demo: MultiAgentTraceDemo,
-    uxDoc: multiAgentTracePattern,
   },
   {
     slug: "sources-stack",
@@ -378,22 +394,6 @@ export const registry: RegistryEntry[] = [
     description: "A stepped onboarding card with circular arc progress, dashed-circle pending states, and strikethrough for completed steps.",
     Demo: SetupChecklistDemo,
     uxDoc: setupChecklistPattern,
-  },
-  {
-    slug: "agent-triggers",
-    category: "agents",
-    title: "Agent Triggers",
-    description: "A configuration panel for listing and toggling the external events that activate an agent, with a manual run control.",
-    Demo: AgentTriggersDemo,
-    uxDoc: agentTriggersPattern,
-  },
-  {
-    slug: "create-agent",
-    category: "agents",
-    title: "Create Agent",
-    description: "A two-step wizard card for naming an agent, picking its icon, and selecting which event sources activate it.",
-    Demo: CreateAgentDemo,
-    uxDoc: createAgentPattern,
   },
 ];
 

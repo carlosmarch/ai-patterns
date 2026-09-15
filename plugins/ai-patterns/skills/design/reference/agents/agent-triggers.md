@@ -110,9 +110,9 @@ export const DEFAULT_TRIGGERS: AgentTrigger[] = [
   {
     id: "slack-mention",
     icon: AtSign,
-    event: "When agent is mentioned",
-    context: "in Slack",
-    enabled: false,
+    event: "When AI-Patterns is mentioned",
+    context: "in #design-requests",
+    enabled: true,
   },
   {
     id: "figma-ready",

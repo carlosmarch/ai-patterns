@@ -41,7 +41,7 @@ export const TRIGGER_SOURCES = [
         id: "repo",
         label: "Repository",
         type: "text" as const,
-        placeholder: "carlosmarch/ai-patterns",
+        placeholder: "e.g. carlosmarch/ai-patterns",
       },
       {
         id: "event",
@@ -65,7 +65,7 @@ export const TRIGGER_SOURCES = [
         id: "channel",
         label: "Channel",
         type: "text" as const,
-        placeholder: "#design-requests",
+        placeholder: "e.g. #design-requests",
       },
       {
         id: "event",
@@ -272,7 +272,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Pattern Bot"
+                placeholder="e.g. AI-Patterns"
                 aria-label="Agent name"
                 className="mt-3 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-ring placeholder:text-muted-foreground/50 focus-visible:ring-2"
               />
@@ -280,7 +280,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
               <textarea
                 value={instructions}
                 onChange={(e) => setInstructions(e.target.value)}
-                placeholder="e.g. When a GitHub issue is labeled pattern-request, analyze it and suggest a matching component from the registry."
+                placeholder="e.g. When a GitHub issue is labeled pattern-request in carlosmarch/ai-patterns, triage it and suggest a matching component."
                 aria-label="Agent instructions"
                 rows={3}
                 className="mt-2 w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-ring placeholder:text-muted-foreground/50 focus-visible:ring-2"

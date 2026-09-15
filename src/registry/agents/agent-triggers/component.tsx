@@ -15,9 +15,16 @@ export interface AgentTrigger {
   needsSetup?: boolean;
 }
 
+export interface AgentAvatar {
+  name: string;
+  src?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+}
+
 export interface AgentTriggersProps {
   title?: string;
   description?: string;
+  agent?: AgentAvatar;
   triggers?: AgentTrigger[];
   onRunAgent?: () => void;
   onToggle?: (id: string, enabled: boolean) => void;
@@ -37,15 +44,15 @@ export const DEFAULT_TRIGGERS: AgentTrigger[] = [
     id: "github-issue",
     icon: GitPullRequest,
     event: "Issue labeled pattern-request",
-    context: "in dm-cmarch/ai-patterns",
+    context: "in carlosmarch/ai-patterns",
     enabled: true,
   },
   {
     id: "slack-mention",
     icon: AtSign,
-    event: "When agent is mentioned",
-    context: "in Slack",
-    enabled: false,
+    event: "When AI-Patterns is mentioned",
+    context: "in #design-requests",
+    enabled: true,
   },
   {
     id: "figma-ready",
@@ -56,6 +63,22 @@ export const DEFAULT_TRIGGERS: AgentTrigger[] = [
     needsSetup: true,
   },
 ];
+
+function Avatar({ agent }: { agent: AgentAvatar }) {
+  return (
+    <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-muted-foreground">
+      {agent.src ? (
+        <img src={agent.src} alt={agent.name} className="size-full object-cover" />
+      ) : agent.icon ? (
+        <agent.icon className="size-4" />
+      ) : (
+        <span className="text-xs font-semibold">
+          {agent.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+        </span>
+      )}
+    </span>
+  );
+}
 
 function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -82,6 +105,7 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean
 export function AgentTriggers({
   title = "Triggers",
   description = "When should this agent run?",
+  agent,
   triggers: initialTriggers = DEFAULT_TRIGGERS,
   onRunAgent,
   onToggle,
@@ -107,9 +131,12 @@ export function AgentTriggers({
   return (
     <div className={cn("w-full max-w-xs overflow-hidden rounded-2xl border bg-card", className)}>
       <div className="flex items-start justify-between gap-3 px-4 pb-3 pt-4">
-        <div>
-          <p className="text-sm font-semibold">{title}</p>
-          <p className="text-xs text-muted-foreground">{description}</p>
+        <div className="flex min-w-0 items-center gap-2.5">
+          {agent && <Avatar agent={agent} />}
+          <div className="min-w-0">
+            <p className="text-sm font-semibold">{title}</p>
+            <p className="text-xs text-muted-foreground">{description}</p>
+          </div>
         </div>
         <button
           type="button"
