@@ -2,12 +2,44 @@
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronDown, ChevronRight, Folder, Link2, Mic, Monitor, Paperclip, Plus, Shuffle } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, Folder, Link2, Mic, Monitor, Paperclip, Plus, Search, Shuffle } from "lucide-react";
 
 import { Attachment, AttachmentChip } from "../../uploads/attachment-chip/component";
 
 import { cn } from "@/lib/utils";
 import { StopGenerationButton, type GenerationState } from "../../buttons/stop-generation-button/component";
+
+interface ConnectorItem {
+  id: string;
+  name: string;
+  color: string;
+  initials: string;
+}
+
+const ALL_CONNECTORS: ConnectorItem[] = [
+  { id: "gmail", name: "Gmail with Calendar", color: "#EA4335", initials: "G" },
+  { id: "outlook", name: "Outlook", color: "#0078D4", initials: "Ou" },
+  { id: "hubspot", name: "HubSpot", color: "#FF7A59", initials: "Hs" },
+  { id: "monday", name: "Monday.com", color: "#FF3D57", initials: "Mo" },
+  { id: "supabase", name: "Supabase", color: "#3ECF8E", initials: "Sb" },
+  { id: "vercel", name: "Vercel", color: "#000000", initials: "Vc" },
+  { id: "snowflake", name: "Snowflake", color: "#29B5E8", initials: "Sn" },
+  { id: "linear", name: "Linear", color: "#5E6AD2", initials: "Li" },
+  { id: "github", name: "GitHub", color: "#24292F", initials: "Gh" },
+  { id: "notion", name: "Notion", color: "#191919", initials: "No" },
+  { id: "slack", name: "Slack", color: "#4A154B", initials: "Sl" },
+  { id: "figma", name: "Figma", color: "#F24E1E", initials: "Fi" },
+  { id: "jira", name: "Jira", color: "#0052CC", initials: "Ji" },
+  { id: "salesforce", name: "Salesforce", color: "#00A1E0", initials: "Sf" },
+  { id: "zendesk", name: "Zendesk", color: "#03363D", initials: "Zd" },
+];
+
+const SAMPLE_PROJECTS = [
+  { id: "p1", name: "Design System Audit" },
+  { id: "p2", name: "Product Roadmap 2027" },
+  { id: "p3", name: "Customer Research" },
+  { id: "p4", name: "Engineering Planning" },
+];
 
 export interface SessionSuggestion {
   id: string;
@@ -118,11 +150,18 @@ export function PromptBarPro({
   const [hasContent, setHasContent] = React.useState(false);
   const [attachments, setAttachments] = React.useState<Attachment[]>([]);
   const [attachMenuOpen, setAttachMenuOpen] = React.useState(false);
+  const [attachPanel, setAttachPanel] = React.useState<"main" | "connectors" | "projects">("main");
+  const [connectorSearch, setConnectorSearch] = React.useState("");
+  const [randomConnectors, setRandomConnectors] = React.useState<ConnectorItem[]>([]);
   const editorRef = React.useRef<HTMLDivElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const environmentRef = useClickOutside<HTMLDivElement>(() => setEnvironmentOpen(false));
   const orchestratorRef = useClickOutside<HTMLDivElement>(() => setOrchestratorOpen(false));
-  const attachMenuRef = useClickOutside<HTMLDivElement>(() => setAttachMenuOpen(false));
+  const attachMenuRef = useClickOutside<HTMLDivElement>(() => {
+    setAttachMenuOpen(false);
+    setAttachPanel("main");
+    setConnectorSearch("");
+  });
 
   const isDisabled = generationState === "generating";
 
@@ -433,7 +472,14 @@ export function PromptBarPro({
             <div ref={attachMenuRef} className="relative shrink-0">
               <button
                 type="button"
-                onClick={() => setAttachMenuOpen((v) => !v)}
+                onClick={() => {
+                  if (!attachMenuOpen) {
+                    setRandomConnectors(pickRandom(ALL_CONNECTORS, 8));
+                    setAttachPanel("main");
+                    setConnectorSearch("");
+                  }
+                  setAttachMenuOpen((v) => !v);
+                }}
                 className="flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 aria-label="Add attachment"
               >
@@ -446,32 +492,143 @@ export function PromptBarPro({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 4 }}
                     transition={{ duration: 0.12 }}
-                    className="absolute bottom-full left-0 z-20 mb-1.5 w-52 overflow-hidden rounded-xl border bg-popover shadow-md"
+                    className="absolute bottom-full left-0 z-20 mb-1.5 w-64 overflow-hidden rounded-xl border bg-popover shadow-md"
                   >
-                    <button
-                      type="button"
-                      onMouseDown={(e) => { e.preventDefault(); fileInputRef.current?.click(); setAttachMenuOpen(false); }}
-                      className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-accent"
-                    >
-                      <Paperclip className="size-4 text-muted-foreground" />
-                      Upload files or images
-                    </button>
-                    <button
-                      type="button"
-                      className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
-                    >
-                      <Link2 className="size-4" />
-                      Connectors
-                      <ChevronRight className="ml-auto size-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
-                    >
-                      <Folder className="size-4" />
-                      Projects
-                      <ChevronRight className="ml-auto size-3.5" />
-                    </button>
+                    <AnimatePresence mode="wait" initial={false}>
+                      {attachPanel === "main" && (
+                        <motion.div
+                          key="main"
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -8 }}
+                          transition={{ duration: 0.1 }}
+                        >
+                          <button
+                            type="button"
+                            onMouseDown={(e) => { e.preventDefault(); fileInputRef.current?.click(); setAttachMenuOpen(false); }}
+                            className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-accent"
+                          >
+                            <Paperclip className="size-4 text-muted-foreground" />
+                            Upload files or images
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAttachPanel("connectors")}
+                            className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                          >
+                            <Link2 className="size-4" />
+                            Connectors
+                            <ChevronRight className="ml-auto size-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAttachPanel("projects")}
+                            className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                          >
+                            <Folder className="size-4" />
+                            Projects
+                            <ChevronRight className="ml-auto size-3.5" />
+                          </button>
+                        </motion.div>
+                      )}
+                      {attachPanel === "connectors" && (
+                        <motion.div
+                          key="connectors"
+                          initial={{ opacity: 0, x: 8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 8 }}
+                          transition={{ duration: 0.1 }}
+                        >
+                          <div className="flex items-center gap-1.5 border-b px-2 py-2">
+                            <button
+                              type="button"
+                              onClick={() => { setAttachPanel("main"); setConnectorSearch(""); }}
+                              className="flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+                            >
+                              <ArrowLeft className="size-3.5" />
+                            </button>
+                            <span className="text-sm font-medium">Connectors</span>
+                          </div>
+                          <div className="border-b px-2 py-2">
+                            <div className="flex items-center gap-1.5 rounded-lg border px-2 py-1.5">
+                              <Search className="size-3.5 shrink-0 text-muted-foreground" />
+                              <input
+                                type="text"
+                                placeholder="Search apps..."
+                                value={connectorSearch}
+                                onChange={(e) => setConnectorSearch(e.target.value)}
+                                className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                              />
+                            </div>
+                          </div>
+                          <div className="max-h-52 overflow-y-auto py-1">
+                            {(connectorSearch
+                              ? ALL_CONNECTORS.filter((c) =>
+                                  c.name.toLowerCase().includes(connectorSearch.toLowerCase())
+                                )
+                              : randomConnectors
+                            ).map((connector) => (
+                              <button
+                                key={connector.id}
+                                type="button"
+                                className="flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-accent"
+                              >
+                                <span
+                                  className="flex size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold text-white"
+                                  style={{ backgroundColor: connector.color }}
+                                >
+                                  {connector.initials}
+                                </span>
+                                <span className="flex-1 truncate text-left">{connector.name}</span>
+                                <Plus className="size-3.5 shrink-0 text-muted-foreground" />
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                      {attachPanel === "projects" && (
+                        <motion.div
+                          key="projects"
+                          initial={{ opacity: 0, x: 8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 8 }}
+                          transition={{ duration: 0.1 }}
+                        >
+                          <div className="flex items-center gap-1.5 border-b px-2 py-2">
+                            <button
+                              type="button"
+                              onClick={() => setAttachPanel("main")}
+                              className="flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+                            >
+                              <ArrowLeft className="size-3.5" />
+                            </button>
+                            <span className="text-sm font-medium">Projects</span>
+                          </div>
+                          <div className="py-1">
+                            <button
+                              type="button"
+                              className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium hover:bg-accent"
+                            >
+                              <span className="flex size-6 items-center justify-center rounded-md border border-dashed border-muted-foreground/50">
+                                <Plus className="size-3.5 text-muted-foreground" />
+                              </span>
+                              New project
+                            </button>
+                            <div className="mx-3 my-1 border-t" />
+                            {SAMPLE_PROJECTS.map((project) => (
+                              <button
+                                key={project.id}
+                                type="button"
+                                className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                              >
+                                <Folder className="size-4 shrink-0" />
+                                <span className="truncate text-left">{project.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 )}
               </AnimatePresence>
