@@ -387,12 +387,12 @@ function FlowchartNodeItem({
 function TriggerCard({ node }: { node: FlowchartTriggerNode }) {
   const Icon = node.icon;
   return (
-    <div className="flex w-full items-center gap-3 rounded-2xl border bg-card p-4">
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300">
-        <Icon className="size-5" />
+    <div className="flex w-full items-center gap-2.5 rounded-2xl border bg-card p-3">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300">
+        <Icon className="size-4" />
       </span>
       <div className="min-w-0">
-        <p className="text-sm font-semibold">{node.title}</p>
+        <p className="text-xs font-semibold">{node.title}</p>
         <p className="text-xs text-muted-foreground">{node.description}</p>
       </div>
     </div>
@@ -409,7 +409,7 @@ function ConditionCard({
   onClauseTokenChange: (clauseId: string, key: ClauseTokenKey, token: FlowchartToken) => void;
 }) {
   return (
-    <div className="w-full rounded-2xl border bg-card p-4">
+    <div className="w-full rounded-2xl border bg-card p-3">
       <Reorder.Group
         as="div"
         axis="y"
@@ -453,7 +453,7 @@ function ClauseRow({
         type="button"
         onPointerDown={(e) => dragControls.start(e)}
         aria-label="Drag to reorder this clause"
-        className="flex w-12 shrink-0 touch-none items-center gap-1 rounded pt-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing cursor-grab"
+        className="flex w-10 shrink-0 touch-none items-center gap-1 rounded pt-1 text-xs text-muted-foreground transition-colors hover:text-foreground active:cursor-grabbing cursor-grab"
       >
         <GripVertical className="size-3.5 shrink-0" />
         {displayConnector}

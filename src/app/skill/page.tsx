@@ -41,7 +41,7 @@ export default async function SkillPage() {
       <div className="mt-10 space-y-3">
         <CodeBlock code={INSTALL_COMMAND} lang="bash" trackAs="install_command" />
         <p className="text-sm text-muted-foreground">
-          Then, in any project: <span className="font-mono text-foreground">&quot;Use ai-patterns to design this screen.&quot;</span>
+          Then invoke <span className="font-mono text-foreground">/ai-patterns</span> in any project — or just describe what you need and it routes itself.
         </p>
       </div>
 
@@ -72,33 +72,32 @@ export default async function SkillPage() {
 
       {/* Commands */}
       <div className="mt-16">
-        <h2 className="text-xl font-semibold tracking-tight">Commands</h2>
+        <h2 className="text-xl font-semibold tracking-tight">Three modes, one command</h2>
         <p className="mt-2 text-muted-foreground">
-          Three entry points into the same skill — name one directly, or just describe what you
-          need and it routes itself.
+          Everything runs through <span className="inline-flex items-center rounded bg-foreground px-1.5 py-0.5 font-mono text-xs text-background">/ai-patterns</span> — describe what you need and it routes itself, or name a mode directly.
         </p>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           {[
             {
-              title: "patterns list",
+              mode: "list",
               body: "Lists every pattern in the catalogue as a numbered inventory, grouped by category.",
-              trigger: "“List all patterns”",
+              trigger: "/ai-patterns list all patterns",
             },
             {
-              title: "patterns review",
+              mode: "review",
               body: "Scans your project for hand-rolled UI a catalogue pattern could replace. Read-only — nothing gets edited.",
-              trigger: "“Review my project for reusable ai-patterns”",
+              trigger: "/ai-patterns review my project",
             },
             {
-              title: "patterns apply",
+              mode: "apply",
               body: "Auto-detects the best-fit pattern, proposes it with a rationale, then scaffolds it once you confirm.",
-              trigger: "“Add a loading state while the agent is working”",
+              trigger: "/ai-patterns add a loading state while the agent is working",
             },
           ].map((command) => (
-            <div key={command.title} className="rounded-lg border p-5">
-              <h3 className="font-mono text-sm font-medium">{command.title}</h3>
+            <div key={command.mode} className="rounded-lg border p-5">
+              <h3 className="font-mono text-sm font-medium">{command.mode}</h3>
               <p className="mt-1.5 text-sm text-muted-foreground">{command.body}</p>
-              <p className="mt-3 text-xs text-muted-foreground">{command.trigger}</p>
+              <p className="mt-3 font-mono text-xs text-muted-foreground">{command.trigger}</p>
             </div>
           ))}
         </div>
@@ -106,12 +105,12 @@ export default async function SkillPage() {
 
       {/* How it works */}
       <div className="mt-16">
-        <h2 className="text-xl font-semibold tracking-tight">How “patterns apply” works</h2>
+        <h2 className="text-xl font-semibold tracking-tight">How "patterns apply" works</h2>
         <ol className="mt-6 space-y-6">
           {[
             {
               title: "Understand the task, not just the component named",
-              body: "“Add a loading state” is really “what does the user need to know while this is happening” — that's what points at a Thinking Loader instead of a progress bar, or vice versa.",
+              body: '“Add a loading state” is really “what does the user need to know while this is happening” — that’s what points at a Thinking Loader instead of a progress bar, or vice versa.',
             },
             {
               title: "Shortlist, then read the full spec",

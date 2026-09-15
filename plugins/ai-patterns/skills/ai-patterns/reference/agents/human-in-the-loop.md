@@ -34,6 +34,14 @@ A compact dialog that pauses an agent mid-task to collect a structured choice fr
 - The dialog entry animates in (fade + slide up) so it feels like an insertion in the flow rather than a blocking overlay.
 - After submit, the dialog transitions to the resolved state and is replaced after a short delay by the agent's next output.
 
+## Guardrails
+- The Continue button must remain disabled until the user has made a selection — either a preset option or a free-text entry with at least one character. Never auto-advance on selection without an explicit tap.
+- Skip must never silently drop a question that the agent requires to proceed. If a question is mandatory, remove Skip and show a hint explaining why an answer is needed.
+- Cap the sequence at five questions. Beyond that, the interruption feels like a form rather than a clarification and should be replaced by a dedicated settings or planning step.
+- Do not show this pattern for decisions the agent can safely reverse or re-ask later. Reserve it for choices that meaningfully fork the agent's path or whose cost to undo is high.
+- Never pre-select an option on the user's behalf. A pre-selected radio implies a default; if a default is acceptable, document it in the agent's behavior and skip the question entirely.
+- The free-text fallback must not be the only option. It signals "none of the above" — if every question needs an open answer, a chat prompt is more appropriate than this pattern.
+
 ## Content guidelines
 - Questions should be concrete decision points, not open-ended prompts ("Which model should handle reasoning tasks?" not "What do you prefer?").
 - Option labels should be short noun phrases or brief imperatives (five words or fewer); avoid starting with a verb that duplicates the question's verb.
@@ -66,10 +74,11 @@ instead of copying these Tailwind classes or the Motion API.
 "use client";
 
 import * as React from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { ChevronDown, X } from "lucide-react";
+import { motion } from "motion/react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { ToolCallChip } from "@/registry/loaders/tool-call-chip/component";
 
 export interface HitlOption {
   id: string;
@@ -88,6 +97,8 @@ export interface HumanInTheLoopProps {
   onSubmit?: (answers: Record<string, string>) => void;
   onSkip?: () => void;
   onClose?: () => void;
+  /** Called ~500 ms after the resolved chip shows "success". */
+  onDone?: () => void;
   className?: string;
 }
 
@@ -96,13 +107,21 @@ export function HumanInTheLoop({
   onSubmit,
   onSkip,
   onClose,
+  onDone,
   className,
 }: HumanInTheLoopProps) {
   const [step, setStep] = React.useState(0);
   const [answers, setAnswers] = React.useState<Record<string, string>>({});
-  const [stepListOpen, setStepListOpen] = React.useState(false);
   const [done, setDone] = React.useState(false);
-  const stepListRef = useClickOutside<HTMLDivElement>(() => setStepListOpen(false));
+  const [chipStatus, setChipStatus] = React.useState<"running" | "success">("running");
+
+  React.useEffect(() => {
+    if (!done) return;
+    const t1 = setTimeout(() => setChipStatus("success"), 1200);
+    const t2 = setTimeout(() => onDone?.(), 1700);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done]);
 
   const current = questions[step];
   const total = questions.length;
@@ -138,19 +157,18 @@ export function HumanInTheLoop({
   if (done) {
     return (
       <motion.div
-        initial={{ opacity: 0, scale: 0.97 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className={cn(
-          "flex w-full max-w-xs items-center gap-3 rounded-2xl border bg-card px-5 py-4",
-          className
-        )}
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.18 }}
+        className={cn("w-full max-w-xs", className)}
       >
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400">
-          <svg viewBox="0 0 16 16" fill="currentColor" className="size-3.5">
-            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 1 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z" />
-          </svg>
-        </span>
-        <p className="text-sm font-medium">Got it — continuing the task.</p>
+        <ToolCallChip
+          kind="code"
+          verb="Resuming"
+          target="agent task"
+          status={chipStatus}
+          result="Agent task resumed"
+        />
       </motion.div>
     );
   }
@@ -161,11 +179,11 @@ export function HumanInTheLoop({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.18 }}
-      className={cn("w-full max-w-xs overflow-visible rounded-2xl border bg-card shadow-lg", className)}
+      className={cn("w-full max-w-xs overflow-visible rounded-2xl border bg-card", className)}
     >
       {/* Header */}
       <div className="flex items-start gap-2 px-4 pt-4 pb-3">
-        <p className="flex-1 text-sm font-semibold leading-snug">{current.question}</p>
+        <p className="flex-1 text-xs font-semibold leading-snug">{current.question}</p>
         {onClose && (
           <button
             type="button"
@@ -193,7 +211,7 @@ export function HumanInTheLoop({
                 className={cn(
                   "flex size-4 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors",
                   isSelected
-                    ? "border-blue-500 bg-blue-500"
+                    ? "border-foreground bg-foreground"
                     : "border-muted-foreground/40"
                 )}
               >
@@ -201,7 +219,7 @@ export function HumanInTheLoop({
               </span>
               <span
                 className={cn(
-                  "text-sm transition-colors",
+                  "text-xs transition-colors",
                   isSelected ? "font-medium text-foreground" : "text-muted-foreground"
                 )}
               >
@@ -234,7 +252,7 @@ export function HumanInTheLoop({
               onFocus={() => {
                 if (!isFreeText) setFreeText("");
               }}
-              className="flex-1 bg-transparent text-sm text-muted-foreground placeholder:text-muted-foreground/50 outline-none focus:text-foreground"
+              className="flex-1 bg-transparent text-xs text-muted-foreground placeholder:text-muted-foreground/50 outline-none focus:text-foreground"
             />
           </div>
         )}
@@ -242,82 +260,36 @@ export function HumanInTheLoop({
 
       {/* Footer */}
       <div className="flex items-center gap-2 border-t px-4 py-3">
-        {/* Step indicator with dropdown */}
-        <div ref={stepListRef} className="relative">
+        {/* Prev / step count / next */}
+        <div className="flex items-center gap-0.5">
           <button
             type="button"
-            onClick={() => setStepListOpen((v) => !v)}
-            aria-haspopup="listbox"
-            aria-expanded={stepListOpen}
-            className="flex items-center gap-1 rounded-md px-1 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            onClick={() => setStep((s) => s - 1)}
+            disabled={step === 0}
+            aria-label="Previous question"
+            className="rounded p-0.5 text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
           >
-            <ChevronDown
-              className={cn("size-3 transition-transform", stepListOpen && "rotate-180")}
-            />
-            <span className="tabular-nums">
-              {step + 1}/{total}
-            </span>
+            <ChevronLeft className="size-3.5" />
           </button>
-
-          <AnimatePresence>
-            {stepListOpen && (
-              <motion.div
-                role="listbox"
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 4 }}
-                transition={{ duration: 0.12 }}
-                className="absolute bottom-full left-0 z-20 mb-2 w-60 overflow-hidden rounded-xl border bg-popover py-1 shadow-md"
-              >
-                {questions.map((q, i) => {
-                  const answered = !!answers[q.id];
-                  return (
-                    <button
-                      key={q.id}
-                      type="button"
-                      role="option"
-                      aria-selected={i === step}
-                      onClick={() => {
-                        setStep(i);
-                        setStepListOpen(false);
-                      }}
-                      className={cn(
-                        "flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs transition-colors hover:bg-accent",
-                        i === step ? "text-foreground" : "text-muted-foreground"
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "flex size-4 shrink-0 items-center justify-center rounded-full text-[9px] font-semibold",
-                          answered
-                            ? "bg-blue-500 text-white"
-                            : i === step
-                              ? "border border-foreground text-foreground"
-                              : "border border-muted-foreground/30 text-muted-foreground"
-                        )}
-                      >
-                        {answered ? (
-                          <svg viewBox="0 0 16 16" fill="currentColor" className="size-2.5">
-                            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 1 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z" />
-                          </svg>
-                        ) : (
-                          i + 1
-                        )}
-                      </span>
-                      <span className="truncate">{q.question}</span>
-                    </button>
-                  );
-                })}
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <span className="tabular-nums text-xs text-muted-foreground">
+            {step + 1}/{total}
+          </span>
+          <button
+            type="button"
+            onClick={() => setStep((s) => s + 1)}
+            disabled={step === total - 1}
+            aria-label="Next question"
+            className="rounded p-0.5 text-muted-foreground transition-colors hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
+          >
+            <ChevronRight className="size-3.5" />
+          </button>
         </div>
 
         <div className="ml-auto flex items-center gap-2">
           <button
             type="button"
             onClick={handleSkip}
-            className="rounded-full px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="rounded-full px-3.5 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             Skip
           </button>
@@ -325,7 +297,7 @@ export function HumanInTheLoop({
             type="button"
             onClick={handleContinue}
             disabled={!selected || (isFreeText && !freeTextValue)}
-            className="rounded-full bg-blue-600 px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-full bg-foreground px-4 py-1.5 text-[11px] font-medium text-background transition-colors hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Continue
           </button>
@@ -333,17 +305,5 @@ export function HumanInTheLoop({
       </div>
     </motion.div>
   );
-}
-
-function useClickOutside<T extends HTMLElement>(onOutside: () => void) {
-  const ref = React.useRef<T>(null);
-  React.useEffect(() => {
-    function handle(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) onOutside();
-    }
-    document.addEventListener("mousedown", handle);
-    return () => document.removeEventListener("mousedown", handle);
-  }, [onOutside]);
-  return ref;
 }
 ```

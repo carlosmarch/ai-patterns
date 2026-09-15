@@ -96,7 +96,7 @@ export function ToolCallChip({
   return (
     <div
       className={cn(
-        "inline-flex max-w-full items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm",
+        "inline-flex max-w-full items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-xs",
         className
       )}
     >

@@ -69,7 +69,7 @@ prototypes, with three entry points:
   project already uses. Name a pattern directly to skip detection, or just
   describe the feature and let it auto-detect the best fit.
 
-See `plugins/ai-patterns/skills/design/SKILL.md` for the full spec of each,
+See `plugins/ai-patterns/skills/ai-patterns/SKILL.md` for the full spec of each,
 or `/skill` on the site for the install walkthrough.
 
 Install it in any project:
@@ -84,7 +84,7 @@ while the agent is working," "review my project for reusable ai-patterns,"
 or "list all patterns in the ai-patterns catalogue."
 
 **It grows with the catalogue, not by hand.** The skill's reference material
-(`plugins/ai-patterns/skills/design/reference/`) is generated from
+(`plugins/ai-patterns/skills/ai-patterns/reference/`) is generated from
 `src/registry/` — never edited directly. After adding a new pattern to the
 registry:
 

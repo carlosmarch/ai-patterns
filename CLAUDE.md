@@ -38,7 +38,7 @@ and the plugin entry in `.claude-plugin/marketplace.json`.
 - `npm run dev` — start the site at localhost:3000
 - `npm run lint` — ESLint
 - `npm run build` — production build
-- `npm run skill:build` — regenerate `plugins/ai-patterns/skills/design/reference/` from `src/registry/`
+- `npm run skill:build` — regenerate `plugins/ai-patterns/skills/ai-patterns/reference/` from `src/registry/`
 
 There is no test suite/script in this repo yet.
 

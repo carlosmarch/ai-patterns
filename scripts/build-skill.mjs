@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Regenerates the bundled reference material for the `ai-patterns` skill
-// (plugins/ai-patterns/skills/design/reference/**) from src/registry/**.
+// (plugins/ai-patterns/skills/ai-patterns/reference/**) from src/registry/**.
 //
 // The registry (src/registry/index.ts + each <category>/<slug>/pattern.ts
 // and component.tsx) is the single source of truth. This script never
@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const registryDir = join(repoRoot, "src/registry");
-const referenceDir = join(repoRoot, "plugins/ai-patterns/skills/design/reference");
+const referenceDir = join(repoRoot, "plugins/ai-patterns/skills/ai-patterns/reference");
 
 function parseRegistryEntries() {
   const indexSource = readFileSync(join(registryDir, "index.ts"), "utf8");

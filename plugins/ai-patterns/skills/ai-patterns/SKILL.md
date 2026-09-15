@@ -1,5 +1,5 @@
 ---
-name: design
+name: ai-patterns
 description: Design-engineering expert for building AI product prototypes and agent-facing UI (composers, thinking/loading states, agent traces, streaming answers, diff summaries, trigger/condition flowcharts, and similar). Backed by a growing, generated pattern catalogue with a UX spec (when to use, anatomy, behavior, accessibility) and a default implementation per pattern. Use this whenever someone is prototyping, designing, or scaffolding a screen or flow for an AI/agent product — even if they just say "build a prompt bar," "add a loading state," "show the agent's steps," or describe a new AI feature without naming a specific pattern. Also covers listing the full catalogue ("list all patterns"), auditing an existing project for UI a pattern could replace ("review my project" — read-only), and applying a named or auto-detected pattern to the current screen. Works with any design system the host project already uses; defaults to the catalogue's own Tailwind + Radix + Motion look only when nothing else is established.
 ---
 
@@ -34,7 +34,7 @@ directly even if something looks incomplete; that fix belongs upstream.
 
 ## Commands
 
-### patterns list
+### list
 
 List every pattern currently in the catalogue as a numbered list, grouped by
 category — handy when you've forgotten what's already in `reference/index.md`
@@ -42,7 +42,7 @@ or just want a quick inventory before shortlisting. Phrases like "list all
 patterns", "what patterns are available", or "show me the catalogue" route
 here too.
 
-### patterns review
+### review
 
 Scan the whole project for hand-rolled UI that duplicates something already
 in the catalogue — a custom spinner where Thinking Loader would do, a
@@ -52,7 +52,7 @@ where one of the catalogue's patterns would slot in, citing the spec section
 edited.** Also triggers on "review my project" or "audit my UI for reusable
 patterns".
 
-### patterns apply
+### apply
 
 Auto-detect the best-fit pattern for the task or screen you're describing,
 propose it with a one-line rationale grounded in that pattern's `When to
@@ -141,7 +141,7 @@ exists.
 
 ## Try it
 
-- List all patterns in the ai-patterns catalogue
-- Review my project for UI that a catalogue pattern could replace
-- Add the right ai-patterns component to this composer
-- Use ai-patterns to add a loading state while the agent is working
+- /ai-patterns list all patterns
+- /ai-patterns review my project for UI a catalogue pattern could replace
+- /ai-patterns add a loading state while the agent is working
+- /ai-patterns apply shiny-button to this submit action

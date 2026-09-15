@@ -88,9 +88,9 @@ export function ThinkingLoader({
     <div
       className={cn("flex items-center gap-1 px-4 py-3 text-muted-foreground", className)}
     >
-      <Brain className="size-4 shrink-0" aria-hidden />
+      <Brain className="size-3.5 shrink-0" aria-hidden />
       <ShimmerWord word={word} />
-      <span className="ml-auto flex items-center font-mono text-sm tabular-nums">
+      <span className="ml-auto flex items-center font-mono text-xs tabular-nums">
         <SlidingNumber value={elapsed} />s
       </span>
     </div>
@@ -127,7 +127,7 @@ function useElapsedSeconds() {
 
 function ShimmerWord({ word }: { word: string }) {
   return (
-    <span className="relative inline-block h-[1.2em] overflow-hidden text-sm font-medium">
+    <span className="relative inline-block h-[1.2em] overflow-hidden text-xs font-medium">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.span
           key={word}

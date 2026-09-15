@@ -470,7 +470,7 @@ const SKILL_INSTALL_SCRIPT: Omit<LogLine, "id">[] = [
   { text: 'Added marketplace "ai-patterns"', level: "info" },
   { text: "$ /plugin install ai-patterns@ai-patterns", level: "default" },
   { text: "Installing ai-patterns ...", level: "default" },
-  { text: '✓ Installed — try "Use ai-patterns to design this screen."', level: "success" },
+  { text: "✓ Installed — /ai-patterns is now available in every project.", level: "success" },
 ];
 
 const FLOWCHART_NODES: FlowchartNode[] = [
