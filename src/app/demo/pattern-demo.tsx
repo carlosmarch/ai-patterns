@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BadgeCheck, Columns2, GitBranch, Gauge, LayoutGrid, Mic, RotateCcw, TerminalSquare } from "lucide-react";
+import { BadgeCheck, Columns2, GitBranch, Gauge, LayoutGrid, Mic, Origami, RotateCcw, TerminalSquare } from "lucide-react";
 
 import { ChatBubble } from "@/registry/messages/chat-bubble/component";
 import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
@@ -35,6 +35,15 @@ import { ListeningState } from "@/registry/voice/listening-state/component";
 import { LiveTranscript, type TranscriptSegment } from "@/registry/voice/live-transcript/component";
 import { VoiceWaveform } from "@/registry/voice/voice-waveform/component";
 import { ShinyButton } from "@/registry/buttons/shiny-button/component";
+import { CollaborativePresence, type Collaborator } from "@/registry/collaboration/collaborative-presence/component";
+import { InviteMembers } from "@/registry/access/invite-members/component";
+import { AnalysisList, type AnalysisItem } from "@/registry/loaders/analysis-list/component";
+import { SetupChecklist, type SetupStep } from "@/registry/navigation/setup-checklist/component";
+import { GenerationError } from "@/registry/errors/generation-error/component";
+import { ConnectivityError } from "@/registry/errors/connectivity-error/component";
+import { AgentTriggers, DEFAULT_TRIGGERS } from "@/registry/agents/agent-triggers/component";
+import { CreateAgent } from "@/registry/agents/create-agent/component";
+import { HumanInTheLoop, type HitlQuestion } from "@/registry/agents/human-in-the-loop/component";
 import { SUGGESTIONS } from "./suggestions";
 import { trackDemoPromptSubmitted } from "@/lib/analytics";
 
@@ -180,6 +189,38 @@ const MORE_OUTRO_SEGMENTS = text(
   "That's the whole registry. Replay from the top, browse the catalogue yourself, or keep chatting."
 );
 
+const COLLAB_INTRO_SEGMENTS = text(
+  "Shared sessions show live avatars for everyone in the room — they update as people join or leave:"
+);
+
+const INVITE_INTRO_SEGMENTS = text(
+  "Inviting a teammate takes two steps — search by name or email, pick a role, send:"
+);
+
+const ANALYSIS_INTRO_SEGMENTS = text(
+  "Long scans show each item resolving as the model works through the list, instead of a blank wait:"
+);
+
+const CHECKLIST_INTRO_SEGMENTS = text(
+  "Onboarding gets its own progress tracker — arc progress and strikethrough as each step finishes:"
+);
+
+const CREATE_AGENT_INTRO_SEGMENTS = text(
+  "Spinning up a new agent is a two-step wizard — name it, pick an icon, wire its trigger sources:"
+);
+
+const AGENT_TRIGGERS_INTRO_SEGMENTS = text(
+  "Once an agent exists, its trigger panel lists every event source — each one independently toggled:"
+);
+
+const GEN_ERROR_INTRO_SEGMENTS = text(
+  "When the model fails outright, a structured error card replaces the blank turn — reason and retry right there:"
+);
+
+const CONNECTIVITY_INTRO_SEGMENTS = text(
+  "A dropped connection gets a dismissible banner with a retry action, not a silent empty screen:"
+);
+
 const CITATION_INTRO_SEGMENTS = text(
   "Long answers can cite sources inline as they're written, too — tap a number to see where it came from without leaving the page:"
 );
@@ -316,9 +357,83 @@ const PALETTE_GROUPS: CommandPaletteGroup[] = [
   },
 ];
 
+const DEMO_COLLABORATORS: Collaborator[] = [
+  { id: "1", name: "Carlos March", role: "Owner", initials: "CM", color: "bg-violet-500", isOnline: true },
+  { id: "2", name: "Ana López", role: "Editor", initials: "AL", color: "bg-sky-500", isOnline: true },
+  { id: "3", name: "James Liu", role: "Viewer", initials: "JL", color: "bg-emerald-500", isOnline: false },
+  { id: "4", name: "Sara Kim", role: "Editor", initials: "SK", color: "bg-amber-500", isOnline: false },
+];
+
+const ANALYSIS_RESULTS: Omit<AnalysisItem, "status">[] = [
+  { id: "a1", title: "components/StopButton.tsx", info: "Matches Stop Generation Button" },
+  { id: "a2", title: "components/ToolBadge.tsx", info: "Matches Tool Call Chip" },
+  { id: "a3", title: "components/ChatMessage.tsx", info: "Matches Chat Bubble" },
+  { id: "a4", title: "components/UploadTray.tsx", info: "Matches Attachment Chip" },
+];
+
+function initAnalysisItems(): AnalysisItem[] {
+  return ANALYSIS_RESULTS.map((r, i) => ({
+    ...r,
+    status: i === 0 ? ("loading" as const) : ("pending" as const),
+  }));
+}
+
+const SETUP_STEPS_DATA: SetupStep[] = [
+  {
+    id: "connect",
+    label: "Connect your apps",
+    status: "done",
+    icons: [
+      { label: "Slack", color: "#E01E5A", initial: "S" },
+      { label: "Notion", color: "#191919", initial: "N" },
+      { label: "Drive", color: "#1FA463", initial: "G" },
+    ],
+  },
+  { id: "first-task", label: "Run your first agent task", status: "done" },
+  { id: "notifications", label: "Turn on notifications", status: "pending" },
+  { id: "invite", label: "Invite your team", status: "pending" },
+];
+
 const VOICE_SCRIPT: { speaker: TranscriptSegment["speaker"]; text: string }[] = [
   { speaker: "user", text: "Can I use these patterns for a voice assistant?" },
   { speaker: "assistant", text: "Yes — Listening State, Live Transcript, and Voice Waveform cover the whole exchange." },
+];
+
+const HITL_INTRO_SEGMENTS = text(
+  "Before I continue, I need a bit more context — just three quick questions:"
+);
+
+const HITL_QUESTIONS: HitlQuestion[] = [
+  {
+    id: "gaps",
+    question: "How should the analysis handle pattern gaps?",
+    options: [
+      { id: "flag", label: "Flag them for manual review" },
+      { id: "skip", label: "Skip and continue" },
+      { id: "match", label: "Suggest a nearest match" },
+    ],
+    freeTextPlaceholder: "Something else...",
+  },
+  {
+    id: "output",
+    question: "Which output format works best for your team?",
+    options: [
+      { id: "code", label: "Annotated code snippets" },
+      { id: "visual", label: "Visual component previews" },
+      { id: "text", label: "Plain text summaries" },
+    ],
+    freeTextPlaceholder: "Something else...",
+  },
+  {
+    id: "cadence",
+    question: "How often should the registry auto-update?",
+    options: [
+      { id: "commit", label: "On every commit" },
+      { id: "weekly", label: "Weekly digest" },
+      { id: "manual", label: "Only when I ask" },
+    ],
+    freeTextPlaceholder: "Something else...",
+  },
 ];
 
 const PARTIAL_RESPONSE_CONTENT =
@@ -398,64 +513,66 @@ const TRACE_STEPS: TraceStep[] = [
 
 const AGENTS_INITIAL: Agent[] = [
   {
-    id: "research",
-    name: "Research agent",
+    id: "ai-patterns",
+    name: "AI-Patterns",
+    icon: Origami,
     status: "running",
-    currentStep: "Searching recent changelogs",
+    currentStep: "Issue labeled pattern-request · carlosmarch/ai-patterns",
     elapsedSeconds: 0,
-    steps: [{ label: "Reading project docs" }],
+    steps: [],
   },
-  { id: "code", name: "Code agent", status: "queued", elapsedSeconds: 0, steps: [] },
-  { id: "review", name: "Review agent", status: "queued", elapsedSeconds: 0, steps: [] },
+  { id: "triage", name: "Triage agent", status: "queued", elapsedSeconds: 0, steps: [] },
+  { id: "recommender", name: "Recommender agent", status: "queued", elapsedSeconds: 0, steps: [] },
+  { id: "pr", name: "PR agent", status: "queued", elapsedSeconds: 0, steps: [] },
 ];
 
-function tickAgents(prev: Agent[]): Agent[] {
-  return prev.map((agent) => {
+function tickAgents(agents: Agent[]): Agent[] {
+  const elapsed = (agents[0].elapsedSeconds ?? 0) + 1;
+
+  return agents.map((agent) => {
     if (agent.status === "done" || agent.status === "error") return agent;
-    const elapsed = (agent.elapsedSeconds ?? 0) + 1;
 
-    if (agent.id === "research") {
-      if (elapsed >= 4) {
-        return {
-          ...agent,
-          status: "done",
-          currentStep: undefined,
-          elapsedSeconds: elapsed,
-          steps: [...agent.steps, { label: "Compiled findings", meta: "6 sources" }],
-        };
-      }
-      return { ...agent, status: "running", elapsedSeconds: elapsed };
-    }
-
-    if (agent.id === "code") {
-      if (elapsed < 2) return { ...agent, elapsedSeconds: elapsed };
-      if (elapsed >= 6) {
-        return {
-          ...agent,
-          status: "done",
-          currentStep: undefined,
-          elapsedSeconds: elapsed,
-          steps: [...agent.steps, { label: "Opened a pull request" }],
-        };
-      }
+    if (agent.id === "ai-patterns") {
+      const others = agents.filter((a) => a.id !== "ai-patterns");
+      const allDone = others.every((a) => a.status === "done" || a.status === "error");
       return {
         ...agent,
-        status: "running",
-        currentStep: "Editing component.tsx",
         elapsedSeconds: elapsed,
-        steps: elapsed === 2 ? [{ label: "Reading component.tsx" }] : agent.steps,
+        status: allDone ? ("done" as const) : ("running" as const),
+        currentStep: allDone
+          ? undefined
+          : elapsed < 2
+          ? "Issue labeled pattern-request · carlosmarch/ai-patterns"
+          : "Coordinating sub-agents",
+        steps: allDone ? [{ label: "All sub-agents completed" }] : agent.steps,
       };
     }
 
-    if (agent.id === "review") {
-      if (elapsed < 5) return { ...agent, elapsedSeconds: elapsed };
-      return {
-        ...agent,
-        status: "error",
-        currentStep: undefined,
-        elapsedSeconds: elapsed,
-        steps: [...agent.steps, { label: "Lint check failed", meta: "2 errors" }],
-      };
+    if (agent.id === "triage") {
+      if (elapsed < 2) return agent;
+      if (elapsed === 2)
+        return { ...agent, status: "running" as const, currentStep: "Reading issue #pattern-request", elapsedSeconds: elapsed, steps: [{ label: "Fetched issue from carlosmarch/ai-patterns" }] };
+      if (elapsed >= 5)
+        return { ...agent, status: "done" as const, currentStep: undefined, elapsedSeconds: elapsed, steps: [...agent.steps, { label: "Matched Agent Triggers pattern", meta: "0.91" }] };
+      return { ...agent, elapsedSeconds: elapsed };
+    }
+
+    if (agent.id === "recommender") {
+      if (elapsed < 4) return agent;
+      if (elapsed === 4)
+        return { ...agent, status: "running" as const, currentStep: "Scanning registry index", elapsedSeconds: elapsed, steps: [{ label: "Loaded 38 patterns" }] };
+      if (elapsed >= 8)
+        return { ...agent, status: "done" as const, currentStep: undefined, elapsedSeconds: elapsed, steps: [...agent.steps, { label: "Drafted component spec" }] };
+      return { ...agent, elapsedSeconds: elapsed };
+    }
+
+    if (agent.id === "pr") {
+      if (elapsed < 7) return agent;
+      if (elapsed === 7)
+        return { ...agent, status: "running" as const, currentStep: "Scaffolding PR", elapsedSeconds: elapsed, steps: [] };
+      if (elapsed >= 10)
+        return { ...agent, status: "done" as const, currentStep: undefined, elapsedSeconds: elapsed, steps: [{ label: "Opened PR #84", meta: "carlosmarch/ai-patterns" }] };
+      return { ...agent, elapsedSeconds: elapsed };
     }
 
     return agent;
@@ -610,6 +727,44 @@ interface CtaBlock {
   label: string;
   onClick: () => void;
 }
+interface CollabBlock {
+  id: string;
+  kind: "collab";
+}
+interface InviteBlock {
+  id: string;
+  kind: "invite";
+}
+interface AnalysisBlock {
+  id: string;
+  kind: "analysis";
+  onDone?: () => void;
+}
+interface ChecklistBlock {
+  id: string;
+  kind: "checklist";
+}
+interface GenErrorBlock {
+  id: string;
+  kind: "gen-error";
+}
+interface ConnectivityBlock {
+  id: string;
+  kind: "connectivity";
+}
+interface AgentTriggersBlock {
+  id: string;
+  kind: "agent-triggers";
+}
+interface CreateAgentBlock {
+  id: string;
+  kind: "create-agent";
+}
+interface HumanInTheLoopBlock {
+  id: string;
+  kind: "human-in-the-loop";
+  onDone?: () => void;
+}
 
 type Block =
   | ChatBlock
@@ -637,7 +792,16 @@ type Block =
   | DiffTabsBlock
   | PaletteBlock
   | VoiceBlock
-  | CtaBlock;
+  | CtaBlock
+  | CollabBlock
+  | InviteBlock
+  | AnalysisBlock
+  | ChecklistBlock
+  | GenErrorBlock
+  | ConnectivityBlock
+  | AgentTriggersBlock
+  | CreateAgentBlock
+  | HumanInTheLoopBlock;
 
 let idCounter = 0;
 function nextId(prefix: string) {
@@ -725,7 +889,7 @@ function LiveMultiAgentTrace({ onDone }: { onDone?: () => void }) {
   const notifiedRef = React.useRef(false);
 
   React.useEffect(() => {
-    const id = window.setInterval(() => setAgents(tickAgents), 1000);
+    const id = window.setInterval(() => setAgents((prev) => tickAgents(prev)), 1000);
     return () => window.clearInterval(id);
   }, []);
 
@@ -889,6 +1053,38 @@ function LivePartialResponse({ content, reason }: { content: string; reason: Par
       className="w-full max-w-md"
     />
   );
+}
+
+function LiveAnalysisList({ onDone }: { onDone?: () => void }) {
+  const [items, setItems] = React.useState<AnalysisItem[]>(initAnalysisItems());
+  const onDoneRef = useLatest(onDone);
+  const notifiedRef = React.useRef(false);
+  const analyzing = items.some((i) => i.status !== "done");
+
+  React.useEffect(() => {
+    const loadingIndex = items.findIndex((item) => item.status === "loading");
+    if (loadingIndex === -1) return;
+    const t = window.setTimeout(() => {
+      setItems((prev) =>
+        prev.map((item, i) => {
+          if (i === loadingIndex) return { ...item, status: "done" as const };
+          if (i === loadingIndex + 1) return { ...item, status: "loading" as const };
+          return item;
+        })
+      );
+    }, 850);
+    return () => window.clearTimeout(t);
+  }, [items]);
+
+  React.useEffect(() => {
+    if (!analyzing && !notifiedRef.current) {
+      notifiedRef.current = true;
+      onDoneRef.current?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [analyzing]);
+
+  return <AnalysisList items={items} analyzing={analyzing} className="w-full max-w-sm" />;
 }
 
 // ---------------------------------------------------------------------------
@@ -1238,6 +1434,75 @@ export function PatternDemo() {
     };
   }
 
+  function showCollab(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("collab"), kind: "collab" });
+      schedule(() => { if (!isCurrent(runId)) return; done(); }, 400);
+    };
+  }
+
+  function showInvite(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("invite"), kind: "invite" });
+      schedule(() => { if (!isCurrent(runId)) return; done(); }, 400);
+    };
+  }
+
+  function showAnalysis(): StepFn {
+    return (runId, done) => {
+      addBlock({
+        id: nextId("analysis"),
+        kind: "analysis",
+        onDone: () => { if (!isCurrent(runId)) return; done(); },
+      });
+    };
+  }
+
+  function showChecklist(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("checklist"), kind: "checklist" });
+      schedule(() => { if (!isCurrent(runId)) return; done(); }, 400);
+    };
+  }
+
+  function showGenError(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("gen-error"), kind: "gen-error" });
+      schedule(() => { if (!isCurrent(runId)) return; done(); }, 400);
+    };
+  }
+
+  function showConnectivity(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("connectivity"), kind: "connectivity" });
+      schedule(() => { if (!isCurrent(runId)) return; done(); }, 400);
+    };
+  }
+
+  function showAgentTriggers(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("agent-triggers"), kind: "agent-triggers" });
+      schedule(() => { if (!isCurrent(runId)) return; done(); }, 400);
+    };
+  }
+
+  function showCreateAgent(): StepFn {
+    return (runId, done) => {
+      addBlock({ id: nextId("create-agent"), kind: "create-agent" });
+      schedule(() => { if (!isCurrent(runId)) return; done(); }, 400);
+    };
+  }
+
+  function showHumanInTheLoop(): StepFn {
+    return (runId, done) => {
+      addBlock({
+        id: nextId("human-in-the-loop"),
+        kind: "human-in-the-loop",
+        onDone: () => { if (!isCurrent(runId)) return; done(); },
+      });
+    };
+  }
+
   function addUserMessage(content: string) {
     addBlock({ id: nextId("u"), kind: "chat", role: "user", content });
   }
@@ -1335,6 +1600,9 @@ export function PatternDemo() {
     runSteps([
       say(MORE_INTRO_SEGMENTS),
       pause(300),
+      say(ANALYSIS_INTRO_SEGMENTS),
+      showAnalysis(),
+      pause(400),
       say(UPLOADS_INTRO_SEGMENTS),
       showAttachment(),
       pause(400),
@@ -1359,8 +1627,17 @@ export function PatternDemo() {
       say(PALETTE_INTRO_SEGMENTS),
       showPalette(),
       pause(400),
+      say(COLLAB_INTRO_SEGMENTS),
+      showCollab(),
+      pause(400),
       say(VOICE_INTRO_SEGMENTS),
       showVoice(),
+      pause(400),
+      say(GEN_ERROR_INTRO_SEGMENTS),
+      showGenError(),
+      pause(400),
+      say(CONNECTIVITY_INTRO_SEGMENTS),
+      showConnectivity(),
       pause(500),
       say(SKILL_INTRO_SEGMENTS),
       showTerminal("/plugin install ai-patterns@ai-patterns", SKILL_INSTALL_SCRIPT),
@@ -1556,6 +1833,56 @@ export function PatternDemo() {
     runSteps([thinking(500), say(VOICE_INTRO_SEGMENTS), showVoice()]);
   }
 
+  function runCollabFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(600), say(COLLAB_INTRO_SEGMENTS), showCollab()]);
+  }
+
+  function runInviteFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(600), say(INVITE_INTRO_SEGMENTS), showInvite()]);
+  }
+
+  function runAnalysisFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(700), say(ANALYSIS_INTRO_SEGMENTS), showAnalysis()]);
+  }
+
+  function runChecklistFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(600), say(CHECKLIST_INTRO_SEGMENTS), showChecklist()]);
+  }
+
+  function runCreateAgentFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(600), say(CREATE_AGENT_INTRO_SEGMENTS), showCreateAgent()]);
+  }
+
+  function runAgentTriggersFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(600), say(AGENT_TRIGGERS_INTRO_SEGMENTS), showAgentTriggers()]);
+  }
+
+  function runGenErrorFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(700), say(GEN_ERROR_INTRO_SEGMENTS), showGenError()]);
+  }
+
+  function runConnectivityFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([thinking(600), say(CONNECTIVITY_INTRO_SEGMENTS), showConnectivity()]);
+  }
+
+  function runHumanInTheLoopFlow(userText: string) {
+    addUserMessage(userText);
+    runSteps([
+      thinking(700),
+      say(HITL_INTRO_SEGMENTS),
+      showHumanInTheLoop(),
+      say(text("Thanks — picking up from where I left off.")),
+    ]);
+  }
+
   function dispatchSuggestion(id: string, label: string) {
     switch (id) {
       case "tour":
@@ -1604,6 +1931,24 @@ export function PatternDemo() {
         return runMoreTour(label);
       case "skill":
         return runSkillFlow(label);
+      case "collab":
+        return runCollabFlow(label);
+      case "invite":
+        return runInviteFlow(label);
+      case "analysis":
+        return runAnalysisFlow(label);
+      case "checklist":
+        return runChecklistFlow(label);
+      case "create-agent":
+        return runCreateAgentFlow(label);
+      case "agent-triggers":
+        return runAgentTriggersFlow(label);
+      case "gen-error":
+        return runGenErrorFlow(label);
+      case "connectivity":
+        return runConnectivityFlow(label);
+      case "human-in-the-loop":
+        return runHumanInTheLoopFlow(label);
       default:
         return runReplyFlow(label);
     }
@@ -1871,6 +2216,83 @@ function BlockView({
         <div className="flex w-full max-w-md justify-start">
           <ShinyButton onClick={block.onClick}>{block.label}</ShinyButton>
         </div>
+      );
+    case "collab":
+      return (
+        <div className="w-full max-w-md">
+          <CollaborativePresence collaborators={DEMO_COLLABORATORS} />
+        </div>
+      );
+    case "invite":
+      return (
+        <div className="w-full max-w-md">
+          <InviteMembers
+            roles={[
+              { id: "editor", label: "Editor" },
+              { id: "viewer", label: "Viewer" },
+              { id: "admin", label: "Admin" },
+            ]}
+            orgMembers={[
+              { id: "1", name: "Carlos March", email: "carlos@ai-patterns.dev" },
+              { id: "2", name: "Ana López", email: "ana@ai-patterns.dev" },
+              { id: "3", name: "James Liu", email: "james@ai-patterns.dev" },
+            ]}
+            initialAssignees={[
+              { id: "1", name: "Carlos March", email: "carlos@ai-patterns.dev", status: "confirmed", roleId: "admin" },
+            ]}
+          />
+        </div>
+      );
+    case "analysis":
+      return <LiveAnalysisList onDone={block.onDone} />;
+    case "checklist":
+      return (
+        <SetupChecklist
+          title="Set up your workspace"
+          steps={SETUP_STEPS_DATA}
+          className="w-full max-w-sm"
+        />
+      );
+    case "gen-error":
+      return (
+        <GenerationError
+          reason="server"
+          errorCode="ERR_MODEL_TIMEOUT"
+          onRetry={() => {}}
+          className="w-full max-w-md"
+        />
+      );
+    case "connectivity":
+      return (
+        <ConnectivityError
+          onRetry={() => {}}
+          onViewDetails={() => {}}
+          className="w-full max-w-md"
+        />
+      );
+    case "agent-triggers":
+      return (
+        <AgentTriggers
+          title="AI-Patterns agent"
+          description="Runs when issues are labeled or Slack mentions come in"
+          agent={{ name: "AI-Patterns", icon: undefined }}
+          triggers={DEFAULT_TRIGGERS}
+          className="w-full max-w-md"
+        />
+      );
+    case "create-agent":
+      return (
+        <div className="w-full max-w-xs">
+          <CreateAgent onCreateAgent={() => {}} />
+        </div>
+      );
+    case "human-in-the-loop":
+      return (
+        <HumanInTheLoop
+          questions={HITL_QUESTIONS}
+          onDone={block.onDone}
+          className="w-full max-w-xs"
+        />
       );
   }
 }

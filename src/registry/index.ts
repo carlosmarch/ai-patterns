@@ -2,6 +2,8 @@ import type { ComponentType } from "react";
 
 import AgentTriggersDemo from "./agents/agent-triggers/demo";
 import { pattern as agentTriggersPattern } from "./agents/agent-triggers/pattern";
+import HumanInTheLoopDemo from "./agents/human-in-the-loop/demo";
+import { pattern as humanInTheLoopPattern } from "./agents/human-in-the-loop/pattern";
 import CreateAgentDemo from "./agents/create-agent/demo";
 import { pattern as createAgentPattern } from "./agents/create-agent/pattern";
 import ShinyButtonDemo from "./buttons/shiny-button/demo";
@@ -103,6 +105,14 @@ export const registry: RegistryEntry[] = [
     description: "A configuration panel for listing and toggling the external events that activate an agent, with a manual run control.",
     Demo: AgentTriggersDemo,
     uxDoc: agentTriggersPattern,
+  },
+  {
+    slug: "human-in-the-loop",
+    category: "agents",
+    title: "Human in the Loop Question",
+    description: "A compact dialog that pauses an agent mid-task to collect a structured choice — radio options, a free-text fallback, skip/continue controls, and multi-step pagination.",
+    Demo: HumanInTheLoopDemo,
+    uxDoc: humanInTheLoopPattern,
   },
   {
     slug: "multi-agent-trace",
