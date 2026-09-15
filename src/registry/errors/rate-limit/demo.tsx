@@ -7,8 +7,11 @@ import { RateLimit } from "./component";
 export default function RateLimitDemo() {
   const [key, setKey] = React.useState(0);
   const [mode, setMode] = React.useState<"static" | "countdown">("static");
+  const [resetAt, setResetAt] = React.useState(new Date(0));
 
-  const resetAt = React.useMemo(() => new Date(Date.now() + 4 * 60 * 1000), [key]);
+  function resetCountdown() {
+    setResetAt(new Date(Date.now() + 4 * 60 * 1000));
+  }
 
   return (
     <div className="flex w-full max-w-lg flex-col gap-4">
@@ -17,7 +20,7 @@ export default function RateLimitDemo() {
           <button
             key={m}
             type="button"
-            onClick={() => { setMode(m); setKey((k) => k + 1); }}
+            onClick={() => { setMode(m); setKey((k) => k + 1); if (m === "countdown") resetCountdown(); }}
             className={[
               "rounded-full px-3 py-1 text-xs font-medium transition-colors",
               mode === m
@@ -37,7 +40,7 @@ export default function RateLimitDemo() {
         resetAt={mode === "countdown" ? resetAt : undefined}
         upgradeLabel="Get more usage"
         onUpgrade={() => {}}
-        onDismiss={() => setKey((k) => k + 1)}
+        onDismiss={() => { setKey((k) => k + 1); if (mode === "countdown") resetCountdown(); }}
       />
     </div>
   );
