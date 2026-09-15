@@ -15,62 +15,81 @@ function makeInitial(): Agent[] {
       currentStep: "Issue labeled pattern-request · carlosmarch/ai-patterns",
       elapsedSeconds: 0,
       steps: [],
-      subAgents: [
-        { id: "triage", name: "Triage agent", status: "queued", elapsedSeconds: 0, steps: [] },
-        { id: "recommender", name: "Recommender agent", status: "queued", elapsedSeconds: 0, steps: [] },
-        { id: "pr", name: "PR agent", status: "queued", elapsedSeconds: 0, steps: [] },
-      ],
+    },
+    {
+      id: "triage",
+      name: "Triage agent",
+      status: "queued",
+      elapsedSeconds: 0,
+      steps: [],
+    },
+    {
+      id: "recommender",
+      name: "Recommender agent",
+      status: "queued",
+      elapsedSeconds: 0,
+      steps: [],
+    },
+    {
+      id: "pr",
+      name: "PR agent",
+      status: "queued",
+      elapsedSeconds: 0,
+      steps: [],
     },
   ];
 }
 
 function tick(agents: Agent[]): Agent[] {
+  const elapsed = (agents[0].elapsedSeconds ?? 0) + 1;
+
   return agents.map((agent) => {
-    if (agent.id !== "ai-patterns") return agent;
+    if (agent.status === "done" || agent.status === "error") return agent;
 
-    const elapsed = (agent.elapsedSeconds ?? 0) + 1;
-    const subs = agent.subAgents ?? [];
+    if (agent.id === "ai-patterns") {
+      const others = agents.filter((a) => a.id !== "ai-patterns");
+      const allDone = others.every((a) => a.status === "done" || a.status === "error");
+      return {
+        ...agent,
+        elapsedSeconds: elapsed,
+        status: allDone ? ("done" as const) : ("running" as const),
+        currentStep: allDone
+          ? undefined
+          : elapsed < 2
+          ? "Issue labeled pattern-request · carlosmarch/ai-patterns"
+          : "Coordinating sub-agents",
+        steps: allDone ? [{ label: "All sub-agents completed" }] : agent.steps,
+      };
+    }
 
-    const nextSubs = subs.map((sub) => {
-      const se = (sub.elapsedSeconds ?? 0) + 1;
+    if (agent.id === "triage") {
+      if (elapsed < 2) return agent;
+      if (elapsed === 2)
+        return { ...agent, status: "running" as const, currentStep: "Reading issue #pattern-request", elapsedSeconds: elapsed, steps: [{ label: "Fetched issue from carlosmarch/ai-patterns" }] };
+      if (elapsed >= 5)
+        return { ...agent, status: "done" as const, currentStep: undefined, elapsedSeconds: elapsed, steps: [...agent.steps, { label: "Matched Agent Triggers pattern", meta: "0.91" }] };
+      return { ...agent, elapsedSeconds: elapsed };
+    }
 
-      if (sub.id === "triage") {
-        if (sub.status === "queued" && elapsed >= 2)
-          return { ...sub, status: "running" as const, currentStep: "Reading issue #pattern-request", elapsedSeconds: se, steps: [{ label: "Fetched issue from carlosmarch/ai-patterns" }] };
-        if (sub.status === "running" && se >= 4)
-          return { ...sub, status: "done" as const, currentStep: undefined, elapsedSeconds: se, steps: [...sub.steps, { label: "Matched Agent Triggers pattern", meta: "0.91" }] };
-        if (sub.status !== "queued" && sub.status !== "done") return { ...sub, elapsedSeconds: se };
-      }
+    if (agent.id === "recommender") {
+      if (elapsed < 4) return agent;
+      if (elapsed === 4)
+        return { ...agent, status: "running" as const, currentStep: "Scanning registry index", elapsedSeconds: elapsed, steps: [{ label: "Loaded 38 patterns" }] };
+      if (elapsed >= 8)
+        return { ...agent, status: "done" as const, currentStep: undefined, elapsedSeconds: elapsed, steps: [...agent.steps, { label: "Drafted component spec" }] };
+      return { ...agent, elapsedSeconds: elapsed };
+    }
 
-      if (sub.id === "recommender") {
-        if (sub.status === "queued" && elapsed >= 5)
-          return { ...sub, status: "running" as const, currentStep: "Scanning registry index", elapsedSeconds: se, steps: [{ label: "Loaded 38 patterns" }] };
-        if (sub.status === "running" && se >= 4)
-          return { ...sub, status: "done" as const, currentStep: undefined, elapsedSeconds: se, steps: [...sub.steps, { label: "Drafted component spec" }] };
-        if (sub.status !== "queued" && sub.status !== "done") return { ...sub, elapsedSeconds: se };
-      }
+    if (agent.id === "pr") {
+      if (elapsed < 7) return agent;
+      if (elapsed === 7)
+        return { ...agent, status: "running" as const, currentStep: "Scaffolding PR", elapsedSeconds: elapsed, steps: [] };
+      if (elapsed >= 10)
+        return { ...agent, status: "done" as const, currentStep: undefined, elapsedSeconds: elapsed, steps: [{ label: "Opened PR #84", meta: "carlosmarch/ai-patterns" }] };
+      return { ...agent, elapsedSeconds: elapsed };
+    }
 
-      if (sub.id === "pr") {
-        if (sub.status === "queued" && elapsed >= 9)
-          return { ...sub, status: "running" as const, currentStep: "Scaffolding PR", elapsedSeconds: se, steps: [] };
-        if (sub.status === "running" && se >= 3)
-          return { ...sub, status: "done" as const, currentStep: undefined, elapsedSeconds: se, steps: [{ label: "Opened PR #84", meta: "carlosmarch/ai-patterns" }] };
-        if (sub.status !== "queued" && sub.status !== "done") return { ...sub, elapsedSeconds: se };
-      }
-
-      return sub;
-    });
-
-    const allDone = nextSubs.every((s) => s.status === "done" || s.status === "error");
-
-    return {
-      ...agent,
-      elapsedSeconds: elapsed,
-      currentStep: allDone ? undefined : elapsed < 2 ? "Issue labeled pattern-request · carlosmarch/ai-patterns" : "Coordinating sub-agents",
-      status: allDone ? ("done" as const) : ("running" as const),
-      steps: allDone && agent.steps.length === 0 ? [{ label: "All sub-agents completed" }] : agent.steps,
-      subAgents: nextSubs,
-    };
+    return agent;
   });
 }
 
