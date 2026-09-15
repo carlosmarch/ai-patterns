@@ -32,7 +32,7 @@ export function ExpandableTrace({
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium"
+        className="flex w-full items-center gap-2 px-4 py-3 text-left text-xs font-medium"
       >
         <Sparkles className="size-4 text-muted-foreground" />
         <span>Thought for {durationSeconds} seconds</span>
@@ -61,7 +61,7 @@ export function ExpandableTrace({
                     </span>
                     {i < steps.length - 1 && <span className="my-1 w-px flex-1 bg-border" />}
                   </div>
-                  <p className="pb-3 text-sm text-foreground/90">
+                  <p className="pb-3 text-xs text-foreground/90">
                     {step.label}
                     {step.meta && (
                       <span className="ml-1.5 text-muted-foreground">{step.meta}</span>
