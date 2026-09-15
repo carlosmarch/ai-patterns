@@ -2,6 +2,8 @@ import type { ComponentType } from "react";
 
 import AgentTriggersDemo from "./agents/agent-triggers/demo";
 import { pattern as agentTriggersPattern } from "./agents/agent-triggers/pattern";
+import CreateAgentDemo from "./agents/create-agent/demo";
+import { pattern as createAgentPattern } from "./agents/create-agent/pattern";
 import ShinyButtonDemo from "./buttons/shiny-button/demo";
 import { pattern as shinyButtonPattern } from "./buttons/shiny-button/pattern";
 import ThinkingLoaderDemo from "./loaders/thinking-loader/demo";
@@ -384,6 +386,14 @@ export const registry: RegistryEntry[] = [
     description: "A configuration panel for listing and toggling the external events that activate an agent, with a manual run control.",
     Demo: AgentTriggersDemo,
     uxDoc: agentTriggersPattern,
+  },
+  {
+    slug: "create-agent",
+    category: "agents",
+    title: "Create Agent",
+    description: "A two-step wizard card for naming an agent, picking its icon, and selecting which event sources activate it.",
+    Demo: CreateAgentDemo,
+    uxDoc: createAgentPattern,
   },
 ];
 

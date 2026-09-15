@@ -20,7 +20,7 @@ A configuration panel listing the external events that cause an agent to run aut
 ## Anatomy
 - Header: a title ("Triggers") and a subtitle ("When should this agent run?") scoped to the agent being configured.
 - Run agent button: an outlined play button in the header that fires the agent manually, independent of any trigger. It enters a transient "Running…" state while the agent executes.
-- Trigger list: one row per trigger, each containing an icon that identifies the source, an event name in medium weight followed by a muted location context ("in Slack", "in dm-cmarch/ai-patterns"), and a toggle on the trailing edge.
+- Trigger list: one row per trigger, each containing an icon that identifies the source, an event name in medium weight followed by a muted location context ("in Slack", "in carlosmarch/ai-patterns"), and a toggle on the trailing edge.
 - Finish setup label: a small underlined text link that appears before the toggle when a trigger has been added but not yet fully configured. Enables the trigger rather than completing setup inline — that flow belongs in a dedicated integration modal.
 - Add trigger footer: a "＋ Add trigger" text button plus icon shortcuts for common source platforms (GitHub, Slack, Figma). Both lead to the same source-picker; the icons are just accelerators for recognized integrations.
 
@@ -33,7 +33,7 @@ A configuration panel listing the external events that cause an agent to run aut
 
 ## Content guidelines
 - Event names are short noun phrases or gerunds that describe the inbound event, not the agent's response to it: "Issue labeled pattern-request", "Frame marked ready for dev". Start with the noun (Issue, Frame, Message) so items scan consistently when the list grows.
-- The context string names the specific location in sentence-case with no trailing period: "in dm-cmarch/ai-patterns", "in any Figma file".
+- The context string names the specific location in sentence-case with no trailing period: "in carlosmarch/ai-patterns", "in any Figma file".
 - Platform icons should match the brand icon for the integration, not a generic glyph. When a brand icon isn't available, use a domain-appropriate generic (a hashtag for channels, an @ for mention events).
 
 ## Accessibility
@@ -62,7 +62,7 @@ instead of copying these Tailwind classes or the Motion API.
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { AtSign, Github, GitPullRequest, Layers, Play, Plus } from "lucide-react";
+import { AtSign, GitBranch, GitPullRequest, Layers, Play, Plus } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -75,9 +75,16 @@ export interface AgentTrigger {
   needsSetup?: boolean;
 }
 
+export interface AgentAvatar {
+  name: string;
+  src?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+}
+
 export interface AgentTriggersProps {
   title?: string;
   description?: string;
+  agent?: AgentAvatar;
   triggers?: AgentTrigger[];
   onRunAgent?: () => void;
   onToggle?: (id: string, enabled: boolean) => void;
@@ -87,7 +94,7 @@ export interface AgentTriggersProps {
 }
 
 const QUICK_ADD_PLATFORMS = [
-  { id: "github", label: "GitHub", icon: Github },
+  { id: "github", label: "GitHub", icon: GitBranch },
   { id: "slack", label: "Slack", icon: AtSign },
   { id: "figma", label: "Figma", icon: Layers },
 ] as const;
@@ -97,7 +104,7 @@ export const DEFAULT_TRIGGERS: AgentTrigger[] = [
     id: "github-issue",
     icon: GitPullRequest,
     event: "Issue labeled pattern-request",
-    context: "in dm-cmarch/ai-patterns",
+    context: "in carlosmarch/ai-patterns",
     enabled: true,
   },
   {
@@ -116,6 +123,22 @@ export const DEFAULT_TRIGGERS: AgentTrigger[] = [
     needsSetup: true,
   },
 ];
+
+function Avatar({ agent }: { agent: AgentAvatar }) {
+  return (
+    <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-muted-foreground">
+      {agent.src ? (
+        <img src={agent.src} alt={agent.name} className="size-full object-cover" />
+      ) : agent.icon ? (
+        <agent.icon className="size-4" />
+      ) : (
+        <span className="text-xs font-semibold">
+          {agent.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+        </span>
+      )}
+    </span>
+  );
+}
 
 function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -142,6 +165,7 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean
 export function AgentTriggers({
   title = "Triggers",
   description = "When should this agent run?",
+  agent,
   triggers: initialTriggers = DEFAULT_TRIGGERS,
   onRunAgent,
   onToggle,
@@ -167,9 +191,12 @@ export function AgentTriggers({
   return (
     <div className={cn("w-full max-w-xs overflow-hidden rounded-2xl border bg-card", className)}>
       <div className="flex items-start justify-between gap-3 px-4 pb-3 pt-4">
-        <div>
-          <p className="text-sm font-semibold">{title}</p>
-          <p className="text-xs text-muted-foreground">{description}</p>
+        <div className="flex min-w-0 items-center gap-2.5">
+          {agent && <Avatar agent={agent} />}
+          <div className="min-w-0">
+            <p className="text-sm font-semibold">{title}</p>
+            <p className="text-xs text-muted-foreground">{description}</p>
+          </div>
         </div>
         <button
           type="button"
