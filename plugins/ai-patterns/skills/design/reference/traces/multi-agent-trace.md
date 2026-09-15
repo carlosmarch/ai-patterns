@@ -74,18 +74,38 @@ export interface Agent {
   steps: AgentStep[];
 }
 
+export interface TraceAgent {
+  name: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  trigger?: string;
+}
+
 export interface MultiAgentTraceProps {
+  agent?: TraceAgent;
   agents: Agent[];
   className?: string;
 }
 
-export function MultiAgentTrace({ agents, className }: MultiAgentTraceProps) {
+export function MultiAgentTrace({ agent, agents, className }: MultiAgentTraceProps) {
   const active = agents.filter((a) => a.status === "running" || a.status === "queued").length;
   const failed = agents.filter((a) => a.status === "error").length;
   const allResolved = active === 0;
 
   return (
     <div className={cn("w-full overflow-hidden rounded-2xl border bg-card", className)}>
+      {agent && (
+        <div className="flex items-center gap-3 border-b px-4 py-3">
+          <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-muted-foreground">
+            {agent.icon ? <agent.icon className="size-4" /> : null}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold leading-none">{agent.name}</p>
+            {agent.trigger && (
+              <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{agent.trigger}</p>
+            )}
+          </div>
+        </div>
+      )}
       <div aria-live="polite" className="flex items-center gap-2 border-b px-4 py-3 text-xs font-medium">
         {!allResolved ? (
           <Loader2 className="size-3.5 animate-spin text-muted-foreground" aria-hidden />

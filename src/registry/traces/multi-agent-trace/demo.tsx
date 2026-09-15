@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { RotateCcw } from "lucide-react";
+import { Origami, RotateCcw } from "lucide-react";
 
 import { MultiAgentTrace, type Agent } from "./component";
 
@@ -94,7 +94,15 @@ export default function MultiAgentTraceDemo() {
 
   return (
     <div className="flex w-full max-w-md flex-col items-center gap-4">
-      <MultiAgentTrace agents={agents} className="w-full" />
+      <MultiAgentTrace
+        agent={{
+          name: "AI-Patterns",
+          icon: Origami,
+          trigger: "Issue labeled pattern-request · carlosmarch/ai-patterns",
+        }}
+        agents={agents}
+        className="w-full"
+      />
       <button
         type="button"
         onClick={() => {
