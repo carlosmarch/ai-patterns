@@ -1,5 +1,7 @@
 import type { ComponentType } from "react";
 
+import AgentTriggersDemo from "./agents/agent-triggers/demo";
+import { pattern as agentTriggersPattern } from "./agents/agent-triggers/pattern";
 import ShinyButtonDemo from "./buttons/shiny-button/demo";
 import { pattern as shinyButtonPattern } from "./buttons/shiny-button/pattern";
 import ThinkingLoaderDemo from "./loaders/thinking-loader/demo";
@@ -374,6 +376,14 @@ export const registry: RegistryEntry[] = [
     description: "A stepped onboarding card with circular arc progress, dashed-circle pending states, and strikethrough for completed steps.",
     Demo: SetupChecklistDemo,
     uxDoc: setupChecklistPattern,
+  },
+  {
+    slug: "agent-triggers",
+    category: "agents",
+    title: "Agent Triggers",
+    description: "A configuration panel for listing and toggling the external events that activate an agent, with a manual run control.",
+    Demo: AgentTriggersDemo,
+    uxDoc: agentTriggersPattern,
   },
 ];
 
