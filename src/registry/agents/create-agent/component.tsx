@@ -3,17 +3,31 @@
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
+  Antenna,
   AtSign,
   Bot,
   Brain,
   Check,
   ChevronRight,
+  Code2,
+  Compass,
+  Cpu,
+  Database,
+  Eye,
+  FlaskConical,
   GitBranch,
+  Globe,
   Layers,
+  Lightbulb,
   Plus,
   Rocket,
+  Search,
+  Server,
   Sparkles,
+  Star,
+  Terminal,
   Webhook,
+  Wrench,
   X,
   Zap,
 } from "lucide-react";
@@ -118,7 +132,26 @@ export const AGENT_ICONS = [
   { id: "rocket" as const, icon: Rocket, label: "Rocket" },
 ] as const;
 
-export type AgentIconId = (typeof AGENT_ICONS)[number]["id"];
+export const EXTRA_AGENT_ICONS = [
+  { id: "cpu" as const, icon: Cpu, label: "CPU" },
+  { id: "globe" as const, icon: Globe, label: "Globe" },
+  { id: "terminal" as const, icon: Terminal, label: "Terminal" },
+  { id: "code2" as const, icon: Code2, label: "Code" },
+  { id: "wrench" as const, icon: Wrench, label: "Wrench" },
+  { id: "search" as const, icon: Search, label: "Search" },
+  { id: "eye" as const, icon: Eye, label: "Eye" },
+  { id: "star" as const, icon: Star, label: "Star" },
+  { id: "database" as const, icon: Database, label: "Database" },
+  { id: "server" as const, icon: Server, label: "Server" },
+  { id: "lightbulb" as const, icon: Lightbulb, label: "Lightbulb" },
+  { id: "compass" as const, icon: Compass, label: "Compass" },
+  { id: "flask" as const, icon: FlaskConical, label: "Flask" },
+  { id: "antenna" as const, icon: Antenna, label: "Antenna" },
+] as const;
+
+export const ALL_AGENT_ICONS = [...AGENT_ICONS, ...EXTRA_AGENT_ICONS];
+
+export type AgentIconId = (typeof ALL_AGENT_ICONS)[number]["id"];
 
 // ── Payload ───────────────────────────────────────────────────────────────────
 
@@ -161,8 +194,9 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
     Partial<Record<TriggerSourceId, Record<string, string>>>
   >({});
   const [customTriggers, setCustomTriggers] = React.useState<CustomTrigger[]>([]);
+  const [showMoreIcons, setShowMoreIcons] = React.useState(false);
 
-  const selectedIcon = AGENT_ICONS.find((i) => i.id === iconId)!;
+  const selectedIcon = ALL_AGENT_ICONS.find((i) => i.id === iconId)!;
   const SelectedIconComp = selectedIcon.icon;
 
   function goToStep1() {
@@ -286,24 +320,72 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                 className="mt-2 w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-ring placeholder:text-muted-foreground/50 focus-visible:ring-2"
               />
 
-              <div className="mt-3 flex items-center gap-1.5">
-                {AGENT_ICONS.map(({ id, icon: Icon, label }) => (
+              <div className="mt-3 space-y-1.5">
+                <div className="flex items-center gap-1.5">
+                  {AGENT_ICONS.map(({ id, icon: Icon, label }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      aria-label={label}
+                      aria-pressed={iconId === id}
+                      onClick={() => setIconId(id)}
+                      className={cn(
+                        "flex size-8 items-center justify-center rounded-lg transition-colors",
+                        iconId === id
+                          ? "bg-foreground text-background"
+                          : "bg-muted text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Icon className="size-4" />
+                    </button>
+                  ))}
                   <button
-                    key={id}
                     type="button"
-                    aria-label={label}
-                    aria-pressed={iconId === id}
-                    onClick={() => setIconId(id)}
+                    aria-label={showMoreIcons ? "Show fewer icons" : "Show more icons"}
+                    aria-expanded={showMoreIcons}
+                    onClick={() => setShowMoreIcons((v) => !v)}
                     className={cn(
                       "flex size-8 items-center justify-center rounded-lg transition-colors",
-                      iconId === id
-                        ? "bg-foreground text-background"
+                      showMoreIcons
+                        ? "bg-muted text-foreground"
                         : "bg-muted text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    <Icon className="size-4" />
+                    <Plus className={cn("size-4 transition-transform duration-150", showMoreIcons && "rotate-45")} />
                   </button>
-                ))}
+                </div>
+
+                <AnimatePresence initial={false}>
+                  {showMoreIcons && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.15, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex flex-wrap gap-1.5 pt-0.5">
+                        {EXTRA_AGENT_ICONS.map(({ id, icon: Icon, label }) => (
+                          <button
+                            key={id}
+                            type="button"
+                            aria-label={label}
+                            aria-pressed={iconId === id}
+                            onClick={() => { setIconId(id); setShowMoreIcons(false); }}
+                            className={cn(
+                              "flex size-8 items-center justify-center rounded-lg transition-colors",
+                              iconId === id
+                                ? "bg-foreground text-background"
+                                : "bg-muted text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            <Icon className="size-4" />
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               <button
