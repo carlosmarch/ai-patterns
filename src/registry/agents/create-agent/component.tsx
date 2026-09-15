@@ -23,6 +23,9 @@ import {
   Rocket,
   Search,
   Server,
+  Shield,
+  ShieldAlert,
+  ShieldOff,
   Sparkles,
   Star,
   Terminal,
@@ -153,6 +156,40 @@ export const ALL_AGENT_ICONS = [...AGENT_ICONS, ...EXTRA_AGENT_ICONS];
 
 export type AgentIconId = (typeof ALL_AGENT_ICONS)[number]["id"];
 
+// ── Guardrails ────────────────────────────────────────────────────────────────
+
+export interface Guardrail {
+  id: string;
+  label: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  enabled: boolean;
+}
+
+export const DEFAULT_GUARDRAILS: Guardrail[] = [
+  {
+    id: "approval-required",
+    label: "Require approval",
+    description: "Human must approve before any write action",
+    icon: ShieldAlert,
+    enabled: true,
+  },
+  {
+    id: "read-only",
+    label: "Read-only by default",
+    description: "Cannot push code or send messages directly",
+    icon: ShieldOff,
+    enabled: true,
+  },
+  {
+    id: "rate-limit",
+    label: "Limit to 1 action per trigger",
+    description: "Prevents runaway loops on rapid events",
+    icon: Shield,
+    enabled: false,
+  },
+];
+
 // ── Payload ───────────────────────────────────────────────────────────────────
 
 export interface SelectedTrigger {
@@ -170,6 +207,7 @@ export interface CreateAgentPayload {
   name: string;
   instructions: string;
   iconId: AgentIconId;
+  guardrails: { id: string; enabled: boolean }[];
   triggers: SelectedTrigger[];
   customTriggers: CustomTrigger[];
 }
@@ -195,6 +233,9 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
   >({});
   const [customTriggers, setCustomTriggers] = React.useState<CustomTrigger[]>([]);
   const [showMoreIcons, setShowMoreIcons] = React.useState(false);
+  const [guardrailStates, setGuardrailStates] = React.useState<Record<string, boolean>>(
+    Object.fromEntries(DEFAULT_GUARDRAILS.map((g) => [g.id, g.enabled]))
+  );
 
   const selectedIcon = ALL_AGENT_ICONS.find((i) => i.id === iconId)!;
   const SelectedIconComp = selectedIcon.icon;
@@ -239,11 +280,16 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
     setCustomTriggers((prev) => prev.filter((t) => t.id !== id));
   }
 
+  function toggleGuardrail(id: string) {
+    setGuardrailStates((prev) => ({ ...prev, [id]: !prev[id] }));
+  }
+
   function buildPayload(): CreateAgentPayload {
     return {
       name: name.trim() || "Unnamed Agent",
       instructions: instructions.trim(),
       iconId,
+      guardrails: DEFAULT_GUARDRAILS.map((g) => ({ id: g.id, enabled: guardrailStates[g.id] ?? g.enabled })),
       triggers: selectedSources.map((sourceId) => ({
         sourceId,
         config: triggerConfigs[sourceId] ?? {},
@@ -319,6 +365,41 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                 rows={3}
                 className="mt-2 w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-ring placeholder:text-muted-foreground/50 focus-visible:ring-2"
               />
+
+              <ul className="mt-3 divide-y rounded-xl border">
+                {DEFAULT_GUARDRAILS.map(({ id, label, description, icon: Icon }) => {
+                  const enabled = guardrailStates[id] ?? false;
+                  return (
+                    <li key={id} className="flex items-center gap-3 px-3 py-2.5">
+                      <span className={cn("flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground")}>
+                        <Icon className="size-3.5" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-xs font-medium">{label}</span>
+                        <span className="block text-[11px] text-muted-foreground">{description}</span>
+                      </span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={enabled}
+                        aria-label={label}
+                        onClick={() => toggleGuardrail(id)}
+                        className={cn(
+                          "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                          enabled ? "bg-foreground" : "bg-muted"
+                        )}
+                      >
+                        <motion.span
+                          aria-hidden
+                          className="pointer-events-none inline-block h-4 w-4 rounded-full bg-background shadow-sm"
+                          animate={{ x: enabled ? 16 : 0 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
 
               <div className="mt-3 space-y-1.5">
                 <div className="flex items-center gap-1.5">
