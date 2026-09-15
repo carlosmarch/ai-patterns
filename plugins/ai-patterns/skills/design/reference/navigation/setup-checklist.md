@@ -98,9 +98,9 @@ export function SetupChecklist({ title, steps, className }: SetupChecklistProps)
   return (
     <div className={cn("rounded-2xl bg-muted/70 p-3", className)}>
       <div className="mb-3 flex items-center justify-between px-1">
-        <span className="text-sm font-medium text-foreground">{title}</span>
+        <span className="text-xs font-medium text-foreground">{title}</span>
         <div className="flex items-center gap-2">
-          <span className="text-sm tabular-nums text-muted-foreground">
+          <span className="text-xs tabular-nums text-muted-foreground">
             {doneCount}/{total}
           </span>
           <CircularProgress done={doneCount} total={total} />
@@ -182,7 +182,7 @@ function SetupRow({ step }: { step: SetupStep }) {
 
       <span
         className={cn(
-          "flex-1 text-sm font-medium",
+          "flex-1 text-xs font-medium",
           done ? "text-muted-foreground line-through decoration-muted-foreground/60" : "text-foreground"
         )}
       >

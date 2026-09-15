@@ -11,7 +11,8 @@ import { HomeHero } from "./home-hero";
 
 export default async function Home() {
   const featured = registry.find((entry) => entry.slug === "prompt-bar-pro");
-  const rest = registry.filter((entry) => entry.slug !== featured?.slug);
+  const HIDDEN = new Set(["shiny-button"]);
+  const rest = registry.filter((entry) => entry.slug !== featured?.slug && !HIDDEN.has(entry.slug));
 
   const sources = await Promise.all(
     rest.map((entry) =>
