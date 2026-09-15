@@ -60,8 +60,8 @@ export function GenerationError({
         <CircleAlert className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
 
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <p className="text-sm font-medium text-foreground">{config.title}</p>
-          <p className="text-xs text-muted-foreground">{message ?? config.hint}</p>
+          <p className="text-xs font-medium text-foreground">{config.title}</p>
+          <p className="text-[11px] text-muted-foreground">{message ?? config.hint}</p>
         </div>
       </div>
 
@@ -71,7 +71,7 @@ export function GenerationError({
             type="button"
             onClick={() => setDetailsOpen((v) => !v)}
             aria-expanded={detailsOpen}
-            className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            className="flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
           >
             <ChevronDown
               className={cn("size-3 transition-transform", detailsOpen && "rotate-180")}
@@ -89,7 +89,7 @@ export function GenerationError({
             onClick={onRetry}
             disabled={retrying}
             aria-label={retrying ? "Retrying" : "Retry"}
-            className="flex items-center gap-1 rounded-full bg-foreground px-2.5 py-1 text-xs font-medium text-background transition-opacity hover:opacity-80 disabled:opacity-50"
+            className="flex items-center gap-1 rounded-full bg-foreground px-2.5 py-1 text-[11px] font-medium text-background transition-opacity hover:opacity-80 disabled:opacity-50"
           >
             <RotateCcw className={cn("size-3", retrying && "animate-spin")} aria-hidden />
             {retrying ? "Retrying…" : "Retry"}
