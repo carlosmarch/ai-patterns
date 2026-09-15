@@ -366,7 +366,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
   };
 
   return (
-    <div className={cn("w-full max-w-xs overflow-hidden rounded-2xl border bg-card", className)}>
+    <div suppressHydrationWarning className={cn("w-full max-w-xs overflow-hidden rounded-2xl border bg-card", className)}>
       {/* Header preview */}
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">

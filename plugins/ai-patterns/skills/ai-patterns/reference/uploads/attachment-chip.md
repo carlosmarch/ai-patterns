@@ -130,7 +130,7 @@ export function AttachmentTray({
   );
 }
 
-function AttachmentChip({
+export function AttachmentChip({
   attachment,
   onRemove,
   onRetry,

@@ -161,7 +161,7 @@ export function ConsoleErrorCard({
               >
                 <ChevronLeft className="size-4" aria-hidden />
               </button>
-              <span className="font-mono text-xs text-muted-foreground tabular-nums">
+              <span className="font-mono text-[11px] text-muted-foreground tabular-nums">
                 {current}/{total}
               </span>
               <button
@@ -177,7 +177,7 @@ export function ConsoleErrorCard({
           )}
           <span
             className={cn(
-              "rounded-md px-2 py-0.5 text-xs font-semibold",
+              "rounded-md px-2 py-0.5 text-[11px] font-semibold",
               isError
                 ? "bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400"
                 : "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400"
@@ -234,7 +234,7 @@ export function ConsoleErrorCard({
       <div className="px-4 py-3">
         <p
           className={cn(
-            "text-sm leading-relaxed",
+            "text-xs leading-relaxed",
             isError ? "text-red-600 dark:text-red-400" : "text-amber-600 dark:text-amber-400"
           )}
         >
@@ -246,7 +246,7 @@ export function ConsoleErrorCard({
       {frame && (
         <div className="mx-4 mb-3 overflow-hidden rounded-xl border border-border bg-muted/40">
           <div className="flex items-center justify-between border-b border-border px-3 py-2">
-            <span className="font-mono text-xs text-muted-foreground">{frame.file}</span>
+            <span className="font-mono text-[11px] text-muted-foreground">{frame.file}</span>
             {onOpenFrame && (
               <button
                 type="button"
@@ -258,7 +258,7 @@ export function ConsoleErrorCard({
               </button>
             )}
           </div>
-          <div className="overflow-x-auto p-2 font-mono text-xs leading-6">
+          <div className="overflow-x-auto p-2 font-mono text-[11px] leading-5">
             {frame.lines.map((line) => (
               <div
                 key={line.number}
@@ -298,8 +298,8 @@ export function ConsoleErrorCard({
             className="flex w-full items-center justify-between px-3 py-2 text-left transition-colors hover:bg-muted/50"
           >
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-foreground">Call Stack</span>
-              <span className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground tabular-nums">
+              <span className="text-[11px] font-semibold text-foreground">Call Stack</span>
+              <span className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground tabular-nums">
                 {stack.length}
               </span>
             </div>
@@ -324,9 +324,9 @@ export function ConsoleErrorCard({
                 <div className="divide-y divide-border">
                   {stack.map((frame, i) => (
                     <div key={i} className="px-3 py-2">
-                      <p className="text-xs font-medium text-foreground">{frame.name}</p>
+                      <p className="text-[11px] font-medium text-foreground">{frame.name}</p>
                       {frame.context && (
-                        <p className="text-xs text-muted-foreground">{frame.context}</p>
+                        <p className="text-[11px] text-muted-foreground">{frame.context}</p>
                       )}
                       {frame.file && (
                         <p className="mt-0.5 font-mono text-[11px] text-muted-foreground/70">{frame.file}</p>
@@ -343,7 +343,7 @@ export function ConsoleErrorCard({
       {/* Footer */}
       {onHelpful && (
         <div className="flex items-center justify-end gap-2 border-t border-border px-4 py-2.5">
-          <span className="text-xs text-muted-foreground">Was this helpful?</span>
+          <span className="text-[11px] text-muted-foreground">Was this helpful?</span>
           <button
             type="button"
             onClick={() => handleHelpful(true)}

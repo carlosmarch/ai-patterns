@@ -57,7 +57,9 @@ instead of copying these Tailwind classes or the Motion API.
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronDown, Mic, Monitor, Plus, Shuffle } from "lucide-react";
+import { ChevronDown, ChevronRight, Folder, Link2, Mic, Monitor, Paperclip, Plus, Shuffle } from "lucide-react";
+
+import { Attachment, AttachmentChip } from "../../uploads/attachment-chip/component";
 
 import { cn } from "@/lib/utils";
 import { StopGenerationButton, type GenerationState } from "../../buttons/stop-generation-button/component";
@@ -169,11 +171,36 @@ export function PromptBarPro({
   const [suppressed, setSuppressed] = React.useState(false);
   const [textBeforeCursor, setTextBeforeCursor] = React.useState("");
   const [hasContent, setHasContent] = React.useState(false);
+  const [attachments, setAttachments] = React.useState<Attachment[]>([]);
+  const [attachMenuOpen, setAttachMenuOpen] = React.useState(false);
   const editorRef = React.useRef<HTMLDivElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const environmentRef = useClickOutside<HTMLDivElement>(() => setEnvironmentOpen(false));
   const orchestratorRef = useClickOutside<HTMLDivElement>(() => setOrchestratorOpen(false));
+  const attachMenuRef = useClickOutside<HTMLDivElement>(() => setAttachMenuOpen(false));
 
   const isDisabled = generationState === "generating";
+
+  function addAttachments(files: FileList | null) {
+    if (!files) return;
+    const next: Attachment[] = Array.from(files).map((f) => ({
+      id: `${f.name}-${Date.now()}-${Math.random()}`,
+      name: f.name,
+      size: f.size,
+      progress: 100,
+      status: "done" as const,
+      previewUrl: f.type.startsWith("image/") ? URL.createObjectURL(f) : undefined,
+    }));
+    setAttachments((prev) => [...prev, ...next]);
+  }
+
+  function removeAttachment(id: string) {
+    setAttachments((prev) => {
+      const att = prev.find((a) => a.id === id);
+      if (att?.previewUrl) URL.revokeObjectURL(att.previewUrl);
+      return prev.filter((a) => a.id !== id);
+    });
+  }
 
   const trigger = getActiveTrigger(textBeforeCursor);
   const autocompleteSuggestions = trigger
@@ -185,7 +212,7 @@ export function PromptBarPro({
       )
     : [];
   const showAutocomplete = Boolean(trigger) && !suppressed && autocompleteSuggestions.length > 0;
-  const canSend = hasContent;
+  const canSend = hasContent || attachments.length > 0;
 
   const triggerKey = trigger ? `${trigger.type}:${trigger.start}` : null;
   const prevTriggerKeyRef = React.useRef(triggerKey);
@@ -306,11 +333,13 @@ export function PromptBarPro({
       return;
     }
     const content = serializeEditor();
-    if (!content) return;
+    if (!content && attachments.length === 0) return;
     onSubmit?.(content);
     if (editorRef.current) editorRef.current.innerHTML = "";
     setHasContent(false);
     setTextBeforeCursor("");
+    attachments.forEach((a) => { if (a.previewUrl) URL.revokeObjectURL(a.previewUrl); });
+    setAttachments([]);
     if (!isControlled) setInternalGenerationState("generating");
   }
 
@@ -403,38 +432,105 @@ export function PromptBarPro({
           )}
         </AnimatePresence>
 
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => addAttachments(e.target.files)}
+          onClick={(e) => { (e.target as HTMLInputElement).value = ""; }}
+        />
+
         <div className="flex flex-col gap-3 rounded-2xl border bg-card p-3 shadow-sm">
-          <div className="relative w-full">
-            <div
-              ref={editorRef}
-              contentEditable={!isDisabled}
-              suppressContentEditableWarning
-              role="textbox"
-              aria-multiline="true"
-              aria-label={placeholder}
-              onInput={updateEditorState}
-              onKeyDown={handleKeyDown}
-              onPaste={handlePaste}
-              className={cn(
-                "max-h-40 min-h-14 w-full overflow-x-hidden overflow-y-auto break-words bg-transparent px-1 py-1 text-base outline-none leading-normal",
-                isDisabled && "pointer-events-none text-muted-foreground"
+          <div className="w-full">
+            <AnimatePresence initial={false}>
+              {attachments.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="overflow-hidden"
+                >
+                  <ul className="flex gap-2 overflow-x-auto pt-2 pr-2 pb-2">
+                    {attachments.map((att) => (
+                      <AttachmentChip key={att.id} attachment={att} onRemove={removeAttachment} />
+                    ))}
+                  </ul>
+                </motion.div>
               )}
-            />
-            {!hasContent && (
-              <span className="pointer-events-none absolute left-1 top-1 text-base text-muted-foreground">
-                {placeholder}
-              </span>
-            )}
+            </AnimatePresence>
+            <div className="relative">
+              <div
+                ref={editorRef}
+                contentEditable={!isDisabled}
+                suppressContentEditableWarning
+                role="textbox"
+                aria-multiline="true"
+                aria-label={placeholder}
+                onInput={updateEditorState}
+                onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
+                className={cn(
+                  "max-h-40 min-h-14 w-full overflow-x-hidden overflow-y-auto break-words bg-transparent px-1 py-1 text-base outline-none leading-normal",
+                  isDisabled && "pointer-events-none text-muted-foreground"
+                )}
+              />
+              {!hasContent && (
+                <span className="pointer-events-none absolute left-1 top-1 text-base text-muted-foreground">
+                  {placeholder}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-y-2 gap-x-1">
-            <button
-              type="button"
-              className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              aria-label="Add attachment"
-            >
-              <Plus className="size-4" />
-            </button>
+            <div ref={attachMenuRef} className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setAttachMenuOpen((v) => !v)}
+                className="flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                aria-label="Add attachment"
+              >
+                <Plus className="size-4" />
+              </button>
+              <AnimatePresence>
+                {attachMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.12 }}
+                    className="absolute bottom-full left-0 z-20 mb-1.5 w-52 overflow-hidden rounded-xl border bg-popover shadow-md"
+                  >
+                    <button
+                      type="button"
+                      onMouseDown={(e) => { e.preventDefault(); fileInputRef.current?.click(); setAttachMenuOpen(false); }}
+                      className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-accent"
+                    >
+                      <Paperclip className="size-4 text-muted-foreground" />
+                      Upload files or images
+                    </button>
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                    >
+                      <Link2 className="size-4" />
+                      Connectors
+                      <ChevronRight className="ml-auto size-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                    >
+                      <Folder className="size-4" />
+                      Projects
+                      <ChevronRight className="ml-auto size-3.5" />
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             <div ref={environmentRef} className="relative hidden shrink-0 sm:block">
               <button

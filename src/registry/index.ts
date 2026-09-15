@@ -28,6 +28,8 @@ import ChatBubbleDemo from "./messages/chat-bubble/demo";
 import { pattern as chatBubblePattern } from "./messages/chat-bubble/pattern";
 import ToolApprovalDemo from "./permissions/tool-approval/demo";
 import { pattern as toolApprovalPattern } from "./permissions/tool-approval/pattern";
+import ConnectorPanelDemo from "./permissions/connector-panel/demo";
+import { pattern as connectorPanelPattern } from "./permissions/connector-panel/pattern";
 import ToolCallChipDemo from "./loaders/tool-call-chip/demo";
 import { pattern as toolCallChipPattern } from "./loaders/tool-call-chip/pattern";
 import AttachmentTrayDemo from "./uploads/attachment-chip/demo";
@@ -210,6 +212,15 @@ export const registry: RegistryEntry[] = [
     description: "A pending tool-call prompt with allow, always-allow, and deny actions.",
     Demo: ToolApprovalDemo,
     uxDoc: toolApprovalPattern,
+  },
+  {
+    slug: "connector-panel",
+    category: "permissions",
+    title: "Connector Panel",
+    description:
+      "A settings panel for connecting an app or MCP server — shows capabilities overview, groups tools by type, and lets users set per-tool permission levels.",
+    Demo: ConnectorPanelDemo,
+    uxDoc: connectorPanelPattern,
   },
   {
     slug: "tool-call-chip",
