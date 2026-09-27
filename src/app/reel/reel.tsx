@@ -6,8 +6,7 @@ import {
   motion,
   useMotionValue,
   useSpring,
-  useTransform,
-  useVelocity,
+  useIsPresent,
   type MotionValue,
 } from "motion/react";
 import {
@@ -697,39 +696,68 @@ function Background({ hues }: { hues: [string, string, string] }) {
   );
 }
 
-const SLIDE = 820;
+// ---------------------------------------------------------------------------
+// Shell: one glass window that stays on screen and morphs to fit each
+// pattern, so the reel reads as a single product flow rather than slides.
+// ---------------------------------------------------------------------------
 
-/**
- * Slides a scene in from the right and out to the left. While it moves, an
- * SVG blur scaled by horizontal velocity smears it sideways, like a camera
- * shutter catching a fast pan. At rest the filter is dropped entirely so the
- * glass cards can blur the background again.
- */
-function SceneFrame({ id, bookend, children }: { id: string; bookend: boolean; children: React.ReactNode }) {
-  const x = useMotionValue(bookend ? 0 : SLIDE);
-  const vx = useVelocity(x);
-  const blur = useTransform(vx, (v) => `${Math.min(Math.abs(v) / 60, 60).toFixed(1)} 0`);
-  const filter = useTransform(vx, (v) => (Math.abs(v) < 40 ? "none" : `url(#mb-${id})`));
-  const spring = { type: "spring", stiffness: 120, damping: 19, mass: 1, delay: 0.1 } as const;
+type Size = { w: number; h: number };
+
+const SHELL_PAD = 14;
+const SHELL_IDLE: Size = { w: 120, h: 120 };
+
+function Shell({ size, visible, children }: { size: Size; visible: boolean; children: React.ReactNode }) {
+  const target = visible ? size : SHELL_IDLE;
   return (
     <motion.div
-      className="absolute"
-      style={{ x, filter }}
-      initial={{ opacity: 0, scale: bookend ? 1.12 : 0.94 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{
-        opacity: 0,
-        x: bookend ? 0 : -SLIDE,
-        scale: bookend ? 0.9 : 0.96,
-        transition: { duration: 0.42, ease: [0.7, 0, 0.84, 0] },
+      className="reel-shell relative"
+      initial={{ width: SHELL_IDLE.w, height: SHELL_IDLE.h, opacity: 0, scale: 0.8 }}
+      animate={{
+        width: target.w + SHELL_PAD * 2,
+        height: target.h + SHELL_PAD * 2,
+        opacity: visible ? 1 : 0,
+        scale: visible ? 1 : 0.8,
       }}
-      transition={{ x: spring, scale: spring, opacity: { duration: 0.3, delay: 0.1 } }}
+      transition={{
+        width: { type: "spring", stiffness: 140, damping: 22, mass: 1 },
+        height: { type: "spring", stiffness: 140, damping: 22, mass: 1 },
+        opacity: { duration: 0.35 },
+        scale: { type: "spring", stiffness: 140, damping: 20 },
+      }}
     >
-      <svg width="0" height="0" className="absolute" aria-hidden>
-        <filter id={`mb-${id}`} x="-30%" y="-10%" width="160%" height="120%">
-          <motion.feGaussianBlur in="SourceGraphic" stdDeviation={blur} />
-        </filter>
-      </svg>
+      <div className="absolute inset-0 overflow-hidden rounded-[inherit]">{children}</div>
+    </motion.div>
+  );
+}
+
+/** A scene's contents inside the shell: reports its size, then crossfades in place. */
+function ShellContent({ onSize, children }: { onSize: (s: Size) => void; children: React.ReactNode }) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const present = useIsPresent();
+  const presentRef = React.useRef(present);
+  React.useEffect(() => {
+    presentRef.current = present;
+  }, [present]);
+
+  React.useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const report = () => presentRef.current && onSize({ w: el.offsetWidth, h: el.offsetHeight });
+    report();
+    const ro = new ResizeObserver(report);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [onSize]);
+
+  return (
+    <motion.div
+      ref={ref}
+      className="absolute top-1/2 left-1/2 w-max -translate-x-1/2 -translate-y-1/2"
+      initial={{ opacity: 0, y: 14, scale: 0.985, filter: "blur(10px)" }}
+      animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)", transitionEnd: { filter: "none" } }}
+      exit={{ opacity: 0, y: -10, scale: 0.985, filter: "blur(8px)", transition: { duration: 0.22, ease: "easeIn" } }}
+      transition={{ delay: 0.16, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+    >
       {children}
     </motion.div>
   );
@@ -849,6 +877,7 @@ export function Reel() {
   const record = React.useRef(false);
   const stageRef = React.useRef<HTMLDivElement>(null);
   const cursor = useCursorState(stageRef, scale);
+  const [shellSize, setShellSize] = React.useState<Size>(SHELL_IDLE);
 
   // `?record` waits for scripts/record-reel.mjs to call __reelPlay() and
   // plays through once instead of looping.
@@ -901,16 +930,33 @@ export function Reel() {
           AI Patterns
         </div>
 
-        {/* UI */}
-        <div
-          className="absolute inset-x-0 flex items-center justify-center"
-          style={{ top: isBookend ? 0 : 120, bottom: isBookend ? 120 : 250 }}
-        >
+        {/* UI: patterns flow through one persistent glass window */}
+        <div className="absolute inset-x-0 top-[120px] bottom-[250px] flex items-center justify-center">
+          <Shell size={shellSize} visible={playing && !isBookend}>
+            <AnimatePresence>
+              {playing && !isBookend && (
+                <ShellContent key={`${cycle}-${scene.id}`} onSize={setShellSize}>
+                  <scene.Render />
+                </ShellContent>
+              )}
+            </AnimatePresence>
+          </Shell>
+        </div>
+
+        {/* Intro / outro */}
+        <div className="absolute inset-x-0 top-0 bottom-[120px] flex items-center justify-center">
           <AnimatePresence>
-            {playing && (
-            <SceneFrame key={`${cycle}-${scene.id}`} id={`${cycle}-${scene.id}`} bookend={isBookend}>
-              <scene.Render />
-            </SceneFrame>
+            {playing && isBookend && (
+              <motion.div
+                key={`${cycle}-${scene.id}`}
+                className="absolute"
+                initial={{ opacity: 0, scale: 1.06, filter: "blur(16px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)", transitionEnd: { filter: "none" } }}
+                exit={{ opacity: 0, scale: 0.94, filter: "blur(12px)", transition: { duration: 0.3 } }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <scene.Render />
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
@@ -993,6 +1039,25 @@ html, body { overflow: hidden; }
     inset 0 1px 0 rgb(255 255 255 / 0.25),
     inset 0 -1px 0 rgb(255 255 255 / 0.05),
     0 40px 100px -30px rgb(0 0 0 / 0.75);
+}
+.reel-shell {
+  border-radius: 40px;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  background: linear-gradient(150deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.04) 45%, rgb(255 255 255 / 0.09)), rgb(22 22 36 / 0.22);
+  backdrop-filter: blur(40px) saturate(1.7) brightness(1.15);
+  -webkit-backdrop-filter: blur(40px) saturate(1.7) brightness(1.15);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
+    inset 0 -1px 0 rgb(255 255 255 / 0.05),
+    0 40px 100px -30px rgb(0 0 0 / 0.75);
+}
+/* Inside the window, pattern surfaces dissolve into it: one pane, not cards on cards. */
+.reel-shell :is(.bg-card, .bg-background) {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 /* Nested surfaces stay flat so they don't stack tints. */
 .reel-stage :is(.bg-card, .bg-background, .bg-popover) :is(.bg-card, .bg-background) {
