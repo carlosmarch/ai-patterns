@@ -1,7 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { AnimatePresence, motion, type TargetAndTransition } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  useVelocity,
+  type MotionValue,
+} from "motion/react";
 import {
   ArrowRight,
   Bot,
@@ -81,10 +89,9 @@ function typeInto(root: HTMLElement | null, selector: string, text: string, char
   return () => ids.forEach((id) => window.clearTimeout(id));
 }
 
-function clickWhere(root: HTMLElement | null, selector: string, match?: RegExp) {
+function find(root: HTMLElement | null, selector: string, match?: RegExp) {
   const els = Array.from(root?.querySelectorAll<HTMLElement>(selector) ?? []);
-  const el = match ? els.find((e) => match.test(e.textContent ?? "") || match.test(e.getAttribute("aria-label") ?? "")) : els[0];
-  el?.click();
+  return match ? els.find((e) => match.test(e.textContent ?? "") || match.test(e.getAttribute("aria-label") ?? "")) : els[0];
 }
 
 /** Scales a component up without blurring text (CSS zoom re-lays out rather than resampling). */
@@ -109,6 +116,12 @@ const PB_COMMANDS: PromptBarItem[] = [{ id: "ship", label: "/ship", description:
 
 function PromptScene() {
   const ref = React.useRef<HTMLDivElement>(null);
+  const cursor = useCursor();
+  useSteps([
+    [200, () => cursor.to(find(ref.current, "[contenteditable=true]"))],
+    [420, () => cursor.tap()],
+    [2250, () => cursor.to(find(ref.current, "button", /Toggle dictation/)?.nextElementSibling ?? null)],
+  ]);
   React.useEffect(() => {
     let cancel = () => {};
     const id = window.setTimeout(() => {
@@ -270,16 +283,35 @@ const DIFF: DiffFile[] = [
 ];
 
 function DiffScene() {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const cursor = useCursor();
+  useSteps([
+    [550, () => cursor.to(find(ref.current, "button", /Show 2 more/))],
+    [1000, () => {
+      cursor.tap();
+      find(ref.current, "button", /Show 2 more/)?.click();
+    }],
+  ]);
   return (
-    <Zoom z={2.2}>
-      <DiffSummaryCard files={DIFF} visibleCount={3} timestamp="Just now" className="w-[460px]" />
-    </Zoom>
+    <div ref={ref}>
+      <Zoom z={2.1}>
+        <DiffSummaryCard files={DIFF} visibleCount={3} timestamp="Just now" className="w-[460px]" />
+      </Zoom>
+    </div>
   );
 }
 
 function ApprovalScene() {
   const ref = React.useRef<HTMLDivElement>(null);
-  useSteps([[1350, () => clickWhere(ref.current, "button", /^\s*Allow\s*$/)]]);
+  const cursor = useCursor();
+  const allow = () => find(ref.current, "button", /^\s*Allow\s*$/);
+  useSteps([
+    [700, () => cursor.to(allow())],
+    [1250, () => {
+      cursor.tap();
+      allow()?.click();
+    }],
+  ]);
   return (
     <div ref={ref}>
       <Zoom z={2.3}>
@@ -310,7 +342,15 @@ const HITL = [
 
 function HitlScene() {
   const ref = React.useRef<HTMLDivElement>(null);
-  useSteps([[900, () => clickWhere(ref.current, "label, [role=radio], button", /Bold and punchy/)]]);
+  const cursor = useCursor();
+  const option = () => find(ref.current, "label, [role=radio], button", /Bold and punchy/);
+  useSteps([
+    [450, () => cursor.to(option())],
+    [900, () => {
+      cursor.tap();
+      option()?.click();
+    }],
+  ]);
   return (
     <div ref={ref}>
       <Zoom z={2.1}>
@@ -398,7 +438,15 @@ function VoiceScene() {
 
 function CompareScene() {
   const ref = React.useRef<HTMLDivElement>(null);
-  useSteps([[1250, () => clickWhere(ref.current, "[role=radio]", /Response B/)]]);
+  const cursor = useCursor();
+  const pick = () => find(ref.current, "[role=radio]", /Response B/);
+  useSteps([
+    [650, () => cursor.to(pick())],
+    [1200, () => {
+      cursor.tap();
+      pick()?.click();
+    }],
+  ]);
   return (
     <div ref={ref}>
       <Zoom z={1.6}>
@@ -439,6 +487,12 @@ const PALETTE: CommandPaletteGroup[] = [
 
 function PaletteScene() {
   const ref = React.useRef<HTMLDivElement>(null);
+  const cursor = useCursor();
+  useSteps([
+    [250, () => cursor.to(find(ref.current, "input"))],
+    [500, () => cursor.tap()],
+    [1300, () => cursor.to(find(ref.current, "[role=option], button", /Multi-Agent Trace/))],
+  ]);
   React.useEffect(() => {
     let cancel = () => {};
     const id = window.setTimeout(() => (cancel = typeInto(ref.current, "input", "agent", 90)), 550);
@@ -467,14 +521,19 @@ const TEAM: Collaborator[] = [
 function PresenceScene() {
   const [team, setTeam] = React.useState(TEAM);
   const online = (id: string) => () => setTeam((p) => p.map((c) => (c.id === id ? { ...c, isOnline: true } : c)));
+  const ref = React.useRef<HTMLDivElement>(null);
+  const cursor = useCursor();
   useSteps([
     [500, online("u2")],
     [900, online("u4")],
+    [700, () => cursor.to(find(ref.current, "[data-avatar], span", /^SC$/))],
   ]);
   return (
-    <Zoom z={3.6}>
-      <CollaborativePresence collaborators={team} />
-    </Zoom>
+    <div ref={ref}>
+      <Zoom z={3.6}>
+        <CollaborativePresence collaborators={team} />
+      </Zoom>
+    </div>
   );
 }
 
@@ -557,8 +616,6 @@ function OutroScene() {
 // Timeline
 // ---------------------------------------------------------------------------
 
-type Style = "rise" | "slide" | "zoom";
-
 interface Scene {
   id: string;
   /** Registry title shown in the corner. */
@@ -567,97 +624,185 @@ interface Scene {
   /** Marketing line, typed in under the UI. */
   headline?: string;
   ms: number;
-  style: Style;
-  /** Background accent hues [a, b, c]. */
-  hues: [string, string, string];
   Render: React.ComponentType;
 }
 
 const SCENES: Scene[] = [
-  { id: "intro", ms: 2100, style: "zoom", hues: ["#7c3aed", "#2563eb", "#db2777"], Render: IntroScene, headline: "Motion-ready UI for AI products." },
-  { id: "prompt", name: "Prompt Bar Pro", category: "Composer", headline: "Start with a better prompt.", ms: 3000, style: "rise", hues: ["#6d28d9", "#0ea5e9", "#9333ea"], Render: PromptScene },
-  { id: "thinking", name: "Thinking Loader", category: "Loaders", headline: "Show it thinking.", ms: 1700, style: "zoom", hues: ["#4f46e5", "#7c3aed", "#0891b2"], Render: ThinkingScene },
-  { id: "tools", name: "Tool Call Chip", category: "Loaders", headline: "Every tool call, live.", ms: 2000, style: "slide", hues: ["#0891b2", "#2563eb", "#10b981"], Render: ToolCallsScene },
-  { id: "agents", name: "Multi-Agent Trace", category: "Traces", headline: "Orchestrate agents in parallel.", ms: 2700, style: "rise", hues: ["#7c3aed", "#db2777", "#2563eb"], Render: AgentsScene },
-  { id: "terminal", name: "Terminal Stream", category: "Code", headline: "Stream every command.", ms: 2300, style: "slide", hues: ["#059669", "#0f766e", "#2563eb"], Render: TerminalScene },
-  { id: "diff", name: "Diff Summary", category: "Code", headline: "Review changes at a glance.", ms: 1800, style: "zoom", hues: ["#16a34a", "#0891b2", "#4f46e5"], Render: DiffScene },
-  { id: "approval", name: "Tool Approval", category: "Permissions", headline: "Keep humans in control.", ms: 2200, style: "rise", hues: ["#ea580c", "#db2777", "#7c3aed"], Render: ApprovalScene },
-  { id: "hitl", name: "Human in the Loop", category: "Agents", headline: "Ask before acting.", ms: 2000, style: "slide", hues: ["#d97706", "#ea580c", "#9333ea"], Render: HitlScene },
-  { id: "stream", name: "Streaming Text", category: "Text", headline: "Answers that stream.", ms: 2700, style: "rise", hues: ["#2563eb", "#7c3aed", "#0ea5e9"], Render: StreamScene },
-  { id: "confidence", name: "Confidence Indicator", category: "Indicators", headline: "Show how sure it is.", ms: 1800, style: "zoom", hues: ["#10b981", "#0891b2", "#65a30d"], Render: ConfidenceScene },
-  { id: "voice", name: "Voice Waveform", category: "Voice", headline: "Just talk to it.", ms: 2500, style: "slide", hues: ["#0284c7", "#6366f1", "#06b6d4"], Render: VoiceScene },
-  { id: "compare", name: "Response Compare", category: "Compare", headline: "Let users pick the best.", ms: 2300, style: "rise", hues: ["#9333ea", "#2563eb", "#db2777"], Render: CompareScene },
-  { id: "palette", name: "Command Palette", category: "Navigation", headline: "Jump anywhere, instantly.", ms: 2000, style: "zoom", hues: ["#4338ca", "#7c3aed", "#0f172a"], Render: PaletteScene },
-  { id: "presence", name: "Collaborative Presence", category: "Collaboration", headline: "Build it together.", ms: 1700, style: "slide", hues: ["#db2777", "#f59e0b", "#7c3aed"], Render: PresenceScene },
-  { id: "limit", name: "Rate Limit", category: "Errors", headline: "Even the limits look good.", ms: 1800, style: "rise", hues: ["#dc2626", "#ea580c", "#9333ea"], Render: LimitScene },
-  { id: "outro", ms: 2800, style: "zoom", hues: ["#7c3aed", "#2563eb", "#db2777"], Render: OutroScene, headline: "ai-patterns — the motion layer for AI apps." },
+  { id: "intro", ms: 2100, Render: IntroScene, headline: "Motion-ready UI for AI products." },
+  { id: "prompt", name: "Prompt Bar Pro", category: "Composer", headline: "Start with a better prompt.", ms: 3000, Render: PromptScene },
+  { id: "thinking", name: "Thinking Loader", category: "Loaders", headline: "Show it thinking.", ms: 1700, Render: ThinkingScene },
+  { id: "tools", name: "Tool Call Chip", category: "Loaders", headline: "Every tool call, live.", ms: 2000, Render: ToolCallsScene },
+  { id: "agents", name: "Multi-Agent Trace", category: "Traces", headline: "Orchestrate agents in parallel.", ms: 2700, Render: AgentsScene },
+  { id: "terminal", name: "Terminal Stream", category: "Code", headline: "Stream every command.", ms: 2300, Render: TerminalScene },
+  { id: "diff", name: "Diff Summary", category: "Code", headline: "Review changes at a glance.", ms: 1800, Render: DiffScene },
+  { id: "approval", name: "Tool Approval", category: "Permissions", headline: "Keep humans in control.", ms: 2200, Render: ApprovalScene },
+  { id: "hitl", name: "Human in the Loop", category: "Agents", headline: "Ask before acting.", ms: 2000, Render: HitlScene },
+  { id: "stream", name: "Streaming Text", category: "Text", headline: "Answers that stream.", ms: 2700, Render: StreamScene },
+  { id: "confidence", name: "Confidence Indicator", category: "Indicators", headline: "Show how sure it is.", ms: 1800, Render: ConfidenceScene },
+  { id: "voice", name: "Voice Waveform", category: "Voice", headline: "Just talk to it.", ms: 2500, Render: VoiceScene },
+  { id: "compare", name: "Response Compare", category: "Compare", headline: "Let users pick the best.", ms: 2300, Render: CompareScene },
+  { id: "palette", name: "Command Palette", category: "Navigation", headline: "Jump anywhere, instantly.", ms: 2000, Render: PaletteScene },
+  { id: "presence", name: "Collaborative Presence", category: "Collaboration", headline: "Build it together.", ms: 1700, Render: PresenceScene },
+  { id: "limit", name: "Rate Limit", category: "Errors", headline: "Even the limits look good.", ms: 1800, Render: LimitScene },
+  { id: "outro", ms: 2800, Render: OutroScene, headline: "ai-patterns — the motion layer for AI apps." },
 ];
 
 const PATTERN_COUNT = SCENES.filter((s) => s.name).length;
-
-const ENTER: Record<Style, TargetAndTransition> = {
-  rise: { opacity: 0, y: 160, scale: 0.86, rotateX: 24, filter: "blur(18px)" },
-  slide: { opacity: 0, x: 520, rotateY: -28, scale: 0.9, filter: "blur(18px)" },
-  zoom: { opacity: 0, scale: 1.22, filter: "blur(24px)" },
-};
-const EXIT: Record<Style, TargetAndTransition> = {
-  rise: { opacity: 0, y: -140, scale: 1.05, rotateX: -16, filter: "blur(16px)" },
-  slide: { opacity: 0, x: -520, rotateY: 28, scale: 0.9, filter: "blur(16px)" },
-  zoom: { opacity: 0, scale: 0.7, filter: "blur(18px)" },
-};
-const SHOW: TargetAndTransition = {
-  opacity: 1,
-  x: 0,
-  y: 0,
-  scale: 1,
-  rotateX: 0,
-  rotateY: 0,
-  filter: "blur(0px)",
-  // A lingering filter would stop the glass cards from blurring the background.
-  transitionEnd: { filter: "none" },
-};
 
 // ---------------------------------------------------------------------------
 // Chrome: background, typed headline, progress
 // ---------------------------------------------------------------------------
 
+// Muted glows that sit behind the UI and tint the glass: blue, violet, peach.
+const PALETTES: [string, string, string][] = [
+  ["#3563d4", "#6a4fd8", "#d9785e"],
+  ["#6a4fd8", "#2f7fd0", "#c9657f"],
+  ["#2f7fd0", "#5b4fd0", "#d98a5e"],
+  ["#4a4fd8", "#8a4fc8", "#3a9fb0"],
+];
+
 function Background({ hues }: { hues: [string, string, string] }) {
   const blobs = [
-    { size: 1100, x: [-260, -120, -260], y: [-240, -120, -240], left: -120, top: -220 },
-    { size: 1000, x: [0, -140, 0], y: [0, 120, 0], left: 1100, top: 300 },
-    { size: 800, x: [0, 160, 0], y: [0, -100, 0], left: 500, top: 620 },
+    { size: 900, left: 260, top: 420, x: [0, 60, 0], y: [0, -40, 0], opacity: 0.55 },
+    { size: 820, left: 620, top: -60, x: [0, -50, 0], y: [0, 50, 0], opacity: 0.5 },
+    { size: 860, left: 1000, top: 380, x: [0, -70, 0], y: [0, -30, 0], opacity: 0.45 },
   ];
   return (
-    <div className="absolute inset-0 overflow-hidden bg-[#06060b]">
+    <div className="absolute inset-0 overflow-hidden bg-[#05050a]">
       {blobs.map((b, i) => (
         <motion.div
           key={i}
           className="absolute rounded-full"
-          style={{ width: b.size, height: b.size, left: b.left, top: b.top, filter: "blur(140px)" }}
-          animate={{ x: b.x, y: b.y, backgroundColor: hues[i], opacity: i === 2 ? 0.45 : 0.6 }}
+          style={{ width: b.size, height: b.size, left: b.left, top: b.top, filter: "blur(170px)", opacity: b.opacity }}
+          animate={{ x: b.x, y: b.y, backgroundColor: hues[i] }}
           transition={{
-            x: { duration: 14 + i * 3, repeat: Infinity, ease: "easeInOut" },
-            y: { duration: 12 + i * 4, repeat: Infinity, ease: "easeInOut" },
-            backgroundColor: { duration: 0.9, ease: "easeInOut" },
+            x: { duration: 11 + i * 3, repeat: Infinity, ease: "easeInOut" },
+            y: { duration: 9 + i * 4, repeat: Infinity, ease: "easeInOut" },
+            backgroundColor: { duration: 1.2, ease: "easeInOut" },
           }}
         />
       ))}
       <div
         className="absolute inset-0"
-        style={{
-          backgroundImage: "radial-gradient(rgba(255,255,255,0.09) 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-          maskImage: "radial-gradient(ellipse 70% 60% at 50% 45%, black, transparent)",
-        }}
+        style={{ background: "radial-gradient(ellipse 75% 70% at 50% 50%, transparent 35%, rgba(3,3,8,0.92) 100%)" }}
       />
       <div
-        className="absolute inset-0 opacity-[0.12] mix-blend-overlay"
+        className="absolute inset-0 opacity-[0.1] mix-blend-overlay"
         style={{
           backgroundImage:
             "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
         }}
       />
     </div>
+  );
+}
+
+const SLIDE = 820;
+
+/**
+ * Slides a scene in from the right and out to the left. While it moves, an
+ * SVG blur scaled by horizontal velocity smears it sideways, like a camera
+ * shutter catching a fast pan. At rest the filter is dropped entirely so the
+ * glass cards can blur the background again.
+ */
+function SceneFrame({ id, bookend, children }: { id: string; bookend: boolean; children: React.ReactNode }) {
+  const x = useMotionValue(bookend ? 0 : SLIDE);
+  const vx = useVelocity(x);
+  const blur = useTransform(vx, (v) => `${Math.min(Math.abs(v) / 60, 60).toFixed(1)} 0`);
+  const filter = useTransform(vx, (v) => (Math.abs(v) < 40 ? "none" : `url(#mb-${id})`));
+  const spring = { type: "spring", stiffness: 120, damping: 19, mass: 1, delay: 0.1 } as const;
+  return (
+    <motion.div
+      className="absolute"
+      style={{ x, filter }}
+      initial={{ opacity: 0, scale: bookend ? 1.12 : 0.94 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{
+        opacity: 0,
+        x: bookend ? 0 : -SLIDE,
+        scale: bookend ? 0.9 : 0.96,
+        transition: { duration: 0.42, ease: [0.7, 0, 0.84, 0] },
+      }}
+      transition={{ x: spring, scale: spring, opacity: { duration: 0.3, delay: 0.1 } }}
+    >
+      <svg width="0" height="0" className="absolute" aria-hidden>
+        <filter id={`mb-${id}`} x="-30%" y="-10%" width="160%" height="120%">
+          <motion.feGaussianBlur in="SourceGraphic" stdDeviation={blur} />
+        </filter>
+      </svg>
+      {children}
+    </motion.div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Cursor: scenes point it at the element they're about to use.
+// ---------------------------------------------------------------------------
+
+interface CursorApi {
+  to: (el: Element | null | undefined) => void;
+  tap: () => void;
+  rest: () => void;
+}
+
+const CursorContext = React.createContext<CursorApi>({ to: () => {}, tap: () => {}, rest: () => {} });
+const useCursor = () => React.useContext(CursorContext);
+
+const REST = { x: 1380, y: 800 };
+
+function useCursorState(stage: React.RefObject<HTMLDivElement | null>, scale: number) {
+  const tx = useMotionValue(REST.x);
+  const ty = useMotionValue(REST.y);
+  const x = useSpring(tx, { stiffness: 90, damping: 18, mass: 0.9 });
+  const y = useSpring(ty, { stiffness: 90, damping: 18, mass: 0.9 });
+  const [taps, setTaps] = React.useState(0);
+  const scaleRef = React.useRef(scale);
+  React.useEffect(() => {
+    scaleRef.current = scale;
+  }, [scale]);
+
+  const api = React.useMemo<CursorApi>(
+    () => ({
+      to: (el) => {
+        const root = stage.current?.getBoundingClientRect();
+        const r = el?.getBoundingClientRect();
+        if (!root || !r) return;
+        tx.set((r.left + r.width * 0.55 - root.left) / scaleRef.current);
+        ty.set((r.top + r.height * 0.6 - root.top) / scaleRef.current);
+      },
+      tap: () => setTaps((t) => t + 1),
+      rest: () => {
+        tx.set(REST.x);
+        ty.set(REST.y);
+      },
+    }),
+    [stage, tx, ty]
+  );
+  return { api, x, y, taps };
+}
+
+function Cursor({ x, y, taps, visible }: { x: MotionValue<number>; y: MotionValue<number>; taps: number; visible: boolean }) {
+  return (
+    <motion.div
+      className="pointer-events-none absolute top-0 left-0 z-50"
+      style={{ x, y }}
+      animate={{ opacity: visible ? 1 : 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.svg
+        key={taps}
+        width="34"
+        height="44"
+        viewBox="0 0 17 22"
+        className="drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]"
+        style={{ originX: 0, originY: 0 }}
+        initial={{ scale: taps ? 0.78 : 1 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", stiffness: 500, damping: 18 }}
+      >
+        <path d="M1 1v17.5l4.6-4.4 3 6.9 3-1.3-3-6.8H15L1 1z" fill="#fff" stroke="#111" strokeWidth="1.2" strokeLinejoin="round" />
+      </motion.svg>
+    </motion.div>
   );
 }
 
@@ -702,6 +847,8 @@ export function Reel() {
   const [done, setDone] = React.useState(false);
   const [playing, setPlaying] = React.useState(false);
   const record = React.useRef(false);
+  const stageRef = React.useRef<HTMLDivElement>(null);
+  const cursor = useCursorState(stageRef, scale);
 
   // `?record` waits for scripts/record-reel.mjs to call __reelPlay() and
   // plays through once instead of looping.
@@ -733,41 +880,37 @@ export function Reel() {
   const patternNo = SCENES.slice(0, index + 1).filter((s) => s.name).length;
   const isBookend = !scene.name;
 
+  // Park the cursor between scenes; the next scene moves it where it needs it.
+  const { rest } = cursor.api;
+  React.useEffect(() => rest(), [index, rest]);
+
   return (
+    <CursorContext.Provider value={cursor.api}>
     <div className="dark fixed inset-0 z-[100] grid place-items-center overflow-hidden bg-black">
       <style>{GLASS_CSS}</style>
       <div
+        ref={stageRef}
         className="reel-stage relative shrink-0 overflow-hidden text-foreground"
         style={{ width: W, height: H, transform: `scale(${scale})` }}
       >
-        <Background hues={scene.hues} />
+        <Background hues={PALETTES[index % PALETTES.length]} />
 
-        {/* Top bar */}
-        <div className="absolute inset-x-[88px] top-[64px] flex items-center justify-between text-white/80">
-          <div className="flex items-center gap-3 text-[26px] font-semibold tracking-tight">
-            <Origami className="size-8" />
-            AI Patterns
-          </div>
-          <div className="font-mono text-[20px] tracking-wide text-white/50">ai-patterns / motion reel</div>
+        {/* Wordmark */}
+        <div className="absolute top-[60px] left-[88px] flex items-center gap-3 text-[24px] font-semibold tracking-tight text-white/55">
+          <Origami className="size-7" />
+          AI Patterns
         </div>
 
         {/* UI */}
         <div
           className="absolute inset-x-0 flex items-center justify-center"
-          style={{ top: isBookend ? 0 : 140, bottom: isBookend ? 120 : 260, perspective: 1800 }}
+          style={{ top: isBookend ? 0 : 120, bottom: isBookend ? 120 : 250 }}
         >
           <AnimatePresence>
             {playing && (
-            <motion.div
-              key={`${cycle}-${scene.id}`}
-              className="absolute"
-              initial={ENTER[scene.style]}
-              animate={SHOW}
-              exit={{ ...EXIT[scene.style], transition: { duration: 0.35, ease: [0.64, 0, 0.78, 0] } }}
-              transition={{ type: "spring", stiffness: 150, damping: 21, mass: 0.9, delay: 0.12 }}
-            >
+            <SceneFrame key={`${cycle}-${scene.id}`} id={`${cycle}-${scene.id}`} bookend={isBookend}>
               <scene.Render />
-            </motion.div>
+            </SceneFrame>
             )}
           </AnimatePresence>
         </div>
@@ -777,7 +920,7 @@ export function Reel() {
           className={
             isBookend
               ? "absolute inset-x-0 bottom-[190px] text-center text-[46px] font-medium tracking-tight text-white/75"
-              : "absolute inset-x-0 bottom-[120px] text-center text-[68px] font-semibold tracking-[-0.035em] text-white"
+              : "absolute inset-x-0 bottom-[112px] text-center text-[60px] font-medium tracking-[-0.035em] text-white/90"
           }
         >
           <AnimatePresence mode="wait">
@@ -804,37 +947,25 @@ export function Reel() {
               transition={{ duration: 0.25 }}
               className="flex items-center gap-4 text-[22px]"
             >
-              {scene.name && (
+              {playing && scene.name && (
                 <>
-                  <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 font-medium backdrop-blur-md">
+                  <span className="rounded-full border border-white/15 bg-white/[0.06] px-4 py-1.5 font-medium text-white/70 backdrop-blur-md">
                     {scene.category}
                   </span>
-                  <span className="text-white/70">{scene.name}</span>
+                  <span className="text-white/45">{scene.name}</span>
                 </>
               )}
             </motion.div>
           </AnimatePresence>
-          <div className="font-mono text-[22px] tabular-nums text-white/60">
+          <div className="font-mono text-[22px] tabular-nums text-white/40">
             {isBookend ? `${PATTERN_COUNT} patterns` : `${String(patternNo).padStart(2, "0")} / ${PATTERN_COUNT}`}
           </div>
         </div>
 
-        {/* Progress */}
-        <div className="absolute inset-x-[88px] bottom-[34px] flex gap-1.5">
-          {SCENES.map((s, i) => (
-            <div key={s.id} className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/15">
-              <motion.div
-                key={`${cycle}-${i === index}`}
-                className="h-full origin-left bg-white/80"
-                initial={{ scaleX: i < index ? 1 : 0 }}
-                animate={{ scaleX: i <= index ? 1 : 0 }}
-                transition={{ duration: i === index ? s.ms / 1000 : 0, ease: "linear" }}
-              />
-            </div>
-          ))}
-        </div>
+        <Cursor x={cursor.x} y={cursor.y} taps={cursor.taps} visible={playing && !isBookend} />
       </div>
     </div>
+    </CursorContext.Provider>
   );
 }
 
@@ -843,19 +974,31 @@ export function Reel() {
 const GLASS_CSS = `
 html, body { overflow: hidden; }
 .reel-stage {
-  --background: oklch(0.18 0.02 280 / 0.55);
-  --card: oklch(0.2 0.02 280 / 0.5);
-  --popover: oklch(0.2 0.02 280 / 0.85);
-  --muted: oklch(1 0 0 / 0.07);
-  --secondary: oklch(1 0 0 / 0.08);
-  --accent: oklch(1 0 0 / 0.1);
-  --border: oklch(1 0 0 / 0.16);
-  --input: oklch(1 0 0 / 0.18);
-  --muted-foreground: oklch(0.82 0.01 280);
+  --background: rgb(22 22 36 / 0.22);
+  --card: rgb(22 22 36 / 0.22);
+  --popover: rgb(26 26 42 / 0.6);
+  --muted: rgb(255 255 255 / 0.07);
+  --secondary: rgb(255 255 255 / 0.08);
+  --accent: rgb(255 255 255 / 0.1);
+  --border: rgb(255 255 255 / 0.14);
+  --input: rgb(255 255 255 / 0.16);
+  --muted-foreground: rgb(255 255 255 / 0.62);
 }
 .reel-stage :is(.bg-card, .bg-background, .bg-popover) {
-  backdrop-filter: blur(28px) saturate(1.5);
-  -webkit-backdrop-filter: blur(28px) saturate(1.5);
-  box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.08);
+  background-image: linear-gradient(150deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.04) 45%, rgb(255 255 255 / 0.09));
+  backdrop-filter: blur(40px) saturate(1.7) brightness(1.15);
+  -webkit-backdrop-filter: blur(40px) saturate(1.7) brightness(1.15);
+  border-color: rgb(255 255 255 / 0.2);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
+    inset 0 -1px 0 rgb(255 255 255 / 0.05),
+    0 40px 100px -30px rgb(0 0 0 / 0.75);
+}
+/* Nested surfaces stay flat so they don't stack tints. */
+.reel-stage :is(.bg-card, .bg-background, .bg-popover) :is(.bg-card, .bg-background) {
+  background-image: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
 }
 `;

@@ -62,7 +62,7 @@ const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, de
 await page.addInitScript(STEP_ANIMATIONS);
 await page.clock.install();
 await page.goto(url, { waitUntil: "networkidle" });
-await page.waitForFunction(() => typeof window.__reelPlay === "function");
+await page.waitForFunction(() => typeof window.__reelPlay === "function", null, { timeout: 120_000 });
 await page.evaluate(() => document.fonts.ready);
 
 const cdp = await page.context().newCDPSession(page);
