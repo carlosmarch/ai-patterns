@@ -108,6 +108,21 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+### Motion reel
+
+[`/reel`](http://localhost:3000/reel) is a looping 16:9 showreel of the
+catalogue: each pattern floats as glass UI over an animated gradient, with a
+typed marketing line underneath. `src/app/reel/reel.tsx` holds the scene list.
+To render it to `public/reel/ai-patterns-reel.mp4` (1080p, 60fps):
+
+```bash
+npm run build && npm start   # in one terminal
+npm run reel:record          # in another; needs Playwright + ffmpeg
+```
+
+Recording steps a fake clock frame by frame, so the video stays smooth even
+though rendering is slower than real time.
+
 ---
 
 ## Adding a pattern
