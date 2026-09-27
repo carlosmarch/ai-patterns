@@ -651,7 +651,7 @@ const PATTERN_COUNT = SCENES.filter((s) => s.name).length;
 // Chrome: background, typed headline, progress
 // ---------------------------------------------------------------------------
 
-// Muted glows that sit behind the UI and tint the glass: blue, violet, peach.
+// Muted glows that sit behind the floating UI: blue, violet, peach.
 const PALETTES: [string, string, string][] = [
   ["#3563d4", "#6a4fd8", "#d9785e"],
   ["#6a4fd8", "#2f7fd0", "#c9657f"],
@@ -706,9 +706,9 @@ function FeedItem({ latest, children }: { latest: boolean; children: React.React
   return (
     // Growing from zero height is what pushes the earlier items up.
     <motion.div
-      className="flex w-full justify-center"
-      initial={{ height: 0, overflow: "hidden" }}
-      animate={{ height: "auto", transitionEnd: { overflow: "visible" } }}
+      className="flex w-full items-end justify-center"
+      initial={{ height: 0 }}
+      animate={{ height: "auto" }}
       transition={{ type: "spring", stiffness: 110, damping: 20, mass: 1 }}
     >
       <motion.div
@@ -722,7 +722,12 @@ function FeedItem({ latest, children }: { latest: boolean; children: React.React
           animate={{ opacity: latest ? 1 : 0.35, scale: latest ? 1 : 0.94 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          {children}
+          <motion.div
+            animate={{ y: latest ? [0, -8, 0] : 0 }}
+            transition={latest ? { duration: 3.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.5 }}
+          >
+            {children}
+          </motion.div>
         </motion.div>
       </motion.div>
     </motion.div>
@@ -884,7 +889,7 @@ export function Reel() {
   return (
     <CursorContext.Provider value={cursor.api}>
     <div className="dark fixed inset-0 z-[100] grid place-items-center overflow-hidden bg-black">
-      <style>{GLASS_CSS}</style>
+      <style>{STAGE_CSS}</style>
       <div
         ref={stageRef}
         className="reel-stage relative shrink-0 overflow-hidden text-foreground"
@@ -992,36 +997,23 @@ export function Reel() {
   );
 }
 
-// Glass theme: every card-like surface turns translucent and blurs the
-// gradient behind it, so the UI floats on top of the background.
-const GLASS_CSS = `
+// Floating theme: the patterns keep their own solid dark surfaces and hover
+// over the background on a deep, soft shadow; no frosted glass.
+const STAGE_CSS = `
 html, body { overflow: hidden; }
 .reel-stage {
-  --background: rgb(22 22 36 / 0.22);
-  --card: rgb(22 22 36 / 0.22);
-  --popover: rgb(26 26 42 / 0.6);
-  --muted: rgb(255 255 255 / 0.07);
-  --secondary: rgb(255 255 255 / 0.08);
-  --accent: rgb(255 255 255 / 0.1);
-  --border: rgb(255 255 255 / 0.14);
-  --input: rgb(255 255 255 / 0.16);
-  --muted-foreground: rgb(255 255 255 / 0.62);
+  --background: oklch(0.17 0.012 280);
+  --card: oklch(0.19 0.012 280);
+  --popover: oklch(0.21 0.012 280);
+  --border: oklch(1 0 0 / 0.1);
 }
 .reel-stage :is(.bg-card, .bg-background, .bg-popover) {
-  background-image: linear-gradient(150deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.04) 45%, rgb(255 255 255 / 0.09));
-  backdrop-filter: blur(40px) saturate(1.7) brightness(1.15);
-  -webkit-backdrop-filter: blur(40px) saturate(1.7) brightness(1.15);
-  border-color: rgb(255 255 255 / 0.2);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.25),
-    inset 0 -1px 0 rgb(255 255 255 / 0.05),
-    0 40px 100px -30px rgb(0 0 0 / 0.75);
+    0 1px 0 rgb(255 255 255 / 0.04) inset,
+    0 50px 120px -30px rgb(0 0 0 / 0.85),
+    0 18px 40px -20px rgb(0 0 0 / 0.6);
 }
-/* Nested surfaces stay flat so they don't stack tints. */
 .reel-stage :is(.bg-card, .bg-background, .bg-popover) :is(.bg-card, .bg-background) {
-  background-image: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
   box-shadow: none;
 }
 `;
