@@ -510,26 +510,22 @@ function PaletteScene() {
 
 const TEAM: Collaborator[] = [
   { id: "u1", name: "Sarah Chen", role: "Admin", initials: "SC", color: "bg-violet-500", isOnline: true },
-  { id: "u2", name: "Marcus Webb", role: "Editor", initials: "MW", color: "bg-sky-500", isOnline: false },
+  { id: "u2", name: "Marcus Webb", role: "Editor", initials: "MW", color: "bg-sky-500", isOnline: true },
   { id: "u3", name: "Priya Nair", role: "Editor", initials: "PN", color: "bg-amber-500", isOnline: true },
-  { id: "u4", name: "James Okafor", role: "Viewer", initials: "JO", color: "bg-rose-500", isOnline: false },
+  { id: "u4", name: "James Okafor", role: "Viewer", initials: "JO", color: "bg-rose-500", isOnline: true },
   { id: "u5", name: "Lin Zhang", role: "Viewer", initials: "LZ", color: "bg-teal-500", isOnline: true },
 ];
 
+// Presence is static on purpose: its avatars re-sort with layout animations
+// when someone comes online, and those miscalculate under the scene's zoom.
 function PresenceScene() {
-  const [team, setTeam] = React.useState(TEAM);
-  const online = (id: string) => () => setTeam((p) => p.map((c) => (c.id === id ? { ...c, isOnline: true } : c)));
   const ref = React.useRef<HTMLDivElement>(null);
   const cursor = useCursor();
-  useSteps([
-    [500, online("u2")],
-    [900, online("u4")],
-    [700, () => cursor.to(find(ref.current, "[data-avatar], span", /^SC$/))],
-  ]);
+  useSteps([[700, () => cursor.to(find(ref.current, "span, div", /^SC$/))]]);
   return (
-    <div ref={ref}>
+    <div ref={ref} className="pb-2">
       <Zoom z={3.6}>
-        <CollaborativePresence collaborators={team} />
+        <CollaborativePresence collaborators={TEAM} />
       </Zoom>
     </div>
   );
@@ -694,6 +690,11 @@ function Background({ hues }: { hues: [string, string, string] }) {
     </div>
   );
 }
+
+/** Scenes own their timelines; memoizing keeps the reel's own re-renders out of them. */
+const SceneBody = React.memo(function SceneBody({ Render }: { Render: React.ComponentType }) {
+  return <Render />;
+});
 
 // ---------------------------------------------------------------------------
 // Feed: patterns arrive at the bottom like chat messages and push the
@@ -917,7 +918,7 @@ export function Reel() {
               >
                 {feed.map((s) => (
                   <FeedItem key={`${cycle}-${s.id}`} latest={s.id === scene.id}>
-                    <s.Render />
+                    <SceneBody Render={s.Render} />
                   </FeedItem>
                 ))}
               </motion.div>
