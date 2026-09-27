@@ -6,7 +6,6 @@ import {
   motion,
   useMotionValue,
   useSpring,
-  useIsPresent,
   type MotionValue,
 } from "motion/react";
 import {
@@ -697,68 +696,35 @@ function Background({ hues }: { hues: [string, string, string] }) {
 }
 
 // ---------------------------------------------------------------------------
-// Shell: one glass window that stays on screen and morphs to fit each
-// pattern, so the reel reads as a single product flow rather than slides.
+// Feed: patterns arrive at the bottom like chat messages and push the
+// earlier ones up, where they dim and fade out.
 // ---------------------------------------------------------------------------
 
-type Size = { w: number; h: number };
+const FEED_DEPTH = 3;
 
-const SHELL_PAD = 14;
-const SHELL_IDLE: Size = { w: 120, h: 120 };
-
-function Shell({ size, visible, children }: { size: Size; visible: boolean; children: React.ReactNode }) {
-  const target = visible ? size : SHELL_IDLE;
+function FeedItem({ latest, children }: { latest: boolean; children: React.ReactNode }) {
   return (
+    // Growing from zero height is what pushes the earlier items up.
     <motion.div
-      className="reel-shell relative"
-      initial={{ width: SHELL_IDLE.w, height: SHELL_IDLE.h, opacity: 0, scale: 0.8 }}
-      animate={{
-        width: target.w + SHELL_PAD * 2,
-        height: target.h + SHELL_PAD * 2,
-        opacity: visible ? 1 : 0,
-        scale: visible ? 1 : 0.8,
-      }}
-      transition={{
-        width: { type: "spring", stiffness: 140, damping: 22, mass: 1 },
-        height: { type: "spring", stiffness: 140, damping: 22, mass: 1 },
-        opacity: { duration: 0.35 },
-        scale: { type: "spring", stiffness: 140, damping: 20 },
-      }}
+      className="flex w-full justify-center"
+      initial={{ height: 0, overflow: "hidden" }}
+      animate={{ height: "auto", transitionEnd: { overflow: "visible" } }}
+      transition={{ type: "spring", stiffness: 110, damping: 20, mass: 1 }}
     >
-      <div className="absolute inset-0 overflow-hidden rounded-[inherit]">{children}</div>
-    </motion.div>
-  );
-}
-
-/** A scene's contents inside the shell: reports its size, then crossfades in place. */
-function ShellContent({ onSize, children }: { onSize: (s: Size) => void; children: React.ReactNode }) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const present = useIsPresent();
-  const presentRef = React.useRef(present);
-  React.useEffect(() => {
-    presentRef.current = present;
-  }, [present]);
-
-  React.useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const report = () => presentRef.current && onSize({ w: el.offsetWidth, h: el.offsetHeight });
-    report();
-    const ro = new ResizeObserver(report);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [onSize]);
-
-  return (
-    <motion.div
-      ref={ref}
-      className="absolute top-1/2 left-1/2 w-max -translate-x-1/2 -translate-y-1/2"
-      initial={{ opacity: 0, y: 14, scale: 0.985, filter: "blur(10px)" }}
-      animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)", transitionEnd: { filter: "none" } }}
-      exit={{ opacity: 0, y: -10, scale: 0.985, filter: "blur(8px)", transition: { duration: 0.22, ease: "easeIn" } }}
-      transition={{ delay: 0.16, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
+      <motion.div
+        className="pt-14"
+        initial={{ opacity: 0, y: 60, filter: "blur(10px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)", transitionEnd: { filter: "none" } }}
+        transition={{ duration: 0.55, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <motion.div
+          style={{ originY: 1 }}
+          animate={{ opacity: latest ? 1 : 0.35, scale: latest ? 1 : 0.94 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {children}
+        </motion.div>
+      </motion.div>
     </motion.div>
   );
 }
@@ -877,7 +843,6 @@ export function Reel() {
   const record = React.useRef(false);
   const stageRef = React.useRef<HTMLDivElement>(null);
   const cursor = useCursorState(stageRef, scale);
-  const [shellSize, setShellSize] = React.useState<Size>(SHELL_IDLE);
 
   // `?record` waits for scripts/record-reel.mjs to call __reelPlay() and
   // plays through once instead of looping.
@@ -908,6 +873,9 @@ export function Reel() {
   const scene = SCENES[index];
   const patternNo = SCENES.slice(0, index + 1).filter((s) => s.name).length;
   const isBookend = !scene.name;
+  const feed = SCENES.slice(0, index + 1)
+    .filter((s) => s.name)
+    .slice(-FEED_DEPTH);
 
   // Park the cursor between scenes; the next scene moves it where it needs it.
   const { rest } = cursor.api;
@@ -930,17 +898,26 @@ export function Reel() {
           AI Patterns
         </div>
 
-        {/* UI: patterns flow through one persistent glass window */}
-        <div className="absolute inset-x-0 top-[120px] bottom-[250px] flex items-center justify-center">
-          <Shell size={shellSize} visible={playing && !isBookend}>
-            <AnimatePresence>
-              {playing && !isBookend && (
-                <ShellContent key={`${cycle}-${scene.id}`} onSize={setShellSize}>
-                  <scene.Render />
-                </ShellContent>
-              )}
-            </AnimatePresence>
-          </Shell>
+        {/* UI: a chat-like feed, newest pattern at the bottom */}
+        <div
+          className="absolute inset-x-0 top-0 bottom-[250px]"
+          style={{ maskImage: "linear-gradient(to bottom, transparent 4%, black 40%)" }}
+        >
+          <AnimatePresence>
+            {playing && !isBookend && (
+              <motion.div
+                key={`feed-${cycle}`}
+                className="absolute inset-x-0 bottom-0 flex flex-col items-center"
+                exit={{ opacity: 0, y: -80, filter: "blur(12px)", transition: { duration: 0.4, ease: "easeIn" } }}
+              >
+                {feed.map((s) => (
+                  <FeedItem key={`${cycle}-${s.id}`} latest={s.id === scene.id}>
+                    <s.Render />
+                  </FeedItem>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Intro / outro */}
@@ -1039,25 +1016,6 @@ html, body { overflow: hidden; }
     inset 0 1px 0 rgb(255 255 255 / 0.25),
     inset 0 -1px 0 rgb(255 255 255 / 0.05),
     0 40px 100px -30px rgb(0 0 0 / 0.75);
-}
-.reel-shell {
-  border-radius: 40px;
-  border: 1px solid rgb(255 255 255 / 0.2);
-  background: linear-gradient(150deg, rgb(255 255 255 / 0.16), rgb(255 255 255 / 0.04) 45%, rgb(255 255 255 / 0.09)), rgb(22 22 36 / 0.22);
-  backdrop-filter: blur(40px) saturate(1.7) brightness(1.15);
-  -webkit-backdrop-filter: blur(40px) saturate(1.7) brightness(1.15);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.25),
-    inset 0 -1px 0 rgb(255 255 255 / 0.05),
-    0 40px 100px -30px rgb(0 0 0 / 0.75);
-}
-/* Inside the window, pattern surfaces dissolve into it: one pane, not cards on cards. */
-.reel-shell :is(.bg-card, .bg-background) {
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
 }
 /* Nested surfaces stay flat so they don't stack tints. */
 .reel-stage :is(.bg-card, .bg-background, .bg-popover) :is(.bg-card, .bg-background) {
