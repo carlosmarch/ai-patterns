@@ -78,6 +78,10 @@ body {
   color: var(--foreground);
 }
 
-* {
-  border-color: var(--border);
+/* In the base layer so border-color utilities (border-background, …) can
+   override it; unlayered, it beat every utility. */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
 }

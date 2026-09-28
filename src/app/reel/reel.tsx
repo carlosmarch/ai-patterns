@@ -560,24 +560,47 @@ function PaletteScene() {
   );
 }
 
+// Online people come first so the component's online-first sort never has to
+// reorder anyone mid-scene.
 const TEAM: Collaborator[] = [
   { id: "u1", name: "Sarah Chen", role: "Admin", initials: "SC", color: "bg-violet-500", isOnline: true },
   { id: "u2", name: "Marcus Webb", role: "Editor", initials: "MW", color: "bg-sky-500", isOnline: true },
   { id: "u3", name: "Priya Nair", role: "Editor", initials: "PN", color: "bg-amber-500", isOnline: true },
-  { id: "u4", name: "James Okafor", role: "Viewer", initials: "JO", color: "bg-rose-500", isOnline: true },
-  { id: "u5", name: "Lin Zhang", role: "Viewer", initials: "LZ", color: "bg-teal-500", isOnline: true },
+  { id: "u4", name: "James Okafor", role: "Viewer", initials: "JO", color: "bg-rose-500", isOnline: false },
+  { id: "u5", name: "Lin Zhang", role: "Viewer", initials: "LZ", color: "bg-teal-500", isOnline: false },
 ];
 
-// Presence is static on purpose: its avatars re-sort with layout animations
-// when someone comes online, and those miscalculate under the scene's zoom.
+/**
+ * Avatars pop in one by one, James comes online, then the cursor opens the
+ * panel. The avatars use layout animations, which misfire if anything moves
+ * them mid-flight, so the scene is fixed-width and left-aligned (new avatars
+ * never shift old ones), starts after the feed entrance settles, and its
+ * feed item doesn't bob.
+ */
 function PresenceScene() {
   const ref = React.useRef<HTMLDivElement>(null);
   const cursor = useCursor();
-  useSteps([[700, () => cursor.to(find(ref.current, "span, div", /^SC$/))]]);
+  const [team, setTeam] = React.useState<Collaborator[]>([]);
+  const add = (i: number) => () => setTeam((p) => [...p, TEAM[i]]);
+  const button = () => find(ref.current, "button", /View collaborators/);
+  useSteps([
+    ...TEAM.map((_, i) => [700 + i * 140, add(i)] as [number, () => void]),
+    [1500, () => setTeam((p) => p.map((c) => (c.id === "u4" ? { ...c, isOnline: true } : c)))],
+    [1650, () => cursor.to(button())],
+    [2100, () => {
+      cursor.tap();
+      button()?.click();
+    }],
+    [2700, () => cursor.to(find(ref.current, "li", /James Okafor/))],
+  ]);
   return (
-    <div ref={ref} className="pb-2">
-      <Zoom z={3.6}>
-        <CollaborativePresence collaborators={TEAM} />
+    // White inner borders and dot rings in the reel: the component draws both
+    // with --background.
+    <div ref={ref} className="pb-2" style={{ "--background": "#fff" } as React.CSSProperties}>
+      <Zoom z={2.5} width={256}>
+        <div className="min-h-8">
+          <CollaborativePresence collaborators={team} className="items-start" />
+        </div>
       </Zoom>
     </div>
   );
@@ -677,6 +700,8 @@ interface Scene {
   /** Marketing line, typed in under the UI. */
   headline?: string;
   ms: number;
+  /** Skip the idle bob (for scenes whose layout animations it would disturb). */
+  still?: boolean;
   Render: React.ComponentType;
 }
 
@@ -695,7 +720,7 @@ const SCENES: Scene[] = [
   { id: "voice", name: "Voice Waveform", category: "Voice", headline: "Just talk to it.", ms: 2500, Render: VoiceScene },
   { id: "compare", name: "Response Compare", category: "Compare", headline: "Let users pick the best.", ms: 2300, Render: CompareScene },
   { id: "palette", name: "Command Palette", category: "Navigation", headline: "Jump anywhere, instantly.", ms: 2000, Render: PaletteScene },
-  { id: "presence", name: "Collaborative Presence", category: "Collaboration", headline: "Build it together.", ms: 1700, Render: PresenceScene },
+  { id: "presence", name: "Collaborative Presence", category: "Collaboration", headline: "Build it together.", ms: 3600, still: true, Render: PresenceScene },
   { id: "limit", name: "Rate Limit", category: "Errors", headline: "Even the limits look good.", ms: 1800, Render: LimitScene },
   { id: "outro", ms: 2800, Render: OutroScene, headline: "ai-patterns — the motion layer for AI apps." },
 ];
@@ -764,7 +789,8 @@ const SceneBody = React.memo(function SceneBody({ Render }: { Render: React.Comp
 
 const FEED_DEPTH = 3;
 
-function FeedItem({ latest, children }: { latest: boolean; children: React.ReactNode }) {
+function FeedItem({ latest, still, children }: { latest: boolean; still?: boolean; children: React.ReactNode }) {
+  const bob = latest && !still;
   return (
     // Growing from zero height is what pushes the earlier items up.
     <motion.div
@@ -785,8 +811,8 @@ function FeedItem({ latest, children }: { latest: boolean; children: React.React
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           <motion.div
-            animate={{ y: latest ? [0, -8, 0] : 0 }}
-            transition={latest ? { duration: 3.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.5 }}
+            animate={{ y: bob ? [0, -8, 0] : 0 }}
+            transition={bob ? { duration: 3.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.5 }}
           >
             {children}
           </motion.div>
@@ -987,7 +1013,7 @@ export function Reel({ vertical = false }: { vertical?: boolean }) {
                 exit={{ opacity: 0, y: -80, filter: "blur(12px)", transition: { duration: 0.4, ease: "easeIn" } }}
               >
                 {feed.map((s) => (
-                  <FeedItem key={`${cycle}-${s.id}`} latest={s.id === scene.id}>
+                  <FeedItem key={`${cycle}-${s.id}`} latest={s.id === scene.id} still={s.still}>
                     <SceneBody Render={s.Render} />
                   </FeedItem>
                 ))}
