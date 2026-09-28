@@ -8,7 +8,9 @@
 // and captured, so the video is smooth no matter how slow rendering is.
 //
 // Usage (with the site running, ideally `npm run build && npm start`):
-//   node scripts/record-reel.mjs [--url http://localhost:3000/reel] [--out reel.mp4] [--fps 60]
+//   node scripts/record-reel.mjs [--url http://localhost:3000] [--out reel.mp4] [--fps 60] [--vertical]
+//
+// --vertical records the 1080×1920 Instagram cut from /reel/vertical.
 //
 // Needs Playwright (local or global install) and ffmpeg (on PATH or $FFMPEG).
 
@@ -19,9 +21,11 @@ import { dirname, join } from "node:path";
 const args = Object.fromEntries(
   process.argv.slice(2).reduce((acc, a, i, all) => (a.startsWith("--") ? [...acc, [a.slice(2), all[i + 1]]] : acc), [])
 );
-const base = args.url ?? "http://localhost:3000/reel";
-const url = base + (base.includes("?") ? "&" : "?") + "record";
-const out = args.out ?? "public/reel/ai-patterns-reel.mp4";
+const vertical = "vertical" in args;
+const origin = (args.url ?? "http://localhost:3000").replace(/\/reel.*$/, "").replace(/\/$/, "");
+const url = `${origin}/reel${vertical ? "/vertical" : ""}?record`;
+const out = args.out ?? `public/reel/ai-patterns-reel${vertical ? "-vertical" : ""}.mp4`;
+const viewport = vertical ? { width: 1080, height: 1920 } : { width: 1920, height: 1080 };
 const fps = Number(args.fps ?? 60);
 const ffmpeg = process.env.FFMPEG ?? "ffmpeg";
 
@@ -58,7 +62,7 @@ window.__stepAnimations = (dt) => {
 
 const { chromium } = await loadPlaywright();
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
+const page = await browser.newPage({ viewport, deviceScaleFactor: 1 });
 await page.addInitScript(STEP_ANIMATIONS);
 await page.clock.install();
 await page.goto(url, { waitUntil: "networkidle" });

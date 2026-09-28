@@ -43,20 +43,70 @@ import { RateLimit } from "@/registry/errors/rate-limit/component";
 import { ShinyButton } from "@/registry/buttons/shiny-button/component";
 
 // ---------------------------------------------------------------------------
-// Stage: a fixed 1920×1080 canvas, scaled to fit the window.
+// Stage: a fixed canvas, 1920×1080 or 1080×1920 (/reel/vertical, for
+// Instagram), scaled to fit the window.
 // ---------------------------------------------------------------------------
 
-const W = 1920;
-const H = 1080;
+interface Layout {
+  vertical: boolean;
+  W: number;
+  H: number;
+  /** Multiplies every scene's zoom. */
+  zoom: number;
+  /** Distance from the bottom edge to the newest feed item. */
+  feedBottom: number;
+  headlineBottom: number;
+  bookendBottom: number;
+  bookendHeadlineBottom: number;
+  labelBottom: number;
+  gutter: number;
+  wordmarkTop: number;
+  rest: { x: number; y: number };
+}
 
-function useFitScale() {
+const LANDSCAPE: Layout = {
+  vertical: false,
+  W: 1920,
+  H: 1080,
+  zoom: 1,
+  feedBottom: 250,
+  headlineBottom: 112,
+  bookendBottom: 120,
+  bookendHeadlineBottom: 190,
+  labelBottom: 56,
+  gutter: 88,
+  wordmarkTop: 60,
+  rest: { x: 1380, y: 800 },
+};
+
+// Instagram covers roughly the top 220px and bottom 380px with its own UI,
+// so the headline and labels sit above that band.
+const VERTICAL: Layout = {
+  vertical: true,
+  W: 1080,
+  H: 1920,
+  zoom: 0.9,
+  feedBottom: 560,
+  headlineBottom: 400,
+  bookendBottom: 300,
+  bookendHeadlineBottom: 470,
+  labelBottom: 330,
+  gutter: 72,
+  wordmarkTop: 250,
+  rest: { x: 800, y: 1320 },
+};
+
+const LayoutContext = React.createContext<Layout>(LANDSCAPE);
+const useLayout = () => React.useContext(LayoutContext);
+
+function useFitScale({ W, H }: Layout) {
   const [scale, setScale] = React.useState(1);
   React.useEffect(() => {
     const update = () => setScale(Math.min(window.innerWidth / W, window.innerHeight / H));
     update();
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
-  }, []);
+  }, [W, H]);
   return scale;
 }
 
@@ -94,7 +144,8 @@ function find(root: HTMLElement | null, selector: string, match?: RegExp) {
 
 /** Scales a component up without blurring text (CSS zoom re-lays out rather than resampling). */
 function Zoom({ z = 1.7, width, children }: { z?: number; width?: number; children: React.ReactNode }) {
-  return <div style={{ zoom: z, width }}>{children}</div>;
+  const { zoom } = useLayout();
+  return <div style={{ zoom: z * zoom, width }}>{children}</div>;
 }
 
 // ---------------------------------------------------------------------------
@@ -436,6 +487,7 @@ function VoiceScene() {
 
 function CompareScene() {
   const ref = React.useRef<HTMLDivElement>(null);
+  const { vertical } = useLayout();
   const cursor = useCursor();
   const pick = () => find(ref.current, "[role=radio]", /Response B/);
   useSteps([
@@ -462,7 +514,7 @@ function CompareScene() {
               content: "With ai-patterns: copy, paste, customize. Animated, accessible and live by lunch.",
             },
           ]}
-          className="w-[760px]"
+          className={vertical ? "w-[640px]" : "w-[760px]"}
         />
       </Zoom>
     </div>
@@ -574,9 +626,16 @@ function IntroScene() {
 }
 
 function OutroScene() {
+  const { vertical } = useLayout();
   return (
     <div className="flex flex-col items-center gap-12 text-white">
-      <h2 className="text-center text-[120px] leading-[0.95] font-semibold tracking-[-0.05em]">
+      <h2
+        className={
+          vertical
+            ? "flex flex-col items-center text-[150px] leading-[1] font-semibold tracking-[-0.05em]"
+            : "text-center text-[120px] leading-[0.95] font-semibold tracking-[-0.05em]"
+        }
+      >
         {["Copy.", "Paste.", "Ship."].map((w, i) => (
           <motion.span
             key={w}
@@ -656,10 +715,12 @@ const PALETTES: [string, string, string][] = [
 ];
 
 function Background({ hues }: { hues: [string, string, string] }) {
+  const { W, H } = useLayout();
+  // Positions are fractions of the stage so the glows frame either format.
   const blobs = [
-    { size: 900, left: 260, top: 420, x: [0, 60, 0], y: [0, -40, 0], opacity: 0.55 },
-    { size: 820, left: 620, top: -60, x: [0, -50, 0], y: [0, 50, 0], opacity: 0.5 },
-    { size: 860, left: 1000, top: 380, x: [0, -70, 0], y: [0, -30, 0], opacity: 0.45 },
+    { size: 900, left: 0.135 * W, top: 0.39 * H, x: [0, 60, 0], y: [0, -40, 0], opacity: 0.55 },
+    { size: 820, left: 0.32 * W, top: -0.055 * H, x: [0, -50, 0], y: [0, 50, 0], opacity: 0.5 },
+    { size: 860, left: 0.52 * W, top: 0.35 * H, x: [0, -70, 0], y: [0, -30, 0], opacity: 0.45 },
   ];
   return (
     <div className="absolute inset-0 overflow-hidden bg-[#05050a]">
@@ -748,9 +809,7 @@ interface CursorApi {
 const CursorContext = React.createContext<CursorApi>({ to: () => {}, tap: () => {}, rest: () => {} });
 const useCursor = () => React.useContext(CursorContext);
 
-const REST = { x: 1380, y: 800 };
-
-function useCursorState(stage: React.RefObject<HTMLDivElement | null>, scale: number) {
+function useCursorState(stage: React.RefObject<HTMLDivElement | null>, scale: number, REST: Layout["rest"]) {
   const tx = useMotionValue(REST.x);
   const ty = useMotionValue(REST.y);
   const x = useSpring(tx, { stiffness: 90, damping: 18, mass: 0.9 });
@@ -776,7 +835,7 @@ function useCursorState(stage: React.RefObject<HTMLDivElement | null>, scale: nu
         ty.set(REST.y);
       },
     }),
-    [stage, tx, ty]
+    [stage, tx, ty, REST.x, REST.y]
   );
   return { api, x, y, taps };
 }
@@ -840,15 +899,17 @@ declare global {
   }
 }
 
-export function Reel() {
-  const scale = useFitScale();
+export function Reel({ vertical = false }: { vertical?: boolean }) {
+  const layout = vertical ? VERTICAL : LANDSCAPE;
+  const { W, H } = layout;
+  const scale = useFitScale(layout);
   const [index, setIndex] = React.useState(0);
   const [cycle, setCycle] = React.useState(0);
   const [done, setDone] = React.useState(false);
   const [playing, setPlaying] = React.useState(false);
   const record = React.useRef(false);
   const stageRef = React.useRef<HTMLDivElement>(null);
-  const cursor = useCursorState(stageRef, scale);
+  const cursor = useCursorState(stageRef, scale, layout.rest);
 
   // `?record` waits for scripts/record-reel.mjs to call __reelPlay() and
   // plays through once instead of looping.
@@ -888,6 +949,7 @@ export function Reel() {
   React.useEffect(() => rest(), [index, rest]);
 
   return (
+    <LayoutContext.Provider value={layout}>
     <CursorContext.Provider value={cursor.api}>
     <div className="dark fixed inset-0 z-[100] grid place-items-center overflow-hidden bg-black">
       <style>{STAGE_CSS}</style>
@@ -899,15 +961,23 @@ export function Reel() {
         <Background hues={PALETTES[index % PALETTES.length]} />
 
         {/* Wordmark */}
-        <div className="absolute top-[60px] left-[88px] flex items-center gap-3 text-[24px] font-semibold tracking-tight text-white/55">
+        <div
+          className="absolute flex items-center gap-3 text-[24px] font-semibold tracking-tight text-white/55"
+          style={{ top: layout.wordmarkTop, left: layout.gutter }}
+        >
           <Origami className="size-7" />
           AI Patterns
         </div>
 
         {/* UI: a chat-like feed, newest pattern at the bottom */}
         <div
-          className="absolute inset-x-0 top-0 bottom-[250px]"
-          style={{ maskImage: "linear-gradient(to bottom, transparent 4%, black 40%)" }}
+          className="absolute inset-x-0 top-0"
+          style={{
+            bottom: layout.feedBottom,
+            maskImage: layout.vertical
+              ? "linear-gradient(to bottom, transparent 12%, black 45%)"
+              : "linear-gradient(to bottom, transparent 4%, black 40%)",
+          }}
         >
           <AnimatePresence>
             {playing && !isBookend && (
@@ -927,7 +997,7 @@ export function Reel() {
         </div>
 
         {/* Intro / outro */}
-        <div className="absolute inset-x-0 top-0 bottom-[120px] flex items-center justify-center">
+        <div className="absolute inset-x-0 top-0 flex items-center justify-center" style={{ bottom: layout.bookendBottom }}>
           <AnimatePresence>
             {playing && isBookend && (
               <motion.div
@@ -948,9 +1018,13 @@ export function Reel() {
         <div
           className={
             isBookend
-              ? "absolute inset-x-0 bottom-[190px] text-center text-[46px] font-medium tracking-tight text-white/75"
-              : "absolute inset-x-0 bottom-[112px] text-center text-[60px] font-medium tracking-[-0.035em] text-white/90"
+              ? "absolute inset-x-0 text-center text-[46px] font-medium tracking-tight text-white/75"
+              : "absolute inset-x-0 text-center text-[60px] leading-[1.1] font-medium tracking-[-0.035em] text-white/90"
           }
+          style={{
+            bottom: isBookend ? layout.bookendHeadlineBottom : layout.headlineBottom,
+            paddingInline: layout.gutter,
+          }}
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -966,7 +1040,10 @@ export function Reel() {
         </div>
 
         {/* Pattern label */}
-        <div className="absolute inset-x-[88px] bottom-[56px] flex items-end justify-between text-white">
+        <div
+          className="absolute flex items-end justify-between text-white"
+          style={{ left: layout.gutter, right: layout.gutter, bottom: layout.labelBottom }}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={`${cycle}-${scene.id}`}
@@ -995,6 +1072,7 @@ export function Reel() {
       </div>
     </div>
     </CursorContext.Provider>
+    </LayoutContext.Provider>
   );
 }
 
