@@ -170,7 +170,7 @@ function ToolRow({
     <div className="flex items-start gap-3 border-t px-4 py-3">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-sm font-semibold">{tool.name}</span>
+          <span className="text-xs font-semibold">{tool.name}</span>
           {tool.badge && (
             <span className="rounded-full border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
               {tool.badge}

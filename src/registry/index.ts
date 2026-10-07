@@ -32,6 +32,8 @@ import ConnectorPanelDemo from "./permissions/connector-panel/demo";
 import { pattern as connectorPanelPattern } from "./permissions/connector-panel/pattern";
 import ToolCallChipDemo from "./loaders/tool-call-chip/demo";
 import { pattern as toolCallChipPattern } from "./loaders/tool-call-chip/pattern";
+import ImagePeekDemo from "./media/image-peek/demo";
+import { pattern as imagePeekPattern } from "./media/image-peek/pattern";
 import AttachmentTrayDemo from "./uploads/attachment-chip/demo";
 import { pattern as attachmentChipPattern } from "./uploads/attachment-chip/pattern";
 import StopGenerationButtonDemo from "./buttons/stop-generation-button/demo";
@@ -237,6 +239,14 @@ export const registry: RegistryEntry[] = [
     description: "A composer's file/image attachment tray with drag-drop, upload progress, and inline preview.",
     Demo: AttachmentTrayDemo,
     uxDoc: attachmentChipPattern,
+  },
+  {
+    slug: "image-peek",
+    category: "media",
+    title: "Image Peek",
+    description: "A row of tiny image thumbnails that grows into an anchored preview card with a label, counter, and prev/next stepping.",
+    Demo: ImagePeekDemo,
+    uxDoc: imagePeekPattern,
   },
   {
     slug: "stop-generation-button",
