@@ -83,14 +83,16 @@ export interface RateLimitProps {
   className?: string;
 }
 
+function getRemaining(resetAt?: Date) {
+  return resetAt ? Math.max(0, Math.floor((resetAt.getTime() - Date.now()) / 1000)) : null;
+}
+
 function useCountdown(resetAt?: Date) {
-  const getRemaining = () =>
-    resetAt ? Math.max(0, Math.floor((resetAt.getTime() - Date.now()) / 1000)) : null;
-  const [remaining, setRemaining] = React.useState(getRemaining);
+  const [remaining, setRemaining] = React.useState(() => getRemaining(resetAt));
 
   React.useEffect(() => {
     if (!resetAt) return;
-    const id = window.setInterval(() => setRemaining(getRemaining()), 1000);
+    const id = window.setInterval(() => setRemaining(getRemaining(resetAt)), 1000);
     return () => window.clearInterval(id);
   }, [resetAt]);
 

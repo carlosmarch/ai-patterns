@@ -68,6 +68,7 @@ function Avatar({ agent }: { agent: AgentAvatar }) {
   return (
     <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-muted-foreground">
       {agent.src ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img src={agent.src} alt={agent.name} className="size-full object-cover" />
       ) : agent.icon ? (
         <agent.icon className="size-4" />
