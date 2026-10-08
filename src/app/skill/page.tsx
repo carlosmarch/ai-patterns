@@ -105,7 +105,7 @@ export default async function SkillPage() {
 
       {/* How it works */}
       <div className="mt-16">
-        <h2 className="text-xl font-semibold tracking-tight">How "patterns apply" works</h2>
+        <h2 className="text-xl font-semibold tracking-tight">How &ldquo;patterns apply&rdquo; works</h2>
         <ol className="mt-6 space-y-6">
           {[
             {

@@ -4,6 +4,8 @@ import AgentTriggersDemo from "./agents/agent-triggers/demo";
 import { pattern as agentTriggersPattern } from "./agents/agent-triggers/pattern";
 import HumanInTheLoopDemo from "./agents/human-in-the-loop/demo";
 import { pattern as humanInTheLoopPattern } from "./agents/human-in-the-loop/pattern";
+import BackgroundTasksDemo from "./agents/background-tasks/demo";
+import { pattern as backgroundTasksPattern } from "./agents/background-tasks/pattern";
 import CreateAgentDemo from "./agents/create-agent/demo";
 import { pattern as createAgentPattern } from "./agents/create-agent/pattern";
 import ShinyButtonDemo from "./buttons/shiny-button/demo";
@@ -117,6 +119,15 @@ export const registry: RegistryEntry[] = [
     description: "A compact dialog that pauses an agent mid-task to collect a structured choice — radio options, a free-text fallback, skip/continue controls, and multi-step pagination.",
     Demo: HumanInTheLoopDemo,
     uxDoc: humanInTheLoopPattern,
+  },
+  {
+    slug: "background-tasks",
+    category: "agents",
+    title: "Background Tasks Drawer",
+    description:
+      "A side drawer that tracks an agent's background work live — running tasks with elapsed time, stats, and stop controls, plus an expandable history of finished commands and output.",
+    Demo: BackgroundTasksDemo,
+    uxDoc: backgroundTasksPattern,
   },
   {
     slug: "multi-agent-trace",
