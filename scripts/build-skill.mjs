@@ -10,7 +10,7 @@
 //
 // Usage: node scripts/build-skill.mjs   (or: npm run skill:build)
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 

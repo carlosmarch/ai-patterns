@@ -74,13 +74,18 @@ export function BackgroundTasksDrawer({
   const [expanded, setExpanded] = React.useState(false);
   const [finishedOpen, setFinishedOpen] = React.useState(true);
   const panelRef = React.useRef<HTMLDivElement>(null);
+  // Only move focus when the drawer is opened after mount, never on initial render,
+  // so a drawer that starts open doesn't steal focus or scroll the page on load.
+  const wasOpen = React.useRef(open);
 
   const running = tasks.filter((t) => t.status === "running");
   const finished = tasks.filter((t) => t.status !== "running");
 
   React.useEffect(() => {
+    const justOpened = open && !wasOpen.current;
+    wasOpen.current = open;
     if (!open) return;
-    panelRef.current?.focus();
+    if (justOpened) panelRef.current?.focus({ preventScroll: true });
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
