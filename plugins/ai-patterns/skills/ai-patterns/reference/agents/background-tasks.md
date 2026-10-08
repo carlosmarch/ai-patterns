@@ -45,7 +45,7 @@ A side drawer listing the work an agent has kicked off in the background — sub
 - Outcome words are past tense and consistent: Completed, Failed, Stopped.
 
 ## Accessibility
-- The drawer is a labelled landmark (`aria-label` = its title) and receives focus when opened; Escape closes it.
+- The drawer is a labelled landmark (`aria-label` = its title) and receives focus (without scrolling the page) when the user opens it — never on initial render, so a drawer that starts open doesn't steal focus or jump the page on load; Escape closes it.
 - A single `aria-live="polite"` region announces the running count, so per-second ticks don't flood assistive tech.
 - Every icon-only control (clear, expand, close, stop) has an `aria-label` naming the action and, for stop, the task.
 - Finished rows expose `aria-expanded`; the Finished disclosure does too.
@@ -145,13 +145,18 @@ export function BackgroundTasksDrawer({
   const [expanded, setExpanded] = React.useState(false);
   const [finishedOpen, setFinishedOpen] = React.useState(true);
   const panelRef = React.useRef<HTMLDivElement>(null);
+  // Only move focus when the drawer is opened after mount, never on initial render,
+  // so a drawer that starts open doesn't steal focus or scroll the page on load.
+  const wasOpen = React.useRef(open);
 
   const running = tasks.filter((t) => t.status === "running");
   const finished = tasks.filter((t) => t.status !== "running");
 
   React.useEffect(() => {
+    const justOpened = open && !wasOpen.current;
+    wasOpen.current = open;
     if (!open) return;
-    panelRef.current?.focus();
+    if (justOpened) panelRef.current?.focus({ preventScroll: true });
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
