@@ -5,11 +5,13 @@ import { cn } from "@/lib/utils";
 /*
  * Tiny SVG primitives for the simplified, wireframe-style hero image each
  * pattern ships in its `thumbnail.tsx`. Everything draws on a 200×120
- * canvas and uses theme tokens, so thumbnails follow light/dark mode.
+ * canvas in grayscale theme tokens only — no icons, no accent colors —
+ * so thumbnails stay minimal and follow light/dark mode.
  */
 
 export const tone = {
   text: "fill-muted-foreground/35",
+  mid: "fill-muted-foreground/60",
   faint: "fill-muted-foreground/15",
   strong: "fill-foreground",
   card: "fill-card stroke-border",
@@ -118,19 +120,6 @@ export function Button({
       height={h}
       rx={h / 2}
       className={className ?? (outline ? tone.card : tone.strong)}
-    />
-  );
-}
-
-/** A small check mark centred on (cx, cy). */
-export function Check({ cx, cy, s = 3, className = "stroke-background" }: { cx: number; cy: number; s?: number; className?: string }) {
-  return (
-    <path
-      d={`M${cx - s} ${cy} l${s * 0.7} ${s * 0.7} l${s * 1.3} -${s * 1.4}`}
-      className={className}
-      strokeWidth={1.2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
     />
   );
 }

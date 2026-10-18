@@ -1,27 +1,19 @@
-import { Frame, Button, Dot, Line } from "@/components/thumbnail";
+import { Frame, Box, Line, tone } from "@/components/thumbnail";
 
 export default function ConfidenceIndicatorThumbnail() {
   return (
     <Frame>
-      {(
-        [
-          ["fill-emerald-500", "fill-emerald-500/10 stroke-emerald-500/40", 64],
-          ["fill-amber-500", "fill-amber-500/10 stroke-amber-500/40", 52],
-          ["fill-red-500", "fill-red-500/10 stroke-red-500/40", 44],
-        ] as const
-      ).map(([dot, pill, w], i) => {
-        const y = 22 + i * 22;
+      {[3, 2, 1].map((level, i) => {
+        const y = 30 + i * 22;
         return (
-          <g key={i}>
-            <Button x={40} y={y} w={w + 22} h={14} className={pill} />
-            <Dot cx={50} cy={y + 7} r={3} className={dot} />
-            <Line x={58} y={y + 5} w={w} />
+          <g key={level}>
+            <Line x={50} y={y + 3} w={64} />
+            {[0, 1, 2].map((s) => (
+              <Box key={s} x={124 + s * 9} y={y} w={7} h={10} r={1.5} className={s < level ? tone.strong : tone.faint} />
+            ))}
           </g>
         );
       })}
-      <Line x={40} y={96} w={84} />
-      <Dot cx={130} cy={98} r={3} className="fill-emerald-500" />
-      <Line x={138} y={96} w={24} />
     </Frame>
   );
 }

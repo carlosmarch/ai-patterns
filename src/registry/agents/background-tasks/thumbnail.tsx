@@ -3,24 +3,13 @@ import { Frame, Box, Dot, Line, tone } from "@/components/thumbnail";
 export default function BackgroundTasksThumbnail() {
   return (
     <Frame>
-      <Line x={16} y={20} w={60} />
-      <Line x={16} y={30} w={74} className={tone.faint} />
-      <Line x={16} y={38} w={52} className={tone.faint} />
-      <Box x={104} y={6} w={90} h={108} r={8} />
-      <Line x={114} y={16} w={40} className={tone.strong} />
-      {[32, 50].map((y) => (
+      <Line x={16} y={24} w={70} className={tone.faint} />
+      <Line x={16} y={34} w={56} className={tone.faint} />
+      <Box x={110} y={8} w={82} h={104} r={8} />
+      {[22, 38, 54].map((y, i) => (
         <g key={y}>
-          <Dot cx={119} cy={y + 4} r={4} className="stroke-sky-500" dashed />
-          <Line x={128} y={y} w={36} className={tone.strong} />
-          <Line x={128} y={y + 6} w={22} h={3} />
-          <Box x={176} y={y} w={8} h={8} r={2} className={tone.muted} />
-        </g>
-      ))}
-      <Line x={114} y={70} w={70} h={0.75} className={tone.faint} />
-      {[78, 90, 102].map((y) => (
-        <g key={y}>
-          <Dot cx={119} cy={y + 2} r={3} className="fill-emerald-500" />
-          <Line x={128} y={y} w={44} />
+          <Dot cx={122} cy={y + 2} r={3} className={i < 2 ? "stroke-muted-foreground" : tone.text} dashed={i < 2} />
+          <Line x={130} y={y} w={48 - i * 8} className={i < 2 ? tone.strong : tone.text} />
         </g>
       ))}
     </Frame>

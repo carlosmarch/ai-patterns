@@ -3,18 +3,14 @@ import { Frame, Box, Button, Dot, Line, tone } from "@/components/thumbnail";
 export default function InviteMembersThumbnail() {
   return (
     <Frame>
-      <Box x={26} y={10} w={148} h={100} r={10} />
-      <Line x={38} y={20} w={56} className={tone.strong} />
-      <Box x={38} y={32} w={78} h={14} r={4} />
-      <Line x={44} y={37} w={44} className={tone.faint} />
-      <Box x={120} y={32} w={20} h={14} r={4} />
-      <Button x={144} y={32} w={20} h={14} />
-      {[58, 76, 94].map((y, i) => (
+      <Box x={32} y={14} w={136} h={92} r={10} />
+      <Box x={44} y={26} w={84} h={14} r={4} />
+      <Button x={132} y={26} w={24} h={14} />
+      {[54, 70, 86].map((y, i) => (
         <g key={y}>
-          <Dot cx={44} cy={y + 4} r={5} className={["fill-violet-500", "fill-sky-500", "fill-amber-500"][i]} />
-          <Line x={54} y={y} w={46 - i * 6} className={tone.strong} />
-          <Line x={54} y={y + 6} w={60} h={3} />
-          <Button x={134} y={y - 1} w={30} h={11} outline />
+          <Dot cx={50} cy={y + 2} r={4} className={tone.muted} />
+          <Line x={60} y={y} w={50 - i * 6} />
+          <Button x={128} y={y - 3} w={28} h={10} outline />
         </g>
       ))}
     </Frame>

@@ -1,26 +1,18 @@
-import { Frame, Box, Dot, Line, tone } from "@/components/thumbnail";
+import { Frame, Box, Button, Line, tone } from "@/components/thumbnail";
 
 export default function InstructionToolsThumbnail() {
   return (
     <Frame>
-      <Box x={24} y={12} w={152} h={96} />
-      {[24, 38, 52].map((y, i) => (
-        <g key={y}>
-          <Line x={34} y={y} w={4} className={tone.strong} />
-          <Line x={44} y={y} w={i === 1 ? 36 : 96 - i * 20} />
-        </g>
-      ))}
-      <Box x={84} y={35} w={34} h={10} r={5} className="fill-violet-500/20 stroke-violet-500" />
-      <Dot cx={90} cy={40} r={2} className="fill-violet-500" />
-      <Line x={95} y={38.5} w={18} h={3} className="fill-violet-500" />
-      <Box x={44} y={62} w={70} h={40} r={5} className={tone.card} />
-      <Box x={47} y={65} w={64} h={10} r={3} className={tone.muted} />
-      {[67, 79, 91].map((y) => (
-        <g key={y}>
-          <Box x={51} y={y} w={6} h={6} r={1.5} className={tone.text} />
-          <Line x={61} y={y + 1} w={36} />
-        </g>
-      ))}
+      <Box x={30} y={14} w={140} h={92} />
+      <Line x={42} y={28} w={110} />
+      <Line x={42} y={42} w={30} />
+      <Button x={76} y={39} w={32} outline />
+      <Line x={112} y={42} w={30} />
+      <Box x={76} y={54} w={60} h={40} r={5} />
+      <Box x={80} y={58} w={52} h={10} r={3} className={tone.muted} />
+      <Line x={86} y={61} w={34} className={tone.strong} />
+      <Line x={86} y={73} w={30} />
+      <Line x={86} y={84} w={38} />
     </Frame>
   );
 }

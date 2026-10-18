@@ -21,8 +21,9 @@ Each pattern lives under `src/registry/<category>/<slug>/`:
 - `thumbnail.tsx` — a tiny, very simplified wireframe of the pattern,
   drawn on a 200×120 SVG `Frame` with the primitives in
   `src/components/thumbnail.tsx`. It is the hero image on the
-  `/patterns` cards; stick to theme tokens (`tone.*`) plus at most one
-  accent color so it reads in light and dark mode.
+  `/patterns` cards. Keep it at the pattern's minimum meaningful
+  expression: grayscale theme tokens (`tone.*`) only — no icons, no
+  accent colors — just lines, boxes, dots and pills.
 
 Register the new entry in `src/registry/index.ts` (import the `Demo`,
 `Thumbnail` and `pattern`, add a `RegistryEntry`) — this is what makes it appear on
