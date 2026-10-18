@@ -14,6 +14,10 @@ import { HomeHero } from "./home-hero";
 // answering, taking input — before builder, error and team patterns.
 // Anything not listed here is appended in registry order.
 const HOME_ORDER = [
+  // Newest first, tagged "New"
+  "procedure-builder",
+  "instruction-tools",
+  "refinement-controls",
   // The agent at work
   "multi-agent-trace",
   "human-in-the-loop",
@@ -34,7 +38,6 @@ const HOME_ORDER = [
   "confidence-indicator",
   "response-compare",
   "chat-bubble",
-  "refinement-controls",
   "selection-actions",
   "follow-up-list",
   // Input
@@ -49,8 +52,6 @@ const HOME_ORDER = [
   "live-transcript",
   // Building agents
   "create-agent",
-  "procedure-builder",
-  "instruction-tools",
   "agent-triggers",
   "trigger-condition",
   "connector-panel",
@@ -66,6 +67,8 @@ const HOME_ORDER = [
   "collaborative-presence",
   "invite-members",
 ];
+
+const NEW = new Set(["procedure-builder", "instruction-tools", "refinement-controls"]);
 
 export default async function Home() {
   const featured = registry.find((entry) => entry.slug === "prompt-bar-pro");
@@ -153,7 +156,14 @@ export default async function Home() {
               >
                 <div className="flex items-baseline justify-between gap-4">
                   <div>
-                    <h2 className="font-medium">{entry.title}</h2>
+                    <h2 className="flex items-center gap-2 font-medium">
+                      {entry.title}
+                      {NEW.has(entry.slug) && (
+                        <span className="rounded-full border bg-muted/40 px-2 py-0.5 text-[11px] font-medium leading-none text-muted-foreground">
+                          New
+                        </span>
+                      )}
+                    </h2>
                     <p className="text-sm text-muted-foreground">{entry.description}</p>
                   </div>
                   <Link
