@@ -2,20 +2,32 @@
 
 import * as React from "react";
 import {
+  ArrowUpRight,
   Bot,
+  CalendarClock,
+  ChartColumn,
   Check,
+  CircleCheck,
+  CircleDashed,
+  CircleX,
   Code2,
   FileText,
   GitBranch,
   Globe,
   LayoutGrid,
+  Link2,
+  Loader2,
   Menu,
+  MessageSquare,
   Mic,
   MousePointer2,
+  Play,
   Plus,
   RotateCcw,
+  Search,
   SquareTerminal,
   Terminal,
+  Unplug,
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -24,14 +36,15 @@ import { cn } from "@/lib/utils";
 import { AgentTriggers, DEFAULT_TRIGGERS } from "@/registry/agents/agent-triggers/component";
 import { ChatBubble } from "@/registry/messages/chat-bubble/component";
 import { ConnectivityError } from "@/registry/errors/connectivity-error/component";
-import { ConnectorPanel } from "@/registry/permissions/connector-panel/component";
+import { ConnectorPanel, type ConnectorLink, type ConnectorToolGroup, type ToolPermission } from "@/registry/permissions/connector-panel/component";
 import { CreateAgent } from "@/registry/agents/create-agent/component";
 import { Flowchart, type FlowchartNode } from "@/registry/flowcharts/trigger-condition/component";
+import { InviteMembers } from "@/registry/access/invite-members/component";
 import { InstructionTools } from "@/registry/agents/instruction-tools/component";
 import { ListeningState } from "@/registry/voice/listening-state/component";
 import { LiveTranscript, type TranscriptSegment } from "@/registry/voice/live-transcript/component";
 import { ProcedureBuilder } from "@/registry/agents/procedure-builder/component";
-import { PromptOnboarding, type CodingTool, type PromptOnboardingStatus } from "@/registry/onboarding/prompt-onboarding/component";
+import { PromptOnboarding, type CodingTool } from "@/registry/onboarding/prompt-onboarding/component";
 import { SetupChecklist, type SetupStep } from "@/registry/navigation/setup-checklist/component";
 import { ShinyButton } from "@/registry/buttons/shiny-button/component";
 import { StopGenerationButton } from "@/registry/buttons/stop-generation-button/component";
@@ -42,12 +55,16 @@ import {
   AGENT_ICON,
   AGENT_NAME,
   GUIDELINE_TOOLS,
+  ORG_MEMBERS,
   PROCEDURES,
   PROCEDURE_STEPS,
   PROCEDURE_TARGETS,
+  ROLES,
   SETUP_STEPS,
   SKILL_PROMPT,
   SKILL_SNIPPET,
+  TEAM,
+  favicon,
 } from "./data";
 
 // ---------------------------------------------------------------------------
@@ -105,12 +122,73 @@ function Scroll({ children, className }: { children: React.ReactNode; className?
   return <div className={cn("min-h-0 flex-1 overflow-y-auto", className)}>{children}</div>;
 }
 
+function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  className,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
+            initial={{ y: 8 }}
+            animate={{ y: 0 }}
+            exit={{ y: 8 }}
+            onClick={(e) => e.stopPropagation()}
+            className={cn("w-full rounded-2xl border bg-background p-5 shadow-xl", className)}
+          >
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h3 className="text-base font-semibold tracking-tight">{title}</h3>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={onClose}
+                className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            {children}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Train — procedures and guidelines
 // ---------------------------------------------------------------------------
 
-export function TrainView() {
-  const [tab, setTab] = React.useState<"procedures" | "guidelines">("procedures");
+export type TrainTab = "procedures" | "guidelines";
+export type PlaygroundTab = "chat" | "voice";
+
+export function TrainView({ tab, onTabChange: setTab }: { tab: TrainTab; onTabChange: (tab: TrainTab) => void }) {
   const [selected, setSelected] = React.useState(PROCEDURES[0].id);
   const [saved, setSaved] = React.useState(true);
   // The builder reports its initial steps on mount; only later edits count as unsaved.
@@ -232,8 +310,7 @@ const VOICE_SCRIPT: { speaker: TranscriptSegment["speaker"]; text: string }[] = 
   { speaker: "assistant", text: "Listening State while the mic is open, a Live Transcript as you talk, then a Voice Waveform while I answer." },
 ];
 
-export function PlaygroundView() {
-  const [tab, setTab] = React.useState<"chat" | "voice">("chat");
+export function PlaygroundView({ tab, onTabChange: setTab }: { tab: PlaygroundTab; onTabChange: (tab: PlaygroundTab) => void }) {
 
   return (
     <>
@@ -523,7 +600,12 @@ export function DeployView() {
 // Workflows
 // ---------------------------------------------------------------------------
 
-const FLOW_NODES: FlowchartNode[] = [
+const PR_FIELDS = [
+  { id: "files", label: "files changed" },
+  { id: "path", label: "path" },
+];
+
+const PR_REVIEW_NODES: FlowchartNode[] = [
   {
     id: "trigger",
     type: "trigger",
@@ -540,10 +622,7 @@ const FLOW_NODES: FlowchartNode[] = [
         connector: "if",
         subject: { id: "pr", icon: GitBranch, label: "PR" },
         field: { id: "files", label: "files changed" },
-        fieldOptions: [
-          { id: "files", label: "files changed" },
-          { id: "path", label: "path" },
-        ],
+        fieldOptions: PR_FIELDS,
         value: { id: "gt10", label: "> 10", dotColor: "bg-amber-500" },
         valueOptions: [
           { id: "gt10", label: "> 10", dotColor: "bg-amber-500" },
@@ -555,10 +634,7 @@ const FLOW_NODES: FlowchartNode[] = [
         connector: "and",
         subject: { id: "pr-2", icon: GitBranch, label: "PR" },
         field: { id: "path", label: "path" },
-        fieldOptions: [
-          { id: "files", label: "files changed" },
-          { id: "path", label: "path" },
-        ],
+        fieldOptions: PR_FIELDS,
         value: { id: "registry", label: "src/registry/**", dotColor: "bg-blue-500" },
         valueOptions: [
           { id: "registry", label: "src/registry/**", dotColor: "bg-blue-500" },
@@ -569,26 +645,312 @@ const FLOW_NODES: FlowchartNode[] = [
   },
 ];
 
-export function WorkflowsView() {
+const WEEKLY_NODES: FlowchartNode[] = [
+  { id: "trigger", type: "trigger", icon: CalendarClock, title: "Every Monday at 9:00", description: "Europe/Madrid · runs as Origami" },
+  {
+    id: "condition",
+    type: "condition",
+    clauses: [
+      {
+        id: "c1",
+        connector: "if",
+        subject: { id: "analytics", icon: ChartColumn, label: "Analytics" },
+        field: { id: "events", label: "copy events" },
+        fieldOptions: [
+          { id: "events", label: "copy events" },
+          { id: "views", label: "page views" },
+        ],
+        value: { id: "gt1000", label: "> 1,000", dotColor: "bg-emerald-500" },
+        valueOptions: [
+          { id: "gt0", label: "> 0", dotColor: "bg-muted-foreground" },
+          { id: "gt1000", label: "> 1,000", dotColor: "bg-emerald-500" },
+        ],
+      },
+    ],
+  },
+];
+
+const TRIAGE_NODES: FlowchartNode[] = [
+  { id: "trigger", type: "trigger", icon: MessageSquare, title: "New message in #design-requests", description: "Slack · top-level messages only" },
+  {
+    id: "condition",
+    type: "condition",
+    clauses: [
+      {
+        id: "c1",
+        connector: "if",
+        subject: { id: "msg", icon: MessageSquare, label: "Message" },
+        field: { id: "contains", label: "mentions" },
+        fieldOptions: [
+          { id: "contains", label: "mentions" },
+          { id: "author", label: "author" },
+        ],
+        value: { id: "pattern", label: "a pattern", dotColor: "bg-violet-500" },
+        valueOptions: [
+          { id: "pattern", label: "a pattern", dotColor: "bg-violet-500" },
+          { id: "screen", label: "a screen", dotColor: "bg-sky-500" },
+        ],
+      },
+      {
+        id: "c2",
+        connector: "or",
+        subject: { id: "msg-2", icon: MessageSquare, label: "Message" },
+        field: { id: "contains", label: "mentions" },
+        fieldOptions: [
+          { id: "contains", label: "mentions" },
+          { id: "author", label: "author" },
+        ],
+        value: { id: "origami", label: "@Origami", dotColor: "bg-amber-500" },
+        valueOptions: [{ id: "origami", label: "@Origami", dotColor: "bg-amber-500" }],
+      },
+    ],
+  },
+];
+
+type RunStatus = "running" | "success" | "skipped" | "failed";
+
+interface WorkflowRun {
+  id: string;
+  label: string;
+  when: string;
+  status: RunStatus;
+}
+
+interface WorkflowDef {
+  id: string;
+  name: string;
+  description: string;
+  live: boolean;
+  runsThisWeek: number;
+  nodes: FlowchartNode[];
+  runs: WorkflowRun[];
+}
+
+const WORKFLOWS: WorkflowDef[] = [
+  {
+    id: "pr-review",
+    name: "PR review automation",
+    description: "Runs the “Review a pattern” procedure on large registry PRs.",
+    live: true,
+    runsThisWeek: 14,
+    nodes: PR_REVIEW_NODES,
+    runs: [
+      { id: "r1", label: "#94 Keep header avatars below the drawer", when: "2h ago", status: "skipped" },
+      { id: "r2", label: "#91 Add /workspace", when: "Yesterday", status: "success" },
+      { id: "r3", label: "#90 Wireframe hero images", when: "Yesterday", status: "success" },
+      { id: "r4", label: "#88 Procedure Builder", when: "Oct 15", status: "failed" },
+    ],
+  },
+  {
+    id: "weekly",
+    name: "Weekly usage report",
+    description: "Summarizes pattern usage and posts it to the team every Monday.",
+    live: true,
+    runsThisWeek: 1,
+    nodes: WEEKLY_NODES,
+    runs: [
+      { id: "r1", label: "Week 42 report", when: "Today, 9:00", status: "success" },
+      { id: "r2", label: "Week 41 report", when: "Oct 13", status: "success" },
+    ],
+  },
+  {
+    id: "triage",
+    name: "Design request triage",
+    description: "Labels pattern requests from Slack and drafts a first reply.",
+    live: false,
+    runsThisWeek: 0,
+    nodes: TRIAGE_NODES,
+    runs: [],
+  },
+];
+
+const RUN_STATUS: Record<RunStatus, { label: string; icon: React.ComponentType<{ className?: string }>; className: string }> = {
+  running: { label: "Running", icon: Loader2, className: "animate-spin text-muted-foreground" },
+  success: { label: "Succeeded", icon: CircleCheck, className: "text-emerald-600 dark:text-emerald-400" },
+  skipped: { label: "Skipped — conditions not met", icon: CircleDashed, className: "text-muted-foreground" },
+  failed: { label: "Failed", icon: CircleX, className: "text-red-600 dark:text-red-400" },
+};
+
+export function WorkflowsView({ slackConnected, onToast }: { slackConnected: boolean; onToast: (message: string) => void }) {
+  const [workflows, setWorkflows] = React.useState(WORKFLOWS);
+  const [selected, setSelected] = React.useState(WORKFLOWS[0].id);
+  const timers = React.useRef<number[]>([]);
+  React.useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
+
+  const workflow = workflows.find((w) => w.id === selected) ?? workflows[0];
+  const isRunning = workflow.runs.some((r) => r.status === "running");
+
+  function patch(id: string, fn: (w: WorkflowDef) => WorkflowDef) {
+    setWorkflows((prev) => prev.map((w) => (w.id === id ? fn(w) : w)));
+  }
+
+  function runNow() {
+    const id = workflow.id;
+    const runId = `run-${Date.now()}`;
+    patch(id, (w) => ({ ...w, runs: [{ id: runId, label: "Manual run", when: "Just now", status: "running" }, ...w.runs] }));
+    timers.current.push(
+      window.setTimeout(() => {
+        patch(id, (w) => ({
+          ...w,
+          runsThisWeek: w.runsThisWeek + 1,
+          runs: w.runs.map((r) => (r.id === runId ? { ...r, status: "success" } : r)),
+        }));
+      }, 2400)
+    );
+  }
+
+  function create() {
+    const id = `workflow-${workflows.length}`;
+    setWorkflows((prev) => [
+      ...prev,
+      {
+        id,
+        name: "Untitled workflow",
+        description: "Draft — pick a trigger and conditions, then turn it on.",
+        live: false,
+        runsThisWeek: 0,
+        runs: [],
+        nodes: [
+          { id: "trigger", type: "trigger", icon: Play, title: "Run manually", description: "From this page or with /run in a thread" },
+          {
+            id: "condition",
+            type: "condition",
+            clauses: [{ ...(PR_REVIEW_NODES[1] as Extract<FlowchartNode, { type: "condition" }>).clauses[0], id: "c1" }],
+          },
+        ],
+      },
+    ]);
+    setSelected(id);
+  }
+
   return (
     <>
       <ViewHeader title="Workflows">
-        <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <span className="size-1.5 rounded-full bg-emerald-500" />
-          Live · ran 14 times this week
-        </span>
+        <button
+          type="button"
+          onClick={create}
+          className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+        >
+          <Plus className="size-4" />
+          <span className="hidden sm:inline">New workflow</span>
+        </button>
       </ViewHeader>
-      <Scroll className="px-6 py-6">
-        <div className="mx-auto max-w-md space-y-4">
-          <div>
-            <h3 className="text-xl font-semibold tracking-tight">PR review automation</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Runs the “Review a pattern” procedure on large registry PRs.
-            </p>
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+        <aside className="flex shrink-0 gap-1 overflow-x-auto border-b p-3 md:w-72 md:flex-col md:overflow-y-auto md:border-b-0 md:border-r">
+          {workflows.map((w) => (
+            <button
+              key={w.id}
+              type="button"
+              onClick={() => setSelected(w.id)}
+              aria-current={w.id === workflow.id ? "true" : undefined}
+              className={cn(
+                "shrink-0 rounded-lg px-3 py-2 text-left transition-colors md:w-full",
+                w.id === workflow.id ? "bg-accent" : "hover:bg-accent/60"
+              )}
+            >
+              <span className="flex items-center gap-2 text-sm font-medium">
+                <span className={cn("size-1.5 shrink-0 rounded-full", w.live ? "bg-emerald-500" : "bg-muted-foreground/40")} />
+                <span className="truncate">{w.name}</span>
+              </span>
+              <span className="mt-0.5 hidden pl-3.5 text-xs text-muted-foreground md:block">
+                {w.live ? `Live · ${w.runsThisWeek} ${w.runsThisWeek === 1 ? "run" : "runs"} this week` : "Paused"}
+              </span>
+            </button>
+          ))}
+        </aside>
+
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto xl:flex-row xl:overflow-hidden">
+          <div className="flex min-w-0 flex-1 flex-col xl:overflow-y-auto">
+            <div className="flex flex-wrap items-start justify-between gap-3 px-4 py-5 sm:px-6">
+              <div className="min-w-0">
+                <h3 className="text-xl font-semibold tracking-tight">{workflow.name}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{workflow.description}</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={workflow.live}
+                  onClick={() => {
+                    if (!workflow.live && workflow.id === "triage" && !slackConnected) {
+                      onToast("Connect Slack in Connectors first — this workflow listens to #design-requests.");
+                      return;
+                    }
+                    patch(workflow.id, (w) => ({ ...w, live: !w.live }));
+                  }}
+                  className="flex items-center gap-2 rounded-lg border bg-background px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+                >
+                  <span className={cn("relative h-4 w-7 rounded-full transition-colors", workflow.live ? "bg-emerald-500" : "bg-muted-foreground/30")}>
+                    <span className={cn("absolute top-0.5 size-3 rounded-full bg-white shadow transition-all", workflow.live ? "left-3.5" : "left-0.5")} />
+                  </span>
+                  {workflow.live ? "Live" : "Paused"}
+                </button>
+                <button
+                  type="button"
+                  disabled={!workflow.live || isRunning}
+                  title={workflow.live ? undefined : "Turn the workflow on to run it"}
+                  onClick={runNow}
+                  className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-opacity disabled:opacity-40"
+                >
+                  {isRunning ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4" />}
+                  Run now
+                </button>
+              </div>
+            </div>
+            {/* grow, not flex-1: the canvas sets its own height from the nodes, so it must never shrink below it. */}
+            <Flowchart key={workflow.id} nodes={workflow.nodes} className="min-h-[420px] shrink-0 grow rounded-none border-x-0 border-b-0" />
           </div>
-          <Flowchart nodes={FLOW_NODES} className="w-full" />
+
+          <aside className="shrink-0 border-t bg-background p-4 sm:p-6 xl:w-80 xl:overflow-y-auto xl:border-l xl:border-t-0">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-xl border p-3">
+                <p className="text-xs text-muted-foreground">Runs this week</p>
+                <p className="mt-1 text-xl font-semibold tabular-nums">{workflow.runsThisWeek}</p>
+              </div>
+              <div className="rounded-xl border p-3">
+                <p className="text-xs text-muted-foreground">Success rate</p>
+                <p className="mt-1 text-xl font-semibold tabular-nums">
+                  {(() => {
+                    const finished = workflow.runs.filter((r) => r.status === "success" || r.status === "failed");
+                    return finished.length ? `${Math.round((finished.filter((r) => r.status === "success").length / finished.length) * 100)}%` : "—";
+                  })()}
+                </p>
+              </div>
+            </div>
+            <p className="mb-2 mt-6 text-xs font-medium text-muted-foreground">Recent runs</p>
+            {workflow.runs.length === 0 ? (
+              <p className="rounded-xl border border-dashed p-4 text-center text-sm text-muted-foreground">
+                No runs yet. {workflow.live ? "Run it now to test it." : "Turn it on to start running."}
+              </p>
+            ) : (
+              <ul className="space-y-1">
+                <AnimatePresence initial={false}>
+                  {workflow.runs.map((run) => {
+                    const meta = RUN_STATUS[run.status];
+                    return (
+                      <motion.li
+                        key={run.id}
+                        layout
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-start gap-2.5 rounded-lg px-2 py-2 hover:bg-accent/60"
+                      >
+                        <meta.icon className={cn("mt-0.5 size-4 shrink-0", meta.className)} aria-label={meta.label} />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm">{run.label}</span>
+                          <span className="block text-xs text-muted-foreground">
+                            {run.when} · {meta.label}
+                          </span>
+                        </span>
+                      </motion.li>
+                    );
+                  })}
+                </AnimatePresence>
+              </ul>
+            )}
+          </aside>
         </div>
-      </Scroll>
+      </div>
     </>
   );
 }
@@ -605,74 +967,410 @@ function GitHubMark({ className }: { className?: string }) {
   );
 }
 
-const CONNECTORS = [
-  { id: "github", name: "GitHub", status: "Connected", detail: "carlosmarch/ai-patterns" },
-  { id: "figma", name: "Figma", status: "Connected", detail: "2 files" },
-  { id: "vercel", name: "Vercel Analytics", status: "Connected", detail: "ai-patterns.dev" },
-  { id: "slack", name: "Slack", status: "Not connected", detail: "#design-requests" },
+export interface ConnectorDef {
+  id: string;
+  name: string;
+  domain: string;
+  description: string;
+  detail: string;
+  connected: boolean;
+  verified?: boolean;
+  overview: string[];
+  links: ConnectorLink[];
+  toolGroups: ConnectorToolGroup[];
+}
+
+function mcp(id: string, name: string, description: string, permission: ToolPermission) {
+  return { id, name, description, badge: "MCP", permission };
+}
+
+export const CONNECTORS: ConnectorDef[] = [
+  {
+    id: "github",
+    name: "GitHub",
+    domain: "github.com",
+    description: "Read the registry, open pull requests, and comment on reviews in carlosmarch/ai-patterns.",
+    detail: "carlosmarch/ai-patterns",
+    connected: true,
+    verified: true,
+    overview: ["Read pattern source and specs", "Open PRs with new or updated patterns", "Comment on pattern review PRs"],
+    links: [
+      { label: "Repository", href: "https://github.com/carlosmarch/ai-patterns", icon: Globe },
+      { label: "Docs", href: "https://docs.github.com/en/rest", icon: FileText },
+    ],
+    toolGroups: [
+      {
+        id: "read",
+        label: "Read-only tools",
+        tools: [
+          mcp("get-file", "Get file contents", "Read a file such as a pattern's component.tsx or pattern.ts.", "allow"),
+          mcp("search-code", "Search code", "Find where a pattern or prop is used across the registry.", "allow"),
+          mcp("list-prs", "List pull requests", "See open pattern PRs and their review status.", "allow"),
+        ],
+      },
+      {
+        id: "write",
+        label: "Write tools",
+        tools: [
+          mcp("create-pr", "Create pull request", "Open a PR with a new pattern or a spec update.", "always-ask"),
+          mcp("comment", "Comment on a pull request", "Post review findings on a pattern PR.", "always-ask"),
+          mcp("push", "Push files", "Commit changes directly to a branch.", "always-ask"),
+        ],
+      },
+      {
+        id: "destructive",
+        label: "Destructive tools",
+        tools: [
+          mcp("merge", "Merge pull request", "Merge a PR into main. Pattern PRs should be merged by a person.", "disable"),
+          mcp("delete-branch", "Delete branch", "Remove a branch after it's merged.", "disable"),
+        ],
+      },
+    ],
+  },
+  {
+    id: "figma",
+    name: "Figma",
+    domain: "figma.com",
+    description: "Read frames from your design files so audits compare the real screen, not a screenshot.",
+    detail: "2 files",
+    connected: true,
+    verified: true,
+    overview: ["Read frames and components", "Match layers to registry patterns", "Leave comments on frames"],
+    links: [
+      { label: "Chat screen v2", href: "https://figma.com", icon: Globe },
+      { label: "Docs", href: "https://www.figma.com/developers/api", icon: FileText },
+    ],
+    toolGroups: [
+      {
+        id: "read",
+        label: "Read-only tools",
+        tools: [
+          mcp("get-frame", "Get frame", "Read a frame's layers, text, and auto-layout.", "allow"),
+          mcp("get-components", "List components", "See the components a file uses and where.", "allow"),
+          mcp("export", "Export image", "Render a frame to PNG for side-by-side audits.", "allow"),
+        ],
+      },
+      {
+        id: "write",
+        label: "Write tools",
+        tools: [mcp("comment", "Comment on a frame", "Pin audit findings to the layer they're about.", "always-ask")],
+      },
+    ],
+  },
+  {
+    id: "vercel",
+    name: "Vercel Analytics",
+    domain: "vercel.com",
+    description: "Count Code tab copies, previews, and installs on ai-patterns.dev for the weekly usage report.",
+    detail: "ai-patterns.dev",
+    connected: true,
+    overview: ["Read page and event analytics", "Group events by pattern", "No write access"],
+    links: [
+      { label: "Dashboard", href: "https://vercel.com/analytics", icon: Globe },
+      { label: "Docs", href: "https://vercel.com/docs/analytics", icon: FileText },
+    ],
+    toolGroups: [
+      {
+        id: "read",
+        label: "Read-only tools",
+        tools: [
+          mcp("events", "Query events", "Read custom events such as copy and install.", "allow"),
+          mcp("pages", "Query page views", "Read views per pattern page.", "allow"),
+        ],
+      },
+    ],
+  },
+  {
+    id: "slack",
+    name: "Slack",
+    domain: "slack.com",
+    description: "Pick up pattern requests from #design-requests and post the weekly usage report.",
+    detail: "#design-requests",
+    connected: false,
+    verified: true,
+    overview: ["Read messages in channels you pick", "Post reports and replies", "Never reads DMs"],
+    links: [{ label: "Docs", href: "https://api.slack.com", icon: FileText }],
+    toolGroups: [
+      {
+        id: "read",
+        label: "Read-only tools",
+        tools: [mcp("history", "Read channel history", "Read messages in #design-requests.", "allow")],
+      },
+      {
+        id: "write",
+        label: "Write tools",
+        tools: [mcp("post", "Post a message", "Share reports and answers in a channel.", "always-ask")],
+      },
+    ],
+  },
 ];
 
-export function ConnectorsView() {
+/** Connectors you can add from the catalogue. They start disconnected. */
+const CONNECTOR_CATALOGUE: ConnectorDef[] = [
+  {
+    id: "linear",
+    name: "Linear",
+    domain: "linear.app",
+    description: "Turn audit findings into issues and track pattern requests.",
+    detail: "Not set up",
+    connected: false,
+    verified: true,
+    overview: ["Create and update issues", "Read project status"],
+    links: [{ label: "Docs", href: "https://linear.app/developers", icon: FileText }],
+    toolGroups: [
+      { id: "read", label: "Read-only tools", tools: [mcp("issues", "List issues", "Read issues in a team.", "allow")] },
+      { id: "write", label: "Write tools", tools: [mcp("create", "Create issue", "File a finding as an issue.", "always-ask")] },
+    ],
+  },
+  {
+    id: "notion",
+    name: "Notion",
+    domain: "notion.so",
+    description: "Read research notes and publish specs to your team wiki.",
+    detail: "Not set up",
+    connected: false,
+    overview: ["Read pages you share", "Publish specs as pages"],
+    links: [{ label: "Docs", href: "https://developers.notion.com", icon: FileText }],
+    toolGroups: [
+      { id: "read", label: "Read-only tools", tools: [mcp("search", "Search pages", "Find research and notes.", "allow")] },
+      { id: "write", label: "Write tools", tools: [mcp("publish", "Create page", "Publish a spec to the wiki.", "always-ask")] },
+    ],
+  },
+  {
+    id: "posthog",
+    name: "PostHog",
+    domain: "posthog.com",
+    description: "Watch session replays and funnels when investigating a UX drop-off.",
+    detail: "Not set up",
+    connected: false,
+    overview: ["Read session replays", "Query funnels and events"],
+    links: [{ label: "Docs", href: "https://posthog.com/docs/api", icon: FileText }],
+    toolGroups: [
+      {
+        id: "read",
+        label: "Read-only tools",
+        tools: [mcp("replays", "List replays", "Find sessions by event.", "allow"), mcp("funnels", "Query funnel", "Measure drop-off between steps.", "allow")],
+      },
+    ],
+  },
+  {
+    id: "jira",
+    name: "Jira",
+    domain: "atlassian.com",
+    description: "File accessibility findings in the right project.",
+    detail: "Not set up",
+    connected: false,
+    overview: ["Create issues", "Read sprint boards"],
+    links: [{ label: "Docs", href: "https://developer.atlassian.com", icon: FileText }],
+    toolGroups: [
+      { id: "write", label: "Write tools", tools: [mcp("create", "Create issue", "File a finding in a project.", "always-ask")] },
+    ],
+  },
+];
+
+function ConnectorIcon({ connector, className }: { connector: ConnectorDef; className?: string }) {
+  const [failed, setFailed] = React.useState(false);
+  if (connector.id === "github") return <GitHubMark className={className} />;
+  if (failed) {
+    return (
+      <span aria-hidden className={cn("flex items-center justify-center rounded-sm bg-muted text-[10px] font-semibold text-muted-foreground", className)}>
+        {connector.name[0]}
+      </span>
+    );
+  }
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={favicon(connector.domain)} alt="" onError={() => setFailed(true)} className={cn("rounded-sm", className)} />;
+}
+
+export function ConnectorsView({
+  connectors,
+  setConnectors,
+  onToast,
+}: {
+  connectors: ConnectorDef[];
+  setConnectors: React.Dispatch<React.SetStateAction<ConnectorDef[]>>;
+  onToast: (message: string) => void;
+}) {
+  const [selected, setSelected] = React.useState(CONNECTORS[0].id);
+  const [connecting, setConnecting] = React.useState<string | null>(null);
+  const [catalogueOpen, setCatalogueOpen] = React.useState(false);
+  const [query, setQuery] = React.useState("");
+  const timer = React.useRef<number>(undefined);
+  React.useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  const connector = connectors.find((c) => c.id === selected) ?? connectors[0];
+  const visible = connectors.filter((c) => c.name.toLowerCase().includes(query.trim().toLowerCase()));
+  const available = CONNECTOR_CATALOGUE.filter((c) => !connectors.some((x) => x.id === c.id));
+  const connectedCount = connectors.filter((c) => c.connected).length;
+
+  function setConnected(id: string, connected: boolean) {
+    setConnectors((prev) => prev.map((c) => (c.id === id ? { ...c, connected, detail: connected && c.detail === "Not set up" ? "1 workspace" : c.detail } : c)));
+  }
+
+  function connect(id: string) {
+    setConnecting(id);
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => {
+      setConnected(id, true);
+      setConnecting(null);
+      onToast(`${connectors.find((c) => c.id === id)?.name} is connected — ${AGENT_NAME} can use it in new threads.`);
+    }, 1400);
+  }
+
+  function add(def: ConnectorDef) {
+    setConnectors((prev) => [...prev, def]);
+    setSelected(def.id);
+    setCatalogueOpen(false);
+  }
+
   return (
     <>
-      <ViewHeader title="Connectors" />
-      <div className="flex min-h-0 flex-1">
-        <aside className="hidden w-64 shrink-0 space-y-1 overflow-y-auto border-r p-3 xl:block">
-          {CONNECTORS.map((c) => (
-            <div key={c.id} className={cn("rounded-lg px-3 py-2", c.id === "github" && "bg-accent")}>
-              <p className="flex items-center justify-between text-sm font-medium">
-                {c.name}
-                <span className={cn("text-[10px]", c.status === "Connected" ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>
-                  {c.status}
+      <ViewHeader title="Connectors">
+        <span className="hidden text-sm text-muted-foreground sm:inline">
+          {connectedCount} of {connectors.length} connected
+        </span>
+        <button
+          type="button"
+          onClick={() => setCatalogueOpen(true)}
+          className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+        >
+          <Plus className="size-4" />
+          Add connector
+        </button>
+      </ViewHeader>
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+        <aside className="flex shrink-0 flex-col gap-2 border-b p-3 md:w-72 md:border-b-0 md:border-r">
+          <label className="hidden items-center gap-2 rounded-full border px-3 py-2 text-sm focus-within:ring-2 focus-within:ring-ring/40 md:flex">
+            <Search className="size-4 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search connectors"
+              aria-label="Search connectors"
+              className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+            />
+          </label>
+          <div className="flex gap-1 overflow-x-auto md:flex-col md:overflow-y-auto">
+            {visible.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => setSelected(c.id)}
+                aria-current={c.id === connector.id ? "true" : undefined}
+                className={cn(
+                  "flex shrink-0 items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors md:w-full",
+                  c.id === connector.id ? "bg-accent" : "hover:bg-accent/60"
+                )}
+              >
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border bg-background">
+                  <ConnectorIcon connector={c} className="size-4" />
                 </span>
-              </p>
-              <p className="text-xs text-muted-foreground">{c.detail}</p>
-            </div>
-          ))}
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2 text-sm font-medium">
+                    <span className="truncate">{c.name}</span>
+                    <span
+                      className={cn("size-1.5 shrink-0 rounded-full", c.connected ? "bg-emerald-500" : "bg-muted-foreground/40")}
+                      aria-label={c.connected ? "Connected" : "Not connected"}
+                    />
+                  </span>
+                  <span className="hidden truncate text-xs text-muted-foreground md:block">{c.connected ? c.detail : "Not connected"}</span>
+                </span>
+              </button>
+            ))}
+            {visible.length === 0 && <p className="px-3 py-2 text-sm text-muted-foreground">No connectors match “{query}”.</p>}
+          </div>
         </aside>
-        <Scroll className="p-4 sm:p-6">
-          <ConnectorPanel
-            appName="GitHub"
-            appDescription="Read the registry, open pull requests, and comment on reviews in carlosmarch/ai-patterns."
-            appIcon={<GitHubMark className="size-5" />}
-            verified
-            overview={["Read pattern source and specs", "Open PRs with new or updated patterns", "Comment on pattern review PRs"]}
-            links={[
-              { label: "Repository", href: "https://github.com/carlosmarch/ai-patterns", icon: Globe },
-              { label: "Docs", href: "https://docs.github.com/en/rest", icon: FileText },
-            ]}
-            toolGroups={[
-              {
-                id: "read",
-                label: "Read-only tools",
-                tools: [
-                  { id: "get-file", name: "Get file contents", description: "Read a file such as a pattern's component.tsx or pattern.ts.", badge: "MCP", permission: "allow" },
-                  { id: "search-code", name: "Search code", description: "Find where a pattern or prop is used across the registry.", badge: "MCP", permission: "allow" },
-                  { id: "list-prs", name: "List pull requests", description: "See open pattern PRs and their review status.", badge: "MCP", permission: "allow" },
-                ],
-              },
-              {
-                id: "write",
-                label: "Write tools",
-                tools: [
-                  { id: "create-pr", name: "Create pull request", description: "Open a PR with a new pattern or a spec update.", badge: "MCP", permission: "always-ask" },
-                  { id: "comment", name: "Comment on a pull request", description: "Post review findings on a pattern PR.", badge: "MCP", permission: "always-ask" },
-                  { id: "push", name: "Push files", description: "Commit changes directly to a branch.", badge: "MCP", permission: "always-ask" },
-                ],
-              },
-              {
-                id: "destructive",
-                label: "Destructive tools",
-                tools: [
-                  { id: "merge", name: "Merge pull request", description: "Merge a PR into main. Pattern PRs should be merged by a person.", badge: "MCP", permission: "disable" },
-                  { id: "delete-branch", name: "Delete branch", description: "Remove a branch after it's merged.", badge: "MCP", permission: "disable" },
-                ],
-              },
-            ]}
-            className="mx-auto h-[600px] max-w-2xl"
-          />
-        </Scroll>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-4 sm:p-6">
+          {connector.connected ? (
+            <>
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400">
+                  <Check className="size-4" />
+                  Connected · {connector.detail}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConnected(connector.id, false);
+                    onToast(`Disconnected ${connector.name}.`);
+                  }}
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  <Unplug className="size-4" />
+                  Disconnect
+                </button>
+              </div>
+              <ConnectorPanel
+                key={connector.id}
+                appName={connector.name}
+                appDescription={connector.description}
+                appIcon={<ConnectorIcon connector={connector} className="size-5" />}
+                verified={connector.verified}
+                overview={connector.overview}
+                links={connector.links}
+                toolGroups={connector.toolGroups}
+                onAddConnector={() => setCatalogueOpen(true)}
+                className="min-h-[520px] flex-1 shadow-sm"
+              />
+            </>
+          ) : (
+            <div className="flex flex-1 items-center justify-center">
+              <div className="w-full max-w-lg rounded-2xl border bg-card p-6 text-center sm:p-8">
+                <span className="mx-auto flex size-14 items-center justify-center rounded-2xl border bg-background">
+                  <ConnectorIcon connector={connector} className="size-7" />
+                </span>
+                <h3 className="mt-4 text-xl font-semibold tracking-tight">Connect {connector.name}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{connector.description}</p>
+                <ul className="mx-auto mt-5 max-w-xs space-y-2 text-left">
+                  {connector.overview.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm">
+                      <Check className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-5 text-xs text-muted-foreground">
+                  {connector.toolGroups.reduce((n, g) => n + g.tools.length, 0)} tools · you choose which ones {AGENT_NAME} can use after connecting
+                </p>
+                <button
+                  type="button"
+                  disabled={connecting === connector.id}
+                  onClick={() => connect(connector.id)}
+                  className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity disabled:opacity-60"
+                >
+                  {connecting === connector.id ? <Loader2 className="size-4 animate-spin" /> : <Link2 className="size-4" />}
+                  {connecting === connector.id ? "Waiting for authorization…" : `Connect ${connector.name}`}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      <Modal open={catalogueOpen} onClose={() => setCatalogueOpen(false)} title="Add a connector" className="max-w-lg">
+        {available.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">You&apos;ve added every connector in the catalogue.</p>
+        ) : (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {available.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => add(c)}
+                className="flex items-start gap-3 rounded-xl border p-3 text-left transition-colors hover:bg-accent/60"
+              >
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border bg-background">
+                  <ConnectorIcon connector={c} className="size-4" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium">{c.name}</span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">{c.description}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </Modal>
     </>
   );
 }
@@ -691,6 +1389,7 @@ const TOP_PATTERNS = [
 
 export function InsightsView() {
   const [state, setState] = React.useState<"error" | "loading" | "ready">("error");
+  const [details, setDetails] = React.useState(false);
 
   function retry() {
     setState("loading");
@@ -705,12 +1404,24 @@ export function InsightsView() {
       <Scroll className="px-6 py-6">
         <div className="mx-auto max-w-3xl space-y-6">
           {state === "error" && (
-            <ConnectivityError
-              title="Couldn't reach Vercel Analytics"
-              onRetry={retry}
-              onViewDetails={() => {}}
-              className="w-full"
-            />
+            <>
+              <ConnectivityError
+                title="Couldn't reach Vercel Analytics"
+                detailsLabel={details ? "Hide details" : "View details"}
+                onRetry={retry}
+                onViewDetails={() => setDetails((d) => !d)}
+                className="w-full"
+              />
+              {details && (
+                <pre className="overflow-x-auto rounded-xl border bg-muted/50 p-4 font-mono text-xs leading-relaxed text-muted-foreground">
+                  {`GET https://vercel.com/api/web/insights/events?projectId=ai-patterns&from=2026-10-11
+→ 504 Gateway Timeout after 30.0s
+x-vercel-id: mad1::iad1::8f2kd-1760781600000
+
+The analytics API didn't answer in time. Your data is safe — retrying usually works.`}
+                </pre>
+              )}
+            </>
           )}
           {state === "loading" && <ThinkingLoader words={["Loading usage", "Counting copies"]} />}
           {state === "ready" && (
@@ -789,33 +1500,111 @@ const CODING_TOOLS: CodingTool[] = [
   { id: "vscode", label: "VS Code", icon: Code2 },
 ];
 
-export function SetupView({ onInvite, onDone }: { onInvite: () => void; onDone: (count: number) => void }) {
-  const [status, setStatus] = React.useState<PromptOnboardingStatus>("waiting");
+export function SetupView({
+  skillDone,
+  teamDone,
+  onSkillDone,
+  onTeamDone,
+  onOpenConnectors,
+  onExit,
+  onToast,
+  connectors,
+}: {
+  connectors: ConnectorDef[];
+  skillDone: boolean;
+  teamDone: boolean;
+  onSkillDone: (done: boolean) => void;
+  onTeamDone: () => void;
+  onOpenConnectors: () => void;
+  onExit: () => void;
+  onToast: (message: string) => void;
+}) {
+  const [waiting, setWaiting] = React.useState(false);
   const timer = React.useRef<number>(undefined);
+  const skillRef = React.useRef<HTMLDivElement>(null);
+  const teamRef = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => () => window.clearTimeout(timer.current), []);
 
+  function focus(ref: React.RefObject<HTMLDivElement | null>) {
+    const el = ref.current;
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.animate([{ boxShadow: "0 0 0 0 transparent" }, { boxShadow: "0 0 0 4px var(--color-ring)" }, { boxShadow: "0 0 0 0 transparent" }], {
+      duration: 900,
+      easing: "ease-out",
+    });
+  }
+
   const steps: SetupStep[] = SETUP_STEPS.map((s) => {
-    if (s.id === "skill") return { ...s, status: status === "received" ? "done" : "pending" };
-    if (s.id === "team") return { ...s, onClick: onInvite };
+    if (s.id === "connect") return { ...s, onClick: onOpenConnectors };
+    if (s.id === "skill") return { ...s, status: skillDone ? "done" : "pending", onClick: () => focus(skillRef) };
+    if (s.id === "team") return { ...s, status: teamDone ? "done" : "pending", onClick: () => focus(teamRef) };
     return s;
   });
-  const doneCount = steps.filter((s) => s.status === "done").length;
 
-  React.useEffect(() => onDone(doneCount), [doneCount, onDone]);
-
+  // Copying the prompt or opening it in a coding tool stands in for the agent
+  // adding its first pattern a few seconds later.
   function simulate() {
-    if (status === "received") return;
+    if (skillDone || waiting) return;
+    setWaiting(true);
     window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setStatus("received"), 3000);
+    timer.current = window.setTimeout(() => {
+      setWaiting(false);
+      onSkillDone(true);
+    }, 3000);
   }
 
   return (
     <>
-      <ViewHeader title="Setup" />
-      <Scroll className="px-6 py-6">
-        <div className="mx-auto flex max-w-4xl flex-col items-start gap-6 lg:flex-row">
-          <SetupChecklist title="Get Origami ready" steps={steps} className="w-full shrink-0 lg:w-72" />
-          <div className="w-full min-w-0 flex-1 space-y-3">
+      <ViewHeader title="Setup">
+        <span className="text-sm text-muted-foreground">
+          {steps.filter((s) => s.status === "done").length} of {steps.length} done
+        </span>
+      </ViewHeader>
+      <Scroll className="p-4 sm:p-6">
+        <div className="grid w-full items-start gap-6 lg:grid-cols-[20rem_minmax(0,1fr)] 2xl:grid-cols-[20rem_minmax(0,1fr)_20rem]">
+          <div className="space-y-4">
+            <SetupChecklist title={`Get ${AGENT_NAME} ready`} steps={steps} className="w-full" />
+            <div ref={teamRef} className="rounded-2xl border bg-card p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium">Your team</p>
+                  <p className="text-xs text-muted-foreground">
+                    {TEAM.length} members · {TEAM.filter((m) => m.isOnline).length} online
+                  </p>
+                </div>
+                <InviteMembers
+                  trigger="share"
+                  roles={ROLES}
+                  orgMembers={ORG_MEMBERS}
+                  initialAssignees={[
+                    { id: "carlos", name: "Carlos March", email: "carlos@ai-patterns.dev", status: "confirmed", roleId: "admin" },
+                    { id: "ana", name: "Ana López", email: "ana@ai-patterns.dev", status: "confirmed", roleId: "editor" },
+                  ]}
+                  defaultMessage={`Join me in the ${AGENT_NAME} workspace — we're auditing our AI screens against the pattern catalogue.`}
+                  onSend={(chips) => {
+                    if (chips.length === 0) return;
+                    onTeamDone();
+                    onToast(`Invited ${chips.length} ${chips.length === 1 ? "person" : "people"}.`);
+                  }}
+                />
+              </div>
+              <ul className="mt-3 space-y-2">
+                {TEAM.map((m) => (
+                  <li key={m.id} className="flex items-center gap-2.5 text-sm">
+                    <span className={cn("relative flex size-7 items-center justify-center rounded-full text-[10px] font-semibold text-white", m.color)}>
+                      {m.initials}
+                      {m.isOnline && <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-card bg-emerald-500" />}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">{m.name}</span>
+                    <span className="text-xs text-muted-foreground">{m.role}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div ref={skillRef} className="min-w-0 space-y-3 rounded-2xl">
             <PromptOnboarding
               title="Install the skill in your coding agent"
               prompt={SKILL_PROMPT}
@@ -825,21 +1614,36 @@ export function SetupView({ onInvite, onDone }: { onInvite: () => void; onDone: 
                 snippet: "Using Claude Code? Install the ai-patterns skill and ask for screens in plain language.",
               }}
               tools={CODING_TOOLS}
-              status={status}
-              statusLabels={{ waiting: "Waiting for your first pattern…", received: "First pattern added" }}
+              status={skillDone ? "received" : "waiting"}
+              statusLabels={{ waiting: waiting ? "Listening for your first pattern…" : "Waiting for your first pattern…", received: "First pattern added" }}
               alternatives={[
                 { id: "browse", title: "Browse the catalogue", description: "Preview every pattern live", icon: LayoutGrid, onClick: () => window.open("/patterns", "_blank") },
-                { id: "copy", title: "Copy a component", description: "Grab the code from any pattern's Code tab", icon: Terminal },
+                {
+                  id: "copy",
+                  title: "Copy a component",
+                  description: "Grab the code from any pattern's Code tab",
+                  icon: Terminal,
+                  onClick: () => window.open("/patterns/buttons/shiny-button", "_blank"),
+                },
               ]}
               onCopy={simulate}
-              onOpenIn={simulate}
-              onSkip={() => {}}
-              onFinish={() => {}}
+              onOpenIn={(tool) => {
+                simulate();
+                onToast(`Opening the prompt in ${tool.label}…`);
+              }}
+              onSkip={() => {
+                onToast("Skipped for now — finish it any time from Setup.");
+                onExit();
+              }}
+              onFinish={() => {
+                onToast(teamDone ? `You're all set — ${AGENT_NAME} is ready.` : "Skill installed. Invite your team when you're ready.");
+                onExit();
+              }}
             />
-            {status === "received" && (
+            {skillDone && (
               <button
                 type="button"
-                onClick={() => setStatus("waiting")}
+                onClick={() => onSkillDone(false)}
                 className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
               >
                 <RotateCcw className="size-3" />
@@ -847,9 +1651,52 @@ export function SetupView({ onInvite, onDone }: { onInvite: () => void; onDone: 
               </button>
             )}
           </div>
+
+          <div className="space-y-4 lg:col-span-2 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 2xl:col-span-1 2xl:block 2xl:space-y-4">
+            <div className="rounded-2xl border bg-card p-4">
+              <p className="text-sm font-medium">What {AGENT_NAME} can reach</p>
+              <ul className="mt-3 space-y-2.5">
+                {connectors.map((c) => (
+                  <li key={c.id} className="flex items-center gap-2.5 text-sm">
+                    <span className="flex size-7 items-center justify-center rounded-lg border bg-background">
+                      <ConnectorIcon connector={c} className="size-3.5" />
+                    </span>
+                    <span className="flex-1">{c.name}</span>
+                    <span className={cn("text-xs", c.connected ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>
+                      {c.connected ? "Connected" : "Not connected"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <button type="button" onClick={onOpenConnectors} className="mt-3 text-xs font-medium text-primary hover:underline">
+                Manage connectors
+              </button>
+            </div>
+            <div className="rounded-2xl border bg-card p-4">
+              <p className="text-sm font-medium">Learn the basics</p>
+              <ul className="mt-2 space-y-1">
+                {[
+                  { label: "Browse all patterns", href: "/patterns" },
+                  { label: "Read a UX spec", href: "/patterns/loaders/thinking-loader" },
+                  { label: "The skill on GitHub", href: "https://github.com/carlosmarch/ai-patterns/tree/main/plugins/ai-patterns" },
+                ].map((l) => (
+                  <li key={l.href}>
+                    <a
+                      href={l.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="-mx-2 flex items-center justify-between rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-accent"
+                    >
+                      {l.label}
+                      <ArrowUpRight className="size-3.5 text-muted-foreground" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </Scroll>
     </>
   );
 }
-
