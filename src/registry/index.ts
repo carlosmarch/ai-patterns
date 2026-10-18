@@ -9,6 +9,8 @@ import { pattern as backgroundTasksPattern } from "./agents/background-tasks/pat
 import InstructionToolsDemo from "./agents/instruction-tools/demo";
 import { pattern as instructionToolsPattern } from "./agents/instruction-tools/pattern";
 import CreateAgentDemo from "./agents/create-agent/demo";
+import ProcedureBuilderDemo from "./agents/procedure-builder/demo";
+import { pattern as procedureBuilderPattern } from "./agents/procedure-builder/pattern";
 import { pattern as createAgentPattern } from "./agents/create-agent/pattern";
 import ShinyButtonDemo from "./buttons/shiny-button/demo";
 import { pattern as shinyButtonPattern } from "./buttons/shiny-button/pattern";
@@ -143,6 +145,15 @@ export const registry: RegistryEntry[] = [
       "A numbered instruction editor where typing / opens a two-step inline picker — choose a tool, then its connector or target — inserting an atomic, editable chip into the prose.",
     Demo: InstructionToolsDemo,
     uxDoc: instructionToolsPattern,
+  },
+  {
+    slug: "procedure-builder",
+    category: "agents",
+    title: "Procedure Builder",
+    description:
+      "A doc-style editor for an agent's step-by-step procedure — a / step picker, IF / ELSE branches with plain-language or code conditions, section jumps, and escalate / switch actions.",
+    Demo: ProcedureBuilderDemo,
+    uxDoc: procedureBuilderPattern,
   },
   {
     slug: "multi-agent-trace",

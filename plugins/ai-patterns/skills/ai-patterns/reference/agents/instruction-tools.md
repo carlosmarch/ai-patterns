@@ -314,13 +314,17 @@ function StepEditor({
   onBackspaceEmpty,
 }: StepEditorProps) {
   const editorRef = React.useRef<HTMLDivElement>(null);
-  const [picker, setPicker] = React.useState<PickerState | null>(null);
+  const [picker, setPickerState] = React.useState<PickerState | null>(null);
+  // Mirrors `picker` so blur/close handlers fired mid-transition see the latest value.
   const pickerRef = React.useRef<PickerState | null>(null);
   const [chips, setChips] = React.useState<ChipState[]>([]);
   const [isEmpty, setIsEmpty] = React.useState(!initialText);
   const chipSeq = React.useRef(0);
 
-  pickerRef.current = picker;
+  function setPicker(next: PickerState | null) {
+    pickerRef.current = next;
+    setPickerState(next);
+  }
 
   React.useEffect(() => {
     const el = editorRef.current;
@@ -350,7 +354,6 @@ function StepEditor({
     const current = pickerRef.current;
     const el = editorRef.current;
     if (!current || !el) return;
-    pickerRef.current = null;
     setPicker(null);
     el.focus();
     const anchor = current.anchor;
