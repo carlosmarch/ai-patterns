@@ -9,10 +9,77 @@ import { ComponentPreview } from "@/components/component-preview";
 import { DownloadButton } from "@/components/download-button";
 import { HomeHero } from "./home-hero";
 
+// Curated order for the home page: lead with the most distinctly agentic
+// patterns, then walk through the life of a turn — the agent working,
+// answering, taking input — before builder, error and team patterns.
+// Anything not listed here is appended in registry order.
+const HOME_ORDER = [
+  // Newest first, tagged "New"
+  "procedure-builder",
+  "instruction-tools",
+  "refinement-controls",
+  // The agent at work
+  "multi-agent-trace",
+  "human-in-the-loop",
+  "tool-approval",
+  "streaming-text",
+  "expandable-trace",
+  "tool-call-chip",
+  "thinking-loader",
+  "analysis-list",
+  "background-tasks",
+  "terminal-stream",
+  "diff-summary",
+  "diff-tabs",
+  // Answers you can trust and steer
+  "inline-citation",
+  "sources-stack",
+  "source-trust-card",
+  "confidence-indicator",
+  "response-compare",
+  "chat-bubble",
+  "selection-actions",
+  "follow-up-list",
+  // Input
+  "prompt-bar",
+  "stop-generation-button",
+  "attachment-chip",
+  "command-palette",
+  "image-peek",
+  // Voice
+  "listening-state",
+  "voice-waveform",
+  "live-transcript",
+  // Building agents
+  "create-agent",
+  "agent-triggers",
+  "trigger-condition",
+  "connector-panel",
+  // When things go wrong
+  "generation-error",
+  "partial-response",
+  "rate-limit",
+  "connectivity-error",
+  "console-error-card",
+  // Onboarding & teams
+  "prompt-onboarding",
+  "setup-checklist",
+  "collaborative-presence",
+  "invite-members",
+];
+
+const NEW = new Set(["procedure-builder", "instruction-tools", "refinement-controls"]);
+
 export default async function Home() {
   const featured = registry.find((entry) => entry.slug === "prompt-bar-pro");
   const HIDDEN = new Set(["shiny-button"]);
-  const rest = registry.filter((entry) => entry.slug !== featured?.slug && !HIDDEN.has(entry.slug));
+  const rank = (slug: string) => {
+    const i = HOME_ORDER.indexOf(slug);
+    return i === -1 ? HOME_ORDER.length : i;
+  };
+  const rest = registry
+    .filter((entry) => entry.slug !== featured?.slug && !HIDDEN.has(entry.slug))
+    .sort((a, b) => rank(a.slug) - rank(b.slug));
 
   const sources = await Promise.all(
     rest.map((entry) =>
@@ -89,7 +156,14 @@ export default async function Home() {
               >
                 <div className="flex items-baseline justify-between gap-4">
                   <div>
-                    <h2 className="font-medium">{entry.title}</h2>
+                    <h2 className="flex items-center gap-2 font-medium">
+                      {entry.title}
+                      {NEW.has(entry.slug) && (
+                        <span className="rounded-full border bg-muted/40 px-2 py-0.5 text-[11px] font-medium leading-none text-muted-foreground">
+                          New
+                        </span>
+                      )}
+                    </h2>
                     <p className="text-sm text-muted-foreground">{entry.description}</p>
                   </div>
                   <Link
