@@ -25,7 +25,6 @@ interface SkillExample {
   command: string;
   /** What the skill should land on, so the reader can check it. */
   outcome: string;
-  href: string;
 }
 
 const EXAMPLES: SkillExample[] = [
@@ -38,7 +37,6 @@ const EXAMPLES: SkillExample[] = [
 Replace it with a loading state that tells them the agent is still working and roughly what it's doing. Propose the pattern you'd use and why before writing code, then build it with our existing components and tokens.`,
     command: "/ai-patterns add a loading state while the agent is working",
     outcome: "Expect Thinking Loader — and a note to stop it the moment the answer starts streaming.",
-    href: "/patterns/loaders/thinking-loader",
   },
   {
     id: "tool-approval",
@@ -49,7 +47,6 @@ Replace it with a loading state that tells them the agent is still working and r
 Before any destructive or outbound tool call, pause and ask the user to approve it — show what will happen, with the exact arguments. Pick the right ai-patterns pattern for this, then wire it into the agent's tool-call handler.`,
     command: "/ai-patterns apply tool-approval before outbound tool calls",
     outcome: "Expect Tool Approval, with Human in the Loop weighed and ruled out for a yes/no gate.",
-    href: "/patterns/permissions/tool-approval",
   },
   {
     id: "composer",
@@ -60,7 +57,6 @@ Before any destructive or outbound tool call, pause and ask the user to approve 
 We're on shadcn/ui — keep its look, but follow the pattern's behavior and accessibility rules.`,
     command: "/ai-patterns design this composer",
     outcome: "Expect Prompt Bar, re-expressed with shadcn primitives instead of the catalogue's markup.",
-    href: "/patterns/composer/prompt-bar",
   },
   {
     id: "review",
@@ -71,7 +67,6 @@ We're on shadcn/ui — keep its look, but follow the pattern's behavior and acce
 Don't edit anything. Give me a per-file list of what you'd replace, which pattern, and the spec line that justifies it.`,
     command: "/ai-patterns review my project",
     outcome: "Read-only: a per-file list of swaps, each citing the pattern's When to use.",
-    href: "/patterns",
   },
   {
     id: "list",
@@ -80,7 +75,6 @@ Don't edit anything. Give me a per-file list of what you'd replace, which patter
     prompt: `List every pattern the ai-patterns skill knows about, grouped by category, so I can see what's available before I start on the onboarding flow.`,
     command: "/ai-patterns list all patterns",
     outcome: "A numbered inventory of the whole catalogue, grouped by category.",
-    href: "/patterns",
   },
 ];
 
@@ -182,8 +176,6 @@ export function SkillExamples() {
             setNote("Prompt copied — paste it into Claude Code");
           }
         }}
-        onSkip={() => router.push("/patterns")}
-        onFinish={() => router.push(example.href)}
       />
 
       <p className="text-sm text-muted-foreground" aria-live="polite">

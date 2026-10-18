@@ -22,7 +22,7 @@ A first-run setup screen that replaces "read the docs, find the SDK, copy the co
   - **Prompt preview**: monospace block, collapsed to the first lines with a fade and an expand control.
   - **Actions**: an "Open in <tool>" split button (default tool + menu of other agents) and a primary **Copy prompt** button.
 - **Alternatives**: divider ("or set up another way") followed by cards for non-code routes — integrations/import, or inviting a teammate to do it.
-- **Status footer**: live listening indicator ("Waiting for your events…"), a **Skip for now** link, and a **Finish setup** button that stays disabled until the first signal arrives.
+- **Status footer**: live listening indicator ("Waiting for your events…"), a **Skip for now** link, and a **Finish setup** button that stays disabled until the first signal arrives. Both are optional — drop them when the card stands alone with no next step (e.g. a docs page), and let the status line carry the confirmation.
 
 ## Behavior
 - The prompt is generated per account/project: it embeds the API key, project/environment name, and any choices made earlier in onboarding. It should never be a generic doc excerpt.
