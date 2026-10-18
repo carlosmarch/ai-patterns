@@ -20,14 +20,19 @@ export default function PatternsIndexPage() {
           <section key={category} id={category} className="scroll-mt-20">
             <h2 className="mb-4 text-lg font-medium capitalize">{category}</h2>
             <ul className="grid gap-3 sm:grid-cols-2">
-              {entries.map((entry) => (
+              {entries.map(({ Thumbnail, ...entry }) => (
                 <li key={entry.slug}>
                   <Link
                     href={`/patterns/${entry.category}/${entry.slug}`}
-                    className="block rounded-lg border p-4 transition-colors hover:bg-accent"
+                    className="group block h-full overflow-hidden rounded-lg border transition-colors hover:bg-accent"
                   >
-                    <p className="font-medium">{entry.title}</p>
-                    <p className="text-sm text-muted-foreground">{entry.description}</p>
+                    <div className="aspect-[5/3] border-b bg-muted/40 p-3 transition-colors group-hover:bg-muted/70">
+                      <Thumbnail />
+                    </div>
+                    <div className="p-4">
+                      <p className="font-medium">{entry.title}</p>
+                      <p className="text-sm text-muted-foreground">{entry.description}</p>
+                    </div>
                   </Link>
                 </li>
               ))}
