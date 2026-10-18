@@ -7,6 +7,8 @@ import { pattern as humanInTheLoopPattern } from "./agents/human-in-the-loop/pat
 import BackgroundTasksDemo from "./agents/background-tasks/demo";
 import { pattern as backgroundTasksPattern } from "./agents/background-tasks/pattern";
 import CreateAgentDemo from "./agents/create-agent/demo";
+import ProcedureBuilderDemo from "./agents/procedure-builder/demo";
+import { pattern as procedureBuilderPattern } from "./agents/procedure-builder/pattern";
 import { pattern as createAgentPattern } from "./agents/create-agent/pattern";
 import ShinyButtonDemo from "./buttons/shiny-button/demo";
 import { pattern as shinyButtonPattern } from "./buttons/shiny-button/pattern";
@@ -132,6 +134,15 @@ export const registry: RegistryEntry[] = [
       "A side drawer that tracks an agent's background work live — running tasks with elapsed time, stats, and stop controls, plus an expandable history of finished commands and output.",
     Demo: BackgroundTasksDemo,
     uxDoc: backgroundTasksPattern,
+  },
+  {
+    slug: "procedure-builder",
+    category: "agents",
+    title: "Procedure Builder",
+    description:
+      "A doc-style editor for an agent's step-by-step procedure — a / step picker, IF / ELSE branches with plain-language or code conditions, section jumps, and escalate / switch actions.",
+    Demo: ProcedureBuilderDemo,
+    uxDoc: procedureBuilderPattern,
   },
   {
     slug: "multi-agent-trace",
