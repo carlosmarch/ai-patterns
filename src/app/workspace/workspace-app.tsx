@@ -532,9 +532,18 @@ export function WorkspaceApp() {
                   <MobileMenuButton />
                   <h2 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight">{activeThread?.title ?? "New thread"}</h2>
                   <div className="flex shrink-0 items-center gap-3">
-                    <CollaborativePresence collaborators={TEAM} visibleCap={3} className="hidden xl:flex" />
+                    {/* Fixed-size slot so the presence panel floats over the thread
+                        instead of stretching the 64px header. */}
+                    <div className="relative hidden h-8 w-[7.5rem] xl:block">
+                      <CollaborativePresence
+                        collaborators={TEAM}
+                        visibleCap={3}
+                        className="absolute right-0 top-0 z-30"
+                      />
+                    </div>
                     <div className="hidden sm:block">
                       <InviteMembers
+                        trigger="share"
                         roles={ROLES}
                         orgMembers={ORG_MEMBERS}
                         initialAssignees={[

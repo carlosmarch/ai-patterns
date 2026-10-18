@@ -81,7 +81,7 @@ Overlays the modal when the remove icon is clicked on a current member. Shows th
 - Reduce motion: use opacity-only transitions; skip scale and y transforms.
 
 ## Related patterns
-- Collaborative Presence — shows the same assignees as a live avatar stack; pairs naturally as the read view for what Invite Members writes
+- Collaborative Presence — shows the same assignees as a live avatar stack; pairs naturally as the read view for what Invite Members writes. When both sit side by side, use the `trigger="share"` button so the header doesn't show two avatar stacks
 - Tool Approval — another modal-adjacent permission flow with confirm/deny actions
 - Attachment Chip — chip removal shares the same backspace-to-remove and × affordance
 
@@ -109,6 +109,7 @@ import {
   Mail,
   PlusCircle,
   RefreshCw,
+  Share2,
   UserPlus,
   X,
 } from "lucide-react";
@@ -152,6 +153,9 @@ export interface InviteMembersProps {
   initialAssignees?: Assignee[];
   defaultMessage?: string;
   initialGeneralAccess?: GeneralAccessLevel;
+  /** "avatars" shows the member stack; "share" shows a compact Share button,
+   *  for surfaces that already display presence elsewhere. Default "avatars". */
+  trigger?: "avatars" | "share";
   onSend?: (chips: PendingChip[], message: string) => void;
   onAssigneesChange?: (assignees: Assignee[]) => void;
   onGeneralAccessChange?: (level: GeneralAccessLevel) => void;
@@ -927,6 +931,19 @@ function InviteModal({
 
 // ─── Entry point trigger ──────────────────────────────────────────────────────
 
+function ShareTrigger({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex h-8 items-center gap-1.5 rounded-md border bg-background px-3 text-sm font-medium transition-colors hover:bg-muted"
+    >
+      <Share2 className="size-3.5" aria-hidden />
+      Share
+    </button>
+  );
+}
+
 function Trigger({ assignees, onClick }: { assignees: Assignee[]; onClick: () => void }) {
   const visible = assignees.slice(0, 4);
   const overflow = assignees.length - 4;
@@ -971,6 +988,7 @@ export function InviteMembers({
   initialAssignees = [],
   defaultMessage = "I'd like to invite you to collaborate on this project.",
   initialGeneralAccess = "restricted",
+  trigger: triggerVariant = "avatars",
   onSend,
   onAssigneesChange,
   onGeneralAccessChange,
@@ -1012,7 +1030,12 @@ export function InviteMembers({
     onGeneralAccessChange?.(level);
   }
 
-  const trigger = <Trigger assignees={assignees} onClick={() => setOpen(true)} />;
+  const trigger =
+    triggerVariant === "share" ? (
+      <ShareTrigger onClick={() => setOpen(true)} />
+    ) : (
+      <Trigger assignees={assignees} onClick={() => setOpen(true)} />
+    );
 
   if (!mounted) return trigger;
 

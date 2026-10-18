@@ -77,7 +77,7 @@ Overlays the modal when the remove icon is clicked on a current member. Shows th
 - Reduce motion: use opacity-only transitions; skip scale and y transforms.
 
 ## Related patterns
-- Collaborative Presence — shows the same assignees as a live avatar stack; pairs naturally as the read view for what Invite Members writes
+- Collaborative Presence — shows the same assignees as a live avatar stack; pairs naturally as the read view for what Invite Members writes. When both sit side by side, use the \`trigger="share"\` button so the header doesn't show two avatar stacks
 - Tool Approval — another modal-adjacent permission flow with confirm/deny actions
 - Attachment Chip — chip removal shares the same backspace-to-remove and × affordance
 `;
