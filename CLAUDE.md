@@ -18,9 +18,14 @@ Each pattern lives under `src/registry/<category>/<slug>/`:
   Summary, When to use, When not to use, Anatomy, Behavior, Content
   guidelines, Accessibility, Related patterns. Use
   `src/registry/buttons/shiny-button/pattern.ts` as the reference shape.
+- `thumbnail.tsx` — a tiny, very simplified wireframe of the pattern,
+  drawn on a 200×120 SVG `Frame` with the primitives in
+  `src/components/thumbnail.tsx`. It is the hero image on the
+  `/patterns` cards; stick to theme tokens (`tone.*`) plus at most one
+  accent color so it reads in light and dark mode.
 
-Register the new entry in `src/registry/index.ts` (import the `Demo` and
-`pattern`, add a `RegistryEntry`) — this is what makes it appear on
+Register the new entry in `src/registry/index.ts` (import the `Demo`,
+`Thumbnail` and `pattern`, add a `RegistryEntry`) — this is what makes it appear on
 `/patterns` and `/patterns/<category>/<slug>`.
 
 After adding or changing a pattern, regenerate the design skill's
