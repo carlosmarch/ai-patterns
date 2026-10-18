@@ -84,6 +84,8 @@ import AnalysisListDemo from "./loaders/analysis-list/demo";
 import { pattern as analysisListPattern } from "./loaders/analysis-list/pattern";
 import SetupChecklistDemo from "./navigation/setup-checklist/demo";
 import { pattern as setupChecklistPattern } from "./navigation/setup-checklist/pattern";
+import PromptOnboardingDemo from "./onboarding/prompt-onboarding/demo";
+import { pattern as promptOnboardingPattern } from "./onboarding/prompt-onboarding/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -436,6 +438,15 @@ export const registry: RegistryEntry[] = [
     description: "A stepped onboarding card with circular arc progress, dashed-circle pending states, and strikethrough for completed steps.",
     Demo: SetupChecklistDemo,
     uxDoc: setupChecklistPattern,
+  },
+  {
+    slug: "prompt-onboarding",
+    category: "onboarding",
+    title: "Prompt-Driven Onboarding",
+    description:
+      "A setup screen that hands users a pre-filled prompt to paste into their AI coding agent, with a snippet fallback and a live listener that confirms the first event.",
+    Demo: PromptOnboardingDemo,
+    uxDoc: promptOnboardingPattern,
   },
 ];
 
