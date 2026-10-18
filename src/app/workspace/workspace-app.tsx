@@ -704,7 +704,7 @@ function IconRail({ view, onNavigate, onSearch }: { view: View; onNavigate: (v: 
           <Search className="size-5" />
         </RailButton>
         <Link
-          href="/demo"
+          href="/"
           title="Back to AI Patterns"
           aria-label="Back to AI Patterns"
           className="flex size-10 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
