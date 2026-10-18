@@ -593,7 +593,8 @@ export function WorkspaceApp() {
             )}
           </section>
 
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-20 flex w-full justify-end">
+          {/* Above the header's floating presence panel (z-30) so avatars don't poke through the drawer. */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-40 flex w-full justify-end">
             <BackgroundTasksDrawer
               open={tasksOpen}
               onClose={() => setTasksOpen(false)}
@@ -611,7 +612,7 @@ export function WorkspaceApp() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 8 }}
-                className="absolute bottom-6 left-1/2 z-30 -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm text-background shadow-lg"
+                className="absolute bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-foreground px-4 py-2 text-sm text-background shadow-lg"
               >
                 {toast}
               </motion.div>
