@@ -7,6 +7,7 @@ import { registry } from "@/registry";
 import { CodeBlock } from "@/components/code-block";
 import { ComponentPreview } from "@/components/component-preview";
 import { DownloadButton } from "@/components/download-button";
+import { HeroHeadline } from "./hero-headline";
 import { HomeHero } from "./home-hero";
 
 // Curated order for the home page: lead with the most distinctly agentic
@@ -104,11 +105,10 @@ export default async function Home() {
             A portable UX contract, not a skin
           </div>
 
-          <h1 className="mt-6 text-5xl font-semibold tracking-tight text-balance sm:text-6xl">
-            The pattern language for AI agents
-          </h1>
-          <p className="mx-auto mt-4 max-w-md text-muted-foreground">
-            Agentic patterns with machine-readable specs. Each pattern ships with a UX spec the
+          <HeroHeadline />
+          <p className="mx-auto mt-5 max-w-md text-muted-foreground">
+            Distilled from the teams pioneering AI workflows. Agentic patterns with
+            machine-readable specs. Each pattern ships with a UX spec the
             harness can read, not just markup — guardrails for what to render, when, and why.
           </p>
 
