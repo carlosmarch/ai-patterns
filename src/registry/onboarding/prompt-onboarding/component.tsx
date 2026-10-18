@@ -28,8 +28,10 @@ export interface PromptOnboardingProps {
   apiKey?: string;
   /** The setup prompt the user hands to their coding agent. */
   prompt: string;
-  /** Manual fallback: the classic SDK snippet. */
+  /** Manual fallback: the classic SDK snippet or install commands. */
   snippet: string;
+  /** One-line explainers under the method toggle. */
+  hints?: Record<Mode, string>;
   /** Agents the prompt can be opened in. The first one is the split button's default. */
   tools: CodingTool[];
   alternatives?: SetupAlternative[];
@@ -45,6 +47,11 @@ export interface PromptOnboardingProps {
 
 type Mode = "prompt" | "snippet";
 
+const DEFAULT_HINTS: Record<Mode, string> = {
+  prompt: "Paste this prompt into an AI coding tool — it reads your codebase and wires up the integration.",
+  snippet: "Prefer to do it by hand? Install the SDK and add this where your app starts.",
+};
+
 const DEFAULT_STATUS_LABELS: Record<PromptOnboardingStatus, string> = {
   waiting: "Waiting for your events…",
   received: "First event received",
@@ -58,6 +65,7 @@ export function PromptOnboarding({
   tools,
   alternatives = [],
   status,
+  hints = DEFAULT_HINTS,
   statusLabels = DEFAULT_STATUS_LABELS,
   onOpenIn,
   onCopy,
@@ -122,11 +130,7 @@ export function PromptOnboarding({
             ))}
           </div>
 
-          <p className="mt-2 text-xs text-muted-foreground">
-            {mode === "prompt"
-              ? "Paste this prompt into an AI coding tool — it reads your codebase and wires up the integration."
-              : "Prefer to do it by hand? Install the SDK and add this where your app starts."}
-          </p>
+          <p className="mt-2 text-xs text-muted-foreground">{hints[mode]}</p>
 
           <div role="tabpanel" className="relative mt-3 overflow-hidden rounded-lg bg-muted/60">
             <motion.pre

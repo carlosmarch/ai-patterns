@@ -1,71 +1,91 @@
 "use client";
 
 import * as React from "react";
-import { Database, MousePointer2, RotateCcw, SquareTerminal, Code2, UserPlus } from "lucide-react";
+import { Code2, LayoutGrid, MousePointer2, RotateCcw, SquareTerminal, Terminal } from "lucide-react";
 
 import { PromptOnboarding, type CodingTool, type PromptOnboardingStatus } from "./component";
 
-const API_KEY = "pk_live_8f2c41d09a7e3b65";
+const REFERENCE_URL =
+  "https://github.com/carlosmarch/ai-patterns/tree/main/plugins/ai-patterns/skills/ai-patterns/reference";
 
-const PROMPT = `Set up Acme Analytics in this app: one real, app-produced first event, ingested into project "web-prod".
+const PROMPT = `Add one pattern from the ai-patterns catalogue to this app: a real screen, built in this codebase's own design system, that I can open and use.
 
-1. Detect the framework and package manager, then install @acme/analytics.
-2. Initialize the SDK once at the app's entry point with API key ${API_KEY}. Read it from an env var (ACME_API_KEY); never hard-code it in client bundles.
-3. Track a "Page Viewed" event on route change and one meaningful product event (e.g. "Sign Up Completed").
-4. Run the app and trigger the event so it reaches the project.
-5. Summarize the files you changed and how to verify in the Acme dashboard.`;
+1. Read the catalogue index at ${REFERENCE_URL}/index.md and shortlist patterns that fit a screen this app already has or needs (e.g. a composer, a pending-response loader, a tool approval prompt).
+2. Detect the stack and design system: framework, styling (Tailwind, CSS modules, tokens), and component library. Note what's already installed.
+3. Pick one pattern, open its spec (<category>/<slug>.md in the same folder) and follow it: Anatomy, Behavior, Content guidelines, Accessibility.
+4. Build it into the existing components folder. If the app has its own design system, re-express the reference implementation with its components and tokens; only use the demoed Tailwind + Motion code verbatim if there's none. Add only the dependencies the pattern needs (e.g. motion, lucide-react).
+5. Render it on a real route, run the app, and summarize the files you changed and where to see the pattern.`;
 
-const SNIPPET = `npm install @acme/analytics
+const SNIPPET = `# In Claude Code, install the skill:
+/plugin marketplace add carlosmarch/ai-patterns
+/plugin install ai-patterns@ai-patterns
 
-import { init, track } from "@acme/analytics";
-
-init(process.env.ACME_API_KEY);
-track("Page Viewed");`;
+# Then ask for a screen, e.g.
+"Add a prompt bar with a model picker to the chat page"`;
 
 const TOOLS: CodingTool[] = [
-  { id: "cursor", label: "Cursor", icon: MousePointer2 },
   { id: "claude-code", label: "Claude Code", icon: SquareTerminal },
+  { id: "cursor", label: "Cursor", icon: MousePointer2 },
   { id: "vscode", label: "VS Code", icon: Code2 },
 ];
 
+const IDLE_HINT = "Copy the prompt or open it in a tool to simulate setup";
+
 export default function PromptOnboardingDemo() {
   const [status, setStatus] = React.useState<PromptOnboardingStatus>("waiting");
-  const [hint, setHint] = React.useState("Copy the prompt or open it in a tool to simulate setup");
+  const [hint, setHint] = React.useState(IDLE_HINT);
   const timer = React.useRef<ReturnType<typeof setTimeout>>(undefined);
 
   React.useEffect(() => () => clearTimeout(timer.current), []);
 
-  // Stand-in for the agent doing the work: the first event lands a few seconds later.
+  // Stand-in for the agent doing the work: the first pattern lands a few seconds later.
   function simulateAgentRun(label: string) {
     if (status === "received") return;
-    setHint(`${label} — the agent is wiring things up…`);
+    setHint(`${label} — the agent is scaffolding a pattern…`);
     clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       setStatus("received");
-      setHint("Event received — setup can finish");
+      setHint("Pattern scaffolded — setup can finish");
     }, 3200);
   }
 
   function reset() {
     clearTimeout(timer.current);
     setStatus("waiting");
-    setHint("Copy the prompt or open it in a tool to simulate setup");
+    setHint(IDLE_HINT);
   }
 
   return (
     <div className="flex w-full max-w-xl flex-col items-center gap-4">
       <PromptOnboarding
-        title="Let's get data in"
-        apiKey={API_KEY}
+        title="Add AI Patterns to your app"
         prompt={PROMPT}
         snippet={SNIPPET}
+        hints={{
+          prompt:
+            "Paste this prompt into an AI coding tool like Claude Code or Cursor — it picks a pattern and builds it in your design system.",
+          snippet: "Using Claude Code? Install the ai-patterns skill and ask for screens in plain language.",
+        }}
         tools={TOOLS}
         status={status}
+        statusLabels={{ waiting: "Waiting for your first pattern…", received: "First pattern added" }}
         alternatives={[
-          { id: "integrations", title: "Integrations", description: "Segment, Snowflake, and 100+ sources", icon: Database },
-          { id: "invite", title: "Invite team", description: "Hand setup to a developer on your team", icon: UserPlus },
+          {
+            id: "browse",
+            title: "Browse the catalogue",
+            description: "Preview all 40+ patterns live",
+            icon: LayoutGrid,
+            onClick: () => setHint("Opens /patterns"),
+          },
+          {
+            id: "copy",
+            title: "Copy a component",
+            description: "Grab the code from any pattern's Code tab",
+            icon: Terminal,
+            onClick: () => setHint("Opens a pattern's Code tab"),
+          },
         ]}
-        onCopy={(mode) => simulateAgentRun(mode === "prompt" ? "Prompt copied" : "Snippet copied")}
+        onCopy={(mode) => simulateAgentRun(mode === "prompt" ? "Prompt copied" : "Commands copied")}
         onOpenIn={(tool) => simulateAgentRun(`Opened in ${tool.label}`)}
         onSkip={() => setHint("Skipped — re-surface setup later from the sidebar")}
         onFinish={() => setHint("Setup finished")}
