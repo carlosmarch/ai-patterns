@@ -54,6 +54,8 @@ import FollowUpListDemo from "./text/follow-up-list/demo";
 import { pattern as followUpListPattern } from "./text/follow-up-list/pattern";
 import SelectionActionsDemo from "./text/selection-actions/demo";
 import { pattern as selectionActionsPattern } from "./text/selection-actions/pattern";
+import RefinementControlsDemo from "./text/refinement-controls/demo";
+import { pattern as refinementControlsPattern } from "./text/refinement-controls/pattern";
 import RateLimitDemo from "./errors/rate-limit/demo";
 import { pattern as rateLimitPattern } from "./errors/rate-limit/pattern";
 import PartialResponseDemo from "./errors/partial-response/demo";
@@ -316,6 +318,15 @@ export const registry: RegistryEntry[] = [
     description: "A floating toolbar on text selection for describing edits, explaining, or improving a passage.",
     Demo: SelectionActionsDemo,
     uxDoc: selectionActionsPattern,
+  },
+  {
+    slug: "refinement-controls",
+    category: "text",
+    title: "Refinement Controls",
+    description:
+      "One-tap adjustments (Rephrase, Shorten, More formal, Bulletize…) and a free-form instruction field docked under an AI output, with every result kept as a steppable version.",
+    Demo: RefinementControlsDemo,
+    uxDoc: refinementControlsPattern,
   },
   {
     slug: "rate-limit",
