@@ -9,6 +9,7 @@ import { SiteCommandPalette } from "@/components/site-command-palette";
 const links = [
   { href: "/patterns", label: "Patterns" },
   { href: "/demo", label: "Demo" },
+  { href: "/workspace", label: "App" },
   { href: "/skill", label: "Skill" },
 ];
 
