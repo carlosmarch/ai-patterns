@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CodeBlock } from "@/components/code-block";
 import { getCategories, registry } from "@/registry";
 import { SkillCta } from "./skill-cta";
+import { SkillExamples } from "./skill-examples";
 
 const INSTALL_COMMAND = `/plugin marketplace add carlosmarch/ai-patterns
 /plugin install ai-patterns@ai-patterns`;
@@ -101,6 +102,16 @@ export default async function SkillPage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Examples */}
+      <div className="mt-16">
+        <h2 className="text-xl font-semibold tracking-tight">Try it on a real request</h2>
+        <p className="mt-2 text-muted-foreground">
+          Pick a request, copy the prompt, and paste it into your agent in any project. Each one
+          says what the skill should land on, so you can check its judgment.
+        </p>
+        <SkillExamples />
       </div>
 
       {/* How it works */}
