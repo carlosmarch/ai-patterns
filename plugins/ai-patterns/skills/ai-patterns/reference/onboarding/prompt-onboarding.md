@@ -26,7 +26,7 @@ A first-run setup screen that replaces "read the docs, find the SDK, copy the co
   - **Prompt preview**: monospace block, collapsed to the first lines with a fade and an expand control.
   - **Actions**: an "Open in <tool>" split button (default tool + menu of other agents) and a primary **Copy prompt** button.
 - **Alternatives**: divider ("or set up another way") followed by cards for non-code routes — integrations/import, or inviting a teammate to do it.
-- **Status footer**: live listening indicator ("Waiting for your events…"), a **Skip for now** link, and a **Finish setup** button that stays disabled until the first signal arrives.
+- **Status footer**: live listening indicator ("Waiting for your events…"), a **Skip for now** link, and a **Finish setup** button that stays disabled until the first signal arrives. Both are optional — drop them when the card stands alone with no next step (e.g. a docs page), and let the status line carry the confirmation.
 
 ## Behavior
 - The prompt is generated per account/project: it embeds the API key, project/environment name, and any choices made earlier in onboarding. It should never be a generic doc excerpt.
@@ -111,7 +111,9 @@ export interface PromptOnboardingProps {
   statusLabels?: Record<PromptOnboardingStatus, string>;
   onOpenIn?: (tool: CodingTool) => void;
   onCopy?: (mode: "prompt" | "snippet") => void;
+  /** Omit to hide the Skip link. */
   onSkip?: () => void;
+  /** Omit to hide the Finish button, e.g. when the flow has no next step. */
   onFinish?: () => void;
   className?: string;
 }
@@ -286,31 +288,35 @@ export function PromptOnboarding({
             </motion.span>
           </AnimatePresence>
         </div>
-        <div className="flex items-center gap-3">
-          {!received && (
-            <button
-              type="button"
-              onClick={onSkip}
-              className="text-xs font-medium text-primary hover:underline"
-            >
-              Skip for now
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onFinish}
-            disabled={!received}
-            className={cn(
-              "inline-flex h-7 items-center gap-1 rounded-lg px-2.5 text-xs font-medium transition-colors",
-              received
-                ? "bg-primary text-primary-foreground"
-                : "cursor-not-allowed bg-muted text-muted-foreground/70"
+        {(onSkip || onFinish) && (
+          <div className="flex items-center gap-3">
+            {onSkip && !received && (
+              <button
+                type="button"
+                onClick={onSkip}
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                Skip for now
+              </button>
             )}
-          >
-            Finish setup
-            <ArrowRight className="size-3" aria-hidden />
-          </button>
-        </div>
+            {onFinish && (
+              <button
+                type="button"
+                onClick={onFinish}
+                disabled={!received}
+                className={cn(
+                  "inline-flex h-7 items-center gap-1 rounded-lg px-2.5 text-xs font-medium transition-colors",
+                  received
+                    ? "bg-primary text-primary-foreground"
+                    : "cursor-not-allowed bg-muted text-muted-foreground/70"
+                )}
+              >
+                Finish setup
+                <ArrowRight className="size-3" aria-hidden />
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
