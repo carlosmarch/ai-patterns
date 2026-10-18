@@ -4,10 +4,13 @@ import * as React from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
+  ArrowRight,
   BookOpen,
   ChartColumn,
+  Check,
   ChevronDown,
   ChevronRight,
+  CircleAlert,
   Clock,
   FlaskConical,
   History,
@@ -19,6 +22,7 @@ import {
   Plus,
   Rocket,
   Search,
+  ShieldAlert,
   Workflow,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -60,20 +64,65 @@ import {
   tickSpikeAgents,
 } from "./data";
 import { BlockView, nextId, seedThreads, type Block, type BlockBody, type BlockHandlers, type Thread } from "./thread";
-import { ChangelogView, ConnectorsView, MobileMenuButton, MobileMenuContext, DeployView, InsightsView, PlaygroundView, SetupView, TrainView, WorkflowsView } from "./views";
+import {
+  CONNECTORS,
+  ChangelogView,
+  ConnectorsView,
+  DeployView,
+  InsightsView,
+  MobileMenuButton,
+  MobileMenuContext,
+  PlaygroundView,
+  SetupView,
+  TrainView,
+  WorkflowsView,
+  type ConnectorDef,
+  type PlaygroundTab,
+  type TrainTab,
+} from "./views";
 
 type View = "operator" | "train" | "playground" | "deploy" | "insights" | "changelog" | "connectors" | "workflows" | "setup";
 
-const NAV_PRIMARY: { id: View; label: string; icon: React.ComponentType<{ className?: string }>; chevron?: boolean }[] = [
+interface NavItem {
+  id: View;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  /** Sub-pages, shown under the item while it's the current view. */
+  children?: { id: string; label: string }[];
+}
+
+const NAV_PRIMARY: NavItem[] = [
   { id: "operator", label: "Operator", icon: AGENT_ICON },
-  { id: "train", label: "Train", icon: BookOpen, chevron: true },
-  { id: "playground", label: "Playground", icon: FlaskConical },
-  { id: "deploy", label: "Deploy", icon: Rocket, chevron: true },
-  { id: "insights", label: "Insights", icon: ChartColumn, chevron: true },
+  {
+    id: "train",
+    label: "Train",
+    icon: BookOpen,
+    children: [
+      { id: "procedures", label: "Procedures" },
+      { id: "guidelines", label: "Guidelines" },
+    ],
+  },
+  {
+    id: "playground",
+    label: "Playground",
+    icon: FlaskConical,
+    children: [
+      { id: "chat", label: "Chat" },
+      { id: "voice", label: "Voice" },
+    ],
+  },
+  { id: "deploy", label: "Deploy", icon: Rocket },
+  { id: "insights", label: "Insights", icon: ChartColumn },
   { id: "changelog", label: "Changelog", icon: History },
 ];
 
-const NAV_SECONDARY: { id: View; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+const WORKSPACES = [
+  { id: "ai-patterns", name: "ai-patterns", color: "bg-violet-500" },
+  { id: "origami-labs", name: "Origami Labs", color: "bg-sky-500" },
+  { id: "personal", name: "Personal", color: "bg-emerald-500" },
+];
+
+const NAV_SECONDARY: NavItem[] = [
   { id: "connectors", label: "Connectors", icon: Plug },
   { id: "workflows", label: "Workflows", icon: Workflow },
   { id: "setup", label: "Setup", icon: ListChecks },
@@ -123,12 +172,17 @@ export function WorkspaceApp() {
   const [tasksOpen, setTasksOpen] = React.useState(false);
   const [tasks, setTasks] = React.useState<BackgroundTask[]>(INITIAL_TASKS);
   const [mobileNav, setMobileNav] = React.useState(false);
-  const [setupDone, setSetupDone] = React.useState(2);
+  const [trainTab, setTrainTab] = React.useState<TrainTab>("procedures");
+  const [playgroundTab, setPlaygroundTab] = React.useState<PlaygroundTab>("chat");
+  const [connectors, setConnectors] = React.useState<ConnectorDef[]>(CONNECTORS);
+  const [skillDone, setSkillDone] = React.useState(false);
+  const [teamDone, setTeamDone] = React.useState(false);
   const [toast, setToast] = React.useState<string | null>(null);
   const runsRef = React.useRef<Record<string, number>>({});
 
   const activeThread = threads.find((t) => t.id === activeId) ?? null;
   const runningTasks = tasks.filter((t) => t.status === "running").length;
+  const setupDone = 2 + Number(skillDone) + Number(teamDone);
 
   // -------------------------------------------------------------------------
   // Thread state helpers
@@ -469,7 +523,7 @@ export function WorkspaceApp() {
       setView("operator");
       setActiveId(value);
     } else if (type === "view") {
-      setView(value as View);
+      navigate(value as View);
     } else if (value === "new") {
       setView("operator");
       setActiveId(null);
@@ -482,8 +536,10 @@ export function WorkspaceApp() {
 
   const openMobileNav = React.useCallback(() => setMobileNav(true), []);
 
-  function navigate(next: View) {
+  function navigate(next: View, sub?: string) {
     setView(next);
+    if (next === "train" && sub) setTrainTab(sub as TrainTab);
+    if (next === "playground" && sub) setPlaygroundTab(sub as PlaygroundTab);
     setMobileNav(false);
   }
 
@@ -496,7 +552,13 @@ export function WorkspaceApp() {
   const visibleThreads = threads.filter((t) => t.title.toLowerCase().includes(query.trim().toLowerCase()));
 
   const navSidebar = (
-    <NavSidebar view={view} onNavigate={navigate} setupDone={setupDone} />
+    <NavSidebar
+      view={view}
+      subView={view === "train" ? trainTab : view === "playground" ? playgroundTab : undefined}
+      onNavigate={navigate}
+      setupDone={setupDone}
+      onToast={setToast}
+    />
   );
   const threadList = (
     <ThreadList
@@ -518,6 +580,7 @@ export function WorkspaceApp() {
           view={view}
           onNavigate={navigate}
           onSearch={() => setPaletteOpen(true)}
+          onHome={() => openThread(null)}
         />
 
         <div className="hidden md:flex">{navSidebar}</div>
@@ -565,13 +628,19 @@ export function WorkspaceApp() {
                     onStop={() => stopRun(activeThread.id)}
                   />
                 ) : (
-                  <NewThread onSubmit={submitPrompt} />
+                  <NewThread
+                    threads={threads}
+                    runningTasks={runningTasks}
+                    onSubmit={submitPrompt}
+                    onOpenThread={openThread}
+                    onOpenTasks={() => setTasksOpen(true)}
+                  />
                 )}
               </>
             ) : view === "train" ? (
-              <TrainView />
+              <TrainView tab={trainTab} onTabChange={setTrainTab} />
             ) : view === "playground" ? (
-              <PlaygroundView />
+              <PlaygroundView tab={playgroundTab} onTabChange={setPlaygroundTab} />
             ) : view === "deploy" ? (
               <DeployView />
             ) : view === "insights" ? (
@@ -579,16 +648,19 @@ export function WorkspaceApp() {
             ) : view === "changelog" ? (
               <ChangelogView />
             ) : view === "connectors" ? (
-              <ConnectorsView />
+              <ConnectorsView connectors={connectors} setConnectors={setConnectors} onToast={setToast} />
             ) : view === "workflows" ? (
-              <WorkflowsView />
+              <WorkflowsView slackConnected={!!connectors.find((c) => c.id === "slack")?.connected} onToast={setToast} />
             ) : (
               <SetupView
-                onInvite={() => {
-                  navigate("operator");
-                  setToast("Invite teammates with the Invite button in the thread header.");
-                }}
-                onDone={setSetupDone}
+                connectors={connectors}
+                skillDone={skillDone}
+                teamDone={teamDone}
+                onSkillDone={setSkillDone}
+                onTeamDone={() => setTeamDone(true)}
+                onOpenConnectors={() => navigate("connectors")}
+                onExit={() => openThread(null)}
+                onToast={setToast}
               />
             )}
           </section>
@@ -688,12 +760,18 @@ function RailButton({
   );
 }
 
-function IconRail({ view, onNavigate, onSearch }: { view: View; onNavigate: (v: View) => void; onSearch: () => void }) {
+function IconRail({ view, onNavigate, onSearch, onHome }: { view: View; onNavigate: (v: View) => void; onSearch: () => void; onHome: () => void }) {
   return (
     <nav aria-label="Product" className="hidden w-12 shrink-0 flex-col items-center gap-2 py-2 sm:flex">
-      <span className="mb-3 flex size-10 items-center justify-center rounded-xl bg-foreground text-background">
+      <button
+        type="button"
+        onClick={onHome}
+        title="New thread"
+        aria-label="New thread"
+        className="mb-3 flex size-10 items-center justify-center rounded-xl bg-foreground text-background transition-transform hover:scale-105 active:scale-95"
+      >
         <AGENT_ICON className="size-5" />
-      </span>
+      </button>
       <RailButton label="Operator" active={view === "operator"} onClick={() => onNavigate("operator")}>
         <MessagesSquare className="size-5" />
       </RailButton>
@@ -726,41 +804,74 @@ function IconRail({ view, onNavigate, onSearch }: { view: View; onNavigate: (v: 
   );
 }
 
-function NavSidebar({ view, onNavigate, setupDone }: { view: View; onNavigate: (v: View) => void; setupDone: number }) {
-  function item(n: { id: View; label: string; icon: React.ComponentType<{ className?: string }>; chevron?: boolean }, extra?: React.ReactNode) {
+function NavSidebar({
+  view,
+  subView,
+  onNavigate,
+  setupDone,
+  onToast,
+}: {
+  view: View;
+  subView?: string;
+  onNavigate: (v: View, sub?: string) => void;
+  setupDone: number;
+  onToast: (message: string) => void;
+}) {
+  function item(n: NavItem, extra?: React.ReactNode) {
     const active = view === n.id;
     return (
-      <button
-        key={n.id}
-        type="button"
-        onClick={() => onNavigate(n.id)}
-        aria-current={active ? "page" : undefined}
-        className={cn(
-          "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
-          active ? "bg-background font-medium shadow-sm ring-1 ring-border" : "hover:bg-accent"
-        )}
-      >
-        <n.icon className="size-4" />
-        <span className="flex-1 text-left">{n.label}</span>
-        {extra}
-        {n.chevron && <ChevronRight className="size-3.5 text-muted-foreground" />}
-      </button>
+      <div key={n.id}>
+        <button
+          type="button"
+          onClick={() => onNavigate(n.id)}
+          aria-current={active ? "page" : undefined}
+          aria-expanded={n.children ? active : undefined}
+          className={cn(
+            "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
+            active ? "bg-background font-medium shadow-sm ring-1 ring-border" : "hover:bg-accent"
+          )}
+        >
+          <n.icon className="size-4" />
+          <span className="flex-1 text-left">{n.label}</span>
+          {extra}
+          {n.children && <ChevronRight className={cn("size-3.5 text-muted-foreground transition-transform", active && "rotate-90")} />}
+        </button>
+        <AnimatePresence initial={false}>
+          {n.children && active && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="overflow-hidden"
+            >
+              <div className="ml-5 mt-0.5 flex flex-col gap-0.5 border-l py-0.5 pl-2">
+                {n.children.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => onNavigate(n.id, c.id)}
+                    aria-current={subView === c.id ? "page" : undefined}
+                    className={cn(
+                      "rounded-md px-2.5 py-1.5 text-left text-sm transition-colors",
+                      subView === c.id ? "bg-accent font-medium" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    )}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     );
   }
 
   return (
     <aside className="flex w-60 shrink-0 flex-col rounded-2xl border bg-background p-3 shadow-sm">
       <h1 className="px-2 pb-4 pt-2 text-xl font-semibold tracking-tight">UX Agent</h1>
-      <button
-        type="button"
-        className="mb-4 flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm font-medium shadow-sm transition-colors hover:bg-accent"
-      >
-        <span className="flex size-6 items-center justify-center rounded-md bg-violet-500 text-white">
-          <LayoutGrid className="size-3.5" />
-        </span>
-        <span className="flex-1 text-left">ai-patterns</span>
-        <ChevronDown className="size-4 text-muted-foreground" />
-      </button>
+      <WorkspaceSwitcher onToast={onToast} />
       <nav aria-label="Workspace" className="flex flex-col gap-0.5">
         {NAV_PRIMARY.map((n) => item(n))}
       </nav>
@@ -776,6 +887,95 @@ function NavSidebar({ view, onNavigate, setupDone }: { view: View; onNavigate: (
         )}
       </nav>
     </aside>
+  );
+}
+
+function WorkspaceSwitcher({ onToast }: { onToast: (message: string) => void }) {
+  const [open, setOpen] = React.useState(false);
+  const [current, setCurrent] = React.useState(WORKSPACES[0].id);
+  const ref = React.useRef<HTMLDivElement>(null);
+  const workspace = WORKSPACES.find((w) => w.id === current)!;
+
+  React.useEffect(() => {
+    if (!open) return;
+    function onDown(e: PointerEvent) {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative mb-4">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm font-medium shadow-sm transition-colors hover:bg-accent"
+      >
+        <span className={cn("flex size-6 items-center justify-center rounded-md text-white", workspace.color)}>
+          <LayoutGrid className="size-3.5" />
+        </span>
+        <span className="flex-1 truncate text-left">{workspace.name}</span>
+        <ChevronDown className={cn("size-4 text-muted-foreground transition-transform", open && "rotate-180")} />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            role="menu"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.12 }}
+            className="absolute inset-x-0 top-full z-50 mt-1 rounded-xl border bg-popover p-1 text-popover-foreground shadow-lg"
+          >
+            <p className="px-2.5 py-1.5 text-xs text-muted-foreground">Workspaces</p>
+            {WORKSPACES.map((w) => (
+              <button
+                key={w.id}
+                type="button"
+                role="menuitemradio"
+                aria-checked={w.id === current}
+                onClick={() => {
+                  setOpen(false);
+                  if (w.id === current) return;
+                  setCurrent(w.id);
+                  onToast(`Switched to ${w.name}.`);
+                }}
+                className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-accent"
+              >
+                <span className={cn("flex size-5 items-center justify-center rounded text-white", w.color)}>
+                  <LayoutGrid className="size-3" />
+                </span>
+                <span className="flex-1 text-left">{w.name}</span>
+                {w.id === current && <Check className="size-4 text-muted-foreground" />}
+              </button>
+            ))}
+            <div className="my-1 border-t" />
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                onToast("New workspaces need an admin — we sent a request to Carlos March.");
+              }}
+              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <Plus className="size-4" />
+              Create workspace
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -891,39 +1091,178 @@ function TasksButton({ count, onClick }: { count: number; onClick: () => void })
 // Operator panes
 // ---------------------------------------------------------------------------
 
-function NewThread({ onSubmit }: { onSubmit: (prompt: string) => void }) {
+// Read the clock on the client only, so the server render and hydration agree.
+function subscribeNever() {
+  return () => {};
+}
+
+function useGreeting() {
+  return React.useSyncExternalStore(
+    subscribeNever,
+    () => {
+      const now = new Date();
+      const h = now.getHours();
+      const part = h < 5 ? "Working late" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+      return `${part} · ${now.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}`;
+    },
+    () => null
+  );
+}
+
+function firstPrompt(thread: Thread) {
+  const user = thread.blocks.find((b) => b.kind === "user");
+  return user && user.kind === "user" ? user.text : "No messages yet";
+}
+
+function NewThread({
+  threads,
+  runningTasks,
+  onSubmit,
+  onOpenThread,
+  onOpenTasks,
+}: {
+  threads: Thread[];
+  runningTasks: number;
+  onSubmit: (prompt: string) => void;
+  onOpenThread: (id: string) => void;
+  onOpenTasks: () => void;
+}) {
+  const greeting = useGreeting();
+  const attention = threads.filter((t) => t.badge);
+  const recent = threads.filter((t) => !t.badge && t.blocks.length > 0).slice(0, 6);
+
   return (
     <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="mx-auto flex w-full max-w-3xl flex-col items-center px-6 pb-12 pt-[10vh]">
-        <AGENT_ICON className="size-12" />
-        <p className="mt-6 text-center font-serif text-3xl tracking-tight sm:text-5xl">Hey {USER_NAME}, what&apos;s on your mind?</p>
-        <PromptBar
-          placeholder="Ask anything…"
-          sources={COMPOSER_SOURCES}
-          commands={COMPOSER_COMMANDS}
-          models={[
-            { id: "fast", label: `${AGENT_NAME} Fast` },
-            { id: "deep", label: `${AGENT_NAME} Deep research` },
-          ]}
-          onSubmit={onSubmit}
-          className="mt-10 w-full"
-        />
-        <div className="mt-6 w-full space-y-3">
-          {STARTER_CARDS.map((card) => (
-            <button
-              key={card.id}
-              type="button"
-              onClick={() => onSubmit(card.prompt)}
-              className="flex w-full items-start gap-4 rounded-2xl border px-5 py-4 text-left transition-colors hover:bg-accent/60"
-            >
-              <card.icon className="mt-0.5 size-5 shrink-0" />
-              <span>
-                <span className="block font-medium">{card.title}</span>
-                <span className="mt-0.5 block text-sm text-muted-foreground">{card.description}</span>
-              </span>
-            </button>
-          ))}
-        </div>
+      <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col px-4 pb-12 pt-10 sm:px-8 lg:pt-[8vh]">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="mx-auto flex w-full max-w-3xl flex-col items-center text-center"
+        >
+          <motion.span
+            initial={{ rotate: -12, scale: 0.9 }}
+            animate={{ rotate: 0, scale: 1 }}
+            transition={{ type: "spring", stiffness: 260, damping: 16 }}
+            className="flex size-14 items-center justify-center rounded-2xl bg-foreground text-background shadow-sm"
+          >
+            <AGENT_ICON className="size-7" />
+          </motion.span>
+          <p className="mt-5 h-5 text-sm text-muted-foreground">{greeting}</p>
+          <h3 className="mt-1 text-balance font-serif text-3xl tracking-tight sm:text-5xl">Hey {USER_NAME}, what&apos;s on your mind?</h3>
+
+          {(attention.length > 0 || runningTasks > 0) && (
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
+              {attention.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => onOpenThread(t.id)}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                    t.badge === "Failed"
+                      ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
+                      : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300"
+                  )}
+                >
+                  {t.badge === "Failed" ? <CircleAlert className="size-3.5" /> : <ShieldAlert className="size-3.5" />}
+                  {t.badge}: {t.title}
+                </button>
+              ))}
+              {runningTasks > 0 && (
+                <button
+                  type="button"
+                  onClick={onOpenTasks}
+                  className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:bg-accent"
+                >
+                  <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
+                  {runningTasks} background {runningTasks === 1 ? "task" : "tasks"} running
+                </button>
+              )}
+            </div>
+          )}
+
+          <PromptBar
+            placeholder="Ask anything — / for commands, @ for sources"
+            sources={COMPOSER_SOURCES}
+            commands={COMPOSER_COMMANDS}
+            models={[
+              { id: "fast", label: `${AGENT_NAME} Fast` },
+              { id: "deep", label: `${AGENT_NAME} Deep research` },
+            ]}
+            onSubmit={onSubmit}
+            className="mt-8 w-full text-left"
+          />
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
+            {COMPOSER_SUGGESTIONS.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => onSubmit(s.label)}
+                className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              >
+                {s.icon && <s.icon className="size-3.5" />}
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+
+        <section aria-labelledby="start-with" className="mt-12">
+          <h4 id="start-with" className="mb-3 text-sm font-medium text-muted-foreground">
+            Start with
+          </h4>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {STARTER_CARDS.map((card, i) => (
+              <motion.button
+                key={card.id}
+                type="button"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08 + i * 0.05, duration: 0.3 }}
+                onClick={() => onSubmit(card.prompt)}
+                className="group flex h-full flex-col items-start gap-3 rounded-2xl border bg-card p-5 text-left transition-colors hover:bg-accent/60"
+              >
+                <span className="flex size-9 items-center justify-center rounded-xl bg-muted">
+                  <card.icon className="size-4.5" />
+                </span>
+                <span className="flex-1">
+                  <span className="block font-medium">{card.title}</span>
+                  <span className="mt-1 block text-sm text-muted-foreground">{card.description}</span>
+                </span>
+                <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground">
+                  Ask {AGENT_NAME}
+                  <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </motion.button>
+            ))}
+          </div>
+        </section>
+
+        {recent.length > 0 && (
+          <section aria-labelledby="recent" className="mt-10">
+            <h4 id="recent" className="mb-3 text-sm font-medium text-muted-foreground">
+              Pick up where you left off
+            </h4>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {recent.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => onOpenThread(t.id)}
+                  className="flex items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors hover:bg-accent/60"
+                >
+                  <MessagesSquare className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium">{t.title}</span>
+                    <span className="mt-0.5 block truncate text-xs text-muted-foreground">{firstPrompt(t)}</span>
+                  </span>
+                  <span className="shrink-0 text-xs text-muted-foreground">{t.group}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
