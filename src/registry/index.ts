@@ -6,6 +6,8 @@ import HumanInTheLoopDemo from "./agents/human-in-the-loop/demo";
 import { pattern as humanInTheLoopPattern } from "./agents/human-in-the-loop/pattern";
 import BackgroundTasksDemo from "./agents/background-tasks/demo";
 import { pattern as backgroundTasksPattern } from "./agents/background-tasks/pattern";
+import InstructionToolsDemo from "./agents/instruction-tools/demo";
+import { pattern as instructionToolsPattern } from "./agents/instruction-tools/pattern";
 import CreateAgentDemo from "./agents/create-agent/demo";
 import ProcedureBuilderDemo from "./agents/procedure-builder/demo";
 import { pattern as procedureBuilderPattern } from "./agents/procedure-builder/pattern";
@@ -134,6 +136,15 @@ export const registry: RegistryEntry[] = [
       "A side drawer that tracks an agent's background work live — running tasks with elapsed time, stats, and stop controls, plus an expandable history of finished commands and output.",
     Demo: BackgroundTasksDemo,
     uxDoc: backgroundTasksPattern,
+  },
+  {
+    slug: "instruction-tools",
+    category: "agents",
+    title: "Instruction Tool Insert",
+    description:
+      "A numbered instruction editor where typing / opens a two-step inline picker — choose a tool, then its connector or target — inserting an atomic, editable chip into the prose.",
+    Demo: InstructionToolsDemo,
+    uxDoc: instructionToolsPattern,
   },
   {
     slug: "procedure-builder",
