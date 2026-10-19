@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Criteria Determination</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --card: #fff; --border: #ece8e2; --bar: #e9e5df; --bar-strong: #cfc8bf;
+    --amber-bg: #fdf8e9; --amber-border: #f2dc8f; --amber-bar: #ecd3a0; --amber-strong: #c98f3d;
+    --dot: #e07b1a; --ai-bg: #f1ebff; --ai-fg: #7c4dff; --row: #f6f4f1;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(1100px 700px at 15% 0%, #6b1d3f 0%, transparent 60%),
+                radial-gradient(900px 650px at 100% 100%, #3d0f2a 0%, transparent 60%), #4a1230;
+    font-family: Inter, system-ui, sans-serif; color: #2b2620;
+    display: grid; place-items: center; padding: 64px 16px; -webkit-font-smoothing: antialiased;
+  }
+  .card {
+    width: min(820px, 100%); background: var(--card); border-radius: 24px; padding: 32px;
+    box-shadow: 0 1px 2px rgba(20,0,10,.2), 0 40px 90px -24px rgba(15,0,8,.65);
+    display: grid; grid-template-columns: 150px 1fr; gap: 24px 32px;
+  }
+  .bar { height: 10px; border-radius: 99px; background: var(--bar); }
+  .label { display: flex; align-items: center; gap: 10px; padding-top: 18px; align-self: start; }
+  .ico { width: 14px; height: 14px; border-radius: 4px; border: 2px solid var(--bar-strong); flex: none; }
+  .select {
+    display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px 16px; font-weight: 600; font-size: 17px;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 99px; background: var(--dot); box-shadow: 0 0 0 4px rgba(224,123,26,.15); }
+  .grow { flex: 1; }
+  .ai { background: var(--ai-bg); color: var(--ai-fg); font-weight: 600; font-size: 13px; border-radius: 8px; padding: 4px 9px; }
+  .chev { width: 8px; height: 8px; border-right: 2px solid var(--bar-strong); border-bottom: 2px solid var(--bar-strong); transform: rotate(45deg) translateY(-3px); margin: 0 4px; }
+  .groups { display: flex; flex-direction: column; gap: 14px; }
+  .heading { width: 110px; margin: 10px 0 2px; height: 8px; }
+  .missing { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+  .missing .bar { background: var(--amber-bar); }
+  .missing .title { background: var(--amber-strong); opacity: .55; height: 11px; }
+  .quote { border-left: 3px solid #f0c44c; background: #fbf1d0; border-radius: 0 10px 10px 0; padding: 14px 16px; display: flex; flex-direction: column; gap: 9px; }
+  .quote .bar { height: 7px; background: #efd9a6; }
+  .answers { display: flex; gap: 8px; margin-top: 2px; }
+  .pill { font-size: 13px; font-weight: 500; background: #fff; border: 1px solid #ece2c8; border-radius: 9px; padding: 6px 14px; }
+  .pill.on { background: #2b2620; color: #fff; border-color: #2b2620; }
+  .row { display: grid; grid-template-columns: 18px 1fr; gap: 16px; align-items: center; background: var(--row); border-radius: 14px; padding: 18px 20px; }
+  .row .bar { height: 8px; }
+  .check { width: 18px; height: 18px; border-radius: 99px; background: #e3f3ea; position: relative; }
+  .check::after { content: ""; position: absolute; left: 6px; top: 4px; width: 4px; height: 7px; border-right: 2px solid #2f9e62; border-bottom: 2px solid #2f9e62; transform: rotate(45deg); }
+  .cross { width: 18px; height: 18px; border-radius: 99px; background: #efebe6; position: relative; }
+  .cross::before, .cross::after { content: ""; position: absolute; left: 8px; top: 4px; width: 2px; height: 10px; background: #a39a8f; border-radius: 2px; transform: rotate(45deg); }
+  .cross::after { transform: rotate(-45deg); }
+  @media (max-width: 640px) { .card { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main class="card" aria-label="Criteria determination, abstracted">
+  <div class="label"><span class="ico"></span><span class="bar" style="width:90px"></span></div>
+  <div class="select">
+    <span class="dot"></span><span class="grow">Uncertain</span><span class="ai">✦ AI</span><span class="chev"></span>
+  </div>
+
+  <div class="label"><span class="ico" style="border-radius:99px"></span><span class="bar" style="width:64px"></span></div>
+  <div class="groups">
+    <span class="bar heading"></span>
+    <div class="missing">
+      <span class="bar title" style="width:72%"></span>
+      <span class="bar" style="width:22%;height:8px"></span>
+      <div class="quote">
+        <span class="bar" style="width:96%"></span>
+        <span class="bar" style="width:88%"></span>
+        <span class="bar" style="width:60%"></span>
+      </div>
+      <div class="answers"><span class="pill on">Yes</span><span class="pill">No</span></div>
+    </div>
+    <div class="missing">
+      <span class="bar title" style="width:54%"></span>
+      <span class="bar" style="width:22%;height:8px"></span>
+      <div class="answers"><span class="pill">Yes</span><span class="pill">No</span></div>
+    </div>
+
+    <span class="bar heading" style="width:70px;margin-top:14px"></span>
+    <div class="row"><span class="cross"></span><span class="bar" style="width:82%"></span></div>
+    <div class="row"><span class="cross"></span><span class="bar" style="width:64%"></span></div>
+
+    <span class="bar heading" style="width:50px;margin-top:14px"></span>
+    <div class="row"><span class="check"></span><span class="bar" style="width:58%"></span></div>
+  </div>
+</main>
+</body>
+</html>
