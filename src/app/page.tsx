@@ -159,7 +159,7 @@ export default async function Home() {
                     <h2 className="flex items-center gap-2 font-medium">
                       {entry.title}
                       {NEW.has(entry.slug) && (
-                        <span className="border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[11px] font-medium leading-none text-blue-600 dark:text-blue-400">
+                        <span className="rounded-md bg-blue-500/10 px-2 py-0.5 text-[11px] font-medium leading-none text-blue-600 dark:text-blue-400">
                           New
                         </span>
                       )}
