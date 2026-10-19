@@ -6,9 +6,13 @@ import {
   siArc,
   siClaude,
   siCursor,
+  siElevenlabs,
   siFigma,
+  siFramer,
   siGithubcopilot,
   siGooglegemini,
+  siHuggingface,
+  siIntercom,
   siLinear,
   siMistralai,
   siNotion,
@@ -18,34 +22,49 @@ import {
   siV0,
   siWarp,
   siWindsurf,
+  siZedindustries,
   type SimpleIcon,
 } from "simple-icons";
 
-type Team = {
-  icon: SimpleIcon;
-  // Tile background and glyph colour, tuned to read like each team's app icon.
-  bg: string;
-  fg: string;
-};
+type Team = { name: string; bg: string } & (
+  // A simple-icons glyph drawn on a tile, coloured to read like the team's app icon…
+  | { path: string; fg: string; src?: never }
+  // …or the team's own app icon artwork, for logos simple-icons doesn't carry.
+  | { src: string; path?: never; fg?: never }
+);
+
+const glyph = (icon: SimpleIcon, bg: string, fg = "#fff"): Team => ({
+  name: icon.title,
+  path: icon.path,
+  bg,
+  fg,
+});
 
 // The teams whose AI workflows the patterns are distilled from. Ordered so
-// neighbouring tiles contrast; three consecutive entries are on screen at once.
+// neighbouring tiles contrast; three consecutive entries are on screen at once,
+// and a length divisible by three keeps every rotation free of repeats.
 const TEAMS: Team[] = [
-  { icon: siClaude, bg: "linear-gradient(145deg,#e48a6a,#c15f3c)", fg: "#fff" },
-  { icon: siCursor, bg: "linear-gradient(145deg,#2a2a2a,#050505)", fg: "#fff" },
-  { icon: siLinear, bg: "linear-gradient(145deg,#7b85e6,#4450c4)", fg: "#fff" },
-  { icon: siPerplexity, bg: "linear-gradient(145deg,#1d3a3f,#0b1f22)", fg: "#20b8cd" },
-  { icon: siRaycast, bg: "linear-gradient(145deg,#ff7b7b,#e0383e)", fg: "#fff" },
-  { icon: siNotion, bg: "linear-gradient(145deg,#ffffff,#ececec)", fg: "#111" },
-  { icon: siGooglegemini, bg: "linear-gradient(145deg,#4f8ef7,#9b72cb)", fg: "#fff" },
-  { icon: siV0, bg: "linear-gradient(145deg,#262626,#000)", fg: "#fff" },
-  { icon: siReplit, bg: "linear-gradient(145deg,#ff8a3d,#e8560a)", fg: "#fff" },
-  { icon: siGithubcopilot, bg: "linear-gradient(145deg,#3a2a6b,#0d1117)", fg: "#fff" },
-  { icon: siArc, bg: "linear-gradient(145deg,#3a3ff5,#1b1fb0)", fg: "#ff9aa0" },
-  { icon: siFigma, bg: "linear-gradient(145deg,#2c2c2c,#111)", fg: "#fff" },
-  { icon: siMistralai, bg: "linear-gradient(145deg,#ffb347,#fa520f)", fg: "#fff" },
-  { icon: siWindsurf, bg: "linear-gradient(145deg,#1f3d38,#0b100f)", fg: "#5fe0c4" },
-  { icon: siWarp, bg: "linear-gradient(145deg,#2fb6ff,#0170c9)", fg: "#fff" },
+  { name: "Orca", src: "/teams/orca.png", bg: "#0b0b0b" },
+  glyph(siCursor, "linear-gradient(145deg,#2a2a2a,#050505)"),
+  glyph(siIntercom, "linear-gradient(145deg,#3b5cff,#1f3bd6)"),
+  glyph(siClaude, "linear-gradient(145deg,#e48a6a,#c15f3c)"),
+  glyph(siPerplexity, "linear-gradient(145deg,#1d3a3f,#0b1f22)", "#20b8cd"),
+  glyph(siLinear, "linear-gradient(145deg,#7b85e6,#4450c4)"),
+  glyph(siRaycast, "linear-gradient(145deg,#ff7b7b,#e0383e)"),
+  glyph(siNotion, "linear-gradient(145deg,#ffffff,#ececec)", "#111"),
+  glyph(siZedindustries, "linear-gradient(145deg,#1a6be0,#0a3f9a)"),
+  glyph(siV0, "linear-gradient(145deg,#262626,#000)"),
+  glyph(siHuggingface, "linear-gradient(145deg,#ffe066,#ffc21a)", "#1f1f1f"),
+  glyph(siGooglegemini, "linear-gradient(145deg,#4f8ef7,#9b72cb)"),
+  glyph(siElevenlabs, "linear-gradient(145deg,#f4f4f4,#dcdcdc)", "#111"),
+  glyph(siReplit, "linear-gradient(145deg,#ff8a3d,#e8560a)"),
+  glyph(siGithubcopilot, "linear-gradient(145deg,#3a2a6b,#0d1117)"),
+  glyph(siFramer, "linear-gradient(145deg,#2f7bff,#0047e0)"),
+  glyph(siArc, "linear-gradient(145deg,#3a3ff5,#1b1fb0)", "#ff9aa0"),
+  glyph(siFigma, "linear-gradient(145deg,#2c2c2c,#111)"),
+  glyph(siMistralai, "linear-gradient(145deg,#ffb347,#fa520f)"),
+  glyph(siWindsurf, "linear-gradient(145deg,#1f3d38,#0b100f)", "#5fe0c4"),
+  glyph(siWarp, "linear-gradient(145deg,#2fb6ff,#0170c9)"),
 ];
 
 const SLOTS = 3;
@@ -62,18 +81,23 @@ function TeamTile({ slot, tick }: { slot: number; tick: number }) {
     >
       <AnimatePresence initial={false} mode="popLayout">
         <motion.span
-          key={team.icon.slug}
-          title={team.icon.title}
-          className="absolute inset-0 grid place-items-center rounded-[24%] shadow-[0_1px_2px_rgb(0_0_0/0.12),0_6px_16px_-6px_rgb(0_0_0/0.35),inset_0_0_0_1px_rgb(255_255_255/0.08)]"
+          key={team.name}
+          title={team.name}
+          className="absolute inset-0 grid overflow-hidden place-items-center rounded-[24%] shadow-[0_1px_2px_rgb(0_0_0/0.12),0_6px_16px_-6px_rgb(0_0_0/0.35),inset_0_0_0_1px_rgb(255_255_255/0.08)]"
           style={{ background: team.bg }}
           initial={reduce ? { opacity: 0 } : { opacity: 0, rotateX: -80, y: "35%", scale: 0.85, filter: "blur(4px)" }}
           animate={{ opacity: 1, rotateX: 0, y: "0%", scale: 1, filter: "blur(0px)" }}
           exit={reduce ? { opacity: 0 } : { opacity: 0, rotateX: 80, y: "-35%", scale: 0.85, filter: "blur(4px)" }}
           transition={{ type: "spring", stiffness: 260, damping: 24, delay: slot * 0.12 }}
         >
-          <svg viewBox="0 0 24 24" className="size-[52%]" fill={team.fg}>
-            <path d={team.icon.path} />
-          </svg>
+          {team.src ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={team.src} alt="" className="size-full" draggable={false} />
+          ) : (
+            <svg viewBox="0 0 24 24" className="size-[52%]" fill={team.fg}>
+              <path d={team.path} />
+            </svg>
+          )}
         </motion.span>
       </AnimatePresence>
     </span>
@@ -91,10 +115,10 @@ export function HeroHeadline() {
   }, [reduce]);
 
   return (
-    <h1 className="mt-6 text-5xl leading-[1.1] font-semibold tracking-tight sm:text-6xl">
-      <span className="sr-only">The pattern language for AI agents</span>
+    <h1 className="mt-6 text-[2.4rem] leading-[1.1] font-semibold tracking-tight sm:text-6xl">
+      <span className="sr-only">The UX pattern language for AI agents</span>
       <span aria-hidden className="block">
-        The pattern
+        The UX pattern
         <TeamTile slot={0} tick={tick} />
       </span>
       <span aria-hidden className="block">
