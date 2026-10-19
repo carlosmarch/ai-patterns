@@ -111,6 +111,9 @@ import { pattern as responseComparePattern } from "./compare/response-compare/pa
 import ConfidenceIndicatorDemo from "./indicators/confidence-indicator/demo";
 import ConfidenceIndicatorThumbnail from "./indicators/confidence-indicator/thumbnail";
 import { pattern as confidenceIndicatorPattern } from "./indicators/confidence-indicator/pattern";
+import CriteriaDeterminationDemo from "./indicators/criteria-determination/demo";
+import CriteriaDeterminationThumbnail from "./indicators/criteria-determination/thumbnail";
+import { pattern as criteriaDeterminationPattern } from "./indicators/criteria-determination/pattern";
 import VoiceWaveformDemo from "./voice/voice-waveform/demo";
 import VoiceWaveformThumbnail from "./voice/voice-waveform/thumbnail";
 import { pattern as voiceWaveformPattern } from "./voice/voice-waveform/pattern";
@@ -490,6 +493,16 @@ export const registry: RegistryEntry[] = [
     Demo: ConfidenceIndicatorDemo,
     Thumbnail: ConfidenceIndicatorThumbnail,
     uxDoc: confidenceIndicatorPattern,
+  },
+  {
+    slug: "criteria-determination",
+    category: "indicators",
+    title: "Criteria Determination",
+    description:
+      "An AI verdict backed by its criteria — grouped into missing, not met and met — where answering Yes/No on the gaps updates the determination live.",
+    Demo: CriteriaDeterminationDemo,
+    Thumbnail: CriteriaDeterminationThumbnail,
+    uxDoc: criteriaDeterminationPattern,
   },
   {
     slug: "voice-waveform",
