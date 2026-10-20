@@ -107,8 +107,6 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   /** Sub-pages, shown under the item while it's the current view. */
   children?: { id: string; label: string }[];
-  /** Also a shortcut in the icon rail. */
-  rail?: boolean;
 }
 
 interface NavGroup {
@@ -122,12 +120,11 @@ interface NavGroup {
 const NAV_GROUPS: NavGroup[] = [
   {
     items: [
-      { id: "operator", label: "Operator", icon: MessagesSquare, rail: true },
+      { id: "operator", label: "Operator", icon: MessagesSquare },
       {
         id: "playground",
         label: "Playground",
         icon: FlaskConical,
-        rail: true,
         children: [
           { id: "chat", label: "Chat" },
           { id: "voice", label: "Voice" },
@@ -143,22 +140,21 @@ const NAV_GROUPS: NavGroup[] = [
         id: "train",
         label: "Train",
         icon: BookOpen,
-        rail: true,
         children: [
           { id: "procedures", label: "Procedures" },
           { id: "guidelines", label: "Guidelines" },
         ],
       },
       { id: "workflows", label: "Workflows", icon: Workflow },
-      { id: "deploy", label: "Deploy", icon: Rocket, rail: true },
+      { id: "deploy", label: "Deploy", icon: Rocket },
     ],
   },
   {
     // The catalogue and skill this workspace is built from, same as /patterns and /skill.
     label: "Library",
     items: [
-      { id: "patterns", label: "Patterns", icon: LayoutGrid, rail: true },
-      { id: "skill", label: "Skill", icon: Package, rail: true },
+      { id: "patterns", label: "Patterns", icon: LayoutGrid },
+      { id: "skill", label: "Skill", icon: Package },
       { id: "changelog", label: "What's new", icon: History },
     ],
   },
@@ -170,6 +166,12 @@ const NAV_SETTINGS: NavItem[] = [
 ];
 
 const NAV_ALL = [...NAV_GROUPS.flatMap((g) => g.items), ...NAV_SETTINGS];
+
+// Shortcuts in the icon rail, in order; a divider sits between the groups.
+const RAIL: View[][] = [
+  ["operator", "patterns", "skill", "deploy"],
+  ["connectors", "workflows"],
+];
 
 const WORKSPACES = [
   { id: "ai-patterns", name: "ai-patterns", color: "bg-violet-500" },
@@ -956,16 +958,17 @@ function IconRail({ view, onNavigate, onSearch, onHome }: { view: View; onNaviga
       >
         <AGENT_ICON className="size-5" />
       </button>
-      {NAV_GROUPS.map((group, i) => (
-        <React.Fragment key={group.label ?? i}>
+      {RAIL.map((group, i) => (
+        <React.Fragment key={group.join()}>
           {i > 0 && <div className="my-1 h-px w-6 bg-border" />}
-          {group.items
-            .filter((n) => n.rail)
-            .map((n) => (
+          {group.map((id) => {
+            const n = NAV_ALL.find((item) => item.id === id)!;
+            return (
               <RailButton key={n.id} label={n.label} active={view === n.id} onClick={() => onNavigate(n.id)}>
                 <n.icon className="size-5" />
               </RailButton>
-            ))}
+            );
+          })}
         </React.Fragment>
       ))}
       <div className="mt-auto flex flex-col items-center gap-2">
