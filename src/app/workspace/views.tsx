@@ -604,7 +604,7 @@ export function DeployView() {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
             onClick={() => setCreating(false)}
           >
-            <motion.div initial={{ y: 8 }} animate={{ y: 0 }} exit={{ y: 8 }} onClick={(e) => e.stopPropagation()} className="relative w-full max-w-xs">
+            <motion.div initial={{ y: 8 }} animate={{ y: 0 }} exit={{ y: 8 }} onClick={(e) => e.stopPropagation()} className="relative w-full max-w-md">
               <button
                 type="button"
                 aria-label="Close"
@@ -614,6 +614,7 @@ export function DeployView() {
                 <X className="size-4" />
               </button>
               <CreateAgent
+                className="max-w-none shadow-xl"
                 onCreateAgent={(payload) => {
                   const id = `agent-${agents.length}`;
                   setAgents((prev) => [...prev, { id, name: payload.name || "Untitled agent", description: "Just created", status: "Draft" }]);
