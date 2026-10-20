@@ -7,6 +7,7 @@ import { CopyButton } from "@/components/copy-button";
 import { DownloadButton } from "@/components/download-button";
 import { GithubMark } from "@/components/github-mark";
 import { cn } from "@/lib/utils";
+import { ConnectivityError } from "@/registry/errors/connectivity-error/component";
 import { getCategories, registry, type RegistryEntry } from "@/registry";
 import { INSTALL_COMMAND, SKILL_MODES, SKILL_PILLARS, SKILL_STATS_BODY, SKILL_STEPS, SKILL_TAGLINE, SkillPitch } from "@/app/skill/content";
 import { SkillExamples, type SkillExample } from "@/app/skill/skill-examples";
@@ -314,10 +315,19 @@ function PatternDetail({
               </p>
               <DownloadButton filename={`${entry.slug}.pattern.md`} content={entry.uxDoc} className="shrink-0" />
             </div>
-            <Highlighted html={source === "error" ? null : source?.specHtml} text={entry.uxDoc} error={source === "error"} wrap />
+            <Highlighted html={source === "error" ? null : source?.specHtml} text={entry.uxDoc} wrap />
           </div>
         ) : (
-          <Highlighted html={source === "error" ? null : source?.codeHtml} text={source === "error" ? undefined : source?.code} error={source === "error"} />
+          source === "error" ? (
+            <ConnectivityError
+              title="Couldn't load the code"
+              description="The component source didn't come through. Your place is kept — try again."
+              onRetry={() => setSource(null)}
+              className="w-full max-w-none"
+            />
+          ) : (
+            <Highlighted html={source?.codeHtml} text={source?.code} />
+          )
         )}
 
         <div className="mt-8 flex items-center justify-between gap-3 border-t pt-4 text-sm">
@@ -339,8 +349,7 @@ function PatternDetail({
   );
 }
 
-function Highlighted({ html, text, error, wrap }: { html?: string | null; text?: string; error?: boolean; wrap?: boolean }) {
-  if (error && !text) return <p className="rounded-2xl border p-6 text-sm text-muted-foreground">Couldn&apos;t load the source. Try again in a moment.</p>;
+function Highlighted({ html, text, wrap }: { html?: string | null; text?: string; wrap?: boolean }) {
   return (
     <div className="relative">
       {text && <CopyButton text={text} className="absolute right-3 top-3 z-10" trackAs={wrap ? "spec" : "component"} />}

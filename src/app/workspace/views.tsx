@@ -36,7 +36,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { AgentTriggers, DEFAULT_TRIGGERS } from "@/registry/agents/agent-triggers/component";
 import { ChatBubble } from "@/registry/messages/chat-bubble/component";
-import { ConnectivityError } from "@/registry/errors/connectivity-error/component";
 import { ConnectorPanel, type ConnectorLink, type ConnectorToolGroup, type ToolPermission } from "@/registry/permissions/connector-panel/component";
 import { CreateAgent } from "@/registry/agents/create-agent/component";
 import { Flowchart, type FlowchartNode } from "@/registry/flowcharts/trigger-condition/component";
@@ -481,7 +480,7 @@ function VoicePlayground() {
 }
 
 // ---------------------------------------------------------------------------
-// Deploy — agents and what triggers them
+// Agents — what each agent does and what triggers it
 // ---------------------------------------------------------------------------
 
 const AGENTS = [
@@ -494,7 +493,7 @@ function AgentIcon({ id, className }: { id: string; className?: string }) {
   return id === "origami" ? <AGENT_ICON className={className} /> : <Bot className={className} />;
 }
 
-export function DeployView() {
+export function AgentsView() {
   const [creating, setCreating] = React.useState(false);
   const [agents, setAgents] = React.useState(AGENTS);
   const [selected, setSelected] = React.useState(AGENTS[0].id);
@@ -505,7 +504,7 @@ export function DeployView() {
 
   return (
     <>
-      <ViewHeader title="Deploy">
+      <ViewHeader title="Agents">
         <span className="hidden text-sm text-muted-foreground sm:inline">
           {agents.filter((a) => a.status === "Live").length} of {agents.length} live
         </span>
@@ -1411,90 +1410,6 @@ export function ConnectorsView({
 }
 
 // ---------------------------------------------------------------------------
-// Insights
-// ---------------------------------------------------------------------------
-
-const TOP_PATTERNS = [
-  { name: "Streaming Text", copies: 1204, change: "+6%" },
-  { name: "Prompt Bar Pro", copies: 988, change: "+38%" },
-  { name: "Tool Approval", copies: 731, change: "+4%" },
-  { name: "Thinking Loader", copies: 702, change: "+11%" },
-  { name: "Procedure Builder", copies: 214, change: "New" },
-];
-
-export function InsightsView() {
-  const [state, setState] = React.useState<"error" | "loading" | "ready">("error");
-  const [details, setDetails] = React.useState(false);
-
-  function retry() {
-    setState("loading");
-    window.setTimeout(() => setState("ready"), 1200);
-  }
-
-  return (
-    <>
-      <ViewHeader title="Insights">
-        <span className="text-sm text-muted-foreground">Oct 11 – Oct 17</span>
-      </ViewHeader>
-      <Scroll className="px-6 py-6">
-        <div className="mx-auto max-w-3xl space-y-6">
-          {state === "error" && (
-            <>
-              <ConnectivityError
-                title="Couldn't reach Vercel Analytics"
-                detailsLabel={details ? "Hide details" : "View details"}
-                onRetry={retry}
-                onViewDetails={() => setDetails((d) => !d)}
-                className="w-full"
-              />
-              {details && (
-                <pre className="overflow-x-auto rounded-xl border bg-muted/50 p-4 font-mono text-xs leading-relaxed text-muted-foreground">
-                  {`GET https://vercel.com/api/web/insights/events?projectId=ai-patterns&from=2026-10-11
-→ 504 Gateway Timeout after 30.0s
-x-vercel-id: mad1::iad1::8f2kd-1760781600000
-
-The analytics API didn't answer in time. Your data is safe — retrying usually works.`}
-                </pre>
-              )}
-            </>
-          )}
-          {state === "loading" && <ThinkingLoader words={["Loading usage", "Counting copies"]} />}
-          {state === "ready" && (
-            <>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  { label: "Code tab copies", value: "6,912", sub: "+14% vs. last week" },
-                  { label: "Skill sessions", value: "1,312", sub: "+22% vs. last week" },
-                  { label: "Threads with Origami", value: "248", sub: "93% resolved without edits" },
-                ].map((s) => (
-                  <div key={s.label} className="rounded-2xl border bg-card p-4">
-                    <p className="text-xs text-muted-foreground">{s.label}</p>
-                    <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">{s.value}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{s.sub}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="rounded-2xl border bg-card">
-                <p className="border-b px-4 py-3 text-sm font-medium">Most-copied patterns</p>
-                <ul>
-                  {TOP_PATTERNS.map((p) => (
-                    <li key={p.name} className="flex items-center gap-3 border-b px-4 py-2.5 text-sm last:border-0">
-                      <span className="flex-1">{p.name}</span>
-                      <span className="w-16 text-right tabular-nums text-muted-foreground">{p.copies.toLocaleString("en-US")}</span>
-                      <span className="w-12 text-right text-xs text-emerald-600 dark:text-emerald-400">{p.change}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </>
-          )}
-        </div>
-      </Scroll>
-    </>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Changelog
 // ---------------------------------------------------------------------------
 
@@ -1508,7 +1423,7 @@ const CHANGES = [
 export function ChangelogView() {
   return (
     <>
-      <ViewHeader title="Changelog" />
+      <ViewHeader title="What's new" />
       <Scroll className="px-6 py-6">
         <ol className="mx-auto max-w-xl space-y-6 border-l pl-6">
           {CHANGES.map((c) => (

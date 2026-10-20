@@ -6,7 +6,7 @@ import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
-  ChartColumn,
+  Bot,
   Check,
   ChevronDown,
   ChevronRight,
@@ -21,7 +21,6 @@ import {
   Package,
   Plug,
   Plus,
-  Rocket,
   Search,
   ShieldAlert,
   Workflow,
@@ -75,8 +74,7 @@ import {
   CONNECTORS,
   ChangelogView,
   ConnectorsView,
-  DeployView,
-  InsightsView,
+  AgentsView,
   MobileMenuButton,
   MobileMenuContext,
   PlaygroundView,
@@ -92,8 +90,7 @@ type View =
   | "operator"
   | "train"
   | "playground"
-  | "deploy"
-  | "insights"
+  | "agents"
   | "changelog"
   | "patterns"
   | "skill"
@@ -109,47 +106,73 @@ interface NavItem {
   children?: { id: string; label: string }[];
 }
 
-const NAV_PRIMARY: NavItem[] = [
-  { id: "operator", label: "Operator", icon: AGENT_ICON },
+interface NavGroup {
+  /** Shown above the group in the sidebar; the first group has none. */
+  label?: string;
+  items: NavItem[];
+}
+
+// Grouped by what you do here: use the agent, configure it, and browse the
+// library it's built from. Settings sit at the bottom of the sidebar.
+const NAV_GROUPS: NavGroup[] = [
   {
-    id: "train",
-    label: "Train",
-    icon: BookOpen,
-    children: [
-      { id: "procedures", label: "Procedures" },
-      { id: "guidelines", label: "Guidelines" },
+    items: [
+      { id: "operator", label: "Operator", icon: MessagesSquare },
+      {
+        id: "playground",
+        label: "Playground",
+        icon: FlaskConical,
+        children: [
+          { id: "chat", label: "Chat" },
+          { id: "voice", label: "Voice" },
+        ],
+      },
     ],
   },
   {
-    id: "playground",
-    label: "Playground",
-    icon: FlaskConical,
-    children: [
-      { id: "chat", label: "Chat" },
-      { id: "voice", label: "Voice" },
+    label: "Configure",
+    items: [
+      {
+        id: "train",
+        label: "Train",
+        icon: BookOpen,
+        children: [
+          { id: "procedures", label: "Procedures" },
+          { id: "guidelines", label: "Guidelines" },
+        ],
+      },
+      { id: "workflows", label: "Workflows", icon: Workflow },
+      { id: "agents", label: "Agents", icon: Bot },
     ],
   },
-  { id: "deploy", label: "Deploy", icon: Rocket },
-  { id: "insights", label: "Insights", icon: ChartColumn },
-  { id: "changelog", label: "Changelog", icon: History },
+  {
+    // The catalogue and skill this workspace is built from, same as /patterns and /skill.
+    label: "Library",
+    items: [
+      { id: "patterns", label: "Patterns", icon: LayoutGrid },
+      { id: "skill", label: "Skill", icon: Package },
+      { id: "changelog", label: "What's new", icon: History },
+    ],
+  },
 ];
 
-// The catalogue and skill this workspace is built from, same as /patterns and /skill.
-const NAV_LIBRARY: NavItem[] = [
-  { id: "patterns", label: "Patterns", icon: LayoutGrid },
-  { id: "skill", label: "Skill", icon: Package },
+const NAV_SETTINGS: NavItem[] = [
+  { id: "connectors", label: "Connectors", icon: Plug },
+  { id: "setup", label: "Setup", icon: ListChecks },
+];
+
+const NAV_ALL = [...NAV_GROUPS.flatMap((g) => g.items), ...NAV_SETTINGS];
+
+// Shortcuts in the icon rail, in order; a divider sits between the groups.
+const RAIL: View[][] = [
+  ["operator", "patterns", "skill", "agents"],
+  ["connectors", "workflows"],
 ];
 
 const WORKSPACES = [
   { id: "ai-patterns", name: "ai-patterns", color: "bg-violet-500" },
   { id: "origami-labs", name: "Origami Labs", color: "bg-sky-500" },
   { id: "personal", name: "Personal", color: "bg-emerald-500" },
-];
-
-const NAV_SECONDARY: NavItem[] = [
-  { id: "connectors", label: "Connectors", icon: Plug },
-  { id: "workflows", label: "Workflows", icon: Workflow },
-  { id: "setup", label: "Setup", icon: ListChecks },
 ];
 
 const CANCELLED = Symbol("cancelled");
@@ -649,7 +672,7 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
     },
     {
       label: "Go to",
-      items: [...NAV_PRIMARY, ...NAV_LIBRARY, ...NAV_SECONDARY].map((n) => ({ id: `view:${n.id}`, label: n.label, icon: n.icon })),
+      items: NAV_ALL.map((n) => ({ id: `view:${n.id}`, label: n.label, icon: n.icon })),
     },
     {
       label: "Patterns",
@@ -785,10 +808,9 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
               <TrainView tab={trainTab} onTabChange={setTrainTab} />
             ) : view === "playground" ? (
               <PlaygroundView tab={playgroundTab} onTabChange={setPlaygroundTab} />
-            ) : view === "deploy" ? (
-              <DeployView />
-            ) : view === "insights" ? (
-              <InsightsView />
+            ) : view === "agents" ? (
+              <AgentsView />
+
             ) : view === "changelog" ? (
               <ChangelogView />
             ) : view === "patterns" ? (
@@ -931,24 +953,19 @@ function IconRail({ view, onNavigate, onSearch, onHome }: { view: View; onNaviga
       >
         <AGENT_ICON className="size-5" />
       </button>
-      <RailButton label="Operator" active={view === "operator"} onClick={() => onNavigate("operator")}>
-        <MessagesSquare className="size-5" />
-      </RailButton>
-      <RailButton label="Train" active={view === "train"} onClick={() => onNavigate("train")}>
-        <BookOpen className="size-5" />
-      </RailButton>
-      <RailButton label="Insights" active={view === "insights"} onClick={() => onNavigate("insights")}>
-        <ChartColumn className="size-5" />
-      </RailButton>
-      <RailButton label="Patterns" active={view === "patterns"} onClick={() => onNavigate("patterns")}>
-        <LayoutGrid className="size-5" />
-      </RailButton>
-      <RailButton label="Deploy" active={view === "deploy"} onClick={() => onNavigate("deploy")}>
-        <Rocket className="size-5" />
-      </RailButton>
-      <RailButton label="Connectors" active={view === "connectors"} onClick={() => onNavigate("connectors")}>
-        <Plug className="size-5" />
-      </RailButton>
+      {RAIL.map((group, i) => (
+        <React.Fragment key={group.join()}>
+          {i > 0 && <div className="my-1 h-px w-6 bg-border" />}
+          {group.map((id) => {
+            const n = NAV_ALL.find((item) => item.id === id)!;
+            return (
+              <RailButton key={n.id} label={n.label} active={view === n.id} onClick={() => onNavigate(n.id)}>
+                <n.icon className="size-5" />
+              </RailButton>
+            );
+          })}
+        </React.Fragment>
+      ))}
       <div className="mt-auto flex flex-col items-center gap-2">
         <RailButton label="Search (⌘K)" onClick={onSearch}>
           <Search className="size-5" />
@@ -1031,30 +1048,39 @@ function NavSidebar({
   }
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col rounded-2xl border bg-background p-3 shadow-sm">
+    <aside className="flex w-60 shrink-0 flex-col overflow-y-auto rounded-2xl border bg-background p-3 shadow-sm">
       <h1 className="px-2 pb-4 pt-2 text-xl font-semibold tracking-tight">UX Agent</h1>
       <WorkspaceSwitcher onToast={onToast} />
-      <nav aria-label="Workspace" className="flex flex-col gap-0.5">
-        {NAV_PRIMARY.map((n) => item(n))}
-      </nav>
-      <div className="my-4 border-t" />
-      <p className="px-3 pb-1.5 text-xs text-muted-foreground">Library</p>
-      <nav aria-label="Library" className="flex flex-col gap-0.5">
-        {NAV_LIBRARY.map((n) =>
-          item(n, n.id === "patterns" ? <span className="text-xs tabular-nums text-muted-foreground">{registry.length}</span> : undefined)
-        )}
-      </nav>
-      <div className="my-4 border-t" />
-      <nav aria-label="Settings" className="flex flex-col gap-0.5">
-        {NAV_SECONDARY.map((n) =>
-          item(
-            n,
-            n.id === "setup" && setupDone < 4 ? (
-              <span className="rounded-full bg-muted px-1.5 text-[10px] tabular-nums text-muted-foreground">{setupDone}/4</span>
-            ) : undefined
-          )
-        )}
-      </nav>
+      {NAV_GROUPS.map((group, i) => (
+        <nav key={group.label ?? i} aria-label={group.label ?? "Agent"} className={cn("flex flex-col gap-0.5", i > 0 && "mt-5")}>
+          {group.label && <p className="px-3 pb-1.5 text-xs text-muted-foreground">{group.label}</p>}
+          {group.items.map((n) =>
+            item(n, n.id === "patterns" ? <span className="text-xs tabular-nums text-muted-foreground">{registry.length}</span> : undefined)
+          )}
+        </nav>
+      ))}
+      <div className="mt-auto pt-5">
+        <button
+          type="button"
+          onClick={() => onNavigate("patterns")}
+          className="mb-3 w-full rounded-xl border border-dashed p-3 text-left transition-colors hover:bg-accent/60 [@media(max-height:760px)]:hidden"
+        >
+          <span className="block text-xs font-medium">A demo built from ai-patterns</span>
+          <span className="mt-0.5 block text-xs text-muted-foreground">
+            Every screen here uses the {registry.length} patterns in the Library.
+          </span>
+        </button>
+        <nav aria-label="Settings" className="flex flex-col gap-0.5 border-t pt-3">
+          {NAV_SETTINGS.map((n) =>
+            item(
+              n,
+              n.id === "setup" && setupDone < 4 ? (
+                <span className="rounded-full bg-muted px-1.5 text-[10px] tabular-nums text-muted-foreground">{setupDone}/4</span>
+              ) : undefined
+            )
+          )}
+        </nav>
+      </div>
     </aside>
   );
 }
