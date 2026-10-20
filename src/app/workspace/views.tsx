@@ -1508,7 +1508,7 @@ const CHANGES = [
 export function ChangelogView() {
   return (
     <>
-      <ViewHeader title="Changelog" />
+      <ViewHeader title="What's new" />
       <Scroll className="px-6 py-6">
         <ol className="mx-auto max-w-xl space-y-6 border-l pl-6">
           {CHANGES.map((c) => (
