@@ -6,7 +6,7 @@ import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
-  ChartColumn,
+  Bot,
   Check,
   ChevronDown,
   ChevronRight,
@@ -21,7 +21,6 @@ import {
   Package,
   Plug,
   Plus,
-  Rocket,
   Search,
   ShieldAlert,
   Workflow,
@@ -75,8 +74,7 @@ import {
   CONNECTORS,
   ChangelogView,
   ConnectorsView,
-  DeployView,
-  InsightsView,
+  AgentsView,
   MobileMenuButton,
   MobileMenuContext,
   PlaygroundView,
@@ -92,8 +90,7 @@ type View =
   | "operator"
   | "train"
   | "playground"
-  | "deploy"
-  | "insights"
+  | "agents"
   | "changelog"
   | "patterns"
   | "skill"
@@ -130,7 +127,6 @@ const NAV_GROUPS: NavGroup[] = [
           { id: "voice", label: "Voice" },
         ],
       },
-      { id: "insights", label: "Insights", icon: ChartColumn },
     ],
   },
   {
@@ -146,7 +142,7 @@ const NAV_GROUPS: NavGroup[] = [
         ],
       },
       { id: "workflows", label: "Workflows", icon: Workflow },
-      { id: "deploy", label: "Deploy", icon: Rocket },
+      { id: "agents", label: "Agents", icon: Bot },
     ],
   },
   {
@@ -169,7 +165,7 @@ const NAV_ALL = [...NAV_GROUPS.flatMap((g) => g.items), ...NAV_SETTINGS];
 
 // Shortcuts in the icon rail, in order; a divider sits between the groups.
 const RAIL: View[][] = [
-  ["operator", "patterns", "skill", "deploy"],
+  ["operator", "patterns", "skill", "agents"],
   ["connectors", "workflows"],
 ];
 
@@ -812,10 +808,9 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
               <TrainView tab={trainTab} onTabChange={setTrainTab} />
             ) : view === "playground" ? (
               <PlaygroundView tab={playgroundTab} onTabChange={setPlaygroundTab} />
-            ) : view === "deploy" ? (
-              <DeployView />
-            ) : view === "insights" ? (
-              <InsightsView />
+            ) : view === "agents" ? (
+              <AgentsView />
+
             ) : view === "changelog" ? (
               <ChangelogView />
             ) : view === "patterns" ? (
