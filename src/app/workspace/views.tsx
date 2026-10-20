@@ -490,23 +490,33 @@ const AGENTS = [
   { id: "triage", name: "Request triage", description: "Labels and routes pattern requests", status: "Draft" },
 ];
 
+function AgentIcon({ id, className }: { id: string; className?: string }) {
+  return id === "origami" ? <AGENT_ICON className={className} /> : <Bot className={className} />;
+}
+
 export function DeployView() {
   const [creating, setCreating] = React.useState(false);
   const [agents, setAgents] = React.useState(AGENTS);
   const [selected, setSelected] = React.useState(AGENTS[0].id);
   const [deployed, setDeployed] = React.useState(false);
+  const [query, setQuery] = React.useState("");
   const agent = agents.find((a) => a.id === selected) ?? agents[0];
+  const visible = agents.filter((a) => a.name.toLowerCase().includes(query.trim().toLowerCase()));
 
   return (
     <>
       <ViewHeader title="Deploy">
+        <span className="hidden text-sm text-muted-foreground sm:inline">
+          {agents.filter((a) => a.status === "Live").length} of {agents.length} live
+        </span>
         <button
           type="button"
           onClick={() => setCreating(true)}
-          className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+          aria-label="New agent"
+          className="flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-sm transition-colors hover:bg-accent sm:px-3"
         >
           <Plus className="size-4" />
-          New agent
+          <span className="hidden sm:inline">New agent</span>
         </button>
         {deployed ? (
           <span className="flex items-center gap-1.5 px-3 text-sm text-emerald-600 dark:text-emerald-400">
@@ -517,39 +527,61 @@ export function DeployView() {
           <ShinyButton onClick={() => setDeployed(true)}>Deploy changes</ShinyButton>
         )}
       </ViewHeader>
-      <Scroll className="px-6 py-6">
-        <div className="mx-auto grid max-w-4xl gap-6 lg:grid-cols-[16rem_1fr]">
-          <div className="space-y-2">
-            <p className="px-1 text-xs font-medium text-muted-foreground">Agents</p>
-            {agents.map((a) => (
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+        <aside className="flex shrink-0 flex-col gap-2 border-b p-3 md:w-72 md:border-b-0 md:border-r">
+          <label className="hidden items-center gap-2 rounded-full border px-3 py-2 text-sm focus-within:ring-2 focus-within:ring-ring/40 md:flex">
+            <Search className="size-4 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search agents"
+              aria-label="Search agents"
+              className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+            />
+          </label>
+          <div className="flex gap-1 overflow-x-auto md:flex-col md:overflow-y-auto">
+            {visible.map((a) => (
               <button
                 key={a.id}
                 type="button"
                 onClick={() => setSelected(a.id)}
+                aria-current={a.id === agent.id ? "true" : undefined}
                 className={cn(
-                  "flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors",
-                  selected === a.id ? "border-foreground/20 bg-accent" : "hover:bg-accent/60"
+                  "flex shrink-0 items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors md:w-full",
+                  a.id === agent.id ? "bg-accent" : "hover:bg-accent/60"
                 )}
               >
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
-                  {a.id === "origami" ? <AGENT_ICON className="size-4" /> : <Bot className="size-4" />}
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border bg-background">
+                  <AgentIcon id={a.id} className="size-4" />
                 </span>
-                <span className="min-w-0">
+                <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2 text-sm font-medium">
-                    {a.name}
+                    <span className="truncate">{a.name}</span>
                     <span
-                      className={cn(
-                        "rounded-full px-1.5 text-[10px]",
-                        a.status === "Live" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : "bg-muted text-muted-foreground"
-                      )}
-                    >
-                      {a.status}
-                    </span>
+                      className={cn("size-1.5 shrink-0 rounded-full", a.status === "Live" ? "bg-emerald-500" : "bg-muted-foreground/40")}
+                      aria-label={a.status}
+                    />
                   </span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground">{a.description}</span>
+                  <span className="hidden truncate text-xs text-muted-foreground md:block">{a.description}</span>
                 </span>
               </button>
             ))}
+            {visible.length === 0 && <p className="px-3 py-2 text-sm text-muted-foreground">No agents match “{query}”.</p>}
+          </div>
+        </aside>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-4 sm:p-6">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            {agent.status === "Live" ? (
+              <p className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400">
+                <Check className="size-4" />
+                Live · {agent.description}
+              </p>
+            ) : (
+              <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <CircleDashed className="size-4" />
+                Draft · not deployed yet
+              </p>
+            )}
           </div>
           <AgentTriggers
             key={agent.id}
@@ -558,9 +590,10 @@ export function DeployView() {
             agent={{ name: agent.name, icon: agent.id === "origami" ? AGENT_ICON : Bot }}
             triggers={DEFAULT_TRIGGERS.map((t) => ({ ...t, event: t.event.replace("AI-Patterns", agent.name) }))}
             onToggle={() => setDeployed(false)}
+            className="w-full max-w-none shadow-sm"
           />
         </div>
-      </Scroll>
+      </div>
 
       <AnimatePresence>
         {creating && (
