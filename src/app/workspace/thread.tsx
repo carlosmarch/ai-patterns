@@ -29,7 +29,9 @@ import { TerminalStream, type LogLine } from "@/registry/code/terminal-stream/co
 import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
 import { ToolApproval, type ToolApprovalDecision as ApprovalDecision } from "@/registry/permissions/tool-approval/component";
 import { ToolCallChip, type ToolCallKind, type ToolCallStatus } from "@/registry/loaders/tool-call-chip/component";
+import { getCategories, registry } from "@/registry";
 
+import { entryPath } from "./catalogue";
 import {
   AUDIT_ATTACHMENT,
   AUDIT_DIFF_FILES,
@@ -84,6 +86,8 @@ export type BlockBody =
   | { kind: "hitl"; questions: HitlQuestion[]; onDone: () => void }
   | { kind: "gen-error"; action: string; retrying?: boolean }
   | { kind: "rich"; content: "weekly" | "spike" }
+  /** A clickable inventory of registry patterns, grouped by category — every pattern unless `paths` narrows it. */
+  | { kind: "catalogue"; paths?: string[] }
   | { kind: "difftabs" }
   | { kind: "trust" }
   | { kind: "selection" }
@@ -457,6 +461,42 @@ async function mockRefine(text: string, instruction: string) {
   return "I couldn't finish that answer. Your message is saved — try again in a moment.";
 }
 
+function CatalogueList({ paths, onOpen }: { paths?: string[]; onOpen: (path: string) => void }) {
+  const entries = paths ? registry.filter((e) => paths.includes(entryPath(e))) : registry;
+  const groups = getCategories()
+    .map((category) => ({ category, items: entries.filter((e) => e.category === category) }))
+    .filter((g) => g.items.length);
+  const ordered = groups.flatMap((g) => g.items);
+
+  return (
+    <div className="w-full max-w-md rounded-2xl border bg-card p-4">
+      <p className="text-sm font-medium">
+        {entries.length} patterns in {groups.length} categories
+      </p>
+      <div className="mt-3 space-y-3">
+        {groups.map((g) => (
+          <div key={g.category}>
+            <p className="text-xs font-medium capitalize text-muted-foreground">{g.category}</p>
+            <ol className="mt-1 flex flex-wrap gap-1.5">
+              {g.items.map((e) => (
+                <li key={e.slug}>
+                  <button
+                    type="button"
+                    onClick={() => onOpen(entryPath(e))}
+                    className="rounded-full border px-2.5 py-0.5 text-xs transition-colors hover:bg-accent"
+                  >
+                    <span className="tabular-nums text-muted-foreground">{ordered.indexOf(e) + 1}.</span> {e.title}
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Block renderer
 // ---------------------------------------------------------------------------
@@ -466,6 +506,7 @@ export interface BlockHandlers {
   onApproval: (blockId: string, action: string, decision: ApprovalDecision) => void;
   onRetry: (blockId: string, action: string) => void;
   onUpgrade: () => void;
+  onOpenPattern: (path: string) => void;
 }
 
 export function BlockView({ block, handlers }: { block: Block; handlers: BlockHandlers }) {
@@ -538,6 +579,8 @@ export function BlockView({ block, handlers }: { block: Block; handlers: BlockHa
       );
     case "rich":
       return block.content === "weekly" ? <WeeklyFindings /> : <SpikeFindings />;
+    case "catalogue":
+      return <CatalogueList paths={block.paths} onOpen={handlers.onOpenPattern} />;
     case "difftabs":
       return <DiffTabs files={AUDIT_DIFF_TABS} className="w-full max-w-md" />;
     case "trust":

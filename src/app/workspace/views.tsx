@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import {
+  ArrowRight,
   ArrowUpRight,
   Bot,
   CalendarClock,
@@ -96,7 +97,7 @@ export function ViewHeader({ title, badge, children }: { title: string; badge?: 
   );
 }
 
-function Tabs<T extends string>({ value, onChange, items }: { value: T; onChange: (v: T) => void; items: { id: T; label: string }[] }) {
+export function Tabs<T extends string>({ value, onChange, items }: { value: T; onChange: (v: T) => void; items: { id: T; label: string }[] }) {
   return (
     <div role="tablist" className="flex gap-1 rounded-lg bg-muted p-1">
       {items.map((item) => (
@@ -118,7 +119,7 @@ function Tabs<T extends string>({ value, onChange, items }: { value: T; onChange
   );
 }
 
-function Scroll({ children, className }: { children: React.ReactNode; className?: string }) {
+export function Scroll({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn("min-h-0 flex-1 overflow-y-auto", className)}>{children}</div>;
 }
 
@@ -1506,6 +1507,7 @@ export function SetupView({
   onSkillDone,
   onTeamDone,
   onOpenConnectors,
+  onOpenPattern,
   onExit,
   onToast,
   connectors,
@@ -1516,6 +1518,8 @@ export function SetupView({
   onSkillDone: (done: boolean) => void;
   onTeamDone: () => void;
   onOpenConnectors: () => void;
+  /** Opens a pattern ("category/slug") in the workspace's Patterns view, or the whole catalogue for null. */
+  onOpenPattern: (path: string | null) => void;
   onExit: () => void;
   onToast: (message: string) => void;
 }) {
@@ -1617,13 +1621,13 @@ export function SetupView({
               status={skillDone ? "received" : "waiting"}
               statusLabels={{ waiting: waiting ? "Listening for your first pattern…" : "Waiting for your first pattern…", received: "First pattern added" }}
               alternatives={[
-                { id: "browse", title: "Browse the catalogue", description: "Preview every pattern live", icon: LayoutGrid, onClick: () => window.open("/patterns", "_blank") },
+                { id: "browse", title: "Browse the catalogue", description: "Preview every pattern live", icon: LayoutGrid, onClick: () => onOpenPattern(null) },
                 {
                   id: "copy",
                   title: "Copy a component",
                   description: "Grab the code from any pattern's Code tab",
                   icon: Terminal,
-                  onClick: () => window.open("/patterns/buttons/shiny-button", "_blank"),
+                  onClick: () => onOpenPattern("buttons/shiny-button"),
                 },
               ]}
               onCopy={simulate}
@@ -1676,10 +1680,21 @@ export function SetupView({
               <p className="text-sm font-medium">Learn the basics</p>
               <ul className="mt-2 space-y-1">
                 {[
-                  { label: "Browse all patterns", href: "/patterns" },
-                  { label: "Read a UX spec", href: "/patterns/loaders/thinking-loader" },
-                  { label: "The skill on GitHub", href: "https://github.com/carlosmarch/ai-patterns/tree/main/plugins/ai-patterns" },
+                  { label: "Browse all patterns", pattern: null },
+                  { label: "Read a UX spec", pattern: "loaders/thinking-loader" },
                 ].map((l) => (
+                  <li key={l.label}>
+                    <button
+                      type="button"
+                      onClick={() => onOpenPattern(l.pattern)}
+                      className="-mx-2 flex w-[calc(100%+1rem)] items-center justify-between rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-accent"
+                    >
+                      {l.label}
+                      <ArrowRight className="size-3.5 text-muted-foreground" />
+                    </button>
+                  </li>
+                ))}
+                {[{ label: "The skill on GitHub", href: "https://github.com/carlosmarch/ai-patterns/tree/main/plugins/ai-patterns" }].map((l) => (
                   <li key={l.href}>
                     <a
                       href={l.href}

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { LayoutGrid, MousePointer2, Package, SquareTerminal } from "lucide-react";
+import { LayoutGrid, MousePointer2, Origami, Package, SquareTerminal } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { trackCodeCopied } from "@/lib/analytics";
@@ -15,7 +15,7 @@ import {
 const INSTALL = `/plugin marketplace add carlosmarch/ai-patterns
 /plugin install ai-patterns@ai-patterns`;
 
-interface SkillExample {
+export interface SkillExample {
   id: string;
   label: string;
   mode: "apply" | "review" | "list";
@@ -25,6 +25,8 @@ interface SkillExample {
   command: string;
   /** What the skill should land on, so the reader can check it. */
   outcome: string;
+  /** The pattern the skill should land on, as "category/slug" — apply mode only. */
+  pattern?: string;
 }
 
 const EXAMPLES: SkillExample[] = [
@@ -37,6 +39,7 @@ const EXAMPLES: SkillExample[] = [
 Replace it with a loading state that tells them the agent is still working and roughly what it's doing. Propose the pattern you'd use and why before writing code, then build it with our existing components and tokens.`,
     command: "/ai-patterns add a loading state while the agent is working",
     outcome: "Expect Thinking Loader — and a note to stop it the moment the answer starts streaming.",
+    pattern: "loaders/thinking-loader",
   },
   {
     id: "tool-approval",
@@ -47,6 +50,7 @@ Replace it with a loading state that tells them the agent is still working and r
 Before any destructive or outbound tool call, pause and ask the user to approve it — show what will happen, with the exact arguments. Pick the right ai-patterns pattern for this, then wire it into the agent's tool-call handler.`,
     command: "/ai-patterns apply tool-approval before outbound tool calls",
     outcome: "Expect Tool Approval, with Human in the Loop weighed and ruled out for a yes/no gate.",
+    pattern: "permissions/tool-approval",
   },
   {
     id: "composer",
@@ -57,6 +61,7 @@ Before any destructive or outbound tool call, pause and ask the user to approve 
 We're on shadcn/ui — keep its look, but follow the pattern's behavior and accessibility rules.`,
     command: "/ai-patterns design this composer",
     outcome: "Expect Prompt Bar, re-expressed with shadcn primitives instead of the catalogue's markup.",
+    pattern: "composer/prompt-bar",
   },
   {
     id: "review",
@@ -83,7 +88,15 @@ const TOOLS: CodingTool[] = [
   { id: "cursor", label: "Cursor", icon: MousePointer2 },
 ];
 
-export function SkillExamples() {
+export function SkillExamples({
+  onBrowse,
+  onTry,
+}: {
+  /** Where "Browse the catalogue" goes. Defaults to the /patterns page. */
+  onBrowse?: () => void;
+  /** When set, adds a "Run it with Origami" option that hands the example over. */
+  onTry?: (example: SkillExample) => void;
+} = {}) {
   const router = useRouter();
   const [exampleId, setExampleId] = React.useState(EXAMPLES[0].id);
   const [status, setStatus] = React.useState<PromptOnboardingStatus>("waiting");
@@ -158,8 +171,19 @@ export function SkillExamples() {
             title: "Browse the catalogue",
             description: "Every pattern the skill can apply",
             icon: LayoutGrid,
-            onClick: () => router.push("/patterns"),
+            onClick: onBrowse ?? (() => router.push("/patterns")),
           },
+          ...(onTry
+            ? [
+                {
+                  id: "origami",
+                  title: "Run it with Origami",
+                  description: "Watch the skill work in this workspace",
+                  icon: Origami,
+                  onClick: () => onTry(example),
+                },
+              ]
+            : []),
         ]}
         onCopy={(mode) => {
           if (mode === "snippet") trackCodeCopied({ type: "install_command" });

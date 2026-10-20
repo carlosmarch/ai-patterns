@@ -18,6 +18,7 @@ import {
   ListChecks,
   Loader2,
   MessagesSquare,
+  Package,
   Plug,
   Plus,
   Rocket,
@@ -28,6 +29,8 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 
 import { cn } from "@/lib/utils";
+import { registry, type RegistryEntry } from "@/registry";
+import type { SkillExample } from "@/app/skill/skill-examples";
 import { BackgroundTasksDrawer, type BackgroundTask } from "@/registry/agents/background-tasks/component";
 import { CollaborativePresence } from "@/registry/collaboration/collaborative-presence/component";
 import { CommandPalette, type CommandPaletteGroup, type CommandPaletteItem } from "@/registry/navigation/command-palette/component";
@@ -61,8 +64,12 @@ import {
   USER_NAME,
   WEEKLY_SOURCES,
   WEEKLY_TRACE,
+  AUDIT_ITEMS,
+  favicon,
   tickSpikeAgents,
 } from "./data";
+import { entryPath, findEntry, firstBullet, loadSource, matchEntry, relatedEntries, specSection } from "./catalogue";
+import { PatternsView, SkillView } from "./library";
 import { BlockView, nextId, seedThreads, type Block, type BlockBody, type BlockHandlers, type Thread } from "./thread";
 import {
   CONNECTORS,
@@ -81,7 +88,18 @@ import {
   type TrainTab,
 } from "./views";
 
-type View = "operator" | "train" | "playground" | "deploy" | "insights" | "changelog" | "connectors" | "workflows" | "setup";
+type View =
+  | "operator"
+  | "train"
+  | "playground"
+  | "deploy"
+  | "insights"
+  | "changelog"
+  | "patterns"
+  | "skill"
+  | "connectors"
+  | "workflows"
+  | "setup";
 
 interface NavItem {
   id: View;
@@ -116,6 +134,12 @@ const NAV_PRIMARY: NavItem[] = [
   { id: "changelog", label: "Changelog", icon: History },
 ];
 
+// The catalogue and skill this workspace is built from, same as /patterns and /skill.
+const NAV_LIBRARY: NavItem[] = [
+  { id: "patterns", label: "Patterns", icon: LayoutGrid },
+  { id: "skill", label: "Skill", icon: Package },
+];
+
 const WORKSPACES = [
   { id: "ai-patterns", name: "ai-patterns", color: "bg-violet-500" },
   { id: "origami-labs", name: "Origami Labs", color: "bg-sky-500" },
@@ -139,16 +163,34 @@ function titleFrom(prompt: string) {
   return clean.length > 40 ? `${clean.slice(0, 38).trimEnd()}…` : clean;
 }
 
-// Which scripted flow a prompt should run. Anything unrecognized gets the
-// generic research flow, so free-typed prompts still feel answered.
-function flowFor(prompt: string) {
+type Flow =
+  | { kind: "spike" | "guidance" | "bulk" | "summary" | "explore" | "list" | "review" | "default" }
+  | { kind: "pattern" | "scaffold"; entry: RegistryEntry; viaSkill?: boolean };
+
+// Which scripted flow a prompt should run. Prompts that name a pattern are
+// answered from its real spec, ahead of the keyword flows, so "scaffold the
+// stop generation button" isn't read as a Stop-click question. Anything
+// unrecognized gets the generic research flow, so free-typed prompts still
+// feel answered.
+function flowFor(prompt: string): Flow {
   const p = prompt.toLowerCase();
-  if (p.includes("stop") || p.includes("drop-off") || p.includes("abandon")) return "spike";
-  if (p.includes("guideline") || p.includes("guidance")) return "guidance";
-  if (p.includes("skill") || p.includes("reference docs") || p.includes("rebuild")) return "bulk";
-  if (p.includes("usage") || p.includes("summar") || p.includes("report")) return "summary";
-  if (p.includes("what can you") || p.includes("capabilit")) return "explore";
-  return "default";
+  const entry = matchEntry(p);
+  if (entry) return { kind: /^(scaffold|build|add|apply|swap)\b/.test(p) ? "scaffold" : "pattern", entry };
+  if (p.includes("stop") || p.includes("drop-off") || p.includes("abandon")) return { kind: "spike" };
+  if (p.includes("guideline") || p.includes("guidance")) return { kind: "guidance" };
+  if (p.includes("skill") || p.includes("reference docs") || p.includes("rebuild")) return { kind: "bulk" };
+  if (p.includes("usage") || p.includes("summar") || p.includes("report")) return { kind: "summary" };
+  if (p.includes("what can you") || p.includes("capabilit")) return { kind: "explore" };
+  if ((p.includes("list") || p.includes("catalogue")) && p.includes("pattern")) return { kind: "list" };
+  if (p.includes("review my project") || p.includes("audit my project")) return { kind: "review" };
+  return { kind: "default" };
+}
+
+/** The flow a skill example runs when it's handed to Origami from the Skill view. */
+function flowForExample(example: SkillExample): Flow {
+  const entry = findEntry(example.pattern);
+  if (entry) return { kind: "pattern", entry, viaSkill: true };
+  return { kind: example.mode === "review" ? "review" : "list" };
 }
 
 interface Runner {
@@ -162,7 +204,7 @@ interface Runner {
   until: <T>(make: (resolve: (value: T) => void) => BlockBody) => Promise<{ id: string; value: T }>;
 }
 
-export function WorkspaceApp() {
+export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
   const [view, setView] = React.useState<View>("operator");
   const [threads, setThreads] = React.useState<Thread[]>(seedThreads);
   const [activeId, setActiveId] = React.useState<string | null>(null);
@@ -178,6 +220,8 @@ export function WorkspaceApp() {
   const [skillDone, setSkillDone] = React.useState(false);
   const [teamDone, setTeamDone] = React.useState(false);
   const [toast, setToast] = React.useState<string | null>(null);
+  const [patternPath, setPatternPath] = React.useState<string | null>(null);
+  const [patternCategory, setPatternCategory] = React.useState<string | null>(null);
   const runsRef = React.useRef<Record<string, number>>({});
 
   const activeThread = threads.find((t) => t.id === activeId) ?? null;
@@ -272,8 +316,89 @@ export function WorkspaceApp() {
   // Flows
   // -------------------------------------------------------------------------
 
-  async function runFlow(r: Runner, flow: ReturnType<typeof flowFor>) {
-    switch (flow) {
+  async function explainPattern(r: Runner, entry: RegistryEntry) {
+    const summary = specSection(entry.uxDoc, "Summary");
+    const use = firstBullet(entry.uxDoc, "When to use");
+    const avoid = firstBullet(entry.uxDoc, "When not to use");
+    if (summary) await r.say(text(summary));
+    if (use) await r.say(text(`Use it for: ${use}`));
+    if (avoid) await r.say(text(`Skip it when: ${avoid}`));
+    r.add({
+      kind: "sources",
+      sources: [
+        { title: `${entry.title} — UX spec`, domain: "ai-patterns.dev", url: `/patterns/${entryPath(entry)}`, faviconUrl: favicon("github.com") },
+        { title: "carlosmarch/ai-patterns", domain: "github.com", url: `https://github.com/carlosmarch/ai-patterns/tree/main/src/registry/${entryPath(entry)}`, faviconUrl: favicon("github.com") },
+      ],
+    });
+    r.add({ kind: "followups", items: [`Scaffold ${entry.title}`, ...relatedEntries(entry).slice(0, 2).map((e) => `Tell me about ${e.title}`)] });
+  }
+
+  async function runFlow(r: Runner, flow: Flow) {
+    switch (flow.kind) {
+      case "pattern": {
+        const { entry, viaSkill } = flow;
+        await r.think(700);
+        if (viaSkill) {
+          await r.tool({ toolKind: "file", verb: "Reading", target: "reference/index.md", result: `Read ${registry.length} pattern summaries` });
+          const runnerUp = relatedEntries(entry)[0];
+          await r.tool({
+            toolKind: "search",
+            verb: "Shortlisting",
+            target: "candidates",
+            result: runnerUp ? `Shortlisted ${entry.title} over ${runnerUp.title}` : `Shortlisted ${entry.title}`,
+          });
+        } else {
+          await r.tool({ toolKind: "search", verb: "Searching", target: "the registry", result: `Found ${entry.title} in ${entry.category}` });
+        }
+        const sections = entry.uxDoc.split("\n").filter((l) => l.startsWith("## ")).length;
+        await r.tool({ toolKind: "file", verb: "Reading", target: `${entry.slug}.pattern.md`, result: `Read ${sections} sections` });
+        if (viaSkill) await r.say(text(`I'd use ${entry.title} here. From its spec:`));
+        await explainPattern(r, entry);
+        return;
+      }
+
+      case "scaffold": {
+        const { entry } = flow;
+        const path = entryPath(entry);
+        await r.think(700);
+        await r.tool({ toolKind: "file", verb: "Reading", target: `${entry.slug}.pattern.md`, result: "Read Anatomy, Behavior, and Accessibility" });
+        await r.tool({ toolKind: "code", verb: "Detecting", target: "the design system", result: "Next.js · Tailwind v4 · Radix · Motion" });
+        const source = await loadSource(path).catch(() => null);
+        const lines = source ? source.code.split("\n").length : 0;
+        await r.tool({ toolKind: "file", verb: "Writing", target: `components/${entry.slug}.tsx`, result: lines ? `Wrote ${lines} lines` : "Wrote the component" });
+        r.add({ kind: "diff", files: [{ id: "1", name: `src/components/${entry.slug}.tsx`, additions: lines, deletions: 0 }], timestamp: "just now" });
+        await r.wait(300);
+        await r.say(text(`Scaffolded ${entry.title} with its behavior and accessibility rules intact. Open it in Patterns to compare against the reference preview.`));
+        r.add({ kind: "catalogue", paths: [path, ...relatedEntries(entry).map(entryPath)] });
+        return;
+      }
+
+      case "list":
+        await r.think(600);
+        await r.tool({ toolKind: "file", verb: "Reading", target: "reference/index.md", result: `Read ${registry.length} pattern summaries` });
+        await r.say(text("Here's everything in the catalogue, grouped by category. Pick one to open it:"));
+        r.add({ kind: "catalogue" });
+        r.add({ kind: "followups", items: ["Review my project", "Tell me about Thinking Loader"] });
+        return;
+
+      case "review": {
+        await r.think(700);
+        await r.say(text("Scanning for hand-rolled AI UI a catalogue pattern already covers. Read-only — I won't edit anything:"));
+        const { id, value } = await r.until<AnalysisItem[]>((done) => ({
+          kind: "analysis",
+          items: AUDIT_ITEMS.map((item, i) => ({ ...item, status: i === 0 ? "loading" : "pending" })),
+          live: { onDone: done },
+        }));
+        r.update(id, { items: value, live: undefined } as Partial<Block>);
+        await r.say(text("Three swaps worth making, each backed by the pattern's When to use. The chat bubble is already up to spec."));
+        r.add({
+          kind: "catalogue",
+          paths: ["buttons/stop-generation-button", "loaders/tool-call-chip", "loaders/thinking-loader"],
+        });
+        r.add({ kind: "followups", items: ["Swap the spinner for a Thinking Loader", "Tell me about Tool Call Chip"] });
+        return;
+      }
+
       case "summary":
         await r.think(900);
         await r.tool({ toolKind: "search", verb: "Searching", target: "copy events", result: "Read 18,240 events from Vercel Analytics" });
@@ -362,7 +487,7 @@ export function WorkspaceApp() {
     }
   }
 
-  function submitPrompt(prompt: string) {
+  function submitPrompt(prompt: string, flow: Flow = flowFor(prompt)) {
     const raw = prompt.trim();
     if (!raw) return;
     let threadId = activeThread?.id;
@@ -379,15 +504,27 @@ export function WorkspaceApp() {
 
     const id = threadId;
     patchThread(id, (t) => ({ ...t, blocks: [...t.blocks, { id: nextId("u"), kind: "user", text: raw }] }));
-    startRun(id, (r) => runFlow(r, flowFor(raw)));
+    startRun(id, (r) => runFlow(r, flow));
   }
 
   function upsertTask(task: BackgroundTask) {
     setTasks((prev) => [task, ...prev.filter((t) => t.id !== task.id)]);
   }
 
+  function openPattern(path: string | null) {
+    setPatternPath(path);
+    setView("patterns");
+    setMobileNav(false);
+  }
+
+  function openPatterns(category?: string) {
+    setPatternCategory(category ?? null);
+    openPattern(null);
+  }
+
   const handlers: BlockHandlers = {
-    onFollowUp: submitPrompt,
+    onFollowUp: (prompt) => submitPrompt(prompt),
+    onOpenPattern: openPattern,
     onUpgrade: () => setToast("Team plans unlock longer generations — ask your workspace admin."),
     onApproval(blockId, action, decision) {
       if (!activeThread) return;
@@ -512,14 +649,20 @@ export function WorkspaceApp() {
     },
     {
       label: "Go to",
-      items: [...NAV_PRIMARY, ...NAV_SECONDARY].map((n) => ({ id: `view:${n.id}`, label: n.label, icon: n.icon })),
+      items: [...NAV_PRIMARY, ...NAV_LIBRARY, ...NAV_SECONDARY].map((n) => ({ id: `view:${n.id}`, label: n.label, icon: n.icon })),
+    },
+    {
+      label: "Patterns",
+      items: registry.map((e) => ({ id: `pattern:${entryPath(e)}`, label: e.title, icon: LayoutGrid, meta: e.category })),
     },
   ];
 
   function onPaletteSelect(item: CommandPaletteItem) {
     setPaletteOpen(false);
     const [type, value] = item.id.split(":");
-    if (type === "thread") {
+    if (type === "pattern") {
+      openPattern(value);
+    } else if (type === "thread") {
       setView("operator");
       setActiveId(value);
     } else if (type === "view") {
@@ -530,7 +673,7 @@ export function WorkspaceApp() {
     } else if (value === "tasks") {
       setTasksOpen(true);
     } else if (value === "registry") {
-      window.open("/patterns", "_blank");
+      openPatterns();
     }
   }
 
@@ -538,6 +681,7 @@ export function WorkspaceApp() {
 
   function navigate(next: View, sub?: string) {
     setView(next);
+    if (next === "patterns") setPatternPath(null);
     if (next === "train" && sub) setTrainTab(sub as TrainTab);
     if (next === "playground" && sub) setPlaygroundTab(sub as PlaygroundTab);
     setMobileNav(false);
@@ -647,6 +791,20 @@ export function WorkspaceApp() {
               <InsightsView />
             ) : view === "changelog" ? (
               <ChangelogView />
+            ) : view === "patterns" ? (
+              <PatternsView
+                selected={patternPath}
+                onSelect={setPatternPath}
+                category={patternCategory}
+                onCategory={setPatternCategory}
+                onAsk={(entry) => submitPrompt(`Tell me about ${entry.title}`, { kind: "pattern", entry })}
+              />
+            ) : view === "skill" ? (
+              <SkillView
+                version={skillVersion}
+                onOpenPatterns={openPatterns}
+                onTry={(example) => submitPrompt(example.prompt, flowForExample(example))}
+              />
             ) : view === "connectors" ? (
               <ConnectorsView connectors={connectors} setConnectors={setConnectors} onToast={setToast} />
             ) : view === "workflows" ? (
@@ -659,6 +817,7 @@ export function WorkspaceApp() {
                 onSkillDone={setSkillDone}
                 onTeamDone={() => setTeamDone(true)}
                 onOpenConnectors={() => navigate("connectors")}
+                onOpenPattern={openPattern}
                 onExit={() => openThread(null)}
                 onToast={setToast}
               />
@@ -781,6 +940,9 @@ function IconRail({ view, onNavigate, onSearch, onHome }: { view: View; onNaviga
       <RailButton label="Insights" active={view === "insights"} onClick={() => onNavigate("insights")}>
         <ChartColumn className="size-5" />
       </RailButton>
+      <RailButton label="Patterns" active={view === "patterns"} onClick={() => onNavigate("patterns")}>
+        <LayoutGrid className="size-5" />
+      </RailButton>
       <RailButton label="Deploy" active={view === "deploy"} onClick={() => onNavigate("deploy")}>
         <Rocket className="size-5" />
       </RailButton>
@@ -874,6 +1036,13 @@ function NavSidebar({
       <WorkspaceSwitcher onToast={onToast} />
       <nav aria-label="Workspace" className="flex flex-col gap-0.5">
         {NAV_PRIMARY.map((n) => item(n))}
+      </nav>
+      <div className="my-4 border-t" />
+      <p className="px-3 pb-1.5 text-xs text-muted-foreground">Library</p>
+      <nav aria-label="Library" className="flex flex-col gap-0.5">
+        {NAV_LIBRARY.map((n) =>
+          item(n, n.id === "patterns" ? <span className="text-xs tabular-nums text-muted-foreground">{registry.length}</span> : undefined)
+        )}
       </nav>
       <div className="my-4 border-t" />
       <nav aria-label="Settings" className="flex flex-col gap-0.5">
