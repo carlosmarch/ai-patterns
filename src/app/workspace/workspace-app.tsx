@@ -10,7 +10,6 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
-  CircleAlert,
   Clock,
   FlaskConical,
   History,
@@ -22,7 +21,6 @@ import {
   Plug,
   Plus,
   Search,
-  ShieldAlert,
   Workflow,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -34,7 +32,6 @@ import { BackgroundTasksDrawer, type BackgroundTask } from "@/registry/agents/ba
 import { CollaborativePresence } from "@/registry/collaboration/collaborative-presence/component";
 import { CommandPalette, type CommandPaletteGroup, type CommandPaletteItem } from "@/registry/navigation/command-palette/component";
 import { InviteMembers } from "@/registry/access/invite-members/component";
-import { PromptBar } from "@/registry/composer/prompt-bar/component";
 import { PromptBarPro } from "@/registry/composer/prompt-bar-pro/component";
 import type { Agent } from "@/registry/traces/multi-agent-trace/component";
 import type { AnalysisItem } from "@/registry/loaders/analysis-list/component";
@@ -797,10 +794,8 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
                 ) : (
                   <NewThread
                     threads={threads}
-                    runningTasks={runningTasks}
                     onSubmit={submitPrompt}
                     onOpenThread={openThread}
-                    onOpenTasks={() => setTasksOpen(true)}
                   />
                 )}
               </>
@@ -1311,19 +1306,14 @@ function firstPrompt(thread: Thread) {
 
 function NewThread({
   threads,
-  runningTasks,
   onSubmit,
   onOpenThread,
-  onOpenTasks,
 }: {
   threads: Thread[];
-  runningTasks: number;
   onSubmit: (prompt: string) => void;
   onOpenThread: (id: string) => void;
-  onOpenTasks: () => void;
 }) {
   const greeting = useGreeting();
-  const attention = threads.filter((t) => t.badge);
   const recent = threads.filter((t) => !t.badge && t.blocks.length > 0).slice(0, 6);
 
   return (
@@ -1346,61 +1336,23 @@ function NewThread({
           <p className="mt-5 h-5 text-sm text-muted-foreground">{greeting}</p>
           <h3 className="mt-1 text-balance font-serif text-3xl tracking-tight sm:text-5xl">Hey {USER_NAME}, what&apos;s on your mind?</h3>
 
-          {(attention.length > 0 || runningTasks > 0) && (
-            <div className="mt-5 flex flex-wrap justify-center gap-2">
-              {attention.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => onOpenThread(t.id)}
-                  className={cn(
-                    "flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-                    t.badge === "Failed"
-                      ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
-                      : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300"
-                  )}
-                >
-                  {t.badge === "Failed" ? <CircleAlert className="size-3.5" /> : <ShieldAlert className="size-3.5" />}
-                  {t.badge}: {t.title}
-                </button>
-              ))}
-              {runningTasks > 0 && (
-                <button
-                  type="button"
-                  onClick={onOpenTasks}
-                  className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:bg-accent"
-                >
-                  <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
-                  {runningTasks} background {runningTasks === 1 ? "task" : "tasks"} running
-                </button>
-              )}
-            </div>
-          )}
-
-          <PromptBar
-            placeholder="Ask anything — / for commands, @ for sources"
+          <PromptBarPro
+            suggestions={COMPOSER_SUGGESTIONS}
+            visibleCount={COMPOSER_SUGGESTIONS.length}
             sources={COMPOSER_SOURCES}
             commands={COMPOSER_COMMANDS}
-            models={[
-              { id: "fast", label: `${AGENT_NAME} Fast` },
-              { id: "deep", label: `${AGENT_NAME} Deep research` },
+            environments={[
+              { id: "repo", label: "carlosmarch/ai-patterns" },
+              { id: "figma", label: "Figma · Chat screen v2" },
             ]}
+            orchestrators={[
+              { id: "origami", label: AGENT_NAME },
+              { id: "reviewer", label: "Spec reviewer" },
+            ]}
+            placeholder="Ask anything — / for commands, @ for sources"
             onSubmit={onSubmit}
             className="mt-8 w-full text-left"
           />
-          <div className="mt-3 flex flex-wrap justify-center gap-2">
-            {COMPOSER_SUGGESTIONS.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => onSubmit(s.label)}
-                className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              >
-                {s.icon && <s.icon className="size-3.5" />}
-                {s.label}
-              </button>
-            ))}
-          </div>
         </motion.div>
 
         <section aria-labelledby="start-with" className="mt-12">
