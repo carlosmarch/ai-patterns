@@ -9,6 +9,7 @@ import "./globals.css";
 import { Footer } from "@/components/footer";
 import { SiteNav } from "@/components/site-nav";
 import { ScrollRestoration } from "@/components/scroll-restoration";
+import { StarToast } from "@/components/star-toast";
 
 const THEME_INIT_SCRIPT = `
 (function () {
@@ -68,6 +69,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </header>
         <div className="flex-1">{children}</div>
         <Footer />
+        <StarToast />
         <Analytics />
       </body>
     </html>
