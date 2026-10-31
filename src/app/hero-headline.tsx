@@ -115,7 +115,7 @@ export function HeroHeadline() {
   }, [reduce]);
 
   return (
-    <h1 className="text-[2.1rem] leading-[1.12] font-semibold tracking-tight sm:text-5xl">
+    <h1 className="mt-6 text-[2.4rem] leading-[1.1] font-semibold tracking-tight sm:text-6xl">
       <span className="sr-only">The UX pattern language for AI agents</span>
       <span aria-hidden className="block">
         The UX pattern

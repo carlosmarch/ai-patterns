@@ -83,8 +83,6 @@ const GROUPS: { title: string; blurb: string; slugs: string[] }[] = [
 
 const FEATURED = "prompt-bar-pro";
 const HIDDEN = new Set([FEATURED, "shiny-button"]);
-// Thumbnails pinned to the hero, like prints on a desk.
-const POLAROIDS = ["multi-agent-trace", "tool-approval"];
 
 const bySlug = new Map(registry.map((entry) => [entry.slug, entry]));
 const pick = (slugs: string[]) =>
@@ -106,158 +104,134 @@ export default function Home() {
   ].filter((g) => g.entries.length > 0);
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6">
-      {/* Hero — left-aligned statement with pinned prints on the right */}
-      <section className="grid items-center gap-10 pt-16 pb-14 sm:grid-cols-[1fr_auto] sm:pt-20">
-        <div>
-          <HeroHeadline />
-          <div className="mt-6 max-w-md space-y-3 text-sm leading-relaxed text-muted-foreground">
-            <p>
-              Agentic UI patterns distilled from the teams pioneering AI workflows. Each one ships
-              with a UX spec the harness can read — not just markup, but guardrails for what to
-              render, when, and why.
-            </p>
-            <p>
-              Browse the{" "}
-              <InlineLink href="/patterns">catalogue</InlineLink>, install them as a{" "}
-              <InlineLink href="/skill">Claude Code skill</InlineLink>, or read the source on{" "}
-              <InlineLink href={REPO_URL} external>
-                GitHub
-              </InlineLink>
-              .
-            </p>
-          </div>
-        </div>
+    <main>
+      <section className="relative overflow-hidden border-b">
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 [background-image:linear-gradient(var(--color-border)_1px,transparent_1px),linear-gradient(90deg,var(--color-border)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(ellipse_60%_55%_at_50%_0%,black,transparent)]"
+        />
 
-        <Polaroids />
-      </section>
-
-      {/* Featured — the composer, live */}
-      {featured && (
-        <Section title="Try it" action={{ label: "View details", href: href(featured) }}>
-          <Card
-            title={featured.title}
-            description={featured.description}
-            href={href(featured)}
-          >
-            <div className="flex justify-center px-4 py-10 sm:px-10">
-              <HomeHero />
-            </div>
-          </Card>
-        </Section>
-      )}
-
-      {/* New */}
-      {newEntries.length > 0 && (
-        <Section title="New" action={{ label: "View all", href: "/patterns" }}>
-          <div className="space-y-4">
-            {newEntries.map((entry) => (
-              <DemoCard key={entry.slug} entry={entry} badge="New" />
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* Groups — one live demo, then a grid of prints */}
-      {groups.map((group) => {
-        const [lead, ...rest] = group.entries;
-        return (
-          <Section
-            key={group.title}
-            title={group.title}
-            blurb={group.blurb}
-            meta={`${group.entries.length} ${group.entries.length === 1 ? "pattern" : "patterns"}`}
-          >
-            <DemoCard entry={lead} />
-            {rest.length > 0 && (
-              <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {rest.map((entry) => (
-                  <li key={entry.slug}>
-                    <ThumbnailCard entry={entry} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Section>
-        );
-      })}
-
-      {/* Closing */}
-      <section className="py-24 text-center sm:py-32">
-        <h2 className="text-2xl font-medium tracking-tight sm:text-3xl">
-          Let&apos;s build agents people can trust.
-        </h2>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-          <Link href="/patterns" className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground">
-            <BookOpen className="size-3.5" />
-            Patterns
-          </Link>
-          <Link href="/skill" className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground">
+        <div className="mx-auto w-full max-w-3xl px-6 pt-20 pb-16 text-center">
+          <div className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
             <Sparkles className="size-3.5" />
-            Claude Code skill
-          </Link>
-          <a
-            href={REPO_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
-          >
-            <GithubMark className="size-3.5" />
-            GitHub
-          </a>
+            A portable UX contract, not a skin
+          </div>
+
+          <HeroHeadline />
+          <p className="mx-auto mt-5 max-w-md text-muted-foreground">
+            Distilled from the teams pioneering AI workflows. Agentic patterns with
+            machine-readable specs. Each pattern ships with a UX spec the
+            harness can read, not just markup — guardrails for what to render, when, and why.
+          </p>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="#first-demo"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
+            >
+              Browse the catalogue →
+            </Link>
+            <Link
+              href="/skill"
+              className="inline-flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              Install as a Claude Code skill
+              <ArrowUpRight className="size-3.5" />
+            </Link>
+          </div>
         </div>
       </section>
+
+      <div className="mx-auto w-full max-w-3xl px-6 pt-6">
+        {/* Featured — the composer, live */}
+        {featured && (
+          <Section title="Try it" action={{ label: "View details", href: href(featured) }}>
+            <Card
+              title={featured.title}
+              description={featured.description}
+              href={href(featured)}
+            >
+              <div className="flex justify-center px-4 py-10 sm:px-10">
+                <HomeHero />
+              </div>
+            </Card>
+          </Section>
+        )}
+
+        {/* New */}
+        {newEntries.length > 0 && (
+          <Section id="first-demo" title="New" action={{ label: "View all", href: "/patterns" }}>
+            <div className="space-y-4">
+              {newEntries.map((entry) => (
+                <DemoCard key={entry.slug} entry={entry} badge="New" />
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Groups — one live demo, then a grid of prints */}
+        {groups.map((group) => {
+          const [lead, ...rest] = group.entries;
+          return (
+            <Section
+              key={group.title}
+              title={group.title}
+              blurb={group.blurb}
+              meta={`${group.entries.length} ${group.entries.length === 1 ? "pattern" : "patterns"}`}
+            >
+              <DemoCard entry={lead} />
+              {rest.length > 0 && (
+                <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                  {rest.map((entry) => (
+                    <li key={entry.slug}>
+                      <ThumbnailCard entry={entry} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Section>
+          );
+        })}
+
+        {/* Closing */}
+        <section className="py-24 text-center sm:py-32">
+          <h2 className="text-2xl font-medium tracking-tight sm:text-3xl">
+            Let&apos;s build agents people can trust.
+          </h2>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            <Link href="/patterns" className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground">
+              <BookOpen className="size-3.5" />
+              Patterns
+            </Link>
+            <Link href="/skill" className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground">
+              <Sparkles className="size-3.5" />
+              Claude Code skill
+            </Link>
+            <a
+              href={REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+            >
+              <GithubMark className="size-3.5" />
+              GitHub
+            </a>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
 
-function InlineLink({ href, external, children }: { href: string; external?: boolean; children: ReactNode }) {
-  const className =
-    "text-foreground underline decoration-foreground/30 underline-offset-[3px] transition-colors hover:decoration-foreground";
-  return external ? (
-    <a href={href} target="_blank" rel="noreferrer" className={className}>
-      {children}
-    </a>
-  ) : (
-    <Link href={href} className={className}>
-      {children}
-    </Link>
-  );
-}
-
-function Polaroids() {
-  const prints = pick(POLAROIDS);
-  return (
-    <div aria-hidden className="relative hidden h-72 w-60 sm:block">
-      {/* dotted desk surface */}
-      <div className="absolute -inset-6 [background-image:radial-gradient(var(--color-border)_1px,transparent_1px)] [background-size:10px_10px] [mask-image:radial-gradient(closest-side,black,transparent)]" />
-      {prints.map(({ slug, title, Thumbnail }, i) => (
-        <div
-          key={slug}
-          className={
-            "absolute w-48 rounded-[3px] border bg-card p-2 pb-7 shadow-[0_1px_2px_rgb(0_0_0/0.06),0_12px_28px_-10px_rgb(0_0_0/0.25)] " +
-            (i === 0 ? "top-0 left-0 -rotate-6" : "right-0 bottom-0 rotate-3")
-          }
-        >
-          <div className="aspect-[5/3] bg-muted/50 p-1.5">
-            <Thumbnail />
-          </div>
-          <p className="absolute right-2 bottom-2 left-2 truncate font-mono text-[10px] text-muted-foreground">
-            {title}
-          </p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function Section({
+  id,
   title,
   blurb,
   meta,
   action,
   children,
 }: {
+  id?: string;
   title: string;
   blurb?: string;
   meta?: string;
@@ -265,7 +239,7 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="py-10 sm:py-12">
+    <section id={id} className="scroll-mt-6 py-10 sm:py-12">
       <div className="mb-4 flex items-baseline justify-between gap-4">
         <div>
           <h2 className="text-sm font-medium">{title}</h2>
