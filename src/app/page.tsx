@@ -4,6 +4,7 @@ import { ArrowUpRight, BookOpen, Sparkles } from "lucide-react";
 
 import { registry, type RegistryEntry } from "@/registry";
 import { GithubMark } from "@/components/github-mark";
+import { PatternCard } from "@/components/pattern-card";
 import { HeroHeadline } from "./hero-headline";
 import { HomeHero } from "./home-hero";
 
@@ -184,7 +185,7 @@ export default function Home() {
                 <ul className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
                   {rest.map((entry) => (
                     <li key={entry.slug}>
-                      <ThumbnailCard entry={entry} />
+                      <PatternCard entry={entry} />
                     </li>
                   ))}
                 </ul>
@@ -239,7 +240,7 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-6 py-10 sm:py-12">
+    <section id={id} className="scroll-mt-16 py-10 sm:py-12">
       <div className="mb-4 flex items-baseline justify-between gap-4">
         <div>
           <h2 className="text-sm font-medium">{title}</h2>
@@ -311,23 +312,5 @@ function DemoCard({ entry, badge }: { entry: RegistryEntry; badge?: string }) {
         <Demo />
       </div>
     </Card>
-  );
-}
-
-function ThumbnailCard({ entry }: { entry: RegistryEntry }) {
-  const { Thumbnail } = entry;
-  return (
-    <Link
-      href={href(entry)}
-      className="group block h-full rounded-xl border bg-muted/40 p-1.5 transition-colors hover:bg-muted/70"
-    >
-      <div className="aspect-[5/3] rounded-lg border bg-card p-2 dark:bg-background transition-transform duration-300 group-hover:-translate-y-0.5">
-        <Thumbnail />
-      </div>
-      <div className="px-1.5 pt-2.5 pb-1.5">
-        <p className="text-sm font-medium">{entry.title}</p>
-        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{entry.description}</p>
-      </div>
-    </Link>
   );
 }
