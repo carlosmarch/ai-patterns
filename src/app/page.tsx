@@ -304,7 +304,7 @@ function Card({
 }) {
   return (
     <article className={"rounded-xl border bg-muted/40 p-1.5 " + (className ?? "")}>
-      <div className="overflow-hidden rounded-lg border bg-background">{children}</div>
+      <div className="overflow-hidden rounded-lg border bg-card dark:bg-background">{children}</div>
       <div className="flex items-end justify-between gap-4 px-3 pt-3 pb-2">
         <div className="min-w-0">
           <h3 className="flex items-center gap-2 text-sm font-medium">
@@ -347,7 +347,7 @@ function ThumbnailCard({ entry }: { entry: RegistryEntry }) {
       href={href(entry)}
       className="group block h-full rounded-xl border bg-muted/40 p-1.5 transition-colors hover:bg-muted/70"
     >
-      <div className="aspect-[5/3] rounded-lg border bg-background p-2 transition-transform duration-300 group-hover:-translate-y-0.5">
+      <div className="aspect-[5/3] rounded-lg border bg-card p-2 dark:bg-background transition-transform duration-300 group-hover:-translate-y-0.5">
         <Thumbnail />
       </div>
       <div className="px-1.5 pt-2.5 pb-1.5">
