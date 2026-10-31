@@ -1,6 +1,5 @@
-import Link from "next/link";
-
 import { registry, type RegistryEntry } from "@/registry";
+import { PatternCard } from "@/components/pattern-card";
 
 export default function PatternsIndexPage() {
   const byCategory: Record<string, RegistryEntry[]> = {};
@@ -18,22 +17,16 @@ export default function PatternsIndexPage() {
       <div className="mt-10 space-y-10">
         {Object.entries(byCategory).map(([category, entries]) => (
           <section key={category} id={category} className="scroll-mt-20">
-            <h2 className="mb-4 text-lg font-medium capitalize">{category}</h2>
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {entries.map(({ Thumbnail, ...entry }) => (
+            <div className="mb-4 flex items-baseline justify-between gap-4">
+              <h2 className="text-sm font-medium capitalize">{category}</h2>
+              <span className="font-mono text-[11px] text-muted-foreground">
+                {entries.length} {entries.length === 1 ? "pattern" : "patterns"}
+              </span>
+            </div>
+            <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {entries.map((entry) => (
                 <li key={entry.slug}>
-                  <Link
-                    href={`/patterns/${entry.category}/${entry.slug}`}
-                    className="group block h-full overflow-hidden rounded-lg border transition-colors hover:bg-accent"
-                  >
-                    <div className="aspect-[5/3] border-b bg-muted/40 p-3 transition-colors group-hover:bg-muted/70">
-                      <Thumbnail />
-                    </div>
-                    <div className="p-4">
-                      <p className="font-medium">{entry.title}</p>
-                      <p className="text-sm text-muted-foreground">{entry.description}</p>
-                    </div>
-                  </Link>
+                  <PatternCard entry={entry} />
                 </li>
               ))}
             </ul>
