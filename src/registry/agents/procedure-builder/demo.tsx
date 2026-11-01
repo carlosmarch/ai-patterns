@@ -33,7 +33,6 @@ const steps: ProcedureStep[] = [
       { id: "evidence-escalate", kind: "action", action: "escalate", target: "Claims team" },
     ],
   },
-  { id: "resolve", kind: "header", text: "Offer a resolution" },
   {
     id: "policy",
     kind: "condition",
