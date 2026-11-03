@@ -144,6 +144,9 @@ import { pattern as describeFiltersPattern } from "./tables/describe-filters/pat
 import AiFillDrawerDemo from "./tables/ai-fill-drawer/demo";
 import AiFillDrawerThumbnail from "./tables/ai-fill-drawer/thumbnail";
 import { pattern as aiFillDrawerPattern } from "./tables/ai-fill-drawer/pattern";
+import NaturalLanguageQueryDemo from "./tables/natural-language-query/demo";
+import NaturalLanguageQueryThumbnail from "./tables/natural-language-query/thumbnail";
+import { pattern as naturalLanguageQueryPattern } from "./tables/natural-language-query/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -600,6 +603,16 @@ export const registry: RegistryEntry[] = [
     Demo: AiFillDrawerDemo,
     Thumbnail: AiFillDrawerThumbnail,
     uxDoc: aiFillDrawerPattern,
+  },
+  {
+    slug: "natural-language-query",
+    category: "tables",
+    title: "Natural Language Query",
+    description:
+      "A SQL-first query bar that also takes plain language — the mode badge flips to Ask, and Enter translates the request into a visible, editable WHERE clause before running it.",
+    Demo: NaturalLanguageQueryDemo,
+    Thumbnail: NaturalLanguageQueryThumbnail,
+    uxDoc: naturalLanguageQueryPattern,
   },
 ];
 
