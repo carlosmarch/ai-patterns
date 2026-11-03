@@ -141,6 +141,9 @@ import { pattern as promptOnboardingPattern } from "./onboarding/prompt-onboardi
 import DescribeFiltersDemo from "./tables/describe-filters/demo";
 import DescribeFiltersThumbnail from "./tables/describe-filters/thumbnail";
 import { pattern as describeFiltersPattern } from "./tables/describe-filters/pattern";
+import AiFillDrawerDemo from "./tables/ai-fill-drawer/demo";
+import AiFillDrawerThumbnail from "./tables/ai-fill-drawer/thumbnail";
+import { pattern as aiFillDrawerPattern } from "./tables/ai-fill-drawer/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -587,6 +590,16 @@ export const registry: RegistryEntry[] = [
     Demo: DescribeFiltersDemo,
     Thumbnail: DescribeFiltersThumbnail,
     uxDoc: describeFiltersPattern,
+  },
+  {
+    slug: "ai-fill-drawer",
+    category: "tables",
+    title: "AI Fill Drawer",
+    description:
+      "A record drawer of key/value fields where the model fills the empty values — each arrives as a sourced suggestion to accept, edit or reject.",
+    Demo: AiFillDrawerDemo,
+    Thumbnail: AiFillDrawerThumbnail,
+    uxDoc: aiFillDrawerPattern,
   },
 ];
 
