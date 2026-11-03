@@ -140,7 +140,7 @@ export function DescribeFiltersTable<Row extends { id: string }>({
   return (
     <div className={cn("w-full overflow-hidden rounded-2xl border bg-card text-sm shadow-sm", className)}>
       {/* Toolbar */}
-      <div className="relative border-b">
+      <div className="border-b">
         <div className="flex min-h-14 items-center gap-2 px-3 py-2.5">
           <AnimatePresence mode="popLayout" initial={false}>
             {mode === "idle" ? (
@@ -269,35 +269,37 @@ export function DescribeFiltersTable<Row extends { id: string }>({
           </AnimatePresence>
         </div>
 
-        {/* Suggestions & errors float over the table instead of pushing it down. */}
-        <AnimatePresence>
+        {/* Suggestions & errors expand inline under the field and push the
+            table down — an overlay would cover the header and spill out of
+            the card when the table is short. */}
+        <AnimatePresence initial={false}>
           {(showSuggestions || error) && (
             <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.12 }}
-              className="absolute inset-x-3 top-full z-10 mt-1 overflow-hidden rounded-xl border bg-popover p-1.5 shadow-lg"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="overflow-hidden"
             >
               {error ? (
-                <p id="describe-filters-error" role="alert" className="px-2.5 py-2 text-xs text-destructive">
+                <p id="describe-filters-error" role="alert" className="px-4 pb-3 text-xs text-destructive">
                   {error}
                 </p>
               ) : (
-                <>
-                  <p className="px-2.5 pb-1 pt-1.5 text-xs text-muted-foreground">Try</p>
+                <div className="px-2 pb-2">
+                  <p className="px-3 pb-1 text-xs text-muted-foreground">Try</p>
                   {suggestions.map((s) => (
                     <button
                       key={s}
                       type="button"
                       onClick={() => submit(s)}
-                      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-accent"
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors hover:bg-accent"
                     >
                       <Sparkles className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
                       {s}
                     </button>
                   ))}
-                </>
+                </div>
               )}
             </motion.div>
           )}

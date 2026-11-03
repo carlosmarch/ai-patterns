@@ -16,7 +16,7 @@ A "Describe" button in a table's toolbar that turns into a free-text field where
 ## Anatomy
 - **Describe button** — a pill with a sparkle icon, first in the toolbar, next to keyword search.
 - **Describe field** — replaces the toolbar in place: cancel (×), text input, submit arrow.
-- **Suggestions** — a small popover of example descriptions, shown only while the field is empty.
+- **Suggestions** — a short list of example descriptions that expands inline under the field (pushing the table down, never overlaying it), shown only while the field is empty.
 - **Pending state** — inline "Building filters" status in the field; the table dims but keeps its rows.
 - **Filter chips** — Field · operator · value, each removable. Chips from the last description carry a small sparkle; semantic chips use a dashed border and an italic field name.
 - **Interpretation bar** — a thin line under the toolbar: the description that produced the filters, the resulting row count ("6 of 24"), and an Edit action.
