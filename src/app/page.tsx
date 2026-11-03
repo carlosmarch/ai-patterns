@@ -14,7 +14,7 @@ const REPO_URL = "https://github.com/carlosmarch/ai-patterns";
 // agent working, answering, taking input — before builder, error and team
 // patterns. The first slug of each group is shown as a live demo; the rest
 // render as thumbnail cards. Anything not listed is appended to a final group.
-const NEW = ["procedure-builder", "instruction-tools", "refinement-controls"];
+const NEW = ["describe-filters", "procedure-builder", "instruction-tools", "refinement-controls"];
 
 const GROUPS: { title: string; blurb: string; slugs: string[] }[] = [
   {
