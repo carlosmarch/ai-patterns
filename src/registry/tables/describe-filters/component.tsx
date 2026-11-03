@@ -1,0 +1,427 @@
+"use client";
+
+import * as React from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { ArrowUp, ListFilter, Search, Sparkles, X } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+
+export interface DescribeFiltersColumn<Row> {
+  key: string;
+  label: string;
+  /** Renders the cell; defaults to `String(row[key])`. */
+  render?: (row: Row) => React.ReactNode;
+  className?: string;
+}
+
+export interface DescribedFilter<Row> {
+  id: string;
+  /** Column label, or a concept label like "About" when no column covers the request. */
+  field: string;
+  operator: string;
+  value: string;
+  /**
+   * `column` filters map onto a real column. `semantic` filters have no
+   * column behind them — the model matched rows by meaning — so the chip is
+   * marked differently and the user knows it can't be edited like a column.
+   */
+  kind: "column" | "semantic";
+  test: (row: Row) => boolean;
+}
+
+export interface DescribeResult<Row> {
+  filters: DescribedFilter<Row>[];
+}
+
+export interface DescribeFiltersTableProps<Row extends { id: string }> {
+  columns: DescribeFiltersColumn<Row>[];
+  rows: Row[];
+  /** Turns a plain-language description into filters. */
+  onDescribe: (description: string) => Promise<DescribeResult<Row>>;
+  /** Used by the plain keyword search box. */
+  searchText?: (row: Row) => string;
+  /** Example descriptions shown while the describe field is empty. */
+  suggestions?: string[];
+  initialFilters?: DescribedFilter<Row>[];
+  describePlaceholder?: string;
+  className?: string;
+}
+
+export function DescribeFiltersTable<Row extends { id: string }>({
+  columns,
+  rows,
+  onDescribe,
+  searchText,
+  suggestions = [],
+  initialFilters = [],
+  describePlaceholder = "Describe the rows you want to see…",
+  className,
+}: DescribeFiltersTableProps<Row>) {
+  const [mode, setMode] = React.useState<"idle" | "describing" | "pending">("idle");
+  const [draft, setDraft] = React.useState("");
+  const [lastDescription, setLastDescription] = React.useState<string | null>(null);
+  const [filters, setFilters] = React.useState(initialFilters);
+  /** Ids of filters produced by the last description — they get the AI marker. */
+  const [generatedIds, setGeneratedIds] = React.useState<Set<string>>(new Set());
+  const [query, setQuery] = React.useState("");
+  const [error, setError] = React.useState<string | null>(null);
+
+  const describeRef = React.useRef<HTMLInputElement>(null);
+  const describeButtonRef = React.useRef<HTMLButtonElement>(null);
+  const restoreFocus = React.useRef(false);
+
+  React.useEffect(() => {
+    if (mode === "describing") describeRef.current?.focus();
+    if (mode === "idle" && restoreFocus.current) {
+      restoreFocus.current = false;
+      describeButtonRef.current?.focus();
+    }
+  }, [mode]);
+
+  const visibleRows = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return rows.filter(
+      (row) =>
+        filters.every((f) => f.test(row)) && (!q || (searchText?.(row) ?? "").toLowerCase().includes(q))
+    );
+  }, [rows, filters, query, searchText]);
+
+  function openDescribe(prefill = "") {
+    setDraft(prefill);
+    setError(null);
+    setMode("describing");
+  }
+
+  function cancelDescribe() {
+    restoreFocus.current = true;
+    setMode("idle");
+  }
+
+  async function submit(description: string) {
+    const trimmed = description.trim();
+    if (!trimmed || mode === "pending") return;
+    setDraft(trimmed);
+    setMode("pending");
+    setError(null);
+    try {
+      const result = await onDescribe(trimmed);
+      // A description replaces the previous generated set but keeps filters
+      // the user added by hand.
+      setFilters((prev) => [...prev.filter((f) => !generatedIds.has(f.id)), ...result.filters]);
+      setGeneratedIds(new Set(result.filters.map((f) => f.id)));
+      setLastDescription(trimmed);
+      restoreFocus.current = true;
+      setMode("idle");
+    } catch {
+      setError("Couldn't turn that into filters. Try rephrasing.");
+      setMode("describing");
+    }
+  }
+
+  function removeFilter(id: string) {
+    setFilters((prev) => prev.filter((f) => f.id !== id));
+    setGeneratedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      if (next.size === 0) setLastDescription(null);
+      return next;
+    });
+  }
+
+  function clearAll() {
+    setFilters([]);
+    setGeneratedIds(new Set());
+    setLastDescription(null);
+  }
+
+  const busy = mode === "pending";
+  const showSuggestions = mode === "describing" && !draft && suggestions.length > 0;
+
+  return (
+    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card text-sm shadow-sm", className)}>
+      {/* Toolbar */}
+      <div className="relative border-b">
+        <div className="flex min-h-14 items-center gap-2 px-3 py-2.5">
+          <AnimatePresence mode="popLayout" initial={false}>
+            {mode === "idle" ? (
+              <motion.div
+                key="toolbar"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+                className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+              >
+                <button
+                  ref={describeButtonRef}
+                  type="button"
+                  onClick={() => openDescribe()}
+                  className="flex h-8 shrink-0 items-center gap-1.5 rounded-full border bg-background px-3 font-medium transition-colors hover:bg-accent"
+                >
+                  <Sparkles className="size-3.5" aria-hidden />
+                  Describe
+                </button>
+
+                <label className="flex h-8 w-40 shrink-0 items-center gap-2 rounded-full border bg-background px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-ring/40">
+                  <Search className="size-3.5 shrink-0" aria-hidden />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search"
+                    aria-label="Search rows"
+                    className="min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
+                  />
+                </label>
+
+                {filters.length > 0 && (
+                  <span className="flex size-8 shrink-0 items-center justify-center text-muted-foreground" aria-hidden>
+                    <ListFilter className="size-4" />
+                  </span>
+                )}
+
+                <ul className="contents" aria-label="Active filters">
+                  <AnimatePresence initial={false}>
+                    {filters.map((f, i) => (
+                      <FilterChip
+                        key={f.id}
+                        filter={f}
+                        generated={generatedIds.has(f.id)}
+                        delay={generatedIds.has(f.id) ? i * 0.06 : 0}
+                        onRemove={() => removeFilter(f.id)}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </ul>
+
+                {filters.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={clearAll}
+                    className="h-8 shrink-0 rounded-full px-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </motion.div>
+            ) : (
+              <motion.form
+                key="describe"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  submit(draft);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape" && !busy) {
+                    e.preventDefault();
+                    cancelDescribe();
+                  }
+                }}
+                className="flex min-w-0 flex-1 items-center gap-2"
+              >
+                <button
+                  type="button"
+                  onClick={cancelDescribe}
+                  disabled={busy}
+                  aria-label="Cancel describing"
+                  className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
+                >
+                  <X className="size-4" />
+                </button>
+                <div className="relative min-w-0 flex-1">
+                  <input
+                    ref={describeRef}
+                    value={draft}
+                    onChange={(e) => {
+                      setDraft(e.target.value);
+                      setError(null);
+                    }}
+                    readOnly={busy}
+                    placeholder={describePlaceholder}
+                    aria-label="Describe filters"
+                    aria-describedby={error ? "describe-filters-error" : undefined}
+                    className={cn(
+                      "h-8 w-full bg-transparent outline-none placeholder:text-muted-foreground",
+                      busy && "text-muted-foreground"
+                    )}
+                  />
+                </div>
+                {busy ? (
+                  <span className="flex shrink-0 items-center gap-1.5 pr-1 text-xs text-muted-foreground" role="status">
+                    <Sparkles className="size-3.5 animate-spin [animation-duration:2s]" aria-hidden />
+                    <span className="animate-pulse">Building filters</span>
+                  </span>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={!draft.trim()}
+                    aria-label="Apply description"
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity disabled:opacity-30"
+                  >
+                    <ArrowUp className="size-4" />
+                  </button>
+                )}
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Suggestions & errors float over the table instead of pushing it down. */}
+        <AnimatePresence>
+          {(showSuggestions || error) && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.12 }}
+              className="absolute inset-x-3 top-full z-10 mt-1 overflow-hidden rounded-xl border bg-popover p-1.5 shadow-lg"
+            >
+              {error ? (
+                <p id="describe-filters-error" role="alert" className="px-2.5 py-2 text-xs text-destructive">
+                  {error}
+                </p>
+              ) : (
+                <>
+                  <p className="px-2.5 pb-1 pt-1.5 text-xs text-muted-foreground">Try</p>
+                  {suggestions.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => submit(s)}
+                      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-accent"
+                    >
+                      <Sparkles className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+                      {s}
+                    </button>
+                  ))}
+                </>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Interpretation line: what was asked, and how to revise it. */}
+      <AnimatePresence initial={false}>
+        {lastDescription && mode === "idle" && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="overflow-hidden border-b bg-muted/40"
+          >
+            <p className="flex items-center gap-1.5 px-4 py-2 text-xs text-muted-foreground" aria-live="polite">
+              <Sparkles className="size-3 shrink-0" aria-hidden />
+              <span className="min-w-0 truncate">
+                Filtered for <span className="text-foreground">“{lastDescription}”</span> · {visibleRows.length} of{" "}
+                {rows.length}
+              </span>
+              <button
+                type="button"
+                onClick={() => openDescribe(lastDescription)}
+                className="ml-auto shrink-0 font-medium text-foreground underline-offset-2 hover:underline"
+              >
+                Edit
+              </button>
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Table */}
+      <div className="max-h-80 overflow-auto">
+        <table className="w-full border-collapse" aria-busy={busy}>
+          <thead className="sticky top-0 z-[1] bg-card">
+            <tr className="border-b text-left text-xs text-muted-foreground">
+              {columns.map((c) => (
+                <th key={c.key} scope="col" className={cn("px-4 py-2.5 font-medium", c.className)}>
+                  {c.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <motion.tbody animate={{ opacity: busy ? 0.4 : 1 }} transition={{ duration: 0.2 }}>
+            <AnimatePresence initial={false}>
+              {visibleRows.map((row) => (
+                <motion.tr
+                  key={row.id}
+                  layout="position"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                  className="border-b last:border-b-0"
+                >
+                  {columns.map((c) => (
+                    <td key={c.key} className={cn("px-4 py-2.5", c.className)}>
+                      {c.render ? c.render(row) : String((row as Record<string, unknown>)[c.key] ?? "")}
+                    </td>
+                  ))}
+                </motion.tr>
+              ))}
+            </AnimatePresence>
+          </motion.tbody>
+        </table>
+        {visibleRows.length === 0 && (
+          <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
+            <p className="text-muted-foreground">No rows match these filters.</p>
+            {lastDescription && (
+              <button
+                type="button"
+                onClick={() => openDescribe(lastDescription)}
+                className="text-xs font-medium underline-offset-2 hover:underline"
+              >
+                Edit description
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FilterChip<Row>({
+  filter,
+  generated,
+  delay,
+  onRemove,
+}: {
+  filter: DescribedFilter<Row>;
+  generated: boolean;
+  delay: number;
+  onRemove: () => void;
+}) {
+  const semantic = filter.kind === "semantic";
+  const label = `${filter.field} ${filter.operator} ${filter.value}`;
+  return (
+    <motion.li
+      layout
+      initial={{ opacity: 0, scale: 0.92 }}
+      animate={{ opacity: 1, scale: 1, transition: { delay, duration: 0.18 } }}
+      exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.12 } }}
+      title={semantic ? "No column covers this — rows were matched by meaning" : undefined}
+      className={cn(
+        "flex h-8 shrink-0 items-center gap-1.5 rounded-full border bg-background pl-3 pr-1",
+        semantic && "border-dashed"
+      )}
+    >
+      {generated && <Sparkles className="size-3 shrink-0 text-muted-foreground" aria-label="Generated" />}
+      <span className={cn(semantic && "italic")}>{filter.field}</span>
+      <span className="text-muted-foreground">· {filter.operator} ·</span>
+      <span className="max-w-48 truncate">{filter.value}</span>
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Remove filter: ${label}`}
+        className="flex size-6 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+      >
+        <X className="size-3.5" />
+      </button>
+    </motion.li>
+  );
+}
