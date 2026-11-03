@@ -66,6 +66,7 @@ instead of copying these Tailwind classes or the Motion API.
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { CornerDownLeft, Search, X } from "lucide-react";
 
@@ -102,11 +103,22 @@ export function CommandPalette({
   onSelect,
   className,
 }: CommandPaletteProps) {
+  // Portal to <body>: an ancestor with backdrop-filter, filter or transform
+  // (e.g. a blurred sticky header) would otherwise become the containing
+  // block for this `fixed` overlay and clip it to that ancestor's box.
+  const mounted = React.useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false
+  );
+
   function close() {
     onOpenChange(false);
   }
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <div className={cn("fixed inset-0 z-50 flex justify-center px-4 pt-[12vh]", className)}>
@@ -141,8 +153,13 @@ export function CommandPalette({
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
+}
+
+function subscribeNoop() {
+  return () => {};
 }
 
 export interface CommandPaletteWindowProps {
