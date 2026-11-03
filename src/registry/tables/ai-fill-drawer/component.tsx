@@ -184,7 +184,7 @@ export function AiFillDrawer({
             </span>
           </div>
 
-          <dl className="flex-1 overflow-y-auto px-2 py-2">
+          <dl className="flex flex-1 flex-col gap-1.5 overflow-y-auto px-2 py-3">
             {fields.map((f) => (
               <FieldRow
                 key={f.key}
