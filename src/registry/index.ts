@@ -138,6 +138,9 @@ import { pattern as setupChecklistPattern } from "./navigation/setup-checklist/p
 import PromptOnboardingDemo from "./onboarding/prompt-onboarding/demo";
 import PromptOnboardingThumbnail from "./onboarding/prompt-onboarding/thumbnail";
 import { pattern as promptOnboardingPattern } from "./onboarding/prompt-onboarding/pattern";
+import DescribeFiltersDemo from "./tables/describe-filters/demo";
+import DescribeFiltersThumbnail from "./tables/describe-filters/thumbnail";
+import { pattern as describeFiltersPattern } from "./tables/describe-filters/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -574,6 +577,16 @@ export const registry: RegistryEntry[] = [
     Demo: PromptOnboardingDemo,
     Thumbnail: PromptOnboardingThumbnail,
     uxDoc: promptOnboardingPattern,
+  },
+  {
+    slug: "describe-filters",
+    category: "tables",
+    title: "Describe Filters",
+    description:
+      "A Describe button in a table toolbar that turns a plain-language request into removable filter chips — column filters where a column exists, marked semantic matches where none does.",
+    Demo: DescribeFiltersDemo,
+    Thumbnail: DescribeFiltersThumbnail,
+    uxDoc: describeFiltersPattern,
   },
 ];
 
