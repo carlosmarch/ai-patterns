@@ -5,6 +5,8 @@ import { ArrowUpRight, BookOpen, Sparkles } from "lucide-react";
 import { registry, type RegistryEntry } from "@/registry";
 import { GithubMark } from "@/components/github-mark";
 import { PatternCard } from "@/components/pattern-card";
+import { SeenIn } from "@/components/seen-in";
+import type { TeamId } from "@/lib/teams";
 import { IntroHero, type HeroEntry } from "./intro-hero/intro-hero";
 import { HomeFeatures } from "./home-features";
 import { HomeHero } from "./home-hero";
@@ -140,6 +142,7 @@ export default function Home() {
               title={featured.title}
               description={featured.description}
               href={href(featured)}
+              seenIn={featured.seenIn}
             >
               <div className="flex justify-center px-4 py-10 sm:px-10">
                 <HomeHero />
@@ -256,6 +259,7 @@ function Card({
   description,
   href,
   badge,
+  seenIn,
   className,
   children,
 }: {
@@ -263,6 +267,7 @@ function Card({
   description: string;
   href: string;
   badge?: string;
+  seenIn?: TeamId[];
   className?: string;
   children: ReactNode;
 }) {
@@ -281,13 +286,16 @@ function Card({
           </h3>
           <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
         </div>
-        <Link
-          href={href}
-          aria-label={`View ${title} details`}
-          className="flex size-7 shrink-0 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowUpRight className="size-3.5" />
-        </Link>
+        <div className="flex shrink-0 items-center gap-3">
+          <SeenIn ids={seenIn} size="sm" className="hidden sm:flex" />
+          <Link
+            href={href}
+            aria-label={`View ${title} details`}
+            className="flex size-7 shrink-0 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowUpRight className="size-3.5" />
+          </Link>
+        </div>
       </div>
     </article>
   );
@@ -296,7 +304,7 @@ function Card({
 function DemoCard({ entry, badge }: { entry: RegistryEntry; badge?: string }) {
   const Demo = entry.Demo;
   return (
-    <Card title={entry.title} description={entry.description} href={href(entry)} badge={badge}>
+    <Card title={entry.title} description={entry.description} href={href(entry)} badge={badge} seenIn={entry.seenIn}>
       <div className="flex min-h-[260px] items-center justify-center p-4 sm:p-10">
         <Demo />
       </div>
