@@ -531,7 +531,7 @@ export const registry: RegistryEntry[] = [
     Demo: SourceTrustCardDemo,
     Thumbnail: SourceTrustCardThumbnail,
     uxDoc: sourceTrustCardPattern,
-    seenIn: [],
+    seenIn: [{ team: "perplexity", source: "https://aiuxplayground.com/teardowns/perplexity/citations" }],
   },
   {
     slug: "follow-up-list",
