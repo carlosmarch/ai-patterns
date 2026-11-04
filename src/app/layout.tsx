@@ -31,6 +31,11 @@ if ("scrollRestoration" in history) {
 }
 `;
 
+// Umami analytics — only loaded when a website ID is configured, so local dev
+// and preview builds without the env var stay untracked.
+const UMAMI_WEBSITE_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+const UMAMI_SCRIPT_URL = process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL ?? "https://cloud.umami.is/script.js";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -72,6 +77,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Footer />
         <StarToast />
         <Analytics />
+        {UMAMI_WEBSITE_ID && (
+          <Script src={UMAMI_SCRIPT_URL} data-website-id={UMAMI_WEBSITE_ID} strategy="afterInteractive" />
+        )}
       </body>
     </html>
   );
