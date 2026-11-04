@@ -63,6 +63,7 @@ export const TEAM_IDS = [
   "supabase",
   "mixpanel",
   "mongodb",
+  "datamaran",
 ] as const;
 
 export type TeamId = (typeof TEAM_IDS)[number];
@@ -125,6 +126,7 @@ const CREDITED: Team[] = [
   glyph("supabase", siSupabase, "linear-gradient(145deg,#1f2a25,#0f1512)", "#3fcf8e"),
   glyph("mixpanel", siMixpanel, "linear-gradient(145deg,#9a7dff,#5b3fe0)"),
   glyph("mongodb", siMongodb, "linear-gradient(145deg,#1f3b2c,#0b1d14)", "#47a248"),
+  { id: "datamaran", name: "Datamaran", src: "/teams/datamaran.png", bg: "#eb5d36" },
 ];
 
 const TEAMS_BY_ID = new Map([...TEAMS, ...CREDITED].map((team) => [team.id, team]));
