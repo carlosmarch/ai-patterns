@@ -147,6 +147,16 @@ export default function Home() {
       </section>
 
       <div className="mx-auto w-full max-w-3xl px-6 pt-6">
+        {/* Why — the bento */}
+        <HomeFeatures
+          patternCount={registry.filter((e) => !HIDDEN.has(e.slug)).length}
+          thumbnails={pick(SEARCH_THUMBS).map(({ slug, Thumbnail }) => (
+            <div key={slug} className="rounded-md border bg-card p-1.5 dark:bg-background">
+              <Thumbnail />
+            </div>
+          ))}
+        />
+
         {/* Featured — the composer, live */}
         {featured && (
           <Section title="Try it" action={{ label: "View details", href: href(featured) }}>
@@ -196,16 +206,6 @@ export default function Home() {
             </Section>
           );
         })}
-
-        {/* Why — the bento */}
-        <HomeFeatures
-          patternCount={registry.filter((e) => !HIDDEN.has(e.slug)).length}
-          thumbnails={pick(SEARCH_THUMBS).map(({ slug, Thumbnail }) => (
-            <div key={slug} className="rounded-md border bg-card p-1.5 dark:bg-background">
-              <Thumbnail />
-            </div>
-          ))}
-        />
 
         {/* Closing */}
         <section className="py-24 text-center sm:py-32">
