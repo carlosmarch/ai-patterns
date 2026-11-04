@@ -14,6 +14,7 @@ import {
   siIntercom,
   siLinear,
   siMistralai,
+  siMixpanel,
   siNotion,
   siPerplexity,
   siPosthog,
@@ -59,6 +60,7 @@ export const TEAM_IDS = [
   "posthog",
   "sentry",
   "supabase",
+  "mixpanel",
 ] as const;
 
 export type TeamId = (typeof TEAM_IDS)[number];
@@ -119,6 +121,7 @@ const CREDITED: Team[] = [
   glyph("posthog", siPosthog, "linear-gradient(145deg,#fff4dc,#f3e3bf)", "#1d1f27"),
   glyph("sentry", siSentry, "linear-gradient(145deg,#4a3f78,#362d59)"),
   glyph("supabase", siSupabase, "linear-gradient(145deg,#1f2a25,#0f1512)", "#3fcf8e"),
+  glyph("mixpanel", siMixpanel, "linear-gradient(145deg,#9a7dff,#5b3fe0)"),
 ];
 
 const TEAMS_BY_ID = new Map([...TEAMS, ...CREDITED].map((team) => [team.id, team]));
