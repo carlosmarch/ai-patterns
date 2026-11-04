@@ -257,9 +257,8 @@ export const registry: RegistryEntry[] = [
     Thumbnail: TaskListThumbnail,
     uxDoc: taskListPattern,
     seenIn: [
-      { team: "claude", source: "https://code.claude.com/docs/en/agent-sdk/todo-tracking" },
+      { team: "claude", source: "https://code.claude.com/docs/en/interactive-mode#task-list" },
       { team: "cursor", source: "https://cursor.com/changelog/1-2" },
-      { team: "copilot", source: "https://code.visualstudio.com/docs/agents/run/planning" },
     ],
   },
   {
