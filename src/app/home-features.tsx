@@ -6,7 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { BadgeCheck, Search } from "lucide-react";
 import { siClaude, siCursor, siGithubcopilot } from "simple-icons";
 
-import { TEAMS, type Team } from "./hero-headline";
+import { TEAMS, type Team } from "./teams";
 
 // The "why" bento on the home page: two wide cards with a live vignette each,
 // three small ones, and a credit strip with the skill CTA.

@@ -5,7 +5,7 @@ import { ArrowUpRight, BookOpen, Sparkles } from "lucide-react";
 import { registry, type RegistryEntry } from "@/registry";
 import { GithubMark } from "@/components/github-mark";
 import { PatternCard } from "@/components/pattern-card";
-import { HeroHeadline } from "./hero-headline";
+import { IntroHero, type HeroEntry } from "./intro-hero/intro-hero";
 import { HomeFeatures } from "./home-features";
 import { HomeHero } from "./home-hero";
 
@@ -92,6 +92,14 @@ const bySlug = new Map(registry.map((entry) => [entry.slug, entry]));
 const pick = (slugs: string[]) =>
   slugs.map((slug) => bySlug.get(slug)).filter((e): e is RegistryEntry => Boolean(e));
 
+const toHeroEntry = ({ slug, category, title, description }: RegistryEntry): HeroEntry => ({
+  slug,
+  category,
+  title,
+  description,
+});
+const heroEntries = registry.filter((e) => !HIDDEN.has(e.slug) || e.slug === FEATURED).map(toHeroEntry);
+
 const href = (entry: RegistryEntry) => `/patterns/${entry.category}/${entry.slug}`;
 
 export default function Home() {
@@ -109,42 +117,10 @@ export default function Home() {
 
   return (
     <main>
-      <section className="relative overflow-hidden border-b">
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10 [background-image:linear-gradient(var(--color-border)_1px,transparent_1px),linear-gradient(90deg,var(--color-border)_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(ellipse_60%_55%_at_50%_0%,black,transparent)]"
-        />
-
-        <div className="mx-auto w-full max-w-3xl px-6 pt-20 pb-16 text-center">
-          <div className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
-            <Sparkles className="size-3.5" />
-            A portable UX contract, not a skin
-          </div>
-
-          <HeroHeadline />
-          <p className="mx-auto mt-5 max-w-md text-muted-foreground">
-            Distilled from the teams pioneering AI workflows. Agentic patterns with
-            machine-readable specs. Each pattern ships with a UX spec the
-            harness can read, not just markup — guardrails for what to render, when, and why.
-          </p>
-
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="#first-demo"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
-            >
-              Browse the catalogue →
-            </Link>
-            <Link
-              href="/skill"
-              className="inline-flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-            >
-              Install as a Claude Code skill
-              <ArrowUpRight className="size-3.5" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      <IntroHero
+        entries={heroEntries}
+        latest={newEntries[0] && toHeroEntry(newEntries[0])}
+      />
 
       <div className="mx-auto w-full max-w-3xl px-6 pt-6">
         {/* Why — the bento */}
