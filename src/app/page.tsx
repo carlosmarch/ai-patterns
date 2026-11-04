@@ -6,6 +6,7 @@ import { registry, type RegistryEntry } from "@/registry";
 import { GithubMark } from "@/components/github-mark";
 import { PatternCard } from "@/components/pattern-card";
 import { HeroHeadline } from "./hero-headline";
+import { HomeFeatures } from "./home-features";
 import { HomeHero } from "./home-hero";
 
 const REPO_URL = "https://github.com/carlosmarch/ai-patterns";
@@ -83,6 +84,8 @@ const GROUPS: { title: string; blurb: string; slugs: string[] }[] = [
 ];
 
 const FEATURED = "prompt-bar-pro";
+// Faded behind the search vignette in the "why" bento.
+const SEARCH_THUMBS = ["tool-approval", "streaming-text", "inline-citation", "stop-generation-button", "generation-error", "sources-stack"];
 const HIDDEN = new Set([FEATURED, "shiny-button"]);
 
 const bySlug = new Map(registry.map((entry) => [entry.slug, entry]));
@@ -193,6 +196,16 @@ export default function Home() {
             </Section>
           );
         })}
+
+        {/* Why — the bento */}
+        <HomeFeatures
+          patternCount={registry.filter((e) => !HIDDEN.has(e.slug)).length}
+          thumbnails={pick(SEARCH_THUMBS).map(({ slug, Thumbnail }) => (
+            <div key={slug} className="rounded-md border bg-card p-1.5 dark:bg-background">
+              <Thumbnail />
+            </div>
+          ))}
+        />
 
         {/* Closing */}
         <section className="py-24 text-center sm:py-32">

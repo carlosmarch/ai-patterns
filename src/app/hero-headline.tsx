@@ -26,7 +26,7 @@ import {
   type SimpleIcon,
 } from "simple-icons";
 
-type Team = { name: string; bg: string } & (
+export type Team = { name: string; bg: string } & (
   // A simple-icons glyph drawn on a tile, coloured to read like the team's app icon…
   | { path: string; fg: string; src?: never }
   // …or the team's own app icon artwork, for logos simple-icons doesn't carry.
@@ -43,7 +43,7 @@ const glyph = (icon: SimpleIcon, bg: string, fg = "#fff"): Team => ({
 // The teams whose AI workflows the patterns are distilled from. Ordered so
 // neighbouring tiles contrast; three consecutive entries are on screen at once,
 // and a length divisible by three keeps every rotation free of repeats.
-const TEAMS: Team[] = [
+export const TEAMS: Team[] = [
   { name: "Orca", src: "/teams/orca.png", bg: "#0b0b0b" },
   glyph(siCursor, "linear-gradient(145deg,#2a2a2a,#050505)"),
   glyph(siIntercom, "linear-gradient(145deg,#3b5cff,#1f3bd6)"),
