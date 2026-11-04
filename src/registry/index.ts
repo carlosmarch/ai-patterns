@@ -353,7 +353,9 @@ export const registry: RegistryEntry[] = [
     Demo: QuickChatDockDemo,
     Thumbnail: QuickChatDockThumbnail,
     uxDoc: quickChatDockPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "mixpanel", source: "https://docs.mixpanel.com/docs/mixpanel-agent" },
+    ],
   },
   {
     slug: "diff-summary",
@@ -401,7 +403,10 @@ export const registry: RegistryEntry[] = [
     Demo: ChatBubbleDemo,
     Thumbnail: ChatBubbleThumbnail,
     uxDoc: chatBubblePattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://community.openai.com/t/chatgpt-bug-introduced-in-response-selector-of-regenerations-and-edits-edit-button-goes-missing/1145664" },
+      { team: "claude", source: "https://www.guideflow.com/tutorial/how-to-retry-a-response-in-a-chat-in-claudeai" },
+    ],
   },
   {
     slug: "tool-approval",
@@ -438,7 +443,10 @@ export const registry: RegistryEntry[] = [
     Demo: ToolCallChipDemo,
     Thumbnail: ToolCallChipThumbnail,
     uxDoc: toolCallChipPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/9237897-chatgpt-search" },
+      { team: "claude", source: "https://support.claude.com/en/articles/10684626-enable-and-use-web-search" },
+    ],
   },
   {
     slug: "attachment-chip",
@@ -460,7 +468,9 @@ export const registry: RegistryEntry[] = [
     Demo: ImagePeekDemo,
     Thumbnail: ImagePeekThumbnail,
     uxDoc: imagePeekPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://searchengineland.com/chatgpt-more-images-answers-465098" },
+    ],
   },
   {
     slug: "stop-generation-button",
@@ -470,7 +480,10 @@ export const registry: RegistryEntry[] = [
     Demo: StopGenerationButtonDemo,
     Thumbnail: StopGenerationButtonThumbnail,
     uxDoc: stopGenerationButtonPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://community.openai.com/t/restore-chatgpts-stop-button-without-errors/1132068" },
+      { team: "gemini", source: "https://support.google.com/googlebook/answer/18429222" },
+    ],
   },
   {
     slug: "terminal-stream",
@@ -517,7 +530,7 @@ export const registry: RegistryEntry[] = [
     Demo: SourceTrustCardDemo,
     Thumbnail: SourceTrustCardThumbnail,
     uxDoc: sourceTrustCardPattern,
-    seenIn: [],
+    seenIn: [{ team: "perplexity", source: "https://aiuxplayground.com/teardowns/perplexity/citations" }],
   },
   {
     slug: "follow-up-list",
@@ -617,7 +630,9 @@ export const registry: RegistryEntry[] = [
     Demo: ConnectivityErrorDemo,
     Thumbnail: ConnectivityErrorThumbnail,
     uxDoc: connectivityErrorPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "claude", source: "https://support.claude.com/en/articles/10366432-i-m-getting-an-api-connection-error-how-can-i-fix-it" },
+    ],
   },
   {
     slug: "response-compare",
@@ -727,7 +742,9 @@ export const registry: RegistryEntry[] = [
     Demo: AnalysisListDemo,
     Thumbnail: AnalysisListThumbnail,
     uxDoc: analysisListPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "gemini", source: "https://blog.google/products-and-platforms/products/gemini/tips-how-to-use-deep-research/" },
+    ],
   },
   {
     slug: "setup-checklist",
