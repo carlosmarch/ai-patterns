@@ -2,8 +2,8 @@ import { PatternsSidebar, type PatternsSidebarGroup } from "@/components/pattern
 import { registry } from "@/registry";
 
 // Route group layout for /patterns/<category>/<slug>: it stays mounted while
-// moving between patterns, so the sidebar keeps its scroll position. The sidebar
-// itself is fixed, so it stays on screen while the page scrolls.
+// moving between patterns. The sidebar is in the normal page flow, so it
+// scrolls together with the page.
 export default function PatternDetailLayout({ children }: { children: React.ReactNode }) {
   const groups: PatternsSidebarGroup[] = [];
   for (const { category, slug, title } of registry) {
