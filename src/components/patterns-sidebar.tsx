@@ -37,12 +37,6 @@ export function PatternsSidebar({ groups }: { groups: PatternsSidebarGroup[] }) 
       aria-label="All patterns"
       className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 overflow-y-auto overscroll-contain py-16 pr-4 lg:block"
     >
-      <Link
-        href="/patterns"
-        className="mb-6 block text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-      >
-        All patterns
-      </Link>
       <div className="space-y-6">
         {groups.map(({ category, items }) => (
           <div key={category}>
