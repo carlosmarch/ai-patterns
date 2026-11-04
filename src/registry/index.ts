@@ -840,7 +840,7 @@ export const registry: RegistryEntry[] = [
     Demo: AiReviewPanelDemo,
     Thumbnail: AiReviewPanelThumbnail,
     uxDoc: aiReviewPanelPattern,
-    seenIn: [],
+    seenIn: [{ team: "datamaran", source: "https://www.datamaran.com/" }],
   },
 ];
 
