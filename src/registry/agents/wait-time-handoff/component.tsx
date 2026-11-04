@@ -12,7 +12,7 @@ export type HandoffKind = "team" | "workflow";
 export interface HandoffOption {
   id: string;
   label: string;
-  /** Default message sent to the customer when this target is chosen. */
+  /** Default message sent to the requester when this target is chosen. */
   message?: string;
 }
 
@@ -26,7 +26,7 @@ export interface WaitTimeHandoffValue {
 }
 
 export interface WaitTimeHandoffProps {
-  /** Name of the agent that is waiting, used in copy ("Set how long Fin waits…"). */
+  /** Name of the agent that is waiting, used in copy ("Set how long AI-Patterns waits…"). */
   agentName?: string;
   teams?: HandoffOption[];
   workflows?: HandoffOption[];
@@ -43,19 +43,39 @@ const UNITS: { value: WaitUnit; label: string; max: number }[] = [
 ];
 
 export const DEFAULT_TEAMS: HandoffOption[] = [
-  { id: "support", label: "Support", message: "I'm passing you to our support team — someone will be with you shortly." },
-  { id: "billing", label: "Billing", message: "I'm passing you to our billing team — they'll pick this up from here." },
-  { id: "escalations", label: "Escalations", message: "I've escalated this to a specialist who'll follow up with you." },
+  {
+    id: "maintainers",
+    label: "Maintainers",
+    message: "I'm passing this pattern request to the maintainers — they'll pick it up from here.",
+  },
+  {
+    id: "design-review",
+    label: "Design review",
+    message: "I've sent this to design review so someone can check the pattern against the registry.",
+  },
+  {
+    id: "docs",
+    label: "Docs",
+    message: "I've handed this to the docs team to finish the pattern spec.",
+  },
 ];
 
 export const DEFAULT_WORKFLOWS: HandoffOption[] = [
   {
-    id: "request-info",
-    label: "Request further information",
-    message: "We'll need to collect some more information to process this request.",
+    id: "request-screenshot",
+    label: "Request a reference screenshot",
+    message: "We'll need a screenshot of where this pattern ships before we can add it to the registry.",
   },
-  { id: "csat", label: "Send CSAT survey", message: "Before you go, how did we do today?" },
-  { id: "close", label: "Snooze and close", message: "No problem — just reply here whenever you're ready to pick this up again." },
+  {
+    id: "open-issue",
+    label: "Open a pattern-request issue",
+    message: "I've saved this as a pattern-request issue in carlosmarch/ai-patterns so it isn't lost.",
+  },
+  {
+    id: "close-stale",
+    label: "Close as stale",
+    message: "No problem — reply here whenever you're ready and I'll pick the pattern request back up.",
+  },
 ];
 
 function formatWait(amount: number, unit: WaitUnit) {
@@ -96,7 +116,7 @@ function Select({
 }
 
 export function WaitTimeHandoff({
-  agentName = "Fin",
+  agentName = "AI-Patterns",
   teams = DEFAULT_TEAMS,
   workflows = DEFAULT_WORKFLOWS,
   defaultValue,
@@ -314,7 +334,7 @@ export function WaitTimeHandoff({
                   id={`${id}-message`}
                   rows={3}
                   value={value.message}
-                  placeholder="Message the customer sees when the conversation is handed off…"
+                  placeholder="Message the requester sees when the conversation is handed off…"
                   onChange={(e) => {
                     setMessageEdited(true);
                     update({ message: e.target.value });
@@ -335,7 +355,7 @@ export function WaitTimeHandoff({
                 <span className="flex flex-col gap-0.5">
                   <span className="text-xs">Start wait time during working hours only</span>
                   <span id={`${id}-hours-hint`} className="text-[11px] text-muted-foreground">
-                    Customers will be notified when your team is unavailable.
+                    Requesters will be notified when maintainers are offline.
                   </span>
                 </span>
               </label>

@@ -3,5 +3,5 @@
 import { WaitTimeHandoff } from "./component";
 
 export default function WaitTimeHandoffDemo() {
-  return <WaitTimeHandoff agentName="Fin" defaultValue={{ amount: 1, unit: "minutes", kind: "workflow" }} />;
+  return <WaitTimeHandoff agentName="AI-Patterns" defaultValue={{ amount: 2, unit: "hours", kind: "workflow" }} />;
 }

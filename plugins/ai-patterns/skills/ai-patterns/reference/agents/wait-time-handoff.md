@@ -5,11 +5,11 @@
 # Wait Time Handoff
 
 ## Summary
-A collapsible settings card that decides what an AI agent does when the customer stops replying. The builder sets a wait duration, chooses whether an unanswered conversation goes to a **Team** or a **Workflow**, picks the specific target, writes the message the customer sees at handoff, and optionally limits the timer to working hours. A one-line summary restates the rule in plain language so the configuration can be checked at a glance.
+A collapsible settings card that decides what an AI agent does when the person it is talking to stops replying. The builder sets a wait duration, chooses whether an unanswered conversation goes to a **Team** or a **Workflow**, picks the specific target, writes the message the requester sees at handoff, and optionally limits the timer to working hours. A one-line summary restates the rule in plain language so the configuration can be checked at a glance.
 
 ## When to use
-- Configuring a support or sales agent that asks the customer something and must not leave the conversation open forever if they go quiet.
-- When there is more than one sensible fallback — route to people (a team inbox) or to automation (a follow-up, survey, or close-out workflow).
+- Configuring an agent that asks someone a question — a missing detail, a screenshot, a confirmation — and must not leave the conversation open forever if they go quiet.
+- When there is more than one sensible fallback — route to people (a team like Maintainers) or to automation (a follow-up, issue, or close-out workflow).
 - As one section inside a larger agent or procedure settings page, where it can collapse to its summary.
 
 ## When not to use
@@ -18,28 +18,28 @@ A collapsible settings card that decides what an AI agent does when the customer
 - Complex inactivity logic with multiple reminders or escalation tiers — use a workflow or procedure builder where the steps are explicit.
 
 ## Anatomy
-- Header: timer icon, "Wait time" title, and a chevron that collapses the card. Collapsed, it shows a summary ("1 minute → Request further information").
+- Header: timer icon, "Wait time" title, and a chevron that collapses the card. Collapsed, it shows a summary ("2 hours → Request a reference screenshot").
 - Duration row: a compact numeric input and a unit select (seconds, minutes, hours), under the helper "Set how long [agent] waits for a response."
 - Handoff label: "If there's no response, hand off to:".
 - Segmented control with two options, Team and Workflow, each with an icon; the selected segment is a raised pill.
-- Target select: the list changes with the segment — team inboxes or saved workflows.
+- Target select: the list changes with the segment — teams or saved workflows.
 - Handoff message: a textarea prefilled with the target's default copy.
-- Working-hours checkbox with a helper line explaining what customers see outside hours.
-- Live summary footer: "[Agent] waits **1 minute**, then hands off to **Request further information**."
+- Working-hours checkbox with a helper line explaining what requesters see outside hours.
+- Live summary footer: "AI-Patterns waits **2 hours**, then hands off to **Request a reference screenshot**."
 
 ## Behavior
 - The duration is clamped on blur or Enter to a sane range per unit (1–59 seconds or minutes, 1–72 hours); switching unit re-clamps the current value instead of rejecting it.
 - Switching between Team and Workflow slides the selection pill across (spring, ~200 ms) and swaps the target select with a short fade, selecting the first option of the new list.
 - Choosing a target replaces the message with that target's default copy — but only until the builder edits the message. Once edited, their text is never overwritten by further target changes.
-- With "working hours only" on, the timer pauses outside working hours and the summary reads "1 minute of working hours".
+- With "working hours only" on, the timer pauses outside working hours and the summary reads "2 hours of working hours".
 - The chevron rotates and the body collapses with a height + opacity transition; the collapsed header keeps the summary visible so the section is never a black box.
 - Every change emits the full value object (`amount`, `unit`, `kind`, `targetId`, `message`, `workingHoursOnly`) so the parent can save or validate it.
 
 ## Content guidelines
-- Name the agent in the helper ("Set how long Fin waits…") so it is clear whose patience is being configured.
+- Name the agent in the helper ("Set how long AI-Patterns waits…") so it is clear whose patience is being configured.
 - Phrase the handoff label as the condition, not the action: "If there's no response, hand off to:".
-- Default messages should tell the customer what happens next, in one sentence, without blaming them for going quiet: "We'll need to collect some more information to process this request."
-- Name workflows by outcome ("Request further information", "Send CSAT survey"), and teams by who they are ("Billing"), so the summary reads as a sentence.
+- Default messages should tell the requester what happens next, in one sentence, without blaming them for going quiet: "We'll need a screenshot of where this pattern ships before we can add it to the registry."
+- Name workflows by outcome ("Request a reference screenshot", "Open a pattern-request issue"), and teams by who they are ("Maintainers"), so the summary reads as a sentence.
 - Keep the summary literal — duration, condition, destination — no marketing copy.
 
 ## Accessibility
@@ -80,7 +80,7 @@ export type HandoffKind = "team" | "workflow";
 export interface HandoffOption {
   id: string;
   label: string;
-  /** Default message sent to the customer when this target is chosen. */
+  /** Default message sent to the requester when this target is chosen. */
   message?: string;
 }
 
@@ -94,7 +94,7 @@ export interface WaitTimeHandoffValue {
 }
 
 export interface WaitTimeHandoffProps {
-  /** Name of the agent that is waiting, used in copy ("Set how long Fin waits…"). */
+  /** Name of the agent that is waiting, used in copy ("Set how long AI-Patterns waits…"). */
   agentName?: string;
   teams?: HandoffOption[];
   workflows?: HandoffOption[];
@@ -111,19 +111,39 @@ const UNITS: { value: WaitUnit; label: string; max: number }[] = [
 ];
 
 export const DEFAULT_TEAMS: HandoffOption[] = [
-  { id: "support", label: "Support", message: "I'm passing you to our support team — someone will be with you shortly." },
-  { id: "billing", label: "Billing", message: "I'm passing you to our billing team — they'll pick this up from here." },
-  { id: "escalations", label: "Escalations", message: "I've escalated this to a specialist who'll follow up with you." },
+  {
+    id: "maintainers",
+    label: "Maintainers",
+    message: "I'm passing this pattern request to the maintainers — they'll pick it up from here.",
+  },
+  {
+    id: "design-review",
+    label: "Design review",
+    message: "I've sent this to design review so someone can check the pattern against the registry.",
+  },
+  {
+    id: "docs",
+    label: "Docs",
+    message: "I've handed this to the docs team to finish the pattern spec.",
+  },
 ];
 
 export const DEFAULT_WORKFLOWS: HandoffOption[] = [
   {
-    id: "request-info",
-    label: "Request further information",
-    message: "We'll need to collect some more information to process this request.",
+    id: "request-screenshot",
+    label: "Request a reference screenshot",
+    message: "We'll need a screenshot of where this pattern ships before we can add it to the registry.",
   },
-  { id: "csat", label: "Send CSAT survey", message: "Before you go, how did we do today?" },
-  { id: "close", label: "Snooze and close", message: "No problem — just reply here whenever you're ready to pick this up again." },
+  {
+    id: "open-issue",
+    label: "Open a pattern-request issue",
+    message: "I've saved this as a pattern-request issue in carlosmarch/ai-patterns so it isn't lost.",
+  },
+  {
+    id: "close-stale",
+    label: "Close as stale",
+    message: "No problem — reply here whenever you're ready and I'll pick the pattern request back up.",
+  },
 ];
 
 function formatWait(amount: number, unit: WaitUnit) {
@@ -164,7 +184,7 @@ function Select({
 }
 
 export function WaitTimeHandoff({
-  agentName = "Fin",
+  agentName = "AI-Patterns",
   teams = DEFAULT_TEAMS,
   workflows = DEFAULT_WORKFLOWS,
   defaultValue,
@@ -382,7 +402,7 @@ export function WaitTimeHandoff({
                   id={`${id}-message`}
                   rows={3}
                   value={value.message}
-                  placeholder="Message the customer sees when the conversation is handed off…"
+                  placeholder="Message the requester sees when the conversation is handed off…"
                   onChange={(e) => {
                     setMessageEdited(true);
                     update({ message: e.target.value });
@@ -403,7 +423,7 @@ export function WaitTimeHandoff({
                 <span className="flex flex-col gap-0.5">
                   <span className="text-xs">Start wait time during working hours only</span>
                   <span id={`${id}-hours-hint`} className="text-[11px] text-muted-foreground">
-                    Customers will be notified when your team is unavailable.
+                    Requesters will be notified when maintainers are offline.
                   </span>
                 </span>
               </label>
