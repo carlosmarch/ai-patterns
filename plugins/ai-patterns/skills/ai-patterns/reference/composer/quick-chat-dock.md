@@ -108,6 +108,7 @@ export function QuickChatDock({
   const openChat = React.useCallback(() => {
     setOpen(true);
     setHovered(false);
+    setFocused(false);
   }, []);
 
   const closeChat = React.useCallback(() => {
@@ -119,6 +120,7 @@ export function QuickChatDock({
     (draft = "") => {
       onOpenAgent?.(draft);
       closeChat();
+      setFocused(false);
     },
     [onOpenAgent, closeChat]
   );
@@ -192,7 +194,7 @@ export function QuickChatDock({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}
             transition={spring}
-            className="pointer-events-auto mx-3 mb-3 flex w-full max-w-xl items-center gap-1.5 rounded-xl border border-primary bg-card py-1.5 pr-1.5 pl-3.5 shadow-lg ring-4 ring-primary/15"
+            className="pointer-events-auto mx-3 mb-3 flex w-full max-w-md items-center gap-1 rounded-2xl border bg-card p-2 pl-3.5 shadow-md"
           >
             <input
               ref={inputRef}
@@ -207,7 +209,7 @@ export function QuickChatDock({
               onClick={() => openAgent(value.trim())}
               aria-label="Continue in agent panel"
               title="Continue in agent panel"
-              className="flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               <PanelRight className="size-4" />
             </button>
@@ -215,7 +217,7 @@ export function QuickChatDock({
               type="submit"
               disabled={!value.trim()}
               aria-label="Ask"
-              className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-opacity disabled:opacity-40"
+              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity disabled:opacity-40"
             >
               <ArrowUp className="size-4" />
             </button>
@@ -241,12 +243,12 @@ export function QuickChatDock({
             <motion.div
               layout={!reduceMotion}
               transition={spring}
-              style={{ borderRadius: 10 }}
+              style={{ borderRadius: 999 }}
               className={cn(
-                "flex items-center overflow-visible border",
+                "flex items-center overflow-visible",
                 expanded
-                  ? "gap-1.5 border-foreground/10 bg-foreground/80 p-1 shadow-lg backdrop-blur"
-                  : "h-2.5 w-10 border-foreground/20 bg-muted-foreground/60"
+                  ? "gap-0.5 border bg-popover p-1 shadow-md"
+                  : "h-1.5 w-10 bg-muted-foreground/40 hover:bg-muted-foreground/60"
               )}
             >
               {expanded ? (
@@ -299,7 +301,7 @@ function DockButton({
         initial={{ opacity: 0, scale: 0.6 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ ...spring, delay: 0.04 }}
-        className="flex h-7 w-10 items-center justify-center rounded-md border border-background/25 text-background transition-colors hover:bg-background/15 focus-visible:ring-2 focus-visible:ring-background/60 focus-visible:outline-none"
+        className="flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:bg-accent focus-visible:text-foreground focus-visible:outline-none"
       >
         {children}
       </motion.button>
@@ -311,20 +313,19 @@ function DockButton({
             animate={{ opacity: 1, y: 0, x: "-50%" }}
             exit={{ opacity: 0, y: 4, x: "-50%" }}
             transition={{ duration: 0.12 }}
-            className="pointer-events-none absolute bottom-full left-1/2 mb-2.5 flex items-center gap-2 rounded-lg bg-foreground px-2.5 py-1.5 text-xs font-medium whitespace-nowrap text-background shadow-md"
+            className="pointer-events-none absolute bottom-full left-1/2 mb-2.5 flex items-center gap-2 rounded-xl border bg-popover py-1.5 pr-1.5 pl-2.5 text-xs font-medium whitespace-nowrap text-foreground shadow-md"
           >
             {label}
             <span className="flex gap-1">
               {keys.map((k) => (
                 <kbd
                   key={k}
-                  className="rounded bg-background/20 px-1.5 py-0.5 font-sans text-[10px] leading-none font-medium"
+                  className="flex h-5 min-w-5 items-center justify-center rounded border bg-muted px-1 font-sans text-[10px] font-medium text-muted-foreground"
                 >
                   {k}
                 </kbd>
               ))}
             </span>
-            <span className="absolute top-full left-1/2 size-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-foreground" />
           </motion.div>
         )}
       </AnimatePresence>
