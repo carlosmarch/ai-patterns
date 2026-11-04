@@ -1,4 +1,5 @@
 import { PatternsSidebar, type PatternsSidebarGroup } from "@/components/patterns-sidebar";
+import { PatternExpandProvider } from "@/components/pattern-expand";
 import { registry } from "@/registry";
 
 // Route group layout for /patterns/<category>/<slug>: it stays mounted while
@@ -16,9 +17,11 @@ export default function PatternDetailLayout({ children }: { children: React.Reac
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl gap-8 px-6">
-      <PatternsSidebar groups={groups} />
-      <div className="min-w-0 flex-1">{children}</div>
-    </div>
+    <PatternExpandProvider>
+      <div className="mx-auto flex w-full max-w-6xl gap-8 px-6">
+        <PatternsSidebar groups={groups} />
+        <div className="min-w-0 flex-1">{children}</div>
+      </div>
+    </PatternExpandProvider>
   );
 }

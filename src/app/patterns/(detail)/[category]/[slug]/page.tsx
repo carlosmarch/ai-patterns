@@ -52,6 +52,9 @@ export default async function PatternPage({
       </div>
 
       <ComponentPreview
+        title={entry.title}
+        prev={toLink(prev)}
+        next={toLink(next)}
         preview={<Demo />}
         code={<CodeBlock code={source} trackAs="component" />}
         pattern={
