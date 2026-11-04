@@ -42,8 +42,9 @@ export function HomeFeatures({
   patternCount: number;
 }) {
   return (
-    <section className="py-16 sm:py-20">
-      <h2 className="text-3xl leading-[1.1] font-semibold tracking-tight sm:text-5xl">
+    <section aria-labelledby="home-why" className="py-16 sm:py-20">
+      <p className="mb-3 text-sm font-medium text-muted-foreground">Why this piece?</p>
+      <h2 id="home-why" className="text-3xl leading-[1.1] font-semibold tracking-tight sm:text-5xl">
         You copied the markup.
         <span className="block text-muted-foreground">Your agent never read why.</span>
       </h2>
