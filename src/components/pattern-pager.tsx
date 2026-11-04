@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -51,7 +50,6 @@ export function PatternPager({ prev, next }: { prev?: PagerLink; next?: PagerLin
 
 function PagerCard({ link, direction }: { link: PagerLink; direction: "prev" | "next" }) {
   const isNext = direction === "next";
-  const Icon = isNext ? ArrowRight : ArrowLeft;
 
   return (
     <Link
@@ -59,20 +57,25 @@ function PagerCard({ link, direction }: { link: PagerLink; direction: "prev" | "
       rel={direction}
       aria-keyshortcuts={isNext ? "ArrowRight" : "ArrowLeft"}
       className={cn(
-        "group flex flex-col gap-1 rounded-lg border p-4 transition-colors hover:bg-accent",
+        "flex flex-col gap-1 rounded-lg border p-4 transition-colors hover:bg-accent",
         isNext && "col-start-2 items-end text-right"
       )}
     >
       <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        {!isNext && <Icon className="size-3.5 transition-transform group-hover:-translate-x-0.5" aria-hidden />}
+        {!isNext && <PagerKey>←</PagerKey>}
         {isNext ? "Next" : "Previous"}
-        <kbd className="hidden rounded border bg-muted px-1 font-sans text-xs leading-4 font-medium sm:inline">
-          {isNext ? "→" : "←"}
-        </kbd>
-        {isNext && <Icon className="size-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />}
+        {isNext && <PagerKey>→</PagerKey>}
       </span>
       <span className="text-sm font-medium">{link.title}</span>
       <span className="text-xs text-muted-foreground capitalize">{link.category}</span>
     </Link>
+  );
+}
+
+function PagerKey({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="hidden rounded border bg-muted px-1 font-sans text-xs leading-4 font-medium sm:inline">
+      {children}
+    </kbd>
   );
 }
