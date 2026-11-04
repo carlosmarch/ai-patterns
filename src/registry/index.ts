@@ -50,6 +50,9 @@ import { pattern as promptBarProPattern } from "./composer/prompt-bar-pro/patter
 import QuickChatDockDemo from "./composer/quick-chat-dock/demo";
 import QuickChatDockThumbnail from "./composer/quick-chat-dock/thumbnail";
 import { pattern as quickChatDockPattern } from "./composer/quick-chat-dock/pattern";
+import MessageQueueDemo from "./composer/message-queue/demo";
+import MessageQueueThumbnail from "./composer/message-queue/thumbnail";
+import { pattern as messageQueuePattern } from "./composer/message-queue/pattern";
 import FlowchartDemo from "./flowcharts/trigger-condition/demo";
 import FlowchartThumbnail from "./flowcharts/trigger-condition/thumbnail";
 import { pattern as flowchartPattern } from "./flowcharts/trigger-condition/pattern";
@@ -355,6 +358,19 @@ export const registry: RegistryEntry[] = [
     uxDoc: quickChatDockPattern,
     seenIn: [
       { team: "mixpanel", source: "https://docs.mixpanel.com/docs/mixpanel-agent" },
+    ],
+  },
+  {
+    slug: "message-queue",
+    category: "composer",
+    title: "Message Queue",
+    description:
+      "A composer that keeps working mid-turn: ⌘Enter queues follow-ups above the input to send now, edit, or auto-send when the agent finishes.",
+    Demo: MessageQueueDemo,
+    Thumbnail: MessageQueueThumbnail,
+    uxDoc: messageQueuePattern,
+    seenIn: [
+      { team: "claude", source: "https://code.claude.com/docs/en/interactive-mode" },
     ],
   },
   {
