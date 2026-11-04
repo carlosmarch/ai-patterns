@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Heart, Origami, Sparkles } from "lucide-react";
+import { Heart, Sparkles } from "lucide-react";
+import { OrigamiMark } from "@/components/origami-mark";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GithubMark } from "@/components/github-mark";
@@ -58,7 +59,7 @@ export function Footer() {
         <div className="flex flex-col gap-10 sm:flex-row sm:justify-between">
           <div className="space-y-3">
             <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-              <Origami className="size-4" />
+              <OrigamiMark className="size-4" />
               AI Patterns
             </Link>
             <p className="text-sm text-muted-foreground">Show your agents the patterns that work</p>

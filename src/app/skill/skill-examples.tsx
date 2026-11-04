@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { LayoutGrid, MousePointer2, Origami, Package, SquareTerminal } from "lucide-react";
+import { LayoutGrid, MousePointer2, Package, SquareTerminal } from "lucide-react";
+import { OrigamiMark } from "@/components/origami-mark";
 
 import { cn } from "@/lib/utils";
 import { trackCodeCopied } from "@/lib/analytics";
@@ -179,7 +180,7 @@ export function SkillExamples({
                   id: "origami",
                   title: "Run it with Origami",
                   description: "Watch the skill work in this workspace",
-                  icon: Origami,
+                  icon: OrigamiMark,
                   onClick: () => onTry(example),
                 },
               ]

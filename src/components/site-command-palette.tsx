@@ -2,13 +2,14 @@
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, FileCode2, LayoutGrid, Origami, Search, Sparkles, SquareDashedMousePointer } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileCode2, LayoutGrid, Search, Sparkles, SquareDashedMousePointer } from "lucide-react";
+import { OrigamiMark } from "@/components/origami-mark";
 
 import { getAdjacentEntries, getEntryHref, registry } from "@/registry";
 import { CommandPalette, type CommandPaletteGroup } from "@/registry/navigation/command-palette/component";
 
 const navItems = [
-  { id: "/", label: "Home", icon: Origami },
+  { id: "/", label: "Home", icon: OrigamiMark },
   { id: "/patterns", label: "Patterns", icon: LayoutGrid },
   { id: "/demo", label: "Demo", icon: SquareDashedMousePointer },
   { id: "/skill", label: "Skill", icon: Sparkles },

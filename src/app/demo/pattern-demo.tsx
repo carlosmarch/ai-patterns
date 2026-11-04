@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BadgeCheck, Columns2, GitBranch, Gauge, LayoutGrid, Mic, Origami, RotateCcw, TerminalSquare } from "lucide-react";
+import { BadgeCheck, Columns2, GitBranch, Gauge, LayoutGrid, Mic, RotateCcw, TerminalSquare } from "lucide-react";
+import { OrigamiMark } from "@/components/origami-mark";
 
 import { ChatBubble } from "@/registry/messages/chat-bubble/component";
 import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
@@ -515,7 +516,7 @@ const AGENTS_INITIAL: Agent[] = [
   {
     id: "ai-patterns",
     name: "AI-Patterns",
-    icon: Origami,
+    icon: OrigamiMark,
     status: "running",
     currentStep: "Issue labeled pattern-request · carlosmarch/ai-patterns",
     elapsedSeconds: 0,

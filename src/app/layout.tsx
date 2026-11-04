@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
 import Script from "next/script";
-import { Origami } from "lucide-react";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 import { Footer } from "@/components/footer";
+import { SiteLogo } from "@/components/site-logo";
 import { SiteHeader } from "@/components/site-header";
 import { SiteNav } from "@/components/site-nav";
 import { ScrollRestoration } from "@/components/scroll-restoration";
@@ -61,10 +60,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ScrollRestoration />
         <SiteHeader>
           <div className="flex h-full items-center justify-between px-4 sm:px-6">
-            <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-              <Origami className="size-5" />
-              AI Patterns
-            </Link>
+            <SiteLogo />
             <SiteNav />
           </div>
         </SiteHeader>

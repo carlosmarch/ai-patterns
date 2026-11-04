@@ -14,8 +14,8 @@ import {
   Tag,
   TerminalSquare,
   TrendingDown,
-  Origami,
 } from "lucide-react";
+import { OrigamiMark } from "@/components/origami-mark";
 
 import type { ComponentType } from "react";
 
@@ -47,7 +47,7 @@ import type { TrustedSource } from "@/registry/text/source-trust-card/component"
 
 export const USER_NAME = "Carlos";
 export const AGENT_NAME = "Origami";
-export const AGENT_ICON = Origami;
+export const AGENT_ICON = OrigamiMark;
 
 export function favicon(domain: string) {
   return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
@@ -254,7 +254,7 @@ export const SPIKE_AGENTS: Agent[] = [
   {
     id: "lead",
     name: "Origami",
-    icon: Origami,
+    icon: OrigamiMark,
     status: "done",
     elapsedSeconds: 41,
     steps: [{ label: "Merged findings from 3 sub-agents" }],
@@ -407,7 +407,7 @@ export const GUIDANCE_DIFF: DiffFile[] = [
 ];
 
 export const SPIKE_LIVE_AGENTS: Agent[] = [
-  { id: "lead", name: "Origami", icon: Origami, status: "running", currentStep: "Planning the investigation", elapsedSeconds: 0, steps: [] },
+  { id: "lead", name: "Origami", icon: OrigamiMark, status: "running", currentStep: "Planning the investigation", elapsedSeconds: 0, steps: [] },
   { id: "replay", name: "Session replay analyst", icon: MousePointerClick, status: "queued", elapsedSeconds: 0, steps: [] },
   { id: "matcher", name: "Pattern matcher", icon: Search, status: "queued", elapsedSeconds: 0, steps: [] },
   { id: "spec", name: "Spec checker", icon: BookOpenCheck, status: "queued", elapsedSeconds: 0, steps: [] },

@@ -27,9 +27,14 @@ export default function Icon() {
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="M12 12V4a1 1 0 0 1 1-1h6.297a1 1 0 0 1 .651 1.759l-4.696 4.025" />
-          <path d="m12 21-7.414-7.414A2 2 0 0 1 4 12.172V6.415a1.002 1.002 0 0 1 1.707-.707L20 20.009" />
-          <path d="m12.214 3.381 8.414 14.966a1 1 0 0 1-.167 1.199l-1.168 1.163a1 1 0 0 1-.706.291H6.351a1 1 0 0 1-.625-.219L3.25 18.8a1 1 0 0 1 .631-1.781l4.165.027" />
+          {/* Same crane as src/components/origami-mark.tsx (inlined: next/og can't import client code). */}
+          <path d="M7 16.5 12 12v8z" fill="#fafafa" fillOpacity={0.25} stroke="none" />
+          <path d="M5 3.5 7 16.5 12 20l5.5-3.5L21.5 4" />
+          <path d="M5 3.5 10 14" />
+          <path d="M21.5 4 14 14" />
+          <path d="M2.5 7 5 3.5" />
+          <path d="M7 16.5 12 12l5.5 4.5" />
+          <path d="M12 12v8" />
         </svg>
       </div>
     ),
