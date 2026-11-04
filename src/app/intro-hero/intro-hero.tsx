@@ -24,6 +24,7 @@ import {
 import { ArrowUpRight, CornerDownLeft, Pause, Play, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { HERO_ID } from "@/components/site-header";
 import {
   ApprovalScene,
   ArticleScene,
@@ -284,13 +285,14 @@ export function IntroHero({ entries, latest }: { entries: HeroEntry[]; latest?: 
     <PlayingContext.Provider value={playing}>
       <section
         ref={sectionRef}
+        id={HERO_ID}
         onPointerMove={onPointerMove}
         onPointerLeave={() => {
           mx.set(0);
           my.set(0);
         }}
         data-paused={!playing}
-        className="relative isolate h-[clamp(620px,calc(100svh-57px),940px)] overflow-hidden border-b bg-background"
+        className="relative isolate -mt-14 h-[clamp(680px,100svh,1000px)] overflow-hidden border-b bg-background"
       >
         {/* Stage */}
         <div
@@ -299,7 +301,7 @@ export function IntroHero({ entries, latest }: { entries: HeroEntry[]; latest?: 
           style={{
             width: STAGE_W,
             height: STAGE_H,
-            transform: `translate(-50%, -50%) scale(${scale})`,
+            transform: `translate(-50%, calc(-50% + 28px)) scale(${scale})`,
           }}
         >
           {SCENES.map((scene, i) => (
@@ -323,13 +325,13 @@ export function IntroHero({ entries, latest }: { entries: HeroEntry[]; latest?: 
         />
 
         {/* Centre column */}
-        <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
+        <div className="pointer-events-none relative z-10 flex h-full flex-col items-center justify-center px-4 pt-14 text-center">
           {latest && (
             <motion.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="pointer-events-auto absolute top-[clamp(20px,6%,64px)]"
+              className="pointer-events-auto absolute top-[clamp(76px,12%,120px)]"
             >
               <Link
                 href={href(latest)}

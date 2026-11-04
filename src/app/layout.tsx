@@ -7,6 +7,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 import { Footer } from "@/components/footer";
+import { SiteHeader } from "@/components/site-header";
 import { SiteNav } from "@/components/site-nav";
 import { ScrollRestoration } from "@/components/scroll-restoration";
 import { StarToast } from "@/components/star-toast";
@@ -58,15 +59,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col font-sans">
         <ScrollRestoration />
-        <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">
-          <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
+        <SiteHeader>
+          <div className="mx-auto flex h-full max-w-3xl items-center justify-between px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
               <Origami className="size-5" />
               AI Patterns
             </Link>
             <SiteNav />
           </div>
-        </header>
+        </SiteHeader>
         <div className="flex-1">{children}</div>
         <Footer />
         <StarToast />
