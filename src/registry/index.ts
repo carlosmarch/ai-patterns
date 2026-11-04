@@ -256,7 +256,10 @@ export const registry: RegistryEntry[] = [
     Demo: TaskListDemo,
     Thumbnail: TaskListThumbnail,
     uxDoc: taskListPattern,
-    seenIn: ["claude", "cursor", "copilot"],
+    seenIn: [
+      { team: "claude", source: "https://code.claude.com/docs/en/interactive-mode#task-list" },
+      { team: "cursor", source: "https://cursor.com/changelog/1-2" },
+    ],
   },
   {
     slug: "multi-agent-trace",
