@@ -809,6 +809,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: naturalLanguageQueryPattern,
     seenIn: [
       { team: "supabase", source: "https://supabase.com/features/sql-editor" },
+      { team: "mongodb", source: "https://www.mongodb.com/ko-kr/docs/v8.3/natural-language-to-mongodb/" },
     ],
   },
 ];
