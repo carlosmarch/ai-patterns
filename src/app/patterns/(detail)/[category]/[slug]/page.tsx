@@ -32,7 +32,7 @@ export default async function PatternPage({
   const Demo = entry.Demo;
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-16">
+    <main className="mx-auto w-full max-w-3xl py-16">
       <BackButton fallbackHref="/patterns" className="mb-6" />
 
       <div className="mb-8 space-y-2">
