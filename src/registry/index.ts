@@ -821,3 +821,14 @@ export function getRegistryEntry(category: string, slug: string) {
 export function getCategories() {
   return Array.from(new Set(registry.map((entry) => entry.category)));
 }
+
+/** The patterns before and after this one in registry order (no wrap-around). */
+export function getAdjacentEntries(category: string, slug: string) {
+  const index = registry.findIndex((entry) => entry.category === category && entry.slug === slug);
+  if (index === -1) return { prev: undefined, next: undefined };
+  return { prev: registry[index - 1], next: registry[index + 1] };
+}
+
+export function getEntryHref(entry: Pick<RegistryEntry, "category" | "slug">) {
+  return `/patterns/${entry.category}/${entry.slug}`;
+}

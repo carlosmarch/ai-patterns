@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
-import { FileCode2, LayoutGrid, Origami, Search, Sparkles, SquareDashedMousePointer } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ArrowLeft, ArrowRight, FileCode2, LayoutGrid, Origami, Search, Sparkles, SquareDashedMousePointer } from "lucide-react";
 
-import { registry } from "@/registry";
+import { getAdjacentEntries, getEntryHref, registry } from "@/registry";
 import { CommandPalette, type CommandPaletteGroup } from "@/registry/navigation/command-palette/component";
 
 const navItems = [
@@ -17,6 +17,7 @@ const navItems = [
 export function SiteCommandPalette() {
   const [open, setOpen] = React.useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   React.useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -29,8 +30,18 @@ export function SiteCommandPalette() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  const groups: CommandPaletteGroup[] = React.useMemo(
-    () => [
+  const groups: CommandPaletteGroup[] = React.useMemo(() => {
+    // On a pattern page, offer jumps to its neighbours first.
+    const [, section, category, slug] = pathname.split("/");
+    const { prev, next } =
+      section === "patterns" && category && slug ? getAdjacentEntries(category, slug) : {};
+    const pagerItems = [
+      prev && { id: `${getEntryHref(prev)}#prev`, label: `Previous pattern: ${prev.title}`, icon: ArrowLeft, meta: "←" },
+      next && { id: `${getEntryHref(next)}#next`, label: `Next pattern: ${next.title}`, icon: ArrowRight, meta: "→" },
+    ].filter((item) => !!item);
+
+    return [
+      ...(pagerItems.length ? [{ label: "This pattern", items: pagerItems }] : []),
       { label: "Navigate", items: navItems },
       {
         label: "Patterns",
@@ -41,9 +52,8 @@ export function SiteCommandPalette() {
           meta: entry.category,
         })),
       },
-    ],
-    []
-  );
+    ];
+  }, [pathname]);
 
   return (
     <>
@@ -62,7 +72,8 @@ export function SiteCommandPalette() {
         onOpenChange={setOpen}
         groups={groups}
         placeholder="Search patterns or jump to a page..."
-        onSelect={(item) => router.push(item.id)}
+        // Item ids are routes; pager items carry a #prev/#next suffix to keep ids unique.
+        onSelect={(item) => router.push(item.id.replace(/#(prev|next)$/, ""))}
       />
     </>
   );

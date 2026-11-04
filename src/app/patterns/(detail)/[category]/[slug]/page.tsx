@@ -2,12 +2,13 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { notFound } from "next/navigation";
 
-import { BackButton } from "@/components/back-button";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CodeBlock } from "@/components/code-block";
 import { ComponentPreview } from "@/components/component-preview";
 import { DownloadButton } from "@/components/download-button";
 import { SeenIn } from "@/components/seen-in";
-import { getRegistryEntry, registry } from "@/registry";
+import { PatternPager } from "@/components/pattern-pager";
+import { getAdjacentEntries, getEntryHref, getRegistryEntry, registry } from "@/registry";
 
 export function generateStaticParams() {
   return registry.map(({ category, slug }) => ({ category, slug }));
@@ -30,13 +31,21 @@ export default async function PatternPage({
     "utf-8"
   );
   const Demo = entry.Demo;
+  const { prev, next } = getAdjacentEntries(category, slug);
+  const toLink = (e: typeof prev) => e && { href: getEntryHref(e), title: e.title, category: e.category };
 
   return (
     <main className="mx-auto w-full max-w-3xl py-16">
-      <BackButton fallbackHref="/patterns" className="mb-6" />
+      <Breadcrumbs
+        className="mb-6"
+        items={[
+          { label: "Patterns", href: "/patterns" },
+          { label: entry.category.charAt(0).toUpperCase() + entry.category.slice(1), href: `/patterns#${entry.category}` },
+          { label: entry.title },
+        ]}
+      />
 
       <div className="mb-8 space-y-2">
-        <p className="text-sm font-medium text-muted-foreground capitalize">{entry.category}</p>
         <h1 className="text-3xl font-semibold tracking-tight">{entry.title}</h1>
         <p className="text-muted-foreground">{entry.description}</p>
         <SeenIn items={entry.seenIn} linked className="pt-2" />
@@ -61,6 +70,8 @@ export default async function PatternPage({
           </div>
         }
       />
+
+      <PatternPager prev={toLink(prev)} next={toLink(next)} />
     </main>
   );
 }
