@@ -7,7 +7,8 @@ import { CodeBlock } from "@/components/code-block";
 import { ComponentPreview } from "@/components/component-preview";
 import { DownloadButton } from "@/components/download-button";
 import { SeenIn } from "@/components/seen-in";
-import { getRegistryEntry, registry } from "@/registry";
+import { PatternPager } from "@/components/pattern-pager";
+import { getAdjacentEntries, getEntryHref, getRegistryEntry, registry } from "@/registry";
 
 export function generateStaticParams() {
   return registry.map(({ category, slug }) => ({ category, slug }));
@@ -30,6 +31,8 @@ export default async function PatternPage({
     "utf-8"
   );
   const Demo = entry.Demo;
+  const { prev, next } = getAdjacentEntries(category, slug);
+  const toLink = (e: typeof prev) => e && { href: getEntryHref(e), title: e.title, category: e.category };
 
   return (
     <main className="mx-auto w-full max-w-3xl py-16">
@@ -67,6 +70,8 @@ export default async function PatternPage({
           </div>
         }
       />
+
+      <PatternPager prev={toLink(prev)} next={toLink(next)} />
     </main>
   );
 }
