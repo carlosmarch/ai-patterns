@@ -19,6 +19,9 @@ import CreateAgentThumbnail from "./agents/create-agent/thumbnail";
 import ProcedureBuilderDemo from "./agents/procedure-builder/demo";
 import ProcedureBuilderThumbnail from "./agents/procedure-builder/thumbnail";
 import { pattern as procedureBuilderPattern } from "./agents/procedure-builder/pattern";
+import TaskListDemo from "./agents/task-list/demo";
+import TaskListThumbnail from "./agents/task-list/thumbnail";
+import { pattern as taskListPattern } from "./agents/task-list/pattern";
 import { pattern as createAgentPattern } from "./agents/create-agent/pattern";
 import ShinyButtonDemo from "./buttons/shiny-button/demo";
 import ShinyButtonThumbnail from "./buttons/shiny-button/thumbnail";
@@ -243,6 +246,17 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "intercom", source: "https://www.intercom.com/help/en/articles/13449439-building-fin-procedures" },
     ],
+  },
+  {
+    slug: "task-list",
+    category: "agents",
+    title: "Task List",
+    description:
+      "A live, agent-authored plan — an ordered list of steps marked pending, in progress, or completed as the agent works through them.",
+    Demo: TaskListDemo,
+    Thumbnail: TaskListThumbnail,
+    uxDoc: taskListPattern,
+    seenIn: ["claude", "cursor", "copilot"],
   },
   {
     slug: "multi-agent-trace",
