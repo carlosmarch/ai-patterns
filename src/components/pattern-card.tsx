@@ -18,7 +18,7 @@ export function PatternCard({ entry }: { entry: RegistryEntry }) {
       <div className="px-1.5 pt-2.5 pb-1.5">
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm font-medium">{entry.title}</p>
-          <SeenIn ids={entry.seenIn} size="sm" showLabel={false} className="shrink-0" />
+          <SeenIn items={entry.seenIn} size="sm" showLabel={false} className="shrink-0" />
         </div>
         <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{entry.description}</p>
       </div>

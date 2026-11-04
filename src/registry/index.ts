@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 
-import type { TeamId } from "@/lib/teams";
+import type { SeenIn } from "@/lib/teams";
 
 import AgentTriggersDemo from "./agents/agent-triggers/demo";
 import AgentTriggersThumbnail from "./agents/agent-triggers/thumbnail";
@@ -163,8 +163,8 @@ export interface RegistryEntry {
   Thumbnail: ComponentType;
   /** A UX spec for the pattern, written for agents implementing or reusing it — not the code. */
   uxDoc: string;
-  /** Products this pattern has been seen shipping in, credited as stacked logos. Empty until verified. */
-  seenIn: TeamId[];
+  /** Products this pattern ships in, each with a public page (docs, help center, changelog) showing it. Empty when no source was found. */
+  seenIn: SeenIn[];
 }
 
 export const registry: RegistryEntry[] = [
@@ -176,7 +176,9 @@ export const registry: RegistryEntry[] = [
     Demo: CreateAgentDemo,
     Thumbnail: CreateAgentThumbnail,
     uxDoc: createAgentPattern,
-    seenIn: ["notion", "intercom"],
+    seenIn: [
+      { team: "notion", source: "https://www.notion.com/help/custom-agents" },
+    ],
   },
   {
     slug: "agent-triggers",
@@ -186,7 +188,10 @@ export const registry: RegistryEntry[] = [
     Demo: AgentTriggersDemo,
     Thumbnail: AgentTriggersThumbnail,
     uxDoc: agentTriggersPattern,
-    seenIn: ["notion", "cursor"],
+    seenIn: [
+      { team: "notion", source: "https://www.notion.com/help/custom-agents" },
+      { team: "cursor", source: "https://docs.cursor.com/slack" },
+    ],
   },
   {
     slug: "human-in-the-loop",
@@ -196,7 +201,9 @@ export const registry: RegistryEntry[] = [
     Demo: HumanInTheLoopDemo,
     Thumbnail: HumanInTheLoopThumbnail,
     uxDoc: humanInTheLoopPattern,
-    seenIn: ["claude", "cursor"],
+    seenIn: [
+      { team: "claude", source: "https://code.claude.com/docs/en/agent-sdk/user-input" },
+    ],
   },
   {
     slug: "background-tasks",
@@ -207,7 +214,9 @@ export const registry: RegistryEntry[] = [
     Demo: BackgroundTasksDemo,
     Thumbnail: BackgroundTasksThumbnail,
     uxDoc: backgroundTasksPattern,
-    seenIn: ["claude", "cursor", "copilot"],
+    seenIn: [
+      { team: "cursor", source: "https://cursor.com/help/ai-features/background-agents" },
+    ],
   },
   {
     slug: "instruction-tools",
@@ -218,7 +227,9 @@ export const registry: RegistryEntry[] = [
     Demo: InstructionToolsDemo,
     Thumbnail: InstructionToolsThumbnail,
     uxDoc: instructionToolsPattern,
-    seenIn: ["intercom", "notion"],
+    seenIn: [
+      { team: "intercom", source: "https://fin.ai/help/en/articles/13976221-how-to-use-data-connectors-in-fin-procedures" },
+    ],
   },
   {
     slug: "procedure-builder",
@@ -229,7 +240,9 @@ export const registry: RegistryEntry[] = [
     Demo: ProcedureBuilderDemo,
     Thumbnail: ProcedureBuilderThumbnail,
     uxDoc: procedureBuilderPattern,
-    seenIn: ["intercom"],
+    seenIn: [
+      { team: "intercom", source: "https://www.intercom.com/help/en/articles/13449439-building-fin-procedures" },
+    ],
   },
   {
     slug: "multi-agent-trace",
@@ -239,7 +252,9 @@ export const registry: RegistryEntry[] = [
     Demo: MultiAgentTraceDemo,
     Thumbnail: MultiAgentTraceThumbnail,
     uxDoc: multiAgentTracePattern,
-    seenIn: ["claude", "cursor"],
+    seenIn: [
+      { team: "claude", source: "https://claude.com/blog/how-and-when-to-use-subagents-in-claude-code" },
+    ],
   },
   {
     slug: "shiny-button",
@@ -249,7 +264,7 @@ export const registry: RegistryEntry[] = [
     Demo: ShinyButtonDemo,
     Thumbnail: ShinyButtonThumbnail,
     uxDoc: shinyButtonPattern,
-    seenIn: ["v0", "framer", "raycast"],
+    seenIn: [],
   },
   {
     slug: "thinking-loader",
@@ -259,7 +274,9 @@ export const registry: RegistryEntry[] = [
     Demo: ThinkingLoaderDemo,
     Thumbnail: ThinkingLoaderThumbnail,
     uxDoc: thinkingLoaderPattern,
-    seenIn: ["claude", "cursor", "gemini"],
+    seenIn: [
+      { team: "claude", source: "https://support.claude.com/en/articles/10574485-using-extended-thinking" },
+    ],
   },
   {
     slug: "expandable-trace",
@@ -269,7 +286,9 @@ export const registry: RegistryEntry[] = [
     Demo: ExpandableTraceDemo,
     Thumbnail: ExpandableTraceThumbnail,
     uxDoc: expandableTracePattern,
-    seenIn: ["claude", "gemini", "mistral", "perplexity"],
+    seenIn: [
+      { team: "claude", source: "https://support.claude.com/en/articles/10574485-using-extended-thinking" },
+    ],
   },
   {
     slug: "streaming-text",
@@ -279,7 +298,9 @@ export const registry: RegistryEntry[] = [
     Demo: StreamingTextDemo,
     Thumbnail: StreamingTextThumbnail,
     uxDoc: streamingTextPattern,
-    seenIn: ["perplexity", "claude", "gemini"],
+    seenIn: [
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/9237897-chatgpt-search" },
+    ],
   },
   {
     slug: "prompt-bar",
@@ -289,7 +310,9 @@ export const registry: RegistryEntry[] = [
     Demo: PromptBarDemo,
     Thumbnail: PromptBarThumbnail,
     uxDoc: promptBarPattern,
-    seenIn: ["cursor", "claude", "perplexity", "windsurf"],
+    seenIn: [
+      { team: "cursor", source: "https://cursor.com/docs/context/symbols" },
+    ],
   },
   {
     slug: "prompt-bar-pro",
@@ -300,7 +323,9 @@ export const registry: RegistryEntry[] = [
     Demo: PromptBarProDemo,
     Thumbnail: PromptBarProThumbnail,
     uxDoc: promptBarProPattern,
-    seenIn: ["cursor", "v0", "replit", "claude"],
+    seenIn: [
+      { team: "cursor", source: "https://cursor.com/docs/context/symbols" },
+    ],
   },
   {
     slug: "quick-chat-dock",
@@ -321,7 +346,10 @@ export const registry: RegistryEntry[] = [
     Demo: DiffSummaryCardDemo,
     Thumbnail: DiffSummaryCardThumbnail,
     uxDoc: diffSummaryPattern,
-    seenIn: ["cursor", "windsurf", "zed"],
+    seenIn: [
+      { team: "cursor", source: "https://docs.cursor.com/agent/review" },
+      { team: "zed", source: "https://zed.dev/docs/ai/agent-panel" },
+    ],
   },
   {
     slug: "diff-tabs",
@@ -331,7 +359,10 @@ export const registry: RegistryEntry[] = [
     Demo: DiffTabsDemo,
     Thumbnail: DiffTabsThumbnail,
     uxDoc: diffTabsPattern,
-    seenIn: ["cursor", "copilot", "zed"],
+    seenIn: [
+      { team: "zed", source: "https://zed.dev/docs/ai/agent-panel" },
+      { team: "cursor", source: "https://docs.cursor.com/agent/review" },
+    ],
   },
   {
     slug: "trigger-condition",
@@ -341,7 +372,9 @@ export const registry: RegistryEntry[] = [
     Demo: FlowchartDemo,
     Thumbnail: FlowchartThumbnail,
     uxDoc: flowchartPattern,
-    seenIn: ["intercom"],
+    seenIn: [
+      { team: "intercom", source: "https://www.intercom.com/help/en/articles/7846212-how-to-use-branches-in-workflows" },
+    ],
   },
   {
     slug: "chat-bubble",
@@ -351,7 +384,7 @@ export const registry: RegistryEntry[] = [
     Demo: ChatBubbleDemo,
     Thumbnail: ChatBubbleThumbnail,
     uxDoc: chatBubblePattern,
-    seenIn: ["claude", "gemini", "mistral"],
+    seenIn: [],
   },
   {
     slug: "tool-approval",
@@ -361,7 +394,10 @@ export const registry: RegistryEntry[] = [
     Demo: ToolApprovalDemo,
     Thumbnail: ToolApprovalThumbnail,
     uxDoc: toolApprovalPattern,
-    seenIn: ["claude", "cursor", "windsurf", "warp"],
+    seenIn: [
+      { team: "claude", source: "https://code.claude.com/docs/en/permissions" },
+      { team: "warp", source: "https://docs.warp.dev/agents/local-agents/interacting-with-agents/terminal-and-agent-modes" },
+    ],
   },
   {
     slug: "connector-panel",
@@ -372,7 +408,10 @@ export const registry: RegistryEntry[] = [
     Demo: ConnectorPanelDemo,
     Thumbnail: ConnectorPanelThumbnail,
     uxDoc: connectorPanelPattern,
-    seenIn: ["claude", "cursor"],
+    seenIn: [
+      { team: "claude", source: "https://support.claude.com/en/articles/11176164" },
+      { team: "chatgpt", source: "https://developers.openai.com/api/docs/guides/developer-mode" },
+    ],
   },
   {
     slug: "tool-call-chip",
@@ -382,7 +421,7 @@ export const registry: RegistryEntry[] = [
     Demo: ToolCallChipDemo,
     Thumbnail: ToolCallChipThumbnail,
     uxDoc: toolCallChipPattern,
-    seenIn: ["claude", "perplexity", "cursor"],
+    seenIn: [],
   },
   {
     slug: "attachment-chip",
@@ -392,7 +431,9 @@ export const registry: RegistryEntry[] = [
     Demo: AttachmentTrayDemo,
     Thumbnail: AttachmentTrayThumbnail,
     uxDoc: attachmentChipPattern,
-    seenIn: ["claude", "gemini", "perplexity"],
+    seenIn: [
+      { team: "claude", source: "https://support.claude.com/en/articles/8241126-upload-files-to-claude" },
+    ],
   },
   {
     slug: "image-peek",
@@ -402,7 +443,7 @@ export const registry: RegistryEntry[] = [
     Demo: ImagePeekDemo,
     Thumbnail: ImagePeekThumbnail,
     uxDoc: imagePeekPattern,
-    seenIn: ["perplexity", "gemini"],
+    seenIn: [],
   },
   {
     slug: "stop-generation-button",
@@ -412,7 +453,7 @@ export const registry: RegistryEntry[] = [
     Demo: StopGenerationButtonDemo,
     Thumbnail: StopGenerationButtonThumbnail,
     uxDoc: stopGenerationButtonPattern,
-    seenIn: ["claude", "gemini", "perplexity", "mistral"],
+    seenIn: [],
   },
   {
     slug: "terminal-stream",
@@ -422,7 +463,9 @@ export const registry: RegistryEntry[] = [
     Demo: TerminalStreamDemo,
     Thumbnail: TerminalStreamThumbnail,
     uxDoc: terminalStreamPattern,
-    seenIn: ["warp", "cursor", "replit", "claude"],
+    seenIn: [
+      { team: "warp", source: "https://docs.warp.dev/agents/local-agents/agent-context/blocks-as-context" },
+    ],
   },
   {
     slug: "inline-citation",
@@ -432,7 +475,10 @@ export const registry: RegistryEntry[] = [
     Demo: InlineCitationDemo,
     Thumbnail: InlineCitationThumbnail,
     uxDoc: inlineCitationPattern,
-    seenIn: ["perplexity", "gemini", "claude"],
+    seenIn: [
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/10352895-how-does-perplexity-work" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/9237897-chatgpt-search" },
+    ],
   },
   {
     slug: "sources-stack",
@@ -442,7 +488,9 @@ export const registry: RegistryEntry[] = [
     Demo: SourcesStackDemo,
     Thumbnail: SourcesStackThumbnail,
     uxDoc: sourcesStackPattern,
-    seenIn: ["perplexity", "arc", "gemini"],
+    seenIn: [
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/9237897-chatgpt-search" },
+    ],
   },
   {
     slug: "source-trust-card",
@@ -452,7 +500,7 @@ export const registry: RegistryEntry[] = [
     Demo: SourceTrustCardDemo,
     Thumbnail: SourceTrustCardThumbnail,
     uxDoc: sourceTrustCardPattern,
-    seenIn: ["perplexity"],
+    seenIn: [],
   },
   {
     slug: "follow-up-list",
@@ -462,7 +510,9 @@ export const registry: RegistryEntry[] = [
     Demo: FollowUpListDemo,
     Thumbnail: FollowUpListThumbnail,
     uxDoc: followUpListPattern,
-    seenIn: ["perplexity", "arc"],
+    seenIn: [
+      { team: "perplexity", source: "https://www.thekeyword.co/news/perplexity-tests-sponsored-follow-up-question-ads" },
+    ],
   },
   {
     slug: "selection-actions",
@@ -472,7 +522,11 @@ export const registry: RegistryEntry[] = [
     Demo: SelectionActionsDemo,
     Thumbnail: SelectionActionsThumbnail,
     uxDoc: selectionActionsPattern,
-    seenIn: ["notion", "cursor", "figma"],
+    seenIn: [
+      { team: "notion", source: "https://www.notion.com/help/guides/notion-ai-for-docs" },
+      { team: "gemini", source: "https://support.google.com/gemini/answer/14262426" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/9930697-what-is-the-canvas-feature-in-chatgpt-and-how-do-i-use-it" },
+    ],
   },
   {
     slug: "refinement-controls",
@@ -483,7 +537,11 @@ export const registry: RegistryEntry[] = [
     Demo: RefinementControlsDemo,
     Thumbnail: RefinementControlsThumbnail,
     uxDoc: refinementControlsPattern,
-    seenIn: ["notion", "gemini"],
+    seenIn: [
+      { team: "gemini", source: "https://support.google.com/gemini/answer/14262426" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/9930697-what-is-the-canvas-feature-in-chatgpt-and-how-do-i-use-it" },
+      { team: "notion", source: "https://www.notion.com/help/guides/notion-ai-for-docs" },
+    ],
   },
   {
     slug: "rate-limit",
@@ -493,7 +551,9 @@ export const registry: RegistryEntry[] = [
     Demo: RateLimitDemo,
     Thumbnail: RateLimitThumbnail,
     uxDoc: rateLimitPattern,
-    seenIn: ["claude", "cursor"],
+    seenIn: [
+      { team: "claude", source: "https://support.claude.com/en/articles/12466728-understand-claude-error-messages" },
+    ],
   },
   {
     slug: "partial-response",
@@ -503,7 +563,9 @@ export const registry: RegistryEntry[] = [
     Demo: PartialResponseDemo,
     Thumbnail: PartialResponseThumbnail,
     uxDoc: partialResponsePattern,
-    seenIn: ["claude", "cursor"],
+    seenIn: [
+      { team: "cursor", source: "https://forum.cursor.com/t/we-default-stop-the-agent-after-25-tool-calls-please-ask-the-agent-to-continue-manually/58981" },
+    ],
   },
   {
     slug: "generation-error",
@@ -513,7 +575,9 @@ export const registry: RegistryEntry[] = [
     Demo: GenerationErrorDemo,
     Thumbnail: GenerationErrorThumbnail,
     uxDoc: generationErrorPattern,
-    seenIn: ["v0", "replit", "claude"],
+    seenIn: [
+      { team: "claude", source: "https://support.claude.com/en/articles/12466728-understand-claude-error-messages" },
+    ],
   },
   {
     slug: "console-error-card",
@@ -523,7 +587,10 @@ export const registry: RegistryEntry[] = [
     Demo: ConsoleErrorCardDemo,
     Thumbnail: ConsoleErrorCardThumbnail,
     uxDoc: consoleErrorCardPattern,
-    seenIn: ["v0", "replit"],
+    seenIn: [
+      { team: "lovable", source: "https://docs.lovable.dev/tips-tricks/troubleshooting" },
+      { team: "v0", source: "https://community.vercel.com/t/runtime-error-on-v0/12485" },
+    ],
   },
   {
     slug: "connectivity-error",
@@ -533,7 +600,7 @@ export const registry: RegistryEntry[] = [
     Demo: ConnectivityErrorDemo,
     Thumbnail: ConnectivityErrorThumbnail,
     uxDoc: connectivityErrorPattern,
-    seenIn: ["claude", "linear"],
+    seenIn: [],
   },
   {
     slug: "response-compare",
@@ -543,7 +610,10 @@ export const registry: RegistryEntry[] = [
     Demo: ResponseCompareDemo,
     Thumbnail: ResponseCompareThumbnail,
     uxDoc: responseComparePattern,
-    seenIn: ["huggingface", "claude"],
+    seenIn: [
+      { team: "lmarena", source: "https://lmarena.ai/faq" },
+      { team: "chatgpt", source: "https://community.openai.com/t/stupid-feature-which-response-do-you-prefer-your-choice-will-help-make-chatgpt-better/394873" },
+    ],
   },
   {
     slug: "confidence-indicator",
@@ -553,7 +623,9 @@ export const registry: RegistryEntry[] = [
     Demo: ConfidenceIndicatorDemo,
     Thumbnail: ConfidenceIndicatorThumbnail,
     uxDoc: confidenceIndicatorPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "box", source: "https://blog.box.com/confidence-scores-box-ai-extract-know-when-rely-your-extractions" },
+    ],
   },
   {
     slug: "voice-waveform",
@@ -563,7 +635,9 @@ export const registry: RegistryEntry[] = [
     Demo: VoiceWaveformDemo,
     Thumbnail: VoiceWaveformThumbnail,
     uxDoc: voiceWaveformPattern,
-    seenIn: ["elevenlabs", "gemini", "claude"],
+    seenIn: [
+      { team: "gemini", source: "https://9to5google.com/2024/08/15/gemini-live-rolling-out/" },
+    ],
   },
   {
     slug: "listening-state",
@@ -573,7 +647,9 @@ export const registry: RegistryEntry[] = [
     Demo: ListeningStateDemo,
     Thumbnail: ListeningStateThumbnail,
     uxDoc: listeningStatePattern,
-    seenIn: ["gemini", "elevenlabs", "claude"],
+    seenIn: [
+      { team: "gemini", source: "https://9to5google.com/2024/08/15/gemini-live-rolling-out/" },
+    ],
   },
   {
     slug: "live-transcript",
@@ -583,7 +659,10 @@ export const registry: RegistryEntry[] = [
     Demo: LiveTranscriptDemo,
     Thumbnail: LiveTranscriptThumbnail,
     uxDoc: liveTranscriptPattern,
-    seenIn: ["elevenlabs", "notion"],
+    seenIn: [
+      { team: "notion", source: "https://www.notion.com/help/ai-meeting-notes" },
+      { team: "elevenlabs", source: "https://elevenlabs.io/docs/overview/capabilities/speech-to-text" },
+    ],
   },
   {
     slug: "command-palette",
@@ -593,7 +672,9 @@ export const registry: RegistryEntry[] = [
     Demo: CommandPaletteDemo,
     Thumbnail: CommandPaletteThumbnail,
     uxDoc: commandPalettePattern,
-    seenIn: ["raycast", "linear", "arc"],
+    seenIn: [
+      { team: "linear", source: "https://linear.app/enablement/guide/navigating-linear" },
+    ],
   },
   {
     slug: "collaborative-presence",
@@ -604,7 +685,9 @@ export const registry: RegistryEntry[] = [
     Demo: CollaborativePresenceDemo,
     Thumbnail: CollaborativePresenceThumbnail,
     uxDoc: collaborativePresencePattern,
-    seenIn: ["figma", "notion", "linear"],
+    seenIn: [
+      { team: "figma", source: "https://help.figma.com/hc/en-us/articles/29638316371479-See-viewer-history-for-your-files" },
+    ],
   },
   {
     slug: "invite-members",
@@ -615,7 +698,9 @@ export const registry: RegistryEntry[] = [
     Demo: InviteMembersDemo,
     Thumbnail: InviteMembersThumbnail,
     uxDoc: inviteMembersPattern,
-    seenIn: ["notion", "figma", "linear"],
+    seenIn: [
+      { team: "notion", source: "https://www.notion.com/help/sharing-and-permissions" },
+    ],
   },
   {
     slug: "analysis-list",
@@ -635,7 +720,9 @@ export const registry: RegistryEntry[] = [
     Demo: SetupChecklistDemo,
     Thumbnail: SetupChecklistThumbnail,
     uxDoc: setupChecklistPattern,
-    seenIn: ["linear", "intercom"],
+    seenIn: [
+      { team: "intercom", source: "https://www.intercom.com/help/en/articles/6661022-getting-started-with-checklists" },
+    ],
   },
   {
     slug: "prompt-onboarding",
@@ -646,7 +733,10 @@ export const registry: RegistryEntry[] = [
     Demo: PromptOnboardingDemo,
     Thumbnail: PromptOnboardingThumbnail,
     uxDoc: promptOnboardingPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "posthog", source: "https://posthog.com/docs/error-tracking/installation" },
+      { team: "sentry", source: "https://github.com/getsentry/sentry-for-ai" },
+    ],
   },
   {
     slug: "describe-filters",
@@ -657,7 +747,9 @@ export const registry: RegistryEntry[] = [
     Demo: DescribeFiltersDemo,
     Thumbnail: DescribeFiltersThumbnail,
     uxDoc: describeFiltersPattern,
-    seenIn: ["notion", "linear"],
+    seenIn: [
+      { team: "linear", source: "https://linear.app/docs/filters" },
+    ],
   },
   {
     slug: "ai-fill-drawer",
@@ -668,7 +760,9 @@ export const registry: RegistryEntry[] = [
     Demo: AiFillDrawerDemo,
     Thumbnail: AiFillDrawerThumbnail,
     uxDoc: aiFillDrawerPattern,
-    seenIn: ["notion"],
+    seenIn: [
+      { team: "notion", source: "https://www.notion.com/help/autofill" },
+    ],
   },
   {
     slug: "natural-language-query",
@@ -679,7 +773,9 @@ export const registry: RegistryEntry[] = [
     Demo: NaturalLanguageQueryDemo,
     Thumbnail: NaturalLanguageQueryThumbnail,
     uxDoc: naturalLanguageQueryPattern,
-    seenIn: ["huggingface"],
+    seenIn: [
+      { team: "supabase", source: "https://supabase.com/features/sql-editor" },
+    ],
   },
 ];
 

@@ -6,7 +6,7 @@ import { registry, type RegistryEntry } from "@/registry";
 import { GithubMark } from "@/components/github-mark";
 import { PatternCard } from "@/components/pattern-card";
 import { SeenIn } from "@/components/seen-in";
-import type { TeamId } from "@/lib/teams";
+import type { SeenIn as SeenInRef } from "@/lib/teams";
 import { IntroHero, type HeroEntry } from "./intro-hero/intro-hero";
 import { HomeFeatures } from "./home-features";
 import { HomeHero } from "./home-hero";
@@ -267,7 +267,7 @@ function Card({
   description: string;
   href: string;
   badge?: string;
-  seenIn?: TeamId[];
+  seenIn?: SeenInRef[];
   className?: string;
   children: ReactNode;
 }) {
@@ -287,7 +287,7 @@ function Card({
           <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
         </div>
         <div className="flex shrink-0 items-center gap-3">
-          <SeenIn ids={seenIn} size="sm" className="hidden sm:flex" />
+          <SeenIn items={seenIn} size="sm" linked className="hidden sm:flex" />
           <Link
             href={href}
             aria-label={`View ${title} details`}

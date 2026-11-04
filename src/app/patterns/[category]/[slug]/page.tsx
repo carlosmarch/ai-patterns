@@ -39,7 +39,7 @@ export default async function PatternPage({
         <p className="text-sm font-medium text-muted-foreground capitalize">{entry.category}</p>
         <h1 className="text-3xl font-semibold tracking-tight">{entry.title}</h1>
         <p className="text-muted-foreground">{entry.description}</p>
-        <SeenIn ids={entry.seenIn} className="pt-2" />
+        <SeenIn items={entry.seenIn} linked className="pt-2" />
       </div>
 
       <ComponentPreview
