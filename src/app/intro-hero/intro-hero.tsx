@@ -39,6 +39,7 @@ import {
   VoiceScene,
   WheelScene,
 } from "./scenes";
+import { AgentTile, PatternTile } from "./headline-tiles";
 
 export type HeroEntry = {
   slug: string;
@@ -79,7 +80,7 @@ const SCENES: Scene[] = [
   { id: "palette", slug: "command-palette", Component: PaletteScene, x: 150, y: 40, w: 370, h: 240, depth: 0.25, tone: "light" },
   { id: "voice", slug: "voice-waveform", Component: VoiceScene, x: 600, y: 40, w: 200, h: 130, depth: 0.7, tone: "light" },
   { id: "trace", slug: "multi-agent-trace", Component: TraceScene, x: 850, y: 70, w: 210, h: 130, depth: 0.6, tone: "dark" },
-  { id: "article", slug: "streaming-text", Component: ArticleScene, x: 1110, y: 10, w: 380, h: 250, depth: 0.85, tone: "light" },
+  { id: "article", slug: "streaming-text", Component: ArticleScene, x: 1110, y: 60, w: 380, h: 250, depth: 0.85, tone: "light" },
   { id: "approval", slug: "tool-approval", Component: ApprovalScene, x: -30, y: 320, w: 220, h: 120, depth: 0.8, tone: "light" },
   { id: "wheel", slug: "thinking-loader", Component: WheelScene, x: 220, y: 470, w: 200, h: 130, depth: 0.5, tone: "dark" },
   { id: "diff", slug: "diff-summary", Component: DiffScene, x: -50, y: 670, w: 400, h: 200, depth: 0.9, tone: "light" },
@@ -350,9 +351,17 @@ export function IntroHero({ entries, latest }: { entries: HeroEntry[]; latest?: 
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="text-[2.1rem] leading-[1.08] sm:leading-[1.05] font-semibold tracking-tight text-balance sm:text-6xl"
           >
-            Show your agent
-            <br />
-            the patterns that work
+            <span className="sr-only">Show your agent the patterns that work</span>
+            <span aria-hidden className="block">
+              Show your
+              <AgentTile />
+              agent
+            </span>
+            <span aria-hidden className="block">
+              the
+              <PatternTile />
+              patterns that work
+            </span>
           </motion.h1>
 
           {/* Search */}
