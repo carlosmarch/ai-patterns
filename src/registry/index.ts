@@ -42,6 +42,9 @@ import { pattern as diffTabsPattern } from "./code/diff-tabs/pattern";
 import PromptBarProDemo from "./composer/prompt-bar-pro/demo";
 import PromptBarProThumbnail from "./composer/prompt-bar-pro/thumbnail";
 import { pattern as promptBarProPattern } from "./composer/prompt-bar-pro/pattern";
+import QuickChatDockDemo from "./composer/quick-chat-dock/demo";
+import QuickChatDockThumbnail from "./composer/quick-chat-dock/thumbnail";
+import { pattern as quickChatDockPattern } from "./composer/quick-chat-dock/pattern";
 import FlowchartDemo from "./flowcharts/trigger-condition/demo";
 import FlowchartThumbnail from "./flowcharts/trigger-condition/thumbnail";
 import { pattern as flowchartPattern } from "./flowcharts/trigger-condition/pattern";
@@ -281,7 +284,17 @@ export const registry: RegistryEntry[] = [
     Demo: PromptBarProDemo,
     Thumbnail: PromptBarProThumbnail,
     uxDoc: promptBarProPattern,
+  },  {
+    slug: "quick-chat-dock",
+    category: "composer",
+    title: "Quick Chat Dock",
+    description:
+      "A hidden bottom-edge handle that wakes into an action dock on hover and summons a floating prompt bar.",
+    Demo: QuickChatDockDemo,
+    Thumbnail: QuickChatDockThumbnail,
+    uxDoc: quickChatDockPattern,
   },
+
   {
     slug: "diff-summary",
     category: "code",
