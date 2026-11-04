@@ -103,15 +103,7 @@ export function HomeFeatures({
       </div>
 
       <div className="mt-6 flex flex-col gap-4 px-1 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <TeamStack teams={TEAMS.slice(0, 3)} />
-          <div>
-            <p className="text-sm font-medium">Distilled from {TEAMS.length} teams</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {patternCount} patterns, each shipped with the UX spec behind it.
-            </p>
-          </div>
-        </div>
+        <TeamCredit patternCount={patternCount} />
         <Link
           href="/skill"
           className="inline-flex shrink-0 items-center justify-center rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
@@ -253,24 +245,73 @@ function SpecStack() {
   );
 }
 
+// Three teams at a time, rotating through the whole strip. TEAMS.length is a
+// multiple of three, so every frame shows three distinct teams.
+function TeamCredit({ patternCount }: { patternCount: number }) {
+  const reduce = useReducedMotion();
+  const tick = useTick(3200);
+  const start = (tick * 3) % TEAMS.length;
+  const teams = [0, 1, 2].map((i) => TEAMS[(start + i) % TEAMS.length]);
+  const names = teams.map((t) => t.name).join(", ");
+
+  return (
+    <div className="flex items-center gap-4">
+      <TeamStack teams={teams} />
+      <div className="min-w-0">
+        <p className="text-sm font-medium">
+          <span className="sr-only">
+            Studied across {TEAMS.slice(0, 3).map((t) => t.name).join(", ")} and more
+          </span>
+          <span aria-hidden>
+            Studied across{" "}
+            <AnimatePresence initial={false} mode="wait">
+              <motion.span
+                key={start}
+                className="inline-block"
+                initial={reduce ? { opacity: 0 } : { opacity: 0, y: 6, filter: "blur(4px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6, filter: "blur(4px)" }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+              >
+                {names}
+              </motion.span>
+            </AnimatePresence>{" "}
+            and more
+          </span>
+        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {patternCount} patterns, each written up as a spec your agent can read
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function TeamStack({ teams }: { teams: Team[] }) {
+  const reduce = useReducedMotion();
   return (
     <div aria-hidden className="relative h-10 w-16 shrink-0">
       {teams.map((team, i) => (
-        <span
-          key={team.name}
-          className="absolute top-0 grid size-10 place-items-center overflow-hidden rounded-[24%] shadow-[0_1px_2px_rgb(0_0_0/0.12),0_6px_16px_-6px_rgb(0_0_0/0.35),inset_0_0_0_1px_rgb(255_255_255/0.08)]"
-          style={{ background: team.bg, left: i * 12, transform: `rotate(${(i - 1) * 7}deg)` }}
-        >
-          {team.src ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={team.src} alt="" className="size-full" draggable={false} />
-          ) : (
-            <svg viewBox="0 0 24 24" className="size-[52%]" fill={team.fg}>
-              <path d={team.path} />
-            </svg>
-          )}
-        </span>
+        <AnimatePresence key={i} initial={false}>
+          <motion.span
+            key={team.id}
+            className="absolute top-0 grid size-10 place-items-center overflow-hidden rounded-[24%] shadow-[0_1px_2px_rgb(0_0_0/0.12),0_6px_16px_-6px_rgb(0_0_0/0.35),inset_0_0_0_1px_rgb(255_255_255/0.08)]"
+            style={{ background: team.bg, left: i * 12, zIndex: i }}
+            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.85, rotate: (i - 1) * 7 }}
+            animate={{ opacity: 1, y: 0, scale: 1, rotate: (i - 1) * 7 }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.85 }}
+            transition={{ type: "spring", stiffness: 300, damping: 26, delay: reduce ? 0 : i * 0.06 }}
+          >
+            {team.src ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={team.src} alt="" className="size-full" draggable={false} />
+            ) : (
+              <svg viewBox="0 0 24 24" className="size-[52%]" fill={team.fg}>
+                <path d={team.path} />
+              </svg>
+            )}
+          </motion.span>
+        </AnimatePresence>
       ))}
     </div>
   );
