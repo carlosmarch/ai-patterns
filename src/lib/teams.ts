@@ -2,6 +2,7 @@
 // app-icon tiles in the home page's credit strip.
 import {
   siArc,
+  siBox,
   siClaude,
   siCursor,
   siElevenlabs,
@@ -15,8 +16,11 @@ import {
   siMistralai,
   siNotion,
   siPerplexity,
+  siPosthog,
   siRaycast,
   siReplit,
+  siSentry,
+  siSupabase,
   siV0,
   siWarp,
   siWindsurf,
@@ -47,16 +51,29 @@ export const TEAM_IDS = [
   "mistral",
   "windsurf",
   "warp",
+  // Credited on patterns only, not in the home page strip.
+  "chatgpt",
+  "lovable",
+  "lmarena",
+  "box",
+  "posthog",
+  "sentry",
+  "supabase",
 ] as const;
 
 export type TeamId = (typeof TEAM_IDS)[number];
 
 export type Team = { id: TeamId; name: string; bg: string } & (
   // A simple-icons glyph drawn on a tile, coloured to read like the team's app icon…
-  | { path: string; fg: string; src?: never }
-  // …or the team's own app icon artwork, for logos simple-icons doesn't carry.
-  | { src: string; path?: never; fg?: never }
+  | { path: string; fg: string; src?: never; mark?: never }
+  // …or the team's own app icon artwork, for logos simple-icons doesn't carry…
+  | { src: string; path?: never; fg?: never; mark?: never }
+  // …or a lettermark, for products with neither.
+  | { mark: string; fg: string; path?: never; src?: never }
 );
+
+/** One product a pattern has been seen in, with the public page that shows it. */
+export type SeenIn = { team: TeamId; source: string };
 
 const glyph = (id: TeamId, icon: SimpleIcon, bg: string, fg = "#fff"): Team => ({
   id,
@@ -93,7 +110,18 @@ export const TEAMS: Team[] = [
   glyph("warp", siWarp, "linear-gradient(145deg,#2fb6ff,#0170c9)"),
 ];
 
-const TEAMS_BY_ID = new Map(TEAMS.map((team) => [team.id, team]));
+// Products credited in patterns' "Seen in" rows that aren't in the home strip.
+const CREDITED: Team[] = [
+  { id: "chatgpt", name: "ChatGPT", mark: "G", fg: "#fff", bg: "linear-gradient(145deg,#2a2a2a,#050505)" },
+  { id: "lovable", name: "Lovable", mark: "L", fg: "#fff", bg: "linear-gradient(145deg,#ff8a6b,#e0457b)" },
+  { id: "lmarena", name: "LMArena", mark: "A", fg: "#fff", bg: "linear-gradient(145deg,#3d3d3d,#141414)" },
+  glyph("box", siBox, "linear-gradient(145deg,#2f86ff,#0061d5)"),
+  glyph("posthog", siPosthog, "linear-gradient(145deg,#fff4dc,#f3e3bf)", "#1d1f27"),
+  glyph("sentry", siSentry, "linear-gradient(145deg,#4a3f78,#362d59)"),
+  glyph("supabase", siSupabase, "linear-gradient(145deg,#1f2a25,#0f1512)", "#3fcf8e"),
+];
+
+const TEAMS_BY_ID = new Map([...TEAMS, ...CREDITED].map((team) => [team.id, team]));
 
 export function getTeams(ids: readonly TeamId[]): Team[] {
   return ids.map((id) => TEAMS_BY_ID.get(id)).filter((team): team is Team => Boolean(team));
