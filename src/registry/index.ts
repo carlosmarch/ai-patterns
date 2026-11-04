@@ -22,6 +22,9 @@ import { pattern as procedureBuilderPattern } from "./agents/procedure-builder/p
 import TaskListDemo from "./agents/task-list/demo";
 import TaskListThumbnail from "./agents/task-list/thumbnail";
 import { pattern as taskListPattern } from "./agents/task-list/pattern";
+import WaitTimeHandoffDemo from "./agents/wait-time-handoff/demo";
+import WaitTimeHandoffThumbnail from "./agents/wait-time-handoff/thumbnail";
+import { pattern as waitTimeHandoffPattern } from "./agents/wait-time-handoff/pattern";
 import { pattern as createAgentPattern } from "./agents/create-agent/pattern";
 import ShinyButtonDemo from "./buttons/shiny-button/demo";
 import ShinyButtonThumbnail from "./buttons/shiny-button/thumbnail";
@@ -265,6 +268,19 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "claude", source: "https://code.claude.com/docs/en/interactive-mode#task-list" },
       { team: "cursor", source: "https://cursor.com/changelog/1-2" },
+    ],
+  },
+  {
+    slug: "wait-time-handoff",
+    category: "agents",
+    title: "Wait Time Handoff",
+    description:
+      "A collapsible settings card for what an agent does when the customer goes quiet — a wait duration, a Team / Workflow handoff target, the handoff message, and a working-hours option.",
+    Demo: WaitTimeHandoffDemo,
+    Thumbnail: WaitTimeHandoffThumbnail,
+    uxDoc: waitTimeHandoffPattern,
+    seenIn: [
+      { team: "intercom", source: "https://www.intercom.com/help/en/articles/7155449-customer-or-teammate-has-been-unresponsive" },
     ],
   },
   {
