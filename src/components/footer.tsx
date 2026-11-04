@@ -13,7 +13,6 @@ const columns: { heading: string; links: FooterLink[] }[] = [
     heading: "Product",
     links: [
       { label: "Patterns", href: "/patterns" },
-      { label: "Workspace", href: "/workspace" },
       { label: "Demo", href: "/demo" },
       { label: "Skill", href: "/skill" },
     ],
@@ -21,6 +20,7 @@ const columns: { heading: string; links: FooterLink[] }[] = [
   {
     heading: "Resources",
     links: [
+      { label: "Workspace demo", href: "/workspace" },
       { label: "Source on GitHub", href: REPO_URL, external: true },
       { label: "Report an issue", href: `${REPO_URL}/issues`, external: true },
     ],
