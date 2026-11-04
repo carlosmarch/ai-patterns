@@ -35,8 +35,28 @@ export function ScrollRestoration() {
       // sessionStorage unavailable — fall through to scrolling to top.
     }
     if (!saved) {
-      window.scrollTo(0, 0);
-      return;
+      // A link to an in-page anchor (e.g. /patterns#text) should land on that
+      // section, not the top. The target may not have rendered yet, so retry.
+      const id = decodeURIComponent(location.hash.slice(1));
+      if (!id) {
+        window.scrollTo(0, 0);
+        return;
+      }
+      let frame = 0;
+      let attempts = 0;
+      function tryScrollToHash() {
+        attempts += 1;
+        const target = document.getElementById(id);
+        if (target) {
+          target.scrollIntoView();
+        } else if (attempts > 30) {
+          window.scrollTo(0, 0);
+        } else {
+          frame = requestAnimationFrame(tryScrollToHash);
+        }
+      }
+      frame = requestAnimationFrame(tryScrollToHash);
+      return () => cancelAnimationFrame(frame);
     }
 
     // The route's content streams in async, so the page may not be tall
