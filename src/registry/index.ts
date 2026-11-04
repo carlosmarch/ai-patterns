@@ -158,6 +158,9 @@ import { pattern as aiFillDrawerPattern } from "./tables/ai-fill-drawer/pattern"
 import NaturalLanguageQueryDemo from "./tables/natural-language-query/demo";
 import NaturalLanguageQueryThumbnail from "./tables/natural-language-query/thumbnail";
 import { pattern as naturalLanguageQueryPattern } from "./tables/natural-language-query/pattern";
+import AiReviewPanelDemo from "./review/ai-review-panel/demo";
+import AiReviewPanelThumbnail from "./review/ai-review-panel/thumbnail";
+import { pattern as aiReviewPanelPattern } from "./review/ai-review-panel/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -827,6 +830,17 @@ export const registry: RegistryEntry[] = [
       { team: "supabase", source: "https://supabase.com/features/sql-editor" },
       { team: "mongodb", source: "https://www.mongodb.com/ko-kr/docs/v8.3/natural-language-to-mongodb/" },
     ],
+  },
+  {
+    slug: "ai-review-panel",
+    category: "review",
+    title: "AI Review Panel",
+    description:
+      "A side panel for checking extracted values one by one — each field shows its value, the model's reasoning and verbatim evidence that highlights in the source, with accept, dismiss and apply-all-pending.",
+    Demo: AiReviewPanelDemo,
+    Thumbnail: AiReviewPanelThumbnail,
+    uxDoc: aiReviewPanelPattern,
+    seenIn: [],
   },
 ];
 
