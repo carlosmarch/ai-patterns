@@ -1,5 +1,7 @@
 import type { ComponentType } from "react";
 
+import type { TeamId } from "@/lib/teams";
+
 import AgentTriggersDemo from "./agents/agent-triggers/demo";
 import AgentTriggersThumbnail from "./agents/agent-triggers/thumbnail";
 import { pattern as agentTriggersPattern } from "./agents/agent-triggers/pattern";
@@ -158,6 +160,8 @@ export interface RegistryEntry {
   Thumbnail: ComponentType;
   /** A UX spec for the pattern, written for agents implementing or reusing it — not the code. */
   uxDoc: string;
+  /** Products this pattern has been seen shipping in, credited as stacked logos. Empty until verified. */
+  seenIn: TeamId[];
 }
 
 export const registry: RegistryEntry[] = [
@@ -169,6 +173,7 @@ export const registry: RegistryEntry[] = [
     Demo: CreateAgentDemo,
     Thumbnail: CreateAgentThumbnail,
     uxDoc: createAgentPattern,
+    seenIn: ["notion", "intercom"],
   },
   {
     slug: "agent-triggers",
@@ -178,6 +183,7 @@ export const registry: RegistryEntry[] = [
     Demo: AgentTriggersDemo,
     Thumbnail: AgentTriggersThumbnail,
     uxDoc: agentTriggersPattern,
+    seenIn: ["notion", "cursor"],
   },
   {
     slug: "human-in-the-loop",
@@ -187,6 +193,7 @@ export const registry: RegistryEntry[] = [
     Demo: HumanInTheLoopDemo,
     Thumbnail: HumanInTheLoopThumbnail,
     uxDoc: humanInTheLoopPattern,
+    seenIn: ["claude", "cursor"],
   },
   {
     slug: "background-tasks",
@@ -197,6 +204,7 @@ export const registry: RegistryEntry[] = [
     Demo: BackgroundTasksDemo,
     Thumbnail: BackgroundTasksThumbnail,
     uxDoc: backgroundTasksPattern,
+    seenIn: ["claude", "cursor", "copilot"],
   },
   {
     slug: "instruction-tools",
@@ -207,6 +215,7 @@ export const registry: RegistryEntry[] = [
     Demo: InstructionToolsDemo,
     Thumbnail: InstructionToolsThumbnail,
     uxDoc: instructionToolsPattern,
+    seenIn: ["intercom", "notion"],
   },
   {
     slug: "procedure-builder",
@@ -217,6 +226,7 @@ export const registry: RegistryEntry[] = [
     Demo: ProcedureBuilderDemo,
     Thumbnail: ProcedureBuilderThumbnail,
     uxDoc: procedureBuilderPattern,
+    seenIn: ["intercom"],
   },
   {
     slug: "multi-agent-trace",
@@ -226,6 +236,7 @@ export const registry: RegistryEntry[] = [
     Demo: MultiAgentTraceDemo,
     Thumbnail: MultiAgentTraceThumbnail,
     uxDoc: multiAgentTracePattern,
+    seenIn: ["claude", "cursor"],
   },
   {
     slug: "shiny-button",
@@ -235,6 +246,7 @@ export const registry: RegistryEntry[] = [
     Demo: ShinyButtonDemo,
     Thumbnail: ShinyButtonThumbnail,
     uxDoc: shinyButtonPattern,
+    seenIn: ["v0", "framer", "raycast"],
   },
   {
     slug: "thinking-loader",
@@ -244,6 +256,7 @@ export const registry: RegistryEntry[] = [
     Demo: ThinkingLoaderDemo,
     Thumbnail: ThinkingLoaderThumbnail,
     uxDoc: thinkingLoaderPattern,
+    seenIn: ["claude", "cursor", "gemini"],
   },
   {
     slug: "expandable-trace",
@@ -253,6 +266,7 @@ export const registry: RegistryEntry[] = [
     Demo: ExpandableTraceDemo,
     Thumbnail: ExpandableTraceThumbnail,
     uxDoc: expandableTracePattern,
+    seenIn: ["claude", "gemini", "mistral", "perplexity"],
   },
   {
     slug: "streaming-text",
@@ -262,6 +276,7 @@ export const registry: RegistryEntry[] = [
     Demo: StreamingTextDemo,
     Thumbnail: StreamingTextThumbnail,
     uxDoc: streamingTextPattern,
+    seenIn: ["perplexity", "claude", "gemini"],
   },
   {
     slug: "prompt-bar",
@@ -271,6 +286,7 @@ export const registry: RegistryEntry[] = [
     Demo: PromptBarDemo,
     Thumbnail: PromptBarThumbnail,
     uxDoc: promptBarPattern,
+    seenIn: ["cursor", "claude", "perplexity", "windsurf"],
   },
   {
     slug: "prompt-bar-pro",
@@ -281,6 +297,7 @@ export const registry: RegistryEntry[] = [
     Demo: PromptBarProDemo,
     Thumbnail: PromptBarProThumbnail,
     uxDoc: promptBarProPattern,
+    seenIn: ["cursor", "v0", "replit", "claude"],
   },
   {
     slug: "diff-summary",
@@ -290,6 +307,7 @@ export const registry: RegistryEntry[] = [
     Demo: DiffSummaryCardDemo,
     Thumbnail: DiffSummaryCardThumbnail,
     uxDoc: diffSummaryPattern,
+    seenIn: ["cursor", "windsurf", "zed"],
   },
   {
     slug: "diff-tabs",
@@ -299,6 +317,7 @@ export const registry: RegistryEntry[] = [
     Demo: DiffTabsDemo,
     Thumbnail: DiffTabsThumbnail,
     uxDoc: diffTabsPattern,
+    seenIn: ["cursor", "copilot", "zed"],
   },
   {
     slug: "trigger-condition",
@@ -308,6 +327,7 @@ export const registry: RegistryEntry[] = [
     Demo: FlowchartDemo,
     Thumbnail: FlowchartThumbnail,
     uxDoc: flowchartPattern,
+    seenIn: ["intercom"],
   },
   {
     slug: "chat-bubble",
@@ -317,6 +337,7 @@ export const registry: RegistryEntry[] = [
     Demo: ChatBubbleDemo,
     Thumbnail: ChatBubbleThumbnail,
     uxDoc: chatBubblePattern,
+    seenIn: ["claude", "gemini", "mistral"],
   },
   {
     slug: "tool-approval",
@@ -326,6 +347,7 @@ export const registry: RegistryEntry[] = [
     Demo: ToolApprovalDemo,
     Thumbnail: ToolApprovalThumbnail,
     uxDoc: toolApprovalPattern,
+    seenIn: ["claude", "cursor", "windsurf", "warp"],
   },
   {
     slug: "connector-panel",
@@ -336,6 +358,7 @@ export const registry: RegistryEntry[] = [
     Demo: ConnectorPanelDemo,
     Thumbnail: ConnectorPanelThumbnail,
     uxDoc: connectorPanelPattern,
+    seenIn: ["claude", "cursor"],
   },
   {
     slug: "tool-call-chip",
@@ -345,6 +368,7 @@ export const registry: RegistryEntry[] = [
     Demo: ToolCallChipDemo,
     Thumbnail: ToolCallChipThumbnail,
     uxDoc: toolCallChipPattern,
+    seenIn: ["claude", "perplexity", "cursor"],
   },
   {
     slug: "attachment-chip",
@@ -354,6 +378,7 @@ export const registry: RegistryEntry[] = [
     Demo: AttachmentTrayDemo,
     Thumbnail: AttachmentTrayThumbnail,
     uxDoc: attachmentChipPattern,
+    seenIn: ["claude", "gemini", "perplexity"],
   },
   {
     slug: "image-peek",
@@ -363,6 +388,7 @@ export const registry: RegistryEntry[] = [
     Demo: ImagePeekDemo,
     Thumbnail: ImagePeekThumbnail,
     uxDoc: imagePeekPattern,
+    seenIn: ["perplexity", "gemini"],
   },
   {
     slug: "stop-generation-button",
@@ -372,6 +398,7 @@ export const registry: RegistryEntry[] = [
     Demo: StopGenerationButtonDemo,
     Thumbnail: StopGenerationButtonThumbnail,
     uxDoc: stopGenerationButtonPattern,
+    seenIn: ["claude", "gemini", "perplexity", "mistral"],
   },
   {
     slug: "terminal-stream",
@@ -381,6 +408,7 @@ export const registry: RegistryEntry[] = [
     Demo: TerminalStreamDemo,
     Thumbnail: TerminalStreamThumbnail,
     uxDoc: terminalStreamPattern,
+    seenIn: ["warp", "cursor", "replit", "claude"],
   },
   {
     slug: "inline-citation",
@@ -390,6 +418,7 @@ export const registry: RegistryEntry[] = [
     Demo: InlineCitationDemo,
     Thumbnail: InlineCitationThumbnail,
     uxDoc: inlineCitationPattern,
+    seenIn: ["perplexity", "gemini", "claude"],
   },
   {
     slug: "sources-stack",
@@ -399,6 +428,7 @@ export const registry: RegistryEntry[] = [
     Demo: SourcesStackDemo,
     Thumbnail: SourcesStackThumbnail,
     uxDoc: sourcesStackPattern,
+    seenIn: ["perplexity", "arc", "gemini"],
   },
   {
     slug: "source-trust-card",
@@ -408,6 +438,7 @@ export const registry: RegistryEntry[] = [
     Demo: SourceTrustCardDemo,
     Thumbnail: SourceTrustCardThumbnail,
     uxDoc: sourceTrustCardPattern,
+    seenIn: ["perplexity"],
   },
   {
     slug: "follow-up-list",
@@ -417,6 +448,7 @@ export const registry: RegistryEntry[] = [
     Demo: FollowUpListDemo,
     Thumbnail: FollowUpListThumbnail,
     uxDoc: followUpListPattern,
+    seenIn: ["perplexity", "arc"],
   },
   {
     slug: "selection-actions",
@@ -426,6 +458,7 @@ export const registry: RegistryEntry[] = [
     Demo: SelectionActionsDemo,
     Thumbnail: SelectionActionsThumbnail,
     uxDoc: selectionActionsPattern,
+    seenIn: ["notion", "cursor", "figma"],
   },
   {
     slug: "refinement-controls",
@@ -436,6 +469,7 @@ export const registry: RegistryEntry[] = [
     Demo: RefinementControlsDemo,
     Thumbnail: RefinementControlsThumbnail,
     uxDoc: refinementControlsPattern,
+    seenIn: ["notion", "gemini"],
   },
   {
     slug: "rate-limit",
@@ -445,6 +479,7 @@ export const registry: RegistryEntry[] = [
     Demo: RateLimitDemo,
     Thumbnail: RateLimitThumbnail,
     uxDoc: rateLimitPattern,
+    seenIn: ["claude", "cursor"],
   },
   {
     slug: "partial-response",
@@ -454,6 +489,7 @@ export const registry: RegistryEntry[] = [
     Demo: PartialResponseDemo,
     Thumbnail: PartialResponseThumbnail,
     uxDoc: partialResponsePattern,
+    seenIn: ["claude", "cursor"],
   },
   {
     slug: "generation-error",
@@ -463,6 +499,7 @@ export const registry: RegistryEntry[] = [
     Demo: GenerationErrorDemo,
     Thumbnail: GenerationErrorThumbnail,
     uxDoc: generationErrorPattern,
+    seenIn: ["v0", "replit", "claude"],
   },
   {
     slug: "console-error-card",
@@ -472,6 +509,7 @@ export const registry: RegistryEntry[] = [
     Demo: ConsoleErrorCardDemo,
     Thumbnail: ConsoleErrorCardThumbnail,
     uxDoc: consoleErrorCardPattern,
+    seenIn: ["v0", "replit"],
   },
   {
     slug: "connectivity-error",
@@ -481,6 +519,7 @@ export const registry: RegistryEntry[] = [
     Demo: ConnectivityErrorDemo,
     Thumbnail: ConnectivityErrorThumbnail,
     uxDoc: connectivityErrorPattern,
+    seenIn: ["claude", "linear"],
   },
   {
     slug: "response-compare",
@@ -490,6 +529,7 @@ export const registry: RegistryEntry[] = [
     Demo: ResponseCompareDemo,
     Thumbnail: ResponseCompareThumbnail,
     uxDoc: responseComparePattern,
+    seenIn: ["huggingface", "claude"],
   },
   {
     slug: "confidence-indicator",
@@ -499,6 +539,7 @@ export const registry: RegistryEntry[] = [
     Demo: ConfidenceIndicatorDemo,
     Thumbnail: ConfidenceIndicatorThumbnail,
     uxDoc: confidenceIndicatorPattern,
+    seenIn: [],
   },
   {
     slug: "voice-waveform",
@@ -508,6 +549,7 @@ export const registry: RegistryEntry[] = [
     Demo: VoiceWaveformDemo,
     Thumbnail: VoiceWaveformThumbnail,
     uxDoc: voiceWaveformPattern,
+    seenIn: ["elevenlabs", "gemini", "claude"],
   },
   {
     slug: "listening-state",
@@ -517,6 +559,7 @@ export const registry: RegistryEntry[] = [
     Demo: ListeningStateDemo,
     Thumbnail: ListeningStateThumbnail,
     uxDoc: listeningStatePattern,
+    seenIn: ["gemini", "elevenlabs", "claude"],
   },
   {
     slug: "live-transcript",
@@ -526,6 +569,7 @@ export const registry: RegistryEntry[] = [
     Demo: LiveTranscriptDemo,
     Thumbnail: LiveTranscriptThumbnail,
     uxDoc: liveTranscriptPattern,
+    seenIn: ["elevenlabs", "notion"],
   },
   {
     slug: "command-palette",
@@ -535,6 +579,7 @@ export const registry: RegistryEntry[] = [
     Demo: CommandPaletteDemo,
     Thumbnail: CommandPaletteThumbnail,
     uxDoc: commandPalettePattern,
+    seenIn: ["raycast", "linear", "arc"],
   },
   {
     slug: "collaborative-presence",
@@ -545,6 +590,7 @@ export const registry: RegistryEntry[] = [
     Demo: CollaborativePresenceDemo,
     Thumbnail: CollaborativePresenceThumbnail,
     uxDoc: collaborativePresencePattern,
+    seenIn: ["figma", "notion", "linear"],
   },
   {
     slug: "invite-members",
@@ -555,6 +601,7 @@ export const registry: RegistryEntry[] = [
     Demo: InviteMembersDemo,
     Thumbnail: InviteMembersThumbnail,
     uxDoc: inviteMembersPattern,
+    seenIn: ["notion", "figma", "linear"],
   },
   {
     slug: "analysis-list",
@@ -564,6 +611,7 @@ export const registry: RegistryEntry[] = [
     Demo: AnalysisListDemo,
     Thumbnail: AnalysisListThumbnail,
     uxDoc: analysisListPattern,
+    seenIn: [],
   },
   {
     slug: "setup-checklist",
@@ -573,6 +621,7 @@ export const registry: RegistryEntry[] = [
     Demo: SetupChecklistDemo,
     Thumbnail: SetupChecklistThumbnail,
     uxDoc: setupChecklistPattern,
+    seenIn: ["linear", "intercom"],
   },
   {
     slug: "prompt-onboarding",
@@ -583,6 +632,7 @@ export const registry: RegistryEntry[] = [
     Demo: PromptOnboardingDemo,
     Thumbnail: PromptOnboardingThumbnail,
     uxDoc: promptOnboardingPattern,
+    seenIn: [],
   },
   {
     slug: "describe-filters",
@@ -593,6 +643,7 @@ export const registry: RegistryEntry[] = [
     Demo: DescribeFiltersDemo,
     Thumbnail: DescribeFiltersThumbnail,
     uxDoc: describeFiltersPattern,
+    seenIn: ["notion", "linear"],
   },
   {
     slug: "ai-fill-drawer",
@@ -603,6 +654,7 @@ export const registry: RegistryEntry[] = [
     Demo: AiFillDrawerDemo,
     Thumbnail: AiFillDrawerThumbnail,
     uxDoc: aiFillDrawerPattern,
+    seenIn: ["notion"],
   },
   {
     slug: "natural-language-query",
@@ -613,6 +665,7 @@ export const registry: RegistryEntry[] = [
     Demo: NaturalLanguageQueryDemo,
     Thumbnail: NaturalLanguageQueryThumbnail,
     uxDoc: naturalLanguageQueryPattern,
+    seenIn: ["huggingface"],
   },
 ];
 

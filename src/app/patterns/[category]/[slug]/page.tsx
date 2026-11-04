@@ -6,6 +6,7 @@ import { BackButton } from "@/components/back-button";
 import { CodeBlock } from "@/components/code-block";
 import { ComponentPreview } from "@/components/component-preview";
 import { DownloadButton } from "@/components/download-button";
+import { SeenIn } from "@/components/seen-in";
 import { getRegistryEntry, registry } from "@/registry";
 
 export function generateStaticParams() {
@@ -38,6 +39,7 @@ export default async function PatternPage({
         <p className="text-sm font-medium text-muted-foreground capitalize">{entry.category}</p>
         <h1 className="text-3xl font-semibold tracking-tight">{entry.title}</h1>
         <p className="text-muted-foreground">{entry.description}</p>
+        <SeenIn ids={entry.seenIn} className="pt-2" />
       </div>
 
       <ComponentPreview

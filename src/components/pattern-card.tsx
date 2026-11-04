@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { SeenIn } from "@/components/seen-in";
 import type { RegistryEntry } from "@/registry";
 
 // The thumbnail card used on the home page groups and the /patterns index:
@@ -15,7 +16,10 @@ export function PatternCard({ entry }: { entry: RegistryEntry }) {
         <Thumbnail />
       </div>
       <div className="px-1.5 pt-2.5 pb-1.5">
-        <p className="text-sm font-medium">{entry.title}</p>
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm font-medium">{entry.title}</p>
+          <SeenIn ids={entry.seenIn} size="sm" showLabel={false} className="shrink-0" />
+        </div>
         <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{entry.description}</p>
       </div>
     </Link>
