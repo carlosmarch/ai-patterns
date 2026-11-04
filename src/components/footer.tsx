@@ -61,7 +61,7 @@ export function Footer() {
               <Origami className="size-4" />
               AI Patterns
             </Link>
-            <p className="text-sm text-muted-foreground">Production components for AI agent UIs.</p>
+            <p className="text-sm text-muted-foreground">Show your agents the patterns that work</p>
             <div className="flex items-center gap-4 pt-2">
               <a href={REPO_URL} target="_blank" rel="noreferrer" aria-label="Source on GitHub" className={iconLinkClass}>
                 <GithubMark className="size-4" />
