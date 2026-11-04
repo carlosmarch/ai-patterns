@@ -44,8 +44,8 @@ export function HomeFeatures({
   return (
     <section className="py-16 sm:py-20">
       <h2 className="text-3xl leading-[1.1] font-semibold tracking-tight sm:text-5xl">
-        You copied the markup.
-        <span className="block text-muted-foreground">Your agent never read why.</span>
+        The code, and the reasoning behind it.
+        <span className="block text-muted-foreground">Both written for AI agents.</span>
       </h2>
 
       <div className="mt-10 grid gap-3 sm:grid-cols-6">
