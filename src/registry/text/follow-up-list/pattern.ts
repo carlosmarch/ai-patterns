@@ -20,6 +20,7 @@ A vertical list of suggested next questions shown after an assistant response, e
 
 ## Behavior
 - Rows animate in with a slight upward fade, staggered a beat apart, so the list doesn't slam onto the screen the instant the response finishes.
+- Each row is a full-width button: on hover or keyboard focus it shows a pointer cursor, a subtle background highlight, and its text and arrow brighten to full foreground, so it reads as clickable before it is clicked.
 - Clicking a row sends that suggestion as the user's next message immediately — it is not a two-step "fill the composer, then let the user edit" interaction.
 - Rows appear only once the response they follow has finished streaming, never while it's still generating.
 
