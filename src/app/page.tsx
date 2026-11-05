@@ -1,15 +1,13 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { ArrowUpRight, BookOpen, Sparkles } from "lucide-react";
+import { BookOpen, Sparkles } from "lucide-react";
 
 import { registry, type RegistryEntry } from "@/registry";
 import { GithubMark } from "@/components/github-mark";
 import { PatternCard } from "@/components/pattern-card";
-import { SeenIn } from "@/components/seen-in";
-import type { SeenIn as SeenInRef } from "@/lib/teams";
 import { IntroHero, type HeroEntry } from "./intro-hero/intro-hero";
 import { HomeFeatures } from "./home-features";
 import { HomeHero } from "./home-hero";
+import { Card, DemoCard, Section, href } from "./home-parts";
 
 const REPO_URL = "https://github.com/carlosmarch/ai-patterns";
 
@@ -101,8 +99,6 @@ const toHeroEntry = ({ slug, category, title, description }: RegistryEntry): Her
   description,
 });
 const heroEntries = registry.filter((e) => !HIDDEN.has(e.slug) || e.slug === FEATURED).map(toHeroEntry);
-
-const href = (entry: RegistryEntry) => `/patterns/${entry.category}/${entry.slug}`;
 
 export default function Home() {
   const featured = bySlug.get(FEATURED);
@@ -213,101 +209,5 @@ export default function Home() {
         </section>
       </div>
     </main>
-  );
-}
-
-function Section({
-  id,
-  title,
-  blurb,
-  meta,
-  action,
-  children,
-}: {
-  id?: string;
-  title: string;
-  blurb?: string;
-  meta?: string;
-  action?: { label: string; href: string };
-  children: ReactNode;
-}) {
-  return (
-    <section id={id} className="scroll-mt-16 py-10 sm:py-12">
-      <div className="mb-4 flex items-baseline justify-between gap-4">
-        <div>
-          <h2 className="text-sm font-medium">{title}</h2>
-          {blurb && <p className="mt-0.5 text-xs text-muted-foreground">{blurb}</p>}
-        </div>
-        {action ? (
-          <Link
-            href={action.href}
-            className="shrink-0 text-xs text-muted-foreground transition-colors hover:text-foreground"
-          >
-            {action.label} →
-          </Link>
-        ) : (
-          meta && <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{meta}</span>
-        )}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function Card({
-  title,
-  description,
-  href,
-  badge,
-  seenIn,
-  className,
-  children,
-}: {
-  title: string;
-  description: string;
-  href: string;
-  badge?: string;
-  seenIn?: SeenInRef[];
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <article className={"rounded-xl border bg-muted/40 p-1.5 " + (className ?? "")}>
-      <div className="overflow-hidden rounded-lg border bg-card dark:bg-background">{children}</div>
-      <div className="flex items-end justify-between gap-4 px-3 pt-3 pb-2">
-        <div className="min-w-0">
-          <h3 className="flex items-center gap-2 text-sm font-medium">
-            {title}
-            {badge && (
-              <span className="rounded-md bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-blue-600 dark:text-blue-400">
-                {badge}
-              </span>
-            )}
-          </h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
-        </div>
-        <div className="flex shrink-0 items-center gap-3">
-          <SeenIn items={seenIn} size="sm" linked className="hidden sm:flex" />
-          <Link
-            href={href}
-            aria-label={`View ${title} details`}
-            className="flex size-7 shrink-0 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowUpRight className="size-3.5" />
-          </Link>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function DemoCard({ entry, badge }: { entry: RegistryEntry; badge?: string }) {
-  const Demo = entry.Demo;
-  return (
-    <Card title={entry.title} description={entry.description} href={href(entry)} badge={badge} seenIn={entry.seenIn}>
-      <div className="flex min-h-[260px] items-center justify-center p-4 sm:p-10">
-        <Demo />
-      </div>
-    </Card>
   );
 }

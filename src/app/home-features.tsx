@@ -17,13 +17,13 @@ const COPIES = [
   { title: "Streaming Text", file: "streaming-text/component.tsx" },
   { title: "Inline Citation", file: "inline-citation/component.tsx" },
 ];
-const AGENTS: { name: string; path: string; bg: string; fg: string }[] = [
+export const AGENTS: { name: string; path: string; bg: string; fg: string }[] = [
   { name: siClaude.title, path: siClaude.path, bg: "#1f1f1f", fg: "#d97757" },
   { name: siCursor.title, path: siCursor.path, bg: "#1f1f1f", fg: "#fff" },
   { name: siGithubcopilot.title, path: siGithubcopilot.path, bg: "#1f1f1f", fg: "#fff" },
 ];
 
-function useTick(interval: number) {
+export function useTick(interval: number) {
   const reduce = useReducedMotion();
   const [tick, setTick] = useState(0);
   useEffect(() => {
@@ -153,7 +153,7 @@ function Tile({
   );
 }
 
-function SearchVignette({ thumbnails }: { thumbnails: ReactNode }) {
+export function SearchVignette({ thumbnails }: { thumbnails: ReactNode }) {
   const reduce = useReducedMotion();
   const tick = useTick(2400);
   const word = QUERIES[tick % QUERIES.length];
@@ -181,7 +181,7 @@ function SearchVignette({ thumbnails }: { thumbnails: ReactNode }) {
 }
 
 // Types `word` out one character at a time; keyed by word so it restarts.
-function Typed({ word }: { word: string }) {
+export function Typed({ word }: { word: string }) {
   const [count, setCount] = useState(0);
   useEffect(() => {
     const id = setInterval(() => {
@@ -195,7 +195,7 @@ function Typed({ word }: { word: string }) {
   return word.slice(0, count);
 }
 
-function CopyVignette() {
+export function CopyVignette() {
   const reduce = useReducedMotion();
   const tick = useTick(2800);
   const item = COPIES[tick % COPIES.length];
@@ -227,7 +227,7 @@ function CopyVignette() {
   );
 }
 
-function SpecStack() {
+export function SpecStack() {
   return (
     <div aria-hidden className="relative h-7 w-12">
       {[0, 1, 2].map((i) => (
@@ -247,7 +247,7 @@ function SpecStack() {
 
 // Three teams at a time, rotating through the whole strip. TEAMS.length is a
 // multiple of three, so every frame shows three distinct teams.
-function TeamCredit({ patternCount }: { patternCount: number }) {
+export function TeamCredit({ patternCount }: { patternCount: number }) {
   const reduce = useReducedMotion();
   const tick = useTick(3200);
   const start = (tick * 3) % TEAMS.length;
@@ -287,7 +287,7 @@ function TeamCredit({ patternCount }: { patternCount: number }) {
   );
 }
 
-function TeamStack({ teams }: { teams: Team[] }) {
+export function TeamStack({ teams }: { teams: Team[] }) {
   const reduce = useReducedMotion();
   return (
     <div aria-hidden className="relative h-10 w-16 shrink-0">
