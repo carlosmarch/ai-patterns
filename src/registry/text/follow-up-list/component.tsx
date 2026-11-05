@@ -23,7 +23,6 @@ export function FollowUpList({ suggestions, onSelect, className }: FollowUpListP
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, delay: i * 0.05 }}
-          className="border-b last:border-b-0"
         >
           <button
             type="button"

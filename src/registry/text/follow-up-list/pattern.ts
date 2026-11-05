@@ -15,7 +15,7 @@ A vertical list of suggested next questions shown after an assistant response, e
 
 ## Anatomy
 - A vertical stack of rows, each with a leading "corner-down-right" arrow icon (echoing "this leads to a reply") and the suggestion text.
-- A hairline divider between rows; no divider after the last row.
+- No dividers between rows — spacing and the hover highlight separate them.
 - No container border or background — the list sits directly under the response it follows, reading as part of that turn rather than a separate card.
 
 ## Behavior
