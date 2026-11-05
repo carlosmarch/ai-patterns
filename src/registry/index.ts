@@ -32,6 +32,9 @@ import { pattern as shinyButtonPattern } from "./buttons/shiny-button/pattern";
 import ThinkingLoaderDemo from "./loaders/thinking-loader/demo";
 import ThinkingLoaderThumbnail from "./loaders/thinking-loader/thumbnail";
 import { pattern as thinkingLoaderPattern } from "./loaders/thinking-loader/pattern";
+import DrawingIconDemo from "./loaders/drawing-icon/demo";
+import DrawingIconThumbnail from "./loaders/drawing-icon/thumbnail";
+import { pattern as drawingIconPattern } from "./loaders/drawing-icon/pattern";
 import ExpandableTraceDemo from "./traces/expandable-trace/demo";
 import ExpandableTraceThumbnail from "./traces/expandable-trace/thumbnail";
 import { pattern as expandableTracePattern } from "./traces/expandable-trace/pattern";
@@ -47,6 +50,9 @@ import { pattern as diffSummaryPattern } from "./code/diff-summary/pattern";
 import DiffTabsDemo from "./code/diff-tabs/demo";
 import DiffTabsThumbnail from "./code/diff-tabs/thumbnail";
 import { pattern as diffTabsPattern } from "./code/diff-tabs/pattern";
+import CodePreviewDemo from "./code/code-preview/demo";
+import CodePreviewThumbnail from "./code/code-preview/thumbnail";
+import { pattern as codePreviewPattern } from "./code/code-preview/pattern";
 import PromptBarProDemo from "./composer/prompt-bar-pro/demo";
 import PromptBarProThumbnail from "./composer/prompt-bar-pro/thumbnail";
 import { pattern as promptBarProPattern } from "./composer/prompt-bar-pro/pattern";
@@ -318,6 +324,16 @@ export const registry: RegistryEntry[] = [
     ],
   },
   {
+    slug: "drawing-icon",
+    category: "loaders",
+    title: "Drawing Icon",
+    description: "A line icon that draws itself stroke by stroke while the step it stands for is running.",
+    Demo: DrawingIconDemo,
+    Thumbnail: DrawingIconThumbnail,
+    uxDoc: drawingIconPattern,
+    seenIn: [],
+  },
+  {
     slug: "expandable-trace",
     category: "traces",
     title: "Expandable Trace",
@@ -417,6 +433,16 @@ export const registry: RegistryEntry[] = [
       { team: "zed", source: "https://zed.dev/docs/ai/agent-panel" },
       { team: "cursor", source: "https://docs.cursor.com/agent/review" },
     ],
+  },
+  {
+    slug: "code-preview",
+    category: "code",
+    title: "Code Preview Block",
+    description: "A code block that flips between the source and a sandboxed live rendering of it.",
+    Demo: CodePreviewDemo,
+    Thumbnail: CodePreviewThumbnail,
+    uxDoc: codePreviewPattern,
+    seenIn: [],
   },
   {
     slug: "trigger-condition",
