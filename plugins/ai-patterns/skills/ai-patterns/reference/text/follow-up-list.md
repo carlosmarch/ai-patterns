@@ -19,7 +19,7 @@ A vertical list of suggested next questions shown after an assistant response, e
 
 ## Anatomy
 - A vertical stack of rows, each with a leading "corner-down-right" arrow icon (echoing "this leads to a reply") and the suggestion text.
-- A hairline divider between rows; no divider after the last row.
+- No dividers between rows — spacing and the hover highlight separate them.
 - No container border or background — the list sits directly under the response it follows, reading as part of that turn rather than a separate card.
 
 ## Behavior
@@ -77,7 +77,6 @@ export function FollowUpList({ suggestions, onSelect, className }: FollowUpListP
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, delay: i * 0.05 }}
-          className="border-b last:border-b-0"
         >
           <button
             type="button"
