@@ -12,6 +12,14 @@ import {
   TerminalVariant,
   type SectionItem,
 } from "./variants";
+import {
+  AnatomyVariant,
+  CompareVariant,
+  ComparisonVariant,
+  IndexVariant,
+  OrbitVariant,
+  SpotlightVariant,
+} from "./variants-more";
 
 export const metadata: Metadata = {
   title: "Section variants — ai-patterns",
@@ -76,6 +84,30 @@ export default function SectionsPage() {
 
       <Variant label="F" name="Numbers" note="A quiet stats strip with the credit line beneath." narrow>
         <StatsVariant patternCount={visible.length} categoryCount={getCategories().length} />
+      </Variant>
+
+      <Variant label="G" name="Before / after" note="Drag to compare a generic confirm with the Tool Approval pattern.">
+        <CompareVariant />
+      </Variant>
+
+      <Variant label="H" name="Anatomy" note="A pattern with numbered callouts tied to a hoverable legend.">
+        <AnatomyVariant />
+      </Variant>
+
+      <Variant label="I" name="Orbit" note="One skill at the centre, agents and patterns circling it.">
+        <OrbitVariant />
+      </Variant>
+
+      <Variant label="J" name="Index" note="Editorial category list with a cursor-following thumbnail peek.">
+        <IndexVariant items={items} />
+      </Variant>
+
+      <Variant label="K" name="Comparison" note="ai-patterns against a component library and an inspiration gallery." narrow>
+        <ComparisonVariant />
+      </Variant>
+
+      <Variant label="L" name="Spotlight grid" note="Four features lit by a glow that follows the cursor across cards.">
+        <SpotlightVariant />
       </Variant>
     </main>
   );

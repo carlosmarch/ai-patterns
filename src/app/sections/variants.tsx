@@ -30,7 +30,7 @@ export type SectionItem = {
 /* Shared bits                                                               */
 /* ------------------------------------------------------------------------ */
 
-function InstallLink({ className }: { className?: string }) {
+export function InstallLink({ className }: { className?: string }) {
   return (
     <Link
       href="/skill"
@@ -44,7 +44,7 @@ function InstallLink({ className }: { className?: string }) {
   );
 }
 
-function AgentIcons({ className }: { className?: string }) {
+export function AgentIcons({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
       {AGENTS.map((a) => (
@@ -59,7 +59,7 @@ function AgentIcons({ className }: { className?: string }) {
   );
 }
 
-function ThumbCard({ item, className }: { item: SectionItem; className?: string }) {
+export function ThumbCard({ item, className }: { item: SectionItem; className?: string }) {
   return (
     <div className={cn("rounded-xl border bg-muted/40 p-1.5", className)}>
       <div className="aspect-[5/3] rounded-lg border bg-card p-1.5 dark:bg-background">{item.thumb}</div>
