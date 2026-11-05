@@ -23,14 +23,18 @@ export function FollowUpList({ suggestions, onSelect, className }: FollowUpListP
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, delay: i * 0.05 }}
+          className="border-b last:border-b-0"
         >
           <button
             type="button"
             onClick={() => onSelect?.(suggestion)}
-            className="group flex w-full items-center gap-2.5 border-b py-3 text-left last:border-b-0"
+            className="group -mx-2 flex w-[calc(100%+1rem)] cursor-pointer items-center gap-2.5 rounded-md px-2 py-3 text-left transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
           >
-            <CornerDownRight className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
-            <span className="flex-1 text-sm text-foreground/90 transition-colors group-hover:text-foreground">
+            <CornerDownRight
+              className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground group-focus-visible:text-foreground"
+              aria-hidden
+            />
+            <span className="flex-1 text-sm text-foreground/90 transition-colors group-hover:text-foreground group-focus-visible:text-foreground">
               {suggestion}
             </span>
           </button>
