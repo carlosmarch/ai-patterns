@@ -532,11 +532,11 @@ function Terminal({ className, compact }: { className?: string; compact?: boolea
     <div
       aria-hidden
       className={cn(
-        "overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 shadow-xl",
+        "overflow-hidden rounded-xl bg-neutral-950 shadow-xl",
         className
       )}
     >
-      <div className="flex items-center gap-1.5 border-b border-neutral-800 px-3 py-2">
+      <div className="flex items-center gap-1.5 px-3 py-2">
         {[0, 1, 2].map((i) => (
           <span key={i} className="size-2 rounded-full bg-neutral-700" />
         ))}

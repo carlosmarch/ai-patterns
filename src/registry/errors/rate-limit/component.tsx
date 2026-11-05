@@ -65,40 +65,47 @@ export function RateLimit({
           role="status"
           aria-live="polite"
           className={cn(
-            "flex w-full items-center gap-3 rounded-2xl border border-border bg-muted/50 px-4 py-2.5",
+            "flex w-full flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-border bg-muted/50 px-4 py-2.5",
             className
           )}
         >
-          <PulsingIcon />
-
-          <div className="flex min-w-0 flex-1 items-center gap-2">
-            <span className="truncate text-xs font-medium text-foreground">{label}</span>
-            {resetLabel && (
-              <span className="shrink-0 text-xs text-muted-foreground" aria-label={resetLabel}>
-                {resetLabel}
-              </span>
-            )}
+          {/* Never truncate: the label wraps and the reset label drops below it.
+              When even that can't fit, the actions wrap onto their own row. */}
+          <div className="flex min-w-[min(100%,11rem)] flex-1 items-center gap-3">
+            <PulsingIcon />
+            <div className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span className="text-xs font-medium text-pretty text-foreground">{label}</span>
+              {resetLabel && (
+                <span className="shrink-0 text-xs text-muted-foreground" aria-label={resetLabel}>
+                  {resetLabel}
+                </span>
+              )}
+            </div>
           </div>
 
-          {onUpgrade && (
-            <button
-              type="button"
-              onClick={onUpgrade}
-              className="shrink-0 rounded-lg border border-border bg-background px-3 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-            >
-              {upgradeLabel}
-            </button>
-          )}
+          {(onUpgrade || onDismiss) && (
+            <div className="ml-auto flex shrink-0 items-center gap-3">
+              {onUpgrade && (
+                <button
+                  type="button"
+                  onClick={onUpgrade}
+                  className="shrink-0 rounded-lg border border-border bg-background px-3 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                >
+                  {upgradeLabel}
+                </button>
+              )}
 
-          {onDismiss && (
-            <button
-              type="button"
-              onClick={dismiss}
-              aria-label="Dismiss"
-              className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <X className="size-4" aria-hidden />
-            </button>
+              {onDismiss && (
+                <button
+                  type="button"
+                  onClick={dismiss}
+                  aria-label="Dismiss"
+                  className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  <X className="size-4" aria-hidden />
+                </button>
+              )}
+            </div>
           )}
         </motion.div>
       )}
