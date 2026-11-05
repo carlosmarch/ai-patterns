@@ -125,3 +125,38 @@ body {
     animation: none;
   }
 }
+
+/* Logo ------------------------------------------------------------- */
+/* The header's origami mark folds itself, stroke by stroke, on hover. */
+@keyframes fold-draw {
+  0% {
+    stroke-dashoffset: 1;
+  }
+  35%,
+  82% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 1;
+  }
+}
+.animated-origami path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.logo-link:hover .animated-origami path,
+.logo-link:focus-visible .animated-origami path {
+  animation: fold-draw 3.6s ease-in-out infinite backwards;
+}
+.logo-link .animated-origami path:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.logo-link .animated-origami path:nth-child(3) {
+  animation-delay: 0.6s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-link:hover .animated-origami path,
+  .logo-link:focus-visible .animated-origami path {
+    animation: none;
+  }
+}
