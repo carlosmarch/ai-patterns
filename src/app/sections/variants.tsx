@@ -1,0 +1,709 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { AnimatePresence, animate, motion, useInView, useReducedMotion } from "motion/react";
+import { Check, Search } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import {
+  AGENTS,
+  CopyVignette,
+  SearchVignette,
+  TeamCredit,
+  Typed,
+  useTick,
+} from "../home-features";
+
+// Alternative takes on the home page's "why" bento. Each variant tells the
+// same story — find by behavior, copy the source, a spec per pattern, read by
+// your agent — in a different shape, so they can be compared side by side.
+
+export type SectionItem = {
+  slug: string;
+  category: string;
+  title: string;
+  thumb: ReactNode;
+};
+
+/* ------------------------------------------------------------------------ */
+/* Shared bits                                                               */
+/* ------------------------------------------------------------------------ */
+
+function InstallLink({ className }: { className?: string }) {
+  return (
+    <Link
+      href="/skill"
+      className={cn(
+        "inline-flex shrink-0 items-center justify-center rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90",
+        className
+      )}
+    >
+      Install the skill
+    </Link>
+  );
+}
+
+function AgentIcons({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex items-center gap-3", className)}>
+      {AGENTS.map((a) => (
+        <span key={a.name} title={a.name} className="grid size-5 place-items-center">
+          <svg viewBox="0 0 24 24" className="size-4.5" fill="currentColor" aria-hidden>
+            <path d={a.path} />
+          </svg>
+          <span className="sr-only">{a.name}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function ThumbCard({ item, className }: { item: SectionItem; className?: string }) {
+  return (
+    <div className={cn("rounded-xl border bg-muted/40 p-1.5", className)}>
+      <div className="aspect-[5/3] rounded-lg border bg-card p-1.5 dark:bg-background">{item.thumb}</div>
+      <p className="truncate px-1 pt-1.5 pb-0.5 text-xs font-medium">{item.title}</p>
+    </div>
+  );
+}
+
+const pickItems = (items: SectionItem[], slugs: string[]) =>
+  slugs
+    .map((slug) => items.find((i) => i.slug === slug))
+    .filter((i): i is SectionItem => Boolean(i));
+
+/* ------------------------------------------------------------------------ */
+/* A · Ask for a pattern — split hero with a chat that answers in patterns   */
+/* ------------------------------------------------------------------------ */
+
+const ASKS: { prompt: string; slugs: string[] }[] = [
+  {
+    prompt: "Show me patterns that let people approve what the agent does",
+    slugs: ["tool-approval", "human-in-the-loop", "connector-panel", "agent-triggers", "invite-members"],
+  },
+  {
+    prompt: "How should an answer prove where it came from?",
+    slugs: ["inline-citation", "sources-stack", "source-trust-card", "confidence-indicator"],
+  },
+  {
+    prompt: "Something for when the model fails halfway through",
+    slugs: ["partial-response", "generation-error", "rate-limit", "connectivity-error", "console-error-card"],
+  },
+  {
+    prompt: "Let people talk to it instead of typing",
+    slugs: ["listening-state", "live-transcript", "prompt-bar", "attachment-chip"],
+  },
+];
+
+export function AskVariant({ items }: { items: SectionItem[] }) {
+  return (
+    <section className="grid items-center gap-10 py-6 md:grid-cols-[0.9fr_1.1fr]">
+      <div>
+        <h2 className="text-4xl leading-[1.05] font-semibold tracking-tight sm:text-5xl">
+          Ask for a pattern.
+          <span className="block text-muted-foreground">Get the reasoning too.</span>
+        </h2>
+        <p className="mt-4 max-w-sm text-sm text-muted-foreground">
+          Describe the behavior you need. Your agent finds the pattern, reads its spec, and writes the UI.
+        </p>
+        <InstallLink className="mt-7" />
+        <AgentIcons className="mt-7 text-muted-foreground" />
+      </div>
+      <AskPanel items={items} />
+    </section>
+  );
+}
+
+type AskPhase = "asking" | "searching" | "found";
+
+function AskPanel({ items }: { items: SectionItem[] }) {
+  const reduce = useReducedMotion();
+  const tick = useTick(6000);
+  const ask = ASKS[tick % ASKS.length];
+  const found = pickItems(items, ask.slugs);
+  const [phase, setPhase] = useState<AskPhase>("asking");
+
+  // Walk each question through asking → searching → found. Resetting happens
+  // in the timers (not synchronously in the effect) to avoid a cascading render.
+  useEffect(() => {
+    if (reduce) return;
+    const timers = [
+      setTimeout(() => setPhase("asking"), 0),
+      setTimeout(() => setPhase("searching"), 700),
+      setTimeout(() => setPhase("found"), 1700),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, [tick, reduce]);
+
+  const shown: AskPhase = reduce ? "found" : phase;
+
+  return (
+    <div aria-hidden className="relative min-h-[340px] overflow-hidden rounded-2xl border bg-muted/40 p-5">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.p
+          key={ask.prompt}
+          className="ml-auto w-fit max-w-[80%] rounded-2xl border bg-card px-4 py-3 text-sm leading-snug shadow-sm dark:bg-background"
+          initial={reduce ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ type: "spring", stiffness: 320, damping: 30 }}
+        >
+          {ask.prompt}
+        </motion.p>
+      </AnimatePresence>
+
+      <div className="mt-8 h-5 text-sm font-medium">
+        <AnimatePresence mode="wait" initial={false}>
+          {shown === "searching" && (
+            <motion.span
+              key="searching"
+              className="block bg-[linear-gradient(90deg,var(--muted-foreground)_0%,var(--foreground)_50%,var(--muted-foreground)_100%)] bg-[length:200%_100%] bg-clip-text text-transparent [animation:hero-shimmer_1.4s_linear_infinite]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              Reading the specs…
+            </motion.span>
+          )}
+          {shown === "found" && (
+            <motion.span
+              key={`found-${ask.prompt}`}
+              className="block"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              Found {found.length} patterns
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className="-mr-5 mt-3 flex gap-3 [mask-image:linear-gradient(to_right,black_70%,transparent)]">
+        <AnimatePresence mode="popLayout">
+          {shown === "found" &&
+            found.map((item, i) => (
+              <motion.div
+                key={`${ask.prompt}-${item.slug}`}
+                className="w-40 shrink-0"
+                initial={reduce ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                transition={{ type: "spring", stiffness: 300, damping: 28, delay: reduce ? 0 : i * 0.07 }}
+              >
+                <ThumbCard item={item} className="bg-card dark:bg-background" />
+              </motion.div>
+            ))}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------------ */
+/* B · Three moves — Find, Copy, Ship, with the active step walking along    */
+/* ------------------------------------------------------------------------ */
+
+const STEPS = [
+  { title: "Find", body: "Search by what it does, not what it's called." },
+  { title: "Copy", body: "The component, its demo and its spec land in your repo." },
+  { title: "Ship", body: "Keyboard, live regions and reduced motion come with it." },
+];
+
+export function StepsVariant() {
+  const reduce = useReducedMotion();
+  const tick = useTick(2800);
+  const active = reduce ? -1 : tick % STEPS.length;
+
+  return (
+    <section className="py-6">
+      <h2 className="text-3xl leading-[1.1] font-semibold tracking-tight sm:text-4xl">
+        From a prompt to a pattern
+        <span className="block text-muted-foreground">in three moves.</span>
+      </h2>
+
+      <ol className="relative mt-10 grid gap-3 sm:grid-cols-3">
+        {STEPS.map((step, i) => {
+          const on = active === i;
+          return (
+            <li
+              key={step.title}
+              className={cn(
+                "relative flex min-h-[260px] flex-col overflow-hidden rounded-xl border transition-[background-color,box-shadow] duration-500",
+                on ? "bg-card shadow-lg dark:bg-muted/60" : "bg-muted/40"
+              )}
+            >
+              <div aria-hidden className="relative flex flex-1 items-center justify-center p-5">
+                {i === 0 && <StepFind on={on || reduce === true} />}
+                {i === 1 && <StepCopy on={on || reduce === true} />}
+                {i === 2 && <StepShip on={on || reduce === true} />}
+              </div>
+              <div className="flex gap-3 px-5 pt-3 pb-5">
+                <span
+                  className={cn(
+                    "grid size-5 shrink-0 place-items-center rounded-full border font-mono text-[10px] transition-colors duration-500",
+                    on ? "border-foreground bg-foreground text-background" : "text-muted-foreground"
+                  )}
+                >
+                  {i + 1}
+                </span>
+                <div>
+                  <h3 className="text-sm font-medium">{step.title}</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{step.body}</p>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+
+      <div className="mt-6 flex flex-col gap-4 px-1 sm:flex-row sm:items-center sm:justify-end">
+        <InstallLink />
+      </div>
+    </section>
+  );
+}
+
+function StepFind({ on }: { on: boolean }) {
+  return (
+    <div className="flex w-full max-w-[220px] items-center gap-2 rounded-full border bg-background px-3.5 py-2 shadow-sm">
+      <Search className="size-3.5 text-muted-foreground" />
+      <span className="flex-1 text-sm">
+        {on ? <Typed word="approve" /> : <span className="text-muted-foreground">Search…</span>}
+      </span>
+    </div>
+  );
+}
+
+const FILES = ["component.tsx", "demo.tsx", "pattern.ts"];
+
+function StepCopy({ on }: { on: boolean }) {
+  return (
+    <ul className="w-full max-w-[200px] space-y-1.5">
+      {FILES.map((file, i) => (
+        <motion.li
+          key={file}
+          className="flex items-center gap-2 rounded-lg border bg-background px-3 py-1.5 font-mono text-[11px] shadow-sm"
+          animate={{ opacity: on ? 1 : 0.45, x: on ? 0 : -4 }}
+          transition={{ delay: on ? i * 0.12 : 0, duration: 0.3 }}
+        >
+          <span className="size-1.5 rounded-full bg-muted-foreground/50" />
+          {file}
+        </motion.li>
+      ))}
+    </ul>
+  );
+}
+
+const CHECKS = ["Keyboard path", "Live region", "Reduced motion"];
+
+function StepShip({ on }: { on: boolean }) {
+  return (
+    <ul className="w-full max-w-[180px] space-y-2">
+      {CHECKS.map((check, i) => (
+        <li key={check} className="flex items-center gap-2 text-xs">
+          <motion.span
+            className="grid size-4 place-items-center rounded-full"
+            animate={{
+              backgroundColor: on ? "rgb(59 130 246)" : "rgb(0 0 0 / 0)",
+              scale: on ? [0.6, 1.1, 1] : 1,
+            }}
+            transition={{ delay: on ? 0.15 + i * 0.15 : 0, duration: 0.35 }}
+          >
+            <Check className={cn("size-2.5 transition-colors", on ? "text-white" : "text-muted-foreground")} strokeWidth={3} />
+          </motion.span>
+          <span className={on ? "" : "text-muted-foreground"}>{check}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/* ------------------------------------------------------------------------ */
+/* C · Feature tabs — a list on the left drives one large preview            */
+/* ------------------------------------------------------------------------ */
+
+const TABS = [
+  { id: "find", title: "Find by behavior", body: "Type what it does — approve, stream, cite, interrupt." },
+  { id: "copy", title: "Copy it, don't install it", body: "Source in your repo, with its demo and spec beside it." },
+  { id: "spec", title: "A spec per pattern", body: "When to use, when not, anatomy, behavior, a11y — same order, every time." },
+  { id: "agent", title: "Read by your agent", body: "The skill makes Claude Code read the spec before it writes the UI." },
+] as const;
+
+const TAB_MS = 5000;
+
+export function TabsVariant({ thumbnails }: { thumbnails: ReactNode }) {
+  const reduce = useReducedMotion();
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const tab = TABS[index];
+  const auto = !reduce && !paused;
+
+  useEffect(() => {
+    if (!auto) return;
+    const id = setTimeout(() => setIndex((i) => (i + 1) % TABS.length), TAB_MS);
+    return () => clearTimeout(id);
+  }, [auto, index]);
+
+  return (
+    <section className="py-6">
+      <h2 className="text-3xl leading-[1.1] font-semibold tracking-tight sm:text-4xl">
+        The code, and the reasoning behind it.
+      </h2>
+      <div
+        className="mt-10 grid gap-3 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]"
+        onPointerEnter={() => setPaused(true)}
+        onPointerLeave={() => setPaused(false)}
+        onFocus={() => setPaused(true)}
+        onBlur={() => setPaused(false)}
+      >
+        <div role="tablist" aria-orientation="vertical" aria-label="Features" className="flex flex-col gap-1">
+          {TABS.map((t, i) => {
+            const selected = i === index;
+            return (
+              <button
+                key={t.id}
+                id={`tab-${t.id}`}
+                role="tab"
+                type="button"
+                aria-selected={selected}
+                aria-controls="features-panel"
+                tabIndex={selected ? 0 : -1}
+                onClick={() => setIndex(i)}
+                onKeyDown={(e) => {
+                  const step = e.key === "ArrowDown" ? 1 : e.key === "ArrowUp" ? -1 : 0;
+                  if (!step) return;
+                  e.preventDefault();
+                  const next = (i + step + TABS.length) % TABS.length;
+                  setIndex(next);
+                  document.getElementById(`tab-${TABS[next].id}`)?.focus();
+                }}
+                className={cn(
+                  "relative overflow-hidden rounded-xl px-4 py-3.5 text-left transition-colors",
+                  selected ? "bg-muted/60" : "hover:bg-muted/40"
+                )}
+              >
+                <span className={cn("block text-sm font-medium", !selected && "text-muted-foreground")}>
+                  {t.title}
+                </span>
+                <AnimatePresence initial={false}>
+                  {selected && (
+                    <motion.span
+                      className="block overflow-hidden text-xs leading-relaxed text-muted-foreground"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: reduce ? 0 : 0.25 }}
+                    >
+                      <span className="block pt-1">{t.body}</span>
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+                {selected && auto && (
+                  <motion.span
+                    key={`bar-${index}`}
+                    aria-hidden
+                    className="absolute inset-x-0 bottom-0 h-px origin-left bg-foreground/40"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: TAB_MS / 1000, ease: "linear" }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div
+          id="features-panel"
+          role="tabpanel"
+          aria-labelledby={`tab-${tab.id}`}
+          className="relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-xl border bg-muted/40"
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={tab.id}
+              className="absolute inset-0 flex items-center justify-center"
+              initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.98, filter: "blur(4px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.98, filter: "blur(4px)" }}
+              transition={{ duration: 0.25 }}
+            >
+              {tab.id === "find" && <SearchVignette thumbnails={thumbnails} />}
+              {tab.id === "copy" && <CopyVignette />}
+              {tab.id === "spec" && <SpecDoc />}
+              {tab.id === "agent" && <MiniTerminal />}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const SPEC_SECTIONS = [
+  "Summary",
+  "When to use",
+  "When not to use",
+  "Anatomy",
+  "Behavior",
+  "Content guidelines",
+  "Accessibility",
+  "Related patterns",
+];
+
+function SpecDoc() {
+  const tick = useTick(700);
+  const active = tick % SPEC_SECTIONS.length;
+  return (
+    <div aria-hidden className="w-[72%] max-w-[280px] rounded-xl border bg-card p-4 shadow-lg dark:bg-background">
+      <p className="font-mono text-[11px] text-muted-foreground">tool-approval/pattern.ts</p>
+      <ul className="mt-3 space-y-1.5">
+        {SPEC_SECTIONS.map((s, i) => (
+          <li key={s} className="flex items-center gap-2">
+            <span
+              className={cn(
+                "h-1.5 rounded-full transition-all duration-300",
+                i === active ? "w-3 bg-foreground" : "w-1.5 bg-muted-foreground/30"
+              )}
+            />
+            <span className={cn("text-xs transition-colors duration-300", i !== active && "text-muted-foreground")}>
+              {s}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------------ */
+/* D · Terminal — the agent visibly reads the spec before writing UI         */
+/* ------------------------------------------------------------------------ */
+
+type TermLine = { kind: "prompt" | "read" | "note" | "write" | "done"; text: string };
+
+const TERM: TermLine[] = [
+  { kind: "prompt", text: "add an approval step before the agent sends email" },
+  { kind: "read", text: "Read ai-patterns/reference/permissions/tool-approval.md" },
+  { kind: "note", text: "When not to use: low-risk, reversible actions" },
+  { kind: "note", text: "Behavior: approve, edit, or deny — never auto-continue" },
+  { kind: "write", text: "Write src/components/tool-approval.tsx" },
+  { kind: "done", text: "Focus moves to Approve · live region announces the request" },
+];
+
+function useTermLines(step = 650, hold = 2600) {
+  const reduce = useReducedMotion();
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (reduce) return;
+    const id = setTimeout(
+      () => setCount((c) => (c >= TERM.length ? 0 : c + 1)),
+      count >= TERM.length ? hold : count === 0 ? 400 : step
+    );
+    return () => clearTimeout(id);
+  }, [count, reduce, step, hold]);
+  return reduce ? TERM.length : count;
+}
+
+function TermRow({ line }: { line: TermLine }) {
+  if (line.kind === "prompt")
+    return (
+      <p className="text-neutral-100">
+        <span className="text-neutral-500">&gt; </span>
+        {line.text}
+      </p>
+    );
+  const dot =
+    line.kind === "done" ? "text-emerald-400" : line.kind === "write" ? "text-sky-400" : "text-[#d97757]";
+  return (
+    <p className={cn(line.kind === "note" ? "pl-4 text-neutral-500" : "text-neutral-300")}>
+      {line.kind !== "note" && <span className={dot}>● </span>}
+      {line.kind === "note" && <span className="text-neutral-600">⎿ </span>}
+      {line.text}
+    </p>
+  );
+}
+
+function Terminal({ className, compact }: { className?: string; compact?: boolean }) {
+  const count = useTermLines();
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        "overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 shadow-xl",
+        className
+      )}
+    >
+      <div className="flex items-center gap-1.5 border-b border-neutral-800 px-3 py-2">
+        {[0, 1, 2].map((i) => (
+          <span key={i} className="size-2 rounded-full bg-neutral-700" />
+        ))}
+        <span className="ml-2 font-mono text-[10px] text-neutral-500">claude — my-app</span>
+      </div>
+      <div
+        className={cn(
+          "space-y-1.5 p-4 font-mono leading-relaxed",
+          compact ? "min-h-[180px] text-[10px]" : "min-h-[230px] text-[11px] sm:text-xs"
+        )}
+      >
+        {TERM.slice(0, count).map((line, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <TermRow line={line} />
+          </motion.div>
+        ))}
+        {count < TERM.length && (
+          <span className="inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-neutral-400" />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MiniTerminal() {
+  return <Terminal compact className="w-[86%] max-w-[380px]" />;
+}
+
+export function TerminalVariant() {
+  return (
+    <section className="grid items-center gap-10 py-6 md:grid-cols-[1.15fr_0.85fr]">
+      <Terminal className="order-last md:order-first" />
+      <div>
+        <h2 className="text-3xl leading-[1.1] font-semibold tracking-tight sm:text-4xl">
+          Your agent reads the spec
+          <span className="block text-muted-foreground">before it writes the UI.</span>
+        </h2>
+        <ul className="mt-6 space-y-3 text-sm">
+          {[
+            "Matches your request to a pattern by behavior",
+            "Follows when-to-use and when-not-to-use",
+            "Ships the keyboard path and live regions with it",
+          ].map((t) => (
+            <li key={t} className="flex gap-2.5">
+              <Check className="mt-0.5 size-4 shrink-0 text-blue-500" />
+              <span className="text-muted-foreground">{t}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-7 flex items-center gap-5">
+          <InstallLink />
+          <AgentIcons className="text-muted-foreground" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------------ */
+/* E · Marquee wall — the whole catalogue drifting behind a centred pitch    */
+/* ------------------------------------------------------------------------ */
+
+function MarqueeRow({ items, reverse, duration }: { items: SectionItem[]; reverse?: boolean; duration: number }) {
+  const reduce = useReducedMotion();
+  // Two copies side by side so translating by -50% loops seamlessly.
+  const loop = [...items, ...items];
+  return (
+    <motion.div
+      className="flex w-max gap-3"
+      animate={reduce ? undefined : { x: reverse ? ["-50%", "0%"] : ["0%", "-50%"] }}
+      transition={{ duration, ease: "linear", repeat: Infinity }}
+    >
+      {loop.map((item, i) => (
+        <ThumbCard key={`${item.slug}-${i}`} item={item} className="w-44 shrink-0" />
+      ))}
+    </motion.div>
+  );
+}
+
+export function MarqueeVariant({ items, patternCount }: { items: SectionItem[]; patternCount: number }) {
+  const half = Math.ceil(items.length / 2);
+  return (
+    <section className="relative overflow-hidden rounded-2xl border bg-muted/20 py-10">
+      <div
+        aria-hidden
+        className="space-y-3 opacity-70 [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]"
+      >
+        <MarqueeRow items={items.slice(0, half)} duration={60} />
+        <MarqueeRow items={items.slice(half)} duration={70} reverse />
+      </div>
+      <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(closest-side,var(--background)_55%,transparent)] px-6">
+        <div className="text-center">
+          <h2 className="text-3xl leading-[1.1] font-semibold tracking-tight sm:text-4xl">
+            {patternCount} patterns.
+            <span className="block text-muted-foreground">One spec format.</span>
+          </h2>
+          <p className="mx-auto mt-3 max-w-xs text-sm text-muted-foreground">
+            Copy the source, keep the reasoning, let your agent read both.
+          </p>
+          <InstallLink className="mt-6" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------------ */
+/* F · Numbers — a quiet stats strip with the credit line beneath            */
+/* ------------------------------------------------------------------------ */
+
+function CountUp({ to }: { to: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const reduce = useReducedMotion();
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || !inView || reduce) return;
+    const controls = animate(0, to, {
+      duration: 1.1,
+      ease: "easeOut",
+      onUpdate: (v) => (node.textContent = String(Math.round(v))),
+    });
+    return () => controls.stop();
+  }, [inView, reduce, to]);
+  return <span ref={ref}>{to}</span>;
+}
+
+export function StatsVariant({ patternCount, categoryCount }: { patternCount: number; categoryCount: number }) {
+  const stats = [
+    { value: patternCount, label: "patterns" },
+    { value: categoryCount, label: "categories" },
+    { value: 8, label: "sections in every spec" },
+    { value: 0, label: "packages to install" },
+  ];
+  return (
+    <section className="py-6">
+      <h2 className="text-3xl leading-[1.1] font-semibold tracking-tight sm:text-4xl">
+        Small enough to read.
+        <span className="block text-muted-foreground">Complete enough to ship.</span>
+      </h2>
+      <dl className="mt-10 grid grid-cols-2 overflow-hidden rounded-xl border sm:grid-cols-4">
+        {stats.map((s, i) => (
+          <div
+            key={s.label}
+            className={cn(
+              "flex min-h-[140px] flex-col justify-between bg-muted/40 p-5",
+              i % 2 === 1 && "border-l",
+              i >= 2 && "border-t sm:border-t-0",
+              i === 2 && "sm:border-l"
+            )}
+          >
+            <dt className="order-last mt-4 text-xs text-muted-foreground">{s.label}</dt>
+            <dd className="text-4xl font-semibold tracking-tight tabular-nums">
+              <CountUp to={s.value} />
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <div className="mt-6 flex flex-col gap-4 px-1 sm:flex-row sm:items-center sm:justify-between">
+        <TeamCredit patternCount={patternCount} />
+        <InstallLink />
+      </div>
+    </section>
+  );
+}
