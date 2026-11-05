@@ -331,7 +331,9 @@ export const registry: RegistryEntry[] = [
     Demo: DrawingIconDemo,
     Thumbnail: DrawingIconThumbnail,
     uxDoc: drawingIconPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://chatgpt.com" },
+    ],
   },
   {
     slug: "expandable-trace",
@@ -442,7 +444,9 @@ export const registry: RegistryEntry[] = [
     Demo: CodePreviewDemo,
     Thumbnail: CodePreviewThumbnail,
     uxDoc: codePreviewPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/9930697-what-is-the-canvas-feature-in-chatgpt-and-how-do-i-use-it" },
+    ],
   },
   {
     slug: "trigger-condition",
