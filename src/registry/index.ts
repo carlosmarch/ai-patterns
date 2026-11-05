@@ -25,6 +25,9 @@ import { pattern as taskListPattern } from "./agents/task-list/pattern";
 import WaitTimeHandoffDemo from "./agents/wait-time-handoff/demo";
 import WaitTimeHandoffThumbnail from "./agents/wait-time-handoff/thumbnail";
 import { pattern as waitTimeHandoffPattern } from "./agents/wait-time-handoff/pattern";
+import AgentRunCardDemo from "./agents/agent-run-card/demo";
+import AgentRunCardThumbnail from "./agents/agent-run-card/thumbnail";
+import { pattern as agentRunCardPattern } from "./agents/agent-run-card/pattern";
 import { pattern as createAgentPattern } from "./agents/create-agent/pattern";
 import ShinyButtonDemo from "./buttons/shiny-button/demo";
 import ShinyButtonThumbnail from "./buttons/shiny-button/thumbnail";
@@ -275,6 +278,17 @@ export const registry: RegistryEntry[] = [
       { team: "claude", source: "https://code.claude.com/docs/en/interactive-mode#task-list" },
       { team: "cursor", source: "https://cursor.com/changelog/1-2" },
     ],
+  },
+  {
+    slug: "agent-run-card",
+    category: "agents",
+    title: "Agent Run Card",
+    description:
+      "A compact run card with the agent's current step and a timer, a segmented progress bar, and a list of finished steps that stacks up as it reads, edits, tests and pushes.",
+    Demo: AgentRunCardDemo,
+    Thumbnail: AgentRunCardThumbnail,
+    uxDoc: agentRunCardPattern,
+    seenIn: [],
   },
   {
     slug: "wait-time-handoff",
