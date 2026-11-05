@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, animate, motion, useReducedMotion } from "motion/react";
 import { Accessibility, Bot, Check, FileText, Minus, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -13,11 +13,91 @@ import { AgentIcons, InstallLink, ThumbCard, type SectionItem } from "./variants
 // A second batch of takes on the home page's "why" section.
 
 /* ------------------------------------------------------------------------ */
-/* G · Before / after — drag to compare a generic confirm with the pattern   */
+/* G · Before / after — pick a request, drag to compare naive vs pattern     */
 /* ------------------------------------------------------------------------ */
 
+type Example = {
+  id: string;
+  request: string;
+  pattern: string;
+  /** What changes, for screen readers — the visuals are decorative. */
+  summary: string;
+  Before: () => ReactNode;
+  After: () => ReactNode;
+};
+
+const EXAMPLES: Example[] = [
+  {
+    id: "approval",
+    request: "Ask before the agent sends email.",
+    pattern: "Tool Approval",
+    summary:
+      "Without the spec: a generic OK / Cancel dialog with no details. With it: the tool, recipient, subject and a body preview, with Deny, Edit and a focused Approve.",
+    Before: ApprovalBefore,
+    After: ApprovalAfter,
+  },
+  {
+    id: "citations",
+    request: "Show where the answer came from.",
+    pattern: "Inline Citation",
+    summary:
+      "Without the spec: a list of raw links dumped under the answer. With it: numbered citations on the claims they support and a compact sources stack.",
+    Before: CitationBefore,
+    After: CitationAfter,
+  },
+  {
+    id: "failure",
+    request: "Handle the model failing mid-answer.",
+    pattern: "Partial Response",
+    summary:
+      "Without the spec: the answer disappears behind 'Something went wrong'. With it: the partial answer stays, marked as interrupted, with Continue and Retry.",
+    Before: FailureBefore,
+    After: FailureAfter,
+  },
+  {
+    id: "working",
+    request: "Show that the agent is working.",
+    pattern: "Expandable Trace",
+    summary:
+      "Without the spec: a spinner that says Loading. With it: the steps the agent has finished, the one it's on, and how long it has taken.",
+    Before: WorkingBefore,
+    After: WorkingAfter,
+  },
+  {
+    id: "limit",
+    request: "Tell people they've hit the limit.",
+    pattern: "Rate Limit",
+    summary:
+      "Without the spec: a raw 429 Too Many Requests error. With it: when the limit resets, what still works, and a way to queue the message.",
+    Before: LimitBefore,
+    After: LimitAfter,
+  },
+];
+
 export function CompareVariant() {
+  const reduce = useReducedMotion();
   const [pos, setPos] = useState(50);
+  const [index, setIndex] = useState(0);
+  const sweep = useRef<ReturnType<typeof animate> | null>(null);
+  const example = EXAMPLES[index];
+  const { Before, After } = example;
+
+  // On a new request, sweep the handle in from the right: the plain version
+  // shows first, then the pattern is revealed up to the midpoint.
+  function choose(i: number) {
+    setIndex(i);
+    sweep.current?.stop();
+    if (reduce) return setPos(50);
+    sweep.current = animate(96, 50, {
+      duration: 0.9,
+      delay: 0.25,
+      ease: [0.65, 0, 0.35, 1],
+      onUpdate: (v) => setPos(Math.round(v)),
+    });
+  }
+
+  useEffect(() => () => sweep.current?.stop(), []);
+
   return (
     <section className="py-6">
       <h2 className="text-3xl leading-[1.1] font-semibold tracking-tight sm:text-4xl">
@@ -25,29 +105,57 @@ export function CompareVariant() {
         <span className="block text-muted-foreground">One of them read the spec.</span>
       </h2>
       <p className="mt-3 max-w-md text-sm text-muted-foreground">
-        &ldquo;Ask before the agent sends email.&rdquo; Drag to compare what an agent writes on its own with
-        what it writes after reading Tool Approval.
+        Pick a request, then drag to compare what an agent writes on its own with what it writes after reading the
+        pattern.
       </p>
 
-      <div className="relative mt-10 h-[340px] overflow-hidden rounded-xl border bg-muted/40 select-none">
-        {/* After — full width underneath */}
-        <div aria-hidden className="absolute inset-0 grid place-items-center p-6">
-          <ApprovalAfter />
-        </div>
-        {/* Before — clipped to the left of the handle */}
-        <div
-          aria-hidden
-          className="absolute inset-0 grid place-items-center bg-muted p-6"
-          style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
-        >
-          <ApprovalBefore />
-        </div>
+      <div role="group" aria-label="Requests" className="mt-8 flex flex-wrap gap-1.5">
+        {EXAMPLES.map((ex, i) => (
+          <button
+            key={ex.id}
+            type="button"
+            aria-pressed={i === index}
+            onClick={() => choose(i)}
+            className={cn(
+              "rounded-full border px-3 py-1.5 text-xs transition-colors",
+              i === index ? "border-foreground bg-foreground text-background" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+          >
+            &ldquo;{ex.request}&rdquo;
+          </button>
+        ))}
+      </div>
+
+      <div className="relative mt-4 h-[340px] overflow-hidden rounded-xl border bg-muted/40 select-none">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={example.id}
+            className="absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            {/* After — full width underneath */}
+            <div aria-hidden className="absolute inset-0 grid place-items-center p-6">
+              <After />
+            </div>
+            {/* Before — clipped to the left of the handle */}
+            <div
+              aria-hidden
+              className="absolute inset-0 grid place-items-center bg-muted p-6"
+              style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
+            >
+              <Before />
+            </div>
+          </motion.div>
+        </AnimatePresence>
 
         <span className="pointer-events-none absolute top-3 left-3 rounded-full border bg-background/80 px-2.5 py-1 text-[11px] backdrop-blur">
           Without the spec
         </span>
         <span className="pointer-events-none absolute top-3 right-3 rounded-full border bg-background/80 px-2.5 py-1 text-[11px] backdrop-blur">
-          With the spec
+          With {example.pattern}
         </span>
 
         <div aria-hidden className="pointer-events-none absolute inset-y-0 w-px bg-foreground/30" style={{ left: `${pos}%` }}>
@@ -64,27 +172,227 @@ export function CompareVariant() {
           min={0}
           max={100}
           value={pos}
-          onChange={(e) => setPos(Number(e.target.value))}
-          aria-label="Compare without and with the spec"
+          onChange={(e) => {
+            sweep.current?.stop();
+            setPos(Number(e.target.value));
+          }}
+          aria-label={`Compare without and with ${example.pattern}`}
           aria-valuetext={`${pos}% without the spec`}
           className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0"
         />
       </div>
+      <p className="sr-only" aria-live="polite">
+        {example.request} {example.summary}
+      </p>
     </section>
+  );
+}
+
+// The "before" side: what an agent writes with no guidance — default-looking,
+// system-dialog styling, the same for every request.
+function PlainBox({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div
+      className={cn(
+        "w-full max-w-[320px] rounded-md border border-neutral-300 bg-white p-4 font-sans text-neutral-800 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function PlainButton({ children, primary }: { children: ReactNode; primary?: boolean }) {
+  return (
+    <span
+      className={cn(
+        "rounded border border-neutral-300 px-3 py-1 text-xs dark:border-neutral-700",
+        primary && "bg-neutral-100 dark:bg-neutral-800"
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+// The "after" side: the card surface every pattern sits on.
+function PatternBox({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={cn("w-full max-w-[320px] rounded-2xl border bg-card p-4 shadow-lg dark:bg-background", className)}>
+      {children}
+    </div>
+  );
+}
+
+const Bar = ({ w }: { w: string }) => <span className={cn("block h-1.5 rounded-full bg-muted-foreground/25", w)} />;
+
+function CitationBefore() {
+  return (
+    <PlainBox>
+      <p className="text-xs leading-relaxed">
+        The Pro plan includes 5 seats and SSO. Annual billing saves 20% compared to monthly.
+      </p>
+      <p className="mt-3 text-[11px] font-medium">Sources:</p>
+      <ul className="mt-1 space-y-0.5 text-[10px] break-all text-blue-700 underline dark:text-blue-400">
+        <li>https://acme.com/pricing?ref=nav&amp;utm_source=docs</li>
+        <li>https://help.acme.com/articles/48213-sso-setup</li>
+        <li>https://acme.com/blog/2025/annual-billing-update</li>
+      </ul>
+    </PlainBox>
+  );
+}
+
+function Cite({ n }: { n: number }) {
+  return (
+    <span className="mx-0.5 inline-grid h-4 min-w-4 place-items-center rounded-full bg-blue-500/15 px-1 align-[1px] font-mono text-[9px] text-blue-600 dark:text-blue-400">
+      {n}
+    </span>
+  );
+}
+
+function CitationAfter() {
+  return (
+    <PatternBox>
+      <p className="text-xs leading-relaxed">
+        The Pro plan includes 5 seats and SSO
+        <Cite n={1} />
+        <Cite n={2} />. Annual billing saves 20% over monthly
+        <Cite n={3} />.
+      </p>
+      <div className="mt-4 flex items-center gap-2">
+        <span className="flex -space-x-1">
+          {["bg-neutral-800", "bg-sky-500", "bg-amber-500"].map((c) => (
+            <span key={c} className={cn("size-4 rounded-full border-2 border-card dark:border-background", c)} />
+          ))}
+        </span>
+        <span className="text-[11px] text-muted-foreground">3 sources · acme.com, help.acme.com</span>
+      </div>
+    </PatternBox>
+  );
+}
+
+function FailureBefore() {
+  return (
+    <PlainBox>
+      <div className="rounded border border-red-300 bg-red-50 p-3 text-xs text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-300">
+        Error: Something went wrong. Please try again.
+      </div>
+      <div className="mt-4 flex justify-end">
+        <PlainButton primary>Try again</PlainButton>
+      </div>
+    </PlainBox>
+  );
+}
+
+function FailureAfter() {
+  return (
+    <PatternBox>
+      <div className="space-y-1.5">
+        <Bar w="w-full" />
+        <Bar w="w-11/12" />
+        <Bar w="w-4/5" />
+        <span className="block h-1.5 w-1/2 rounded-full bg-gradient-to-r from-muted-foreground/25 to-transparent" />
+      </div>
+      <div className="mt-4 flex items-center gap-2 border-t pt-3">
+        <span className="size-1.5 rounded-full bg-amber-500" />
+        <span className="text-[11px] text-muted-foreground">Response interrupted — your partial answer is kept</span>
+      </div>
+      <div className="mt-3 flex gap-2">
+        <span className="rounded-full bg-foreground px-3 py-1 text-xs text-background">Continue</span>
+        <span className="rounded-full border px-3 py-1 text-xs">Retry from start</span>
+      </div>
+    </PatternBox>
+  );
+}
+
+function WorkingBefore() {
+  return (
+    <PlainBox className="flex flex-col items-center gap-3 py-8">
+      <span className="size-6 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-700 dark:border-neutral-700 dark:border-t-neutral-300" />
+      <span className="text-xs">Loading...</span>
+    </PlainBox>
+  );
+}
+
+function WorkingAfter() {
+  const steps = [
+    { label: "Searched 3 sources", done: true },
+    { label: "Read pricing.md", done: true },
+    { label: "Comparing plans", done: false },
+  ];
+  return (
+    <PatternBox>
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium">Working · 3 steps</span>
+        <span className="font-mono text-[10px] text-muted-foreground">0:08</span>
+      </div>
+      <ul className="mt-3 space-y-2">
+        {steps.map((step) => (
+          <li key={step.label} className="flex items-center gap-2 text-xs">
+            {step.done ? (
+              <span className="grid size-4 place-items-center rounded-full bg-foreground/10">
+                <Check className="size-2.5" strokeWidth={3} />
+              </span>
+            ) : (
+              <span className="size-4 animate-spin rounded-full border-2 border-muted-foreground/25 border-t-foreground" />
+            )}
+            <span
+              className={
+                step.done
+                  ? "text-muted-foreground"
+                  : "bg-[linear-gradient(90deg,var(--muted-foreground)_0%,var(--foreground)_50%,var(--muted-foreground)_100%)] bg-[length:200%_100%] bg-clip-text text-transparent [animation:hero-shimmer_1.4s_linear_infinite]"
+              }
+            >
+              {step.label}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3 border-t pt-2.5 text-[11px] text-muted-foreground">Show details ›</p>
+    </PatternBox>
+  );
+}
+
+function LimitBefore() {
+  return (
+    <PlainBox>
+      <p className="font-mono text-xs">429 Too Many Requests</p>
+      <p className="mt-1 font-mono text-[10px] break-all text-neutral-500">
+        {"{\"error\":{\"type\":\"rate_limit_error\",\"message\":\"Rate limited\"}}"}
+      </p>
+      <div className="mt-4 flex justify-end">
+        <PlainButton primary>OK</PlainButton>
+      </div>
+    </PlainBox>
+  );
+}
+
+function LimitAfter() {
+  return (
+    <PatternBox>
+      <p className="text-sm font-medium">You&apos;ve used today&apos;s messages</p>
+      <p className="mt-1 text-xs text-muted-foreground">Resets in 42 min · Smaller models still work.</p>
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+        <span className="block h-full w-full rounded-full bg-foreground/70" />
+      </div>
+      <div className="mt-4 flex gap-2">
+        <span className="rounded-full bg-foreground px-3 py-1 text-xs text-background">Queue for later</span>
+        <span className="rounded-full border px-3 py-1 text-xs">Switch model</span>
+      </div>
+    </PatternBox>
   );
 }
 
 function ApprovalBefore() {
   return (
-    <div className="w-full max-w-[300px] rounded-md border border-neutral-300 bg-white p-4 font-sans text-neutral-800 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200">
+    <PlainBox>
       <p className="text-sm">The agent wants to send an email. Continue?</p>
       <div className="mt-4 flex justify-end gap-2">
-        <span className="rounded border border-neutral-300 px-3 py-1 text-xs dark:border-neutral-700">Cancel</span>
-        <span className="rounded border border-neutral-300 bg-neutral-100 px-3 py-1 text-xs dark:border-neutral-700 dark:bg-neutral-800">
-          OK
-        </span>
+        <PlainButton>Cancel</PlainButton>
+        <PlainButton primary>OK</PlainButton>
       </div>
-    </div>
+    </PlainBox>
   );
 }
 

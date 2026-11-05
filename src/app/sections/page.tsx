@@ -123,7 +123,7 @@ export default function SectionsPage() {
         <StatsVariant patternCount={visible.length} categoryCount={getCategories().length} />
       </Variant>
 
-      <Variant label="G" name="Before / after" note="Drag to compare a generic confirm with the Tool Approval pattern.">
+      <Variant label="G" name="Before / after" note="Five requests; drag to compare what an agent writes without and with the pattern spec.">
         <CompareVariant />
       </Variant>
 
