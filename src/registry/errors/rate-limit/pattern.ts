@@ -16,13 +16,14 @@ A dismissible horizontal banner that warns the user their usage is approaching o
 ## Anatomy
 - **Pulsing signal icon**: concentric arcs around a center dot, with a subtle ping animation. Communicates "signal / broadcast / status" — not an error icon, not an alarm.
 - **Label**: the usage limit message in medium-weight text. Should describe what limit was hit, not the raw technical limit.
-- **Reset label**: muted text, inline with the label. Either a static clock time ("Resets at 18:00") or a live MM:SS countdown ("Resets in 4:23").
+- **Reset label**: muted text, inline with the label — it wraps onto its own line below the label when the banner is narrow. Either a static clock time ("Resets at 18:00") or a live MM:SS countdown ("Resets in 4:23").
 - **Upgrade CTA**: a bordered pill button with a short action label. Only shown when \`onUpgrade\` is provided.
 - **Dismiss (×)**: icon-only button at the far right. Removes the banner with an exit animation.
 
 ## Behavior
 - Enters with a short downward fade (opacity 0→1, y -6→0, 200ms ease-out).
 - Exits with the reverse when dismissed.
+- The label is never truncated. It's the only thing that says what happened, so an ellipsis would hide the message itself. At narrow widths (phones, side panels, compact composers) the label wraps and the reset label drops to the next line, while the upgrade CTA and dismiss stay pinned to the right. When the text column would fall below ~11rem, the actions wrap onto their own row, right-aligned, rather than squeezing the message.
 - Countdown mode: a \`setInterval\` ticking every second drives the MM:SS display. The interval stops at 0 to avoid unnecessary renders. Callers are responsible for restoring access when the timer expires — this component does not re-enable the composer automatically.
 - Static mode: \`resetTime\` is a pre-formatted string ("18:00"); the component renders it as-is.
 - Dismissing via the × fires \`onDismiss\` and hides the component. Callers decide whether to re-show it (e.g. on next page load or after a threshold is crossed again).

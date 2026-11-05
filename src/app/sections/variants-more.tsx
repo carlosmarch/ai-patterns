@@ -8,6 +8,7 @@ import { Accessibility, Bot, Check, FileText, Mail, Minus, Search } from "lucide
 import { cn } from "@/lib/utils";
 import { ToolApproval } from "@/registry/permissions/tool-approval/component";
 import { InlineCitation, type CitationSource } from "@/registry/text/inline-citation/component";
+import { SourcesStack, type Source } from "@/registry/text/sources-stack/component";
 import { PartialResponse } from "@/registry/errors/partial-response/component";
 import { ExpandableTrace, type TraceStep } from "@/registry/traces/expandable-trace/component";
 import { RateLimit } from "@/registry/errors/rate-limit/component";
@@ -44,9 +45,9 @@ const EXAMPLES: Example[] = [
   {
     id: "citations",
     request: "Show where the answer came from.",
-    pattern: "Inline Citation",
+    pattern: "Inline Citation + Sources",
     summary:
-      "Without the spec: a list of raw links dumped under the answer. With it: numbered citations on the claims they support, each opening a preview of its source.",
+      "Without the spec: a list of raw links dumped under the answer. With it: numbered citations on the claims they support, each opening a preview of its source, and a collapsed sources stack that expands into the full list.",
     Before: CitationBefore,
     After: CitationAfter,
   },
@@ -313,15 +314,24 @@ const CITE_SOURCES: CitationSource[] = [
   { title: "Annual billing", domain: "acme.com", snippet: "Pay yearly and save 20%.", url: "https://acme.com/blog/annual-billing" },
 ];
 
+// The same three sources, plus the pages read but not cited, for the stack.
+const STACK_SOURCES: Source[] = [
+  ...CITE_SOURCES.map(({ title, domain, url }) => ({ title, domain, url })),
+  { title: "Plans FAQ", domain: "help.acme.com", url: "https://help.acme.com/plans" },
+];
+
 function CitationAfter() {
   return (
     <PatternSlot>
-      <p className="rounded-2xl border bg-card p-4 text-sm leading-relaxed text-foreground/90 shadow-lg dark:bg-background">
-        The Pro plan includes 5 seats and SSO
-        <InlineCitation index={1} source={CITE_SOURCES[0]} />
-        <InlineCitation index={2} source={CITE_SOURCES[1]} />. Annual billing saves 20% over monthly
-        <InlineCitation index={3} source={CITE_SOURCES[2]} />.
-      </p>
+      <div className="rounded-2xl border bg-card p-4 shadow-lg dark:bg-background">
+        <p className="text-sm leading-relaxed text-foreground/90">
+          The Pro plan includes 5 seats and SSO
+          <InlineCitation index={1} source={CITE_SOURCES[0]} />
+          <InlineCitation index={2} source={CITE_SOURCES[1]} />. Annual billing saves 20% over monthly
+          <InlineCitation index={3} source={CITE_SOURCES[2]} />.
+        </p>
+        <SourcesStack sources={STACK_SOURCES} className="mt-3 border-t pt-3" />
+      </div>
     </PatternSlot>
   );
 }
