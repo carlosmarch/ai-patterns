@@ -3,9 +3,14 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
 import { AnimatePresence, animate, motion, useReducedMotion } from "motion/react";
-import { Accessibility, Bot, Check, FileText, Minus, Search } from "lucide-react";
+import { Accessibility, Bot, Check, FileText, Mail, Minus, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { ToolApproval } from "@/registry/permissions/tool-approval/component";
+import { InlineCitation, type CitationSource } from "@/registry/text/inline-citation/component";
+import { PartialResponse } from "@/registry/errors/partial-response/component";
+import { ExpandableTrace, type TraceStep } from "@/registry/traces/expandable-trace/component";
+import { RateLimit } from "@/registry/errors/rate-limit/component";
 import { AnimatedOrigami } from "@/components/animated-origami";
 import { AGENTS, useTick } from "../home-features";
 import { AgentIcons, InstallLink, ThumbCard, type SectionItem } from "./variants";
@@ -32,7 +37,7 @@ const EXAMPLES: Example[] = [
     request: "Ask before the agent sends email.",
     pattern: "Tool Approval",
     summary:
-      "Without the spec: a generic OK / Cancel dialog with no details. With it: the tool, recipient, subject and a body preview, with Deny, Edit and a focused Approve.",
+      "Without the spec: a generic OK / Cancel dialog with no details. With it: a card naming the tool, what it will do and the exact details, with Deny and allow choices.",
     Before: ApprovalBefore,
     After: ApprovalAfter,
   },
@@ -41,7 +46,7 @@ const EXAMPLES: Example[] = [
     request: "Show where the answer came from.",
     pattern: "Inline Citation",
     summary:
-      "Without the spec: a list of raw links dumped under the answer. With it: numbered citations on the claims they support and a compact sources stack.",
+      "Without the spec: a list of raw links dumped under the answer. With it: numbered citations on the claims they support, each opening a preview of its source.",
     Before: CitationBefore,
     After: CitationAfter,
   },
@@ -50,7 +55,7 @@ const EXAMPLES: Example[] = [
     request: "Handle the model failing mid-answer.",
     pattern: "Partial Response",
     summary:
-      "Without the spec: the answer disappears behind 'Something went wrong'. With it: the partial answer stays, marked as interrupted, with Continue and Retry.",
+      "Without the spec: the answer disappears behind 'Something went wrong'. With it: the partial answer stays, marked as incomplete, with Continue and Retry.",
     Before: FailureBefore,
     After: FailureAfter,
   },
@@ -59,7 +64,7 @@ const EXAMPLES: Example[] = [
     request: "Show that the agent is working.",
     pattern: "Expandable Trace",
     summary:
-      "Without the spec: a spinner that says Loading. With it: the steps the agent has finished, the one it's on, and how long it has taken.",
+      "Without the spec: a spinner that says Loading. With it: a collapsible trace of each step the agent took and how long it ran.",
     Before: WorkingBefore,
     After: WorkingAfter,
   },
@@ -68,7 +73,7 @@ const EXAMPLES: Example[] = [
     request: "Tell people they've hit the limit.",
     pattern: "Rate Limit",
     summary:
-      "Without the spec: a raw 429 Too Many Requests error. With it: when the limit resets, what still works, and a way to queue the message.",
+      "Without the spec: a raw 429 Too Many Requests error. With it: a calm notice of the limit, when it resets, and how to get more usage.",
     Before: LimitBefore,
     After: LimitAfter,
   },
@@ -137,12 +142,12 @@ export function CompareVariant() {
             transition={{ duration: 0.18 }}
           >
             {/* After — full width underneath */}
-            <div aria-hidden className="absolute inset-0 grid place-items-center p-6">
+            <div inert className="absolute inset-0 grid place-items-center bg-card p-6 dark:bg-background">
               <After />
             </div>
             {/* Before — clipped to the left of the handle */}
             <div
-              aria-hidden
+              inert
               className="absolute inset-0 grid place-items-center bg-muted p-6"
               style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
             >
@@ -194,7 +199,7 @@ function PlainBox({ children, className }: { children: ReactNode; className?: st
   return (
     <div
       className={cn(
-        "w-full max-w-[320px] rounded-md border border-neutral-300 bg-white p-4 font-sans text-neutral-800 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200",
+        "w-full max-w-[360px] rounded-md border border-neutral-300 bg-white p-4 font-sans text-neutral-800 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200",
         className
       )}
     >
@@ -216,17 +221,6 @@ function PlainButton({ children, primary }: { children: ReactNode; primary?: boo
   );
 }
 
-// The "after" side: the card surface every pattern sits on.
-function PatternBox({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={cn("w-full max-w-[320px] rounded-2xl border bg-card p-4 shadow-lg dark:bg-background", className)}>
-      {children}
-    </div>
-  );
-}
-
-const Bar = ({ w }: { w: string }) => <span className={cn("block h-1.5 rounded-full bg-muted-foreground/25", w)} />;
-
 function CitationBefore() {
   return (
     <PlainBox>
@@ -243,35 +237,6 @@ function CitationBefore() {
   );
 }
 
-function Cite({ n }: { n: number }) {
-  return (
-    <span className="mx-0.5 inline-grid h-4 min-w-4 place-items-center rounded-full bg-blue-500/15 px-1 align-[1px] font-mono text-[9px] text-blue-600 dark:text-blue-400">
-      {n}
-    </span>
-  );
-}
-
-function CitationAfter() {
-  return (
-    <PatternBox>
-      <p className="text-xs leading-relaxed">
-        The Pro plan includes 5 seats and SSO
-        <Cite n={1} />
-        <Cite n={2} />. Annual billing saves 20% over monthly
-        <Cite n={3} />.
-      </p>
-      <div className="mt-4 flex items-center gap-2">
-        <span className="flex -space-x-1">
-          {["bg-neutral-800", "bg-sky-500", "bg-amber-500"].map((c) => (
-            <span key={c} className={cn("size-4 rounded-full border-2 border-card dark:border-background", c)} />
-          ))}
-        </span>
-        <span className="text-[11px] text-muted-foreground">3 sources · acme.com, help.acme.com</span>
-      </div>
-    </PatternBox>
-  );
-}
-
 function FailureBefore() {
   return (
     <PlainBox>
@@ -285,72 +250,12 @@ function FailureBefore() {
   );
 }
 
-function FailureAfter() {
-  return (
-    <PatternBox>
-      <div className="space-y-1.5">
-        <Bar w="w-full" />
-        <Bar w="w-11/12" />
-        <Bar w="w-4/5" />
-        <span className="block h-1.5 w-1/2 rounded-full bg-gradient-to-r from-muted-foreground/25 to-transparent" />
-      </div>
-      <div className="mt-4 flex items-center gap-2 border-t pt-3">
-        <span className="size-1.5 rounded-full bg-amber-500" />
-        <span className="text-[11px] text-muted-foreground">Response interrupted — your partial answer is kept</span>
-      </div>
-      <div className="mt-3 flex gap-2">
-        <span className="rounded-full bg-foreground px-3 py-1 text-xs text-background">Continue</span>
-        <span className="rounded-full border px-3 py-1 text-xs">Retry from start</span>
-      </div>
-    </PatternBox>
-  );
-}
-
 function WorkingBefore() {
   return (
     <PlainBox className="flex flex-col items-center gap-3 py-8">
       <span className="size-6 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-700 dark:border-neutral-700 dark:border-t-neutral-300" />
       <span className="text-xs">Loading...</span>
     </PlainBox>
-  );
-}
-
-function WorkingAfter() {
-  const steps = [
-    { label: "Searched 3 sources", done: true },
-    { label: "Read pricing.md", done: true },
-    { label: "Comparing plans", done: false },
-  ];
-  return (
-    <PatternBox>
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium">Working · 3 steps</span>
-        <span className="font-mono text-[10px] text-muted-foreground">0:08</span>
-      </div>
-      <ul className="mt-3 space-y-2">
-        {steps.map((step) => (
-          <li key={step.label} className="flex items-center gap-2 text-xs">
-            {step.done ? (
-              <span className="grid size-4 place-items-center rounded-full bg-foreground/10">
-                <Check className="size-2.5" strokeWidth={3} />
-              </span>
-            ) : (
-              <span className="size-4 animate-spin rounded-full border-2 border-muted-foreground/25 border-t-foreground" />
-            )}
-            <span
-              className={
-                step.done
-                  ? "text-muted-foreground"
-                  : "bg-[linear-gradient(90deg,var(--muted-foreground)_0%,var(--foreground)_50%,var(--muted-foreground)_100%)] bg-[length:200%_100%] bg-clip-text text-transparent [animation:hero-shimmer_1.4s_linear_infinite]"
-              }
-            >
-              {step.label}
-            </span>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-3 border-t pt-2.5 text-[11px] text-muted-foreground">Show details ›</p>
-    </PatternBox>
   );
 }
 
@@ -368,22 +273,6 @@ function LimitBefore() {
   );
 }
 
-function LimitAfter() {
-  return (
-    <PatternBox>
-      <p className="text-sm font-medium">You&apos;ve used today&apos;s messages</p>
-      <p className="mt-1 text-xs text-muted-foreground">Resets in 42 min · Smaller models still work.</p>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-        <span className="block h-full w-full rounded-full bg-foreground/70" />
-      </div>
-      <div className="mt-4 flex gap-2">
-        <span className="rounded-full bg-foreground px-3 py-1 text-xs text-background">Queue for later</span>
-        <span className="rounded-full border px-3 py-1 text-xs">Switch model</span>
-      </div>
-    </PatternBox>
-  );
-}
-
 function ApprovalBefore() {
   return (
     <PlainBox>
@@ -396,40 +285,79 @@ function ApprovalBefore() {
   );
 }
 
+// The "after" side renders the real registry components, as shipped on the
+// pattern pages, at one shared width so both halves line up at the divider.
+function PatternSlot({ children }: { children: ReactNode }) {
+  return <div className="w-full max-w-[360px]">{children}</div>;
+}
+
+const NOOP = () => {};
+
 function ApprovalAfter() {
   return (
-    <div className="w-full max-w-[340px] rounded-2xl border bg-card p-4 shadow-lg dark:bg-background">
-      <div className="flex items-center justify-between">
-        <span className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[11px]">
-          <span className="size-1.5 rounded-full bg-amber-500" />
-          gmail.send
-        </span>
-        <span className="text-[11px] text-muted-foreground">Needs your approval</span>
-      </div>
-      <dl className="mt-3 space-y-1 text-xs">
-        <div className="flex gap-2">
-          <dt className="w-12 text-muted-foreground">To</dt>
-          <dd>team@acme.com</dd>
-        </div>
-        <div className="flex gap-2">
-          <dt className="w-12 text-muted-foreground">Subject</dt>
-          <dd>Q3 launch recap</dd>
-        </div>
-      </dl>
-      <div className="mt-3 space-y-1.5 rounded-lg bg-muted/60 p-2.5">
-        <span className="block h-1.5 w-full rounded-full bg-muted-foreground/25" />
-        <span className="block h-1.5 w-5/6 rounded-full bg-muted-foreground/25" />
-        <span className="block h-1.5 w-2/3 rounded-full bg-muted-foreground/25" />
-      </div>
-      <div className="mt-4 flex items-center gap-2">
-        <span className="rounded-full border px-3 py-1 text-xs">Deny</span>
-        <span className="rounded-full border px-3 py-1 text-xs">Edit</span>
-        <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-foreground px-3 py-1 text-xs text-background ring-2 ring-blue-500/50 ring-offset-2 ring-offset-card dark:ring-offset-background">
-          Approve
-          <kbd className="font-mono text-[10px] opacity-60">⏎</kbd>
-        </span>
-      </div>
-    </div>
+    <PatternSlot>
+      <ToolApproval
+        icon={Mail}
+        toolName="Gmail"
+        summary="Send an email"
+        detail="To team@acme.com · “Q3 launch recap”"
+        className="shadow-lg"
+      />
+    </PatternSlot>
+  );
+}
+
+const CITE_SOURCES: CitationSource[] = [
+  { title: "Pricing", domain: "acme.com", snippet: "Pro includes 5 seats and single sign-on.", url: "https://acme.com/pricing" },
+  { title: "Set up SSO", domain: "help.acme.com", snippet: "SSO is available on Pro and Enterprise.", url: "https://help.acme.com/sso" },
+  { title: "Annual billing", domain: "acme.com", snippet: "Pay yearly and save 20%.", url: "https://acme.com/blog/annual-billing" },
+];
+
+function CitationAfter() {
+  return (
+    <PatternSlot>
+      <p className="rounded-2xl border bg-card p-4 text-sm leading-relaxed text-foreground/90 shadow-lg dark:bg-background">
+        The Pro plan includes 5 seats and SSO
+        <InlineCitation index={1} source={CITE_SOURCES[0]} />
+        <InlineCitation index={2} source={CITE_SOURCES[1]} />. Annual billing saves 20% over monthly
+        <InlineCitation index={3} source={CITE_SOURCES[2]} />.
+      </p>
+    </PatternSlot>
+  );
+}
+
+function FailureAfter() {
+  return (
+    <PatternSlot>
+      <PartialResponse
+        content="The Pro plan includes 5 seats and SSO. Annual billing saves 20% compared to monthly, and seats can be added at any time from the billing page. If you need more than 20 seats, the"
+        reason="error"
+        onResume={NOOP}
+        onRetry={NOOP}
+      />
+    </PatternSlot>
+  );
+}
+
+const TRACE_STEPS: TraceStep[] = [
+  { label: "Searched 3 sources" },
+  { label: "Read pricing.md", meta: "2.4k tokens" },
+  { label: "Compared Pro and Team plans" },
+];
+
+function WorkingAfter() {
+  return (
+    <PatternSlot>
+      <ExpandableTrace durationSeconds={8} steps={TRACE_STEPS} defaultOpen />
+    </PatternSlot>
+  );
+}
+
+function LimitAfter() {
+  return (
+    <PatternSlot>
+      <RateLimit label="Daily message limit reached" resetTime="18:00" upgradeLabel="Get more usage" onUpgrade={NOOP} />
+    </PatternSlot>
   );
 }
 

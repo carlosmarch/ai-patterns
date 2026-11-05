@@ -6,7 +6,7 @@ import type { RegistryEntry } from "@/registry";
 import { SeenIn } from "@/components/seen-in";
 import type { SeenIn as SeenInRef } from "@/lib/teams";
 
-// Layout pieces shared by the home page and its hidden /home-next proposal.
+// Layout pieces for the home page: section headers and the live demo cards.
 
 export const href = (entry: RegistryEntry) => `/patterns/${entry.category}/${entry.slug}`;
 
