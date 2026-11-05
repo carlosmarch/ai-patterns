@@ -41,6 +41,9 @@ import { pattern as drawingIconPattern } from "./loaders/drawing-icon/pattern";
 import ExpandableTraceDemo from "./traces/expandable-trace/demo";
 import ExpandableTraceThumbnail from "./traces/expandable-trace/thumbnail";
 import { pattern as expandableTracePattern } from "./traces/expandable-trace/pattern";
+import TraceWaterfallDemo from "./traces/trace-waterfall/demo";
+import TraceWaterfallThumbnail from "./traces/trace-waterfall/thumbnail";
+import { pattern as traceWaterfallPattern } from "./traces/trace-waterfall/pattern";
 import StreamingTextDemo from "./text/streaming-text/demo";
 import StreamingTextThumbnail from "./text/streaming-text/thumbnail";
 import { pattern as streamingTextPattern } from "./text/streaming-text/pattern";
@@ -360,6 +363,17 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "claude", source: "https://support.claude.com/en/articles/10574485-using-extended-thinking" },
     ],
+  },
+  {
+    slug: "trace-waterfall",
+    category: "traces",
+    title: "Trace Waterfall",
+    description:
+      "A run's tool calls as rows with timing bars on a shared axis, a total-time summary, and a toggle that redraws compressed waiting time to scale.",
+    Demo: TraceWaterfallDemo,
+    Thumbnail: TraceWaterfallThumbnail,
+    uxDoc: traceWaterfallPattern,
+    seenIn: [],
   },
   {
     slug: "streaming-text",
