@@ -24,12 +24,30 @@ import {
 export const metadata: Metadata = {
   title: "Section variants — ai-patterns",
   description: "Alternative takes on the home page's feature section, side by side.",
-  robots: { index: false },
+  robots: { index: false, follow: false },
 };
 
 // Same exclusions and search thumbnails as the home page.
 const HIDDEN = new Set(["prompt-bar-pro", "shiny-button"]);
 const SEARCH_THUMBS = ["tool-approval", "streaming-text", "inline-citation", "stop-generation-button", "generation-error", "sources-stack"];
+
+const NAV = [
+  { label: "Current", name: "Bento" },
+  { label: "A", name: "Ask for a pattern" },
+  { label: "B", name: "Three moves" },
+  { label: "C", name: "Feature tabs" },
+  { label: "D", name: "Terminal" },
+  { label: "E", name: "Marquee wall" },
+  { label: "F", name: "Numbers" },
+  { label: "G", name: "Before / after" },
+  { label: "H", name: "Anatomy" },
+  { label: "I", name: "Orbit" },
+  { label: "J", name: "Index" },
+  { label: "K", name: "Comparison" },
+  { label: "L", name: "Spotlight grid" },
+];
+
+const anchor = (label: string) => `variant-${label.toLowerCase()}`;
 
 export default function SectionsPage() {
   const visible = registry.filter((e) => !HIDDEN.has(e.slug));
@@ -57,6 +75,25 @@ export default function SectionsPage() {
           behavior, copy the source, a spec per pattern, read by your agent.
         </p>
       </header>
+
+      <nav
+        aria-label="Variants"
+        className="sticky top-14 z-30 -mx-6 mt-8 overflow-x-auto border-b bg-background/85 px-6 py-2.5 backdrop-blur [scrollbar-width:none]"
+      >
+        <ul className="flex w-max gap-1.5">
+          {NAV.map((v) => (
+            <li key={v.label}>
+              <a
+                href={`#${anchor(v.label)}`}
+                className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <span className="font-mono text-[10px]">{v.label}</span>
+                {v.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
       <Variant label="Current" name="Bento" note="What ships on the home page today." narrow>
         <HomeFeatures patternCount={visible.length} thumbnails={searchThumbs} />
@@ -128,7 +165,7 @@ function Variant({
   children: ReactNode;
 }) {
   return (
-    <div className="mt-16 border-t pt-6">
+    <div id={anchor(label)} className="mt-16 scroll-mt-28 border-t pt-6">
       <div className="mb-8 flex items-baseline gap-3">
         <span className="rounded-md border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">{label}</span>
         <p className="text-sm font-medium">{name}</p>
