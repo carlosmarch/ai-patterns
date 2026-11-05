@@ -32,7 +32,7 @@ const HIDDEN = new Set(["prompt-bar-pro", "shiny-button"]);
 const SEARCH_THUMBS = ["tool-approval", "streaming-text", "inline-citation", "stop-generation-button", "generation-error", "sources-stack"];
 
 const NAV = [
-  { label: "Current", name: "Bento" },
+  { label: "Previous", name: "Bento" },
   { label: "A", name: "Ask for a pattern" },
   { label: "B", name: "Three moves" },
   { label: "C", name: "Feature tabs" },
@@ -95,7 +95,7 @@ export default function SectionsPage() {
         </ul>
       </nav>
 
-      <Variant label="Current" name="Bento" note="What ships on the home page today." narrow>
+      <Variant label="Previous" name="Bento" note="The previous home page block, kept for reference." narrow>
         <HomeFeatures patternCount={visible.length} thumbnails={searchThumbs} />
       </Variant>
 
