@@ -127,7 +127,7 @@ body {
 }
 
 /* Logo ------------------------------------------------------------- */
-/* The header's origami mark folds itself, stroke by stroke, on hover. */
+/* The header and footer origami marks fold themselves, stroke by stroke, on hover. */
 @keyframes fold-draw {
   0% {
     stroke-dashoffset: 1;

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Heart, Origami, Sparkles } from "lucide-react";
+import { Heart, Sparkles } from "lucide-react";
 
+import { AnimatedOrigami } from "@/components/animated-origami";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { GithubMark } from "@/components/github-mark";
 
@@ -57,8 +58,8 @@ export function Footer() {
       <div className="px-6 py-10 sm:py-12">
         <div className="flex flex-col gap-10 sm:flex-row sm:justify-between">
           <div className="space-y-3">
-            <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-              <Origami className="size-4" />
+            <Link href="/" className="logo-link flex items-center gap-2 text-sm font-semibold tracking-tight">
+              <AnimatedOrigami className="size-4" />
               AI Patterns
             </Link>
             <p className="text-sm text-muted-foreground">Show your agents the patterns that work</p>
