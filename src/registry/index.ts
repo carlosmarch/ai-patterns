@@ -32,6 +32,9 @@ import { pattern as shinyButtonPattern } from "./buttons/shiny-button/pattern";
 import ThinkingLoaderDemo from "./loaders/thinking-loader/demo";
 import ThinkingLoaderThumbnail from "./loaders/thinking-loader/thumbnail";
 import { pattern as thinkingLoaderPattern } from "./loaders/thinking-loader/pattern";
+import DrawingIconDemo from "./loaders/drawing-icon/demo";
+import DrawingIconThumbnail from "./loaders/drawing-icon/thumbnail";
+import { pattern as drawingIconPattern } from "./loaders/drawing-icon/pattern";
 import ExpandableTraceDemo from "./traces/expandable-trace/demo";
 import ExpandableTraceThumbnail from "./traces/expandable-trace/thumbnail";
 import { pattern as expandableTracePattern } from "./traces/expandable-trace/pattern";
@@ -316,6 +319,16 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "claude", source: "https://support.claude.com/en/articles/10574485-using-extended-thinking" },
     ],
+  },
+  {
+    slug: "drawing-icon",
+    category: "loaders",
+    title: "Drawing Icon",
+    description: "A line icon that draws itself stroke by stroke while the step it stands for is running.",
+    Demo: DrawingIconDemo,
+    Thumbnail: DrawingIconThumbnail,
+    uxDoc: drawingIconPattern,
+    seenIn: [],
   },
   {
     slug: "expandable-trace",
