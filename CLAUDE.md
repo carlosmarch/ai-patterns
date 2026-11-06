@@ -39,6 +39,16 @@ npm run skill:build
 then bump `version` in both `plugins/ai-patterns/.claude-plugin/plugin.json`
 and the plugin entry in `.claude-plugin/marketplace.json`.
 
+## Agent-facing endpoints
+
+`src/lib/agent.ts` builds everything the site serves to agents —
+`/llms.txt`, `/llms-full.txt`, the Markdown twins of pages (`src/app/md/`,
+reached via `.md` URLs or `Accept: text/markdown` rewrites in
+`next.config.ts`), the JSON API (`src/app/api/patterns/`) and the MCP
+server (`src/app/mcp/route.ts`). All read from the registry, so a new
+pattern shows up in them automatically; add a new top-level page to the
+`md` route, the rewrites and `sitemap.ts` if agents should see it.
+
 ## Commands
 
 - `npm run dev` — start the site at localhost:3000

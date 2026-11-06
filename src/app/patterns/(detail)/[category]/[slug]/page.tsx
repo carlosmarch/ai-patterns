@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -12,6 +13,25 @@ import { getAdjacentEntries, getEntryHref, getRegistryEntry, registry } from "@/
 
 export function generateStaticParams() {
   return registry.map(({ category, slug }) => ({ category, slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string; slug: string }>;
+}): Promise<Metadata> {
+  const { category, slug } = await params;
+  const entry = getRegistryEntry(category, slug);
+  if (!entry) return {};
+  const href = getEntryHref(entry);
+  return {
+    title: `${entry.title} — AI Patterns`,
+    description: entry.description,
+    alternates: {
+      canonical: href,
+      types: { "text/markdown": `${href}.md`, "application/json": `/api/patterns/${category}/${slug}` },
+    },
+  };
 }
 
 export default async function PatternPage({

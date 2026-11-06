@@ -34,6 +34,30 @@ Each pattern detail page has three tabs:
 
 ---
 
+## For agents
+
+The site is agent-ready: everything a browser sees is also available as Markdown, JSON or MCP, all generated from `src/registry/`.
+
+| Endpoint | What it returns |
+|---|---|
+| [`/llms.txt`](https://ai-patterns.vercel.app/llms.txt) | [llms.txt](https://llmstxt.org) index — every pattern with a link to its Markdown page |
+| [`/llms-full.txt`](https://ai-patterns.vercel.app/llms-full.txt) | Every pattern's full UX spec in one file |
+| `/<page>.md` | Markdown version of a page — `/index.md`, `/patterns.md`, `/skill.md`, `/patterns/<category>/<slug>.md` (spec + `component.tsx` + npm deps) |
+| `Accept: text/markdown` | The same Markdown, served from the normal page URLs |
+| [`/api/patterns`](https://ai-patterns.vercel.app/api/patterns) | JSON index; `/api/patterns/<category>/<slug>` adds `spec`, `code`, `dependencies` |
+| `/mcp` | Stateless MCP server (Streamable HTTP, no auth) with `list_patterns`, `search_patterns`, `get_pattern` |
+| `/robots.txt`, `/sitemap.xml` | Crawlers and AI agents welcome |
+
+Connect the MCP server to Claude Code:
+
+```
+claude mcp add --transport http ai-patterns https://ai-patterns.vercel.app/mcp
+```
+
+Absolute URLs use `NEXT_PUBLIC_SITE_URL` (default `https://ai-patterns.vercel.app`).
+
+---
+
 ## The skill
 
 The catalogue ships as an installable Claude Code skill. Once installed, your agent becomes a design-engineering expert that can recommend, validate, and scaffold patterns from the catalogue directly into your project — adapting to whatever design system you're already using.

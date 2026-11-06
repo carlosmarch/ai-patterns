@@ -5,6 +5,8 @@ import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
+import { SITE_URL } from "@/lib/agent";
+
 import { AnimatedOrigami } from "@/components/animated-origami";
 import { Footer } from "@/components/footer";
 import { SiteHeader } from "@/components/site-header";
@@ -42,8 +44,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "AI Patterns",
   description: "Production components for AI agent UIs — each with a UX spec the harness can read.",
+  alternates: {
+    types: { "text/markdown": "/index.md", "text/plain": "/llms.txt" },
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
