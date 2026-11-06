@@ -12,6 +12,8 @@ export interface CommandPaletteItem {
   label: string;
   icon?: React.ComponentType<{ className?: string }>;
   meta?: string;
+  /** Extra searchable text (e.g. a description) — matched by the filter but not rendered. */
+  keywords?: string;
 }
 
 export interface CommandPaletteGroup {
@@ -277,7 +279,15 @@ function filterGroups(groups: CommandPaletteGroup[], query: string): CommandPale
   return groups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => item.label.toLowerCase().includes(trimmed)),
+      // Label matches rank above matches found only in keywords.
+      items: [
+        ...group.items.filter((item) => item.label.toLowerCase().includes(trimmed)),
+        ...group.items.filter(
+          (item) =>
+            !item.label.toLowerCase().includes(trimmed) &&
+            !!item.keywords?.toLowerCase().includes(trimmed)
+        ),
+      ],
     }))
     .filter((group) => group.items.length > 0);
 }

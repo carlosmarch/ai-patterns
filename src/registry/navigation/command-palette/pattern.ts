@@ -24,7 +24,7 @@ A search-first overlay for jumping to or launching something — a session, a do
 - Opens via an explicit trigger (button) and/or a global shortcut (⌘K / Ctrl+K); the trigger must remain visible even where the shortcut exists.
 - The search input autofocuses the moment the palette opens.
 - With an empty query, show the full grouped list (quick actions first, then recent items) — don't force typing before anything is visible.
-- Typing filters items by label across all groups in place; groups with no matches collapse out entirely rather than showing an empty header.
+- Typing filters items by label — and by optional hidden keywords such as a description — across all groups in place; label matches rank above keyword-only matches, and groups with no matches collapse out entirely rather than showing an empty header.
 - Arrow Up/Down move the highlighted row, clamped at the first/last item (no wraparound) so repeated key-holds don't overshoot silently.
 - Hovering a row also updates the highlight, kept in sync with keyboard navigation.
 - Enter commits the highlighted row; clicking a row commits it directly.

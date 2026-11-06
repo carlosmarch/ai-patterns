@@ -50,6 +50,7 @@ export function SiteCommandPalette() {
           label: entry.title,
           icon: FileCode2,
           meta: entry.category,
+          keywords: entry.description,
         })),
       },
     ];
