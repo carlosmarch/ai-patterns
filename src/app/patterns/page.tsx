@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import { registry, type RegistryEntry } from "@/registry";
 import { PatternCard } from "@/components/pattern-card";
+
+export const metadata: Metadata = {
+  title: "Patterns — AI Patterns",
+  description: "Every pattern in the catalogue, grouped by category.",
+  alternates: { types: { "text/markdown": "/patterns.md", "text/plain": "/llms.txt" } },
+};
 
 export default function PatternsIndexPage() {
   const byCategory: Record<string, RegistryEntry[]> = {};

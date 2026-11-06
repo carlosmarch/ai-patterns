@@ -1,0 +1,21 @@
+import { abs, groupByCategory, SITE_DESCRIPTION, SITE_NAME, summarize } from "@/lib/agent";
+import { registry } from "@/registry";
+
+// JSON index of the catalogue. Each pattern links to its detail endpoint,
+// which carries the spec and source code.
+
+export const dynamic = "force-static";
+
+export function GET() {
+  return Response.json(
+    {
+      name: SITE_NAME,
+      description: SITE_DESCRIPTION,
+      count: registry.length,
+      categories: groupByCategory().map(({ category, patterns }) => ({ category, count: patterns.length })),
+      patterns: registry.map(summarize),
+      links: { llms: abs("/llms.txt"), mcp: abs("/mcp") },
+    },
+    { headers: { "Access-Control-Allow-Origin": "*" } }
+  );
+}
