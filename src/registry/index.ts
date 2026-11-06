@@ -161,6 +161,9 @@ import { pattern as setupChecklistPattern } from "./navigation/setup-checklist/p
 import PromptOnboardingDemo from "./onboarding/prompt-onboarding/demo";
 import PromptOnboardingThumbnail from "./onboarding/prompt-onboarding/thumbnail";
 import { pattern as promptOnboardingPattern } from "./onboarding/prompt-onboarding/pattern";
+import AgentSetupPillDemo from "./onboarding/agent-setup-pill/demo";
+import AgentSetupPillThumbnail from "./onboarding/agent-setup-pill/thumbnail";
+import { pattern as agentSetupPillPattern } from "./onboarding/agent-setup-pill/pattern";
 import DescribeFiltersDemo from "./tables/describe-filters/demo";
 import DescribeFiltersThumbnail from "./tables/describe-filters/thumbnail";
 import { pattern as describeFiltersPattern } from "./tables/describe-filters/pattern";
@@ -849,6 +852,19 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "posthog", source: "https://posthog.com/docs/error-tracking/installation" },
       { team: "sentry", source: "https://github.com/getsentry/sentry-for-ai" },
+    ],
+  },
+  {
+    slug: "agent-setup-pill",
+    category: "onboarding",
+    title: "Agent Setup Pill",
+    description:
+      "A floating pill that copies a setup prompt for the user's AI coding agent in one click — outcome label, a row of supported agents, a tooltip that says what the click does, and a separate dismiss button.",
+    Demo: AgentSetupPillDemo,
+    Thumbnail: AgentSetupPillThumbnail,
+    uxDoc: agentSetupPillPattern,
+    seenIn: [
+      { team: "cloudflare", source: "https://developers.cloudflare.com/" },
     ],
   },
   {

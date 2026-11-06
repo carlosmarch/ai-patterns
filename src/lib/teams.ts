@@ -4,6 +4,7 @@ import {
   siArc,
   siBox,
   siClaude,
+  siCloudflare,
   siCursor,
   siElevenlabs,
   siFigma,
@@ -64,6 +65,7 @@ export const TEAM_IDS = [
   "mixpanel",
   "mongodb",
   "datamaran",
+  "cloudflare",
 ] as const;
 
 export type TeamId = (typeof TEAM_IDS)[number];
@@ -127,6 +129,7 @@ const CREDITED: Team[] = [
   glyph("mixpanel", siMixpanel, "linear-gradient(145deg,#9a7dff,#5b3fe0)"),
   glyph("mongodb", siMongodb, "linear-gradient(145deg,#1f3b2c,#0b1d14)", "#47a248"),
   { id: "datamaran", name: "Datamaran", src: "/teams/datamaran.png", bg: "#eb5d36" },
+  glyph("cloudflare", siCloudflare, "linear-gradient(145deg,#ffffff,#f1f1f1)", "#f38020"),
 ];
 
 const TEAMS_BY_ID = new Map([...TEAMS, ...CREDITED].map((team) => [team.id, team]));
