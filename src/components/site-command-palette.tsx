@@ -62,7 +62,7 @@ export function SiteCommandPalette() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Search patterns"
-        className="flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        className="flex items-center gap-2 rounded-md border bg-background px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
       >
         <Search className="size-3.5" aria-hidden />
         <span className="hidden sm:inline">Search</span>
