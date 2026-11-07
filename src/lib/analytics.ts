@@ -1,4 +1,16 @@
-import { track } from "@vercel/analytics";
+type Props = Record<string, string | number | boolean | undefined>;
+
+declare global {
+  interface Window {
+    umami?: { track: (event: string, props?: Props) => void };
+  }
+}
+
+// No analytics provider is loaded yet; events go to Umami if its script is
+// on the page, and are dropped otherwise.
+function track(event: string, props?: Props) {
+  if (typeof window !== "undefined") window.umami?.track(event, props);
+}
 
 export type CodeCopiedType = "component" | "spec" | "install_command";
 
