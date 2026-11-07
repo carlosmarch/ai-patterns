@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { AnimatedOrigami } from "@/components/animated-origami";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CodeBlock } from "@/components/code-block";
 import { ComponentPreview } from "@/components/component-preview";
@@ -67,6 +68,7 @@ export default async function PatternPage({
       <Breadcrumbs
         className="mb-6"
         items={[
+          { label: "AI Patterns home", href: "/", icon: <AnimatedOrigami className="size-4" /> },
           { label: "Patterns", href: "/patterns" },
           { label: entry.category.charAt(0).toUpperCase() + entry.category.slice(1), href: `/patterns#${entry.category}` },
           { label: entry.title },

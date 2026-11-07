@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronLeft, ChevronRight, Maximize2, Minimize2 } from "lucide-react";
 
+import { AnimatedOrigami } from "@/components/animated-origami";
 import { usePatternExpand } from "@/components/pattern-expand";
 import type { PagerLink } from "@/components/pattern-pager";
 import { Button } from "@/components/ui/button";
@@ -82,15 +83,26 @@ export function ComponentPreview({
       <div
         role={isExpanded ? "region" : undefined}
         aria-label={isExpanded ? `${title} preview, full width` : undefined}
-        className={cn(isExpanded ? "fixed inset-x-0 top-14 bottom-0 z-30 flex bg-background" : "contents")}
+        className={cn(isExpanded ? "fixed inset-0 z-50 flex bg-background" : "contents")}
       >
-        {/* Left side: header with title and pager, above the live preview. */}
+        {/* Left side: header with logo and title, the live preview, and a footer with the pager. */}
         <div className={cn(isExpanded ? "flex min-w-0 flex-1 flex-col" : "contents")}>
           {isExpanded && (
             <div className="flex h-12 shrink-0 items-center gap-2 border-b px-4 sm:px-6">
-              <span className="min-w-0 flex-1 truncate text-sm font-medium">{title}</span>
-              <ExpandedPagerLink link={prev} direction="prev" />
-              <ExpandedPagerLink link={next} direction="next" />
+              <div className="flex min-w-0 flex-1 items-center gap-1.5 text-sm">
+                <Link
+                  href="/"
+                  aria-label="AI Patterns home"
+                  title="AI Patterns home"
+                  className="logo-link flex shrink-0 items-center text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <AnimatedOrigami className="size-4" />
+                </Link>
+                <span aria-hidden="true" className="text-muted-foreground">
+                  /
+                </span>
+                <span className="min-w-0 truncate font-medium">{title}</span>
+              </div>
               {/* Without room for the side panel, Collapse lives here instead. */}
               <CollapseButton onClick={() => setExpanded(false)} className="ml-2 lg:hidden" />
             </div>
@@ -105,6 +117,15 @@ export function ComponentPreview({
           >
             {preview}
           </TabsContent>
+          {isExpanded && (prev || next) && (
+            <nav
+              aria-label="Previous and next pattern"
+              className="flex h-12 shrink-0 items-center justify-between gap-2 border-t px-4 sm:px-6"
+            >
+              <ExpandedPagerLink link={prev} direction="prev" />
+              <ExpandedPagerLink link={next} direction="next" />
+            </nav>
+          )}
         </div>
         {/* Right side: resizable panel with the guardrails or code. */}
         {isExpanded && (
