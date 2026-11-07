@@ -137,7 +137,7 @@ export function ConversationBranches({ branches, active, onActiveChange, onEdit,
                 <span className="min-w-8 text-center text-xs tabular-nums" aria-live="polite" aria-atomic="true">
                   <span className="sr-only">Version </span>
                   {active + 1}
-                  <span aria-hidden>/</span>
+                  <span aria-hidden> / </span>
                   <span className="sr-only"> of </span>
                   {branches.length}
                 </span>

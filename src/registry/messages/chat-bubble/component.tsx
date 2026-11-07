@@ -19,6 +19,12 @@ export interface ChatBubbleProps {
   /** Total number of versions (edits/regenerations) available for this message. */
   versionCount?: number;
   onVersionChange?: (index: number) => void;
+  /**
+   * Announce version changes to screen readers. A user/assistant pair shares
+   * one version, so only one stepper should announce it — the user bubble by
+   * default. Set it on the assistant bubble if only replies show a stepper.
+   */
+  announceVersion?: boolean;
   className?: string;
 }
 
@@ -31,6 +37,7 @@ export function ChatBubble({
   versionIndex,
   versionCount,
   onVersionChange,
+  announceVersion = role === "user",
   className,
 }: ChatBubbleProps) {
   const [editing, setEditing] = React.useState(false);
@@ -157,7 +164,12 @@ export function ChatBubble({
           )}
 
           {hasVersions && (
-            <VersionNav index={versionIndex} count={versionCount} onChange={onVersionChange} />
+            <VersionNav
+              index={versionIndex}
+              count={versionCount}
+              onChange={onVersionChange}
+              announce={announceVersion}
+            />
           )}
         </div>
       )}
@@ -169,23 +181,35 @@ function VersionNav({
   index,
   count,
   onChange,
+  announce,
 }: {
   index: number;
   count: number;
   onChange: (index: number) => void;
+  announce: boolean;
 }) {
   return (
-    <div className="ml-0.5 flex items-center gap-0.5 border-l pl-1">
+    // Same switcher as Conversation Branches: a labeled nav, and a counter
+    // that reads "Version 2 of 3" and is announced when it changes.
+    <nav aria-label="Message versions" className="ml-0.5 flex items-center gap-0.5 border-l pl-1">
       <IconButton label="Previous version" onClick={() => onChange(index - 1)} disabled={index <= 0}>
-        <ChevronLeft className="size-3.5" />
+        <ChevronLeft className="size-3.5" aria-hidden />
       </IconButton>
-      <span className="min-w-[2.5ch] text-center text-xs tabular-nums text-muted-foreground">
-        {index + 1}/{count}
+      <span
+        className="min-w-8 text-center text-xs tabular-nums text-muted-foreground"
+        aria-live={announce ? "polite" : "off"}
+        aria-atomic="true"
+      >
+        <span className="sr-only">Version </span>
+        {index + 1}
+        <span aria-hidden> / </span>
+        <span className="sr-only"> of </span>
+        {count}
       </span>
       <IconButton label="Next version" onClick={() => onChange(index + 1)} disabled={index >= count - 1}>
-        <ChevronRight className="size-3.5" />
+        <ChevronRight className="size-3.5" aria-hidden />
       </IconButton>
-    </div>
+    </nav>
   );
 }
 

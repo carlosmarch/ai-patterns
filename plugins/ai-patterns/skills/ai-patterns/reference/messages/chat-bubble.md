@@ -5,13 +5,12 @@
 # Chat Bubble with Actions
 
 ## Summary
-A conversational message bubble — user or assistant — with an inline action row that reveals on hover/focus: Copy, thumbs up/down feedback, and Regenerate on assistant replies; Retry, Edit (and resubmit), and Copy on the user's own messages. When a message has more than one version — from an edit or a retry/regenerate — a version stepper ("2/2" with prev/next arrows) appears at the end of the row so people can page through history without losing it.
+A conversational message bubble — user or assistant — with an inline action row that reveals on hover/focus: Copy, thumbs up/down feedback, and Regenerate on assistant replies; Retry, Edit (and resubmit), and Copy on the user's own messages. When a message has more than one version — from an edit or a retry/regenerate — the row ends in a version stepper; how those versions behave is defined by Conversation Branches.
 
 ## When to use
 - Any chat-style conversation UI where actions belong to a single message, not a global toolbar.
 - Assistant replies that benefit from an explicit quality signal (thumbs) or a one-click retry when the first answer misses.
 - User messages the person may want to correct or refine after seeing the reply (a typo, an added detail, a different phrasing) without retyping the whole conversation.
-- Conversations where regenerating or editing produces multiple candidate replies/prompts worth keeping around instead of discarding — the version stepper lets people compare them without duplicating bubbles on screen.
 
 ## When not to use
 - Read-only transcripts (chat history exports, shared/public views) where no one should be able to edit or regenerate.
@@ -23,36 +22,34 @@ A conversational message bubble — user or assistant — with an inline action 
 - Action row, below the bubble, revealed on hover/focus:
   - User: Retry, Edit, Copy.
   - Assistant: Copy, thumbs up, thumbs down, Regenerate.
-  - Version stepper (optional, trailing): a vertical divider, a previous-version chevron, an "n/total" counter, a next-version chevron — shown only when the message has more than one version.
+  - Version stepper (optional, trailing): a vertical divider, then the previous / counter / next switcher from Conversation Branches.
 - Edit mode: the bubble becomes an editable textarea in place, with Cancel and "Save & submit" controls.
 
 ## Behavior
 - The action row stays hidden until the bubble (or an action inside it) has hover or keyboard focus — it shouldn't compete with the message content at rest.
 - Once feedback is given, the corresponding thumb stays visibly active (a toggle, not a one-shot click) so the state reads even after the row is no longer hovered; clicking the same thumb again clears it.
 - Retry (user) and Regenerate (assistant) both resend the current user message and produce a new reply. Wire them to the same re-send handler — retrying from the user bubble is equivalent to regenerating from the assistant bubble that follows it.
-- Regenerating/retrying never overwrites history in place — it adds a new version and moves the stepper to it, so earlier attempts stay reachable via the prev arrow.
+- Retry, Regenerate and "Save & submit" never overwrite history: each adds a version and shows it. Versioning — what a version contains, how switching moves the reply and the rest of the thread with it, the counter and its disabled ends — follows Conversation Branches.
 - Editing a user message swaps the bubble for a textarea pre-filled with the current text. Enter (without Shift) or "Save & submit" commits it; Escape or Cancel discards the edit and restores the original text.
-- Submitting an edited user message is expected to invalidate and regenerate the assistant reply that followed it — this pattern doesn't perform that regeneration itself, but callers should wire the edit-submit handler to a re-send that also creates a new version.
+- This component doesn't generate replies itself: wire edit-submit, Retry and Regenerate to a re-send that creates the new version.
 - Only one bubble is in edit mode at a time.
-- The version stepper is only rendered when there's more than one version (`versionCount > 1`) — a message with a single version shows no stepper at all, not a disabled "1/1".
-- Navigating the stepper on either the user or assistant bubble in a pair should move both in lockstep, since a version represents one full turn (the prompt and the reply it produced), not two independently versioned halves.
-- The prev/next arrows disable at the ends of the version range instead of wrapping.
+- The stepper is only rendered when there's more than one version (`versionCount > 1`) — a single version shows no stepper, not a disabled "1/1".
 
 ## Content guidelines
 - Label the commit action "Save & submit" (or equivalent), not just "Save" — it should read as re-sending the message, a bigger consequence than saving a draft.
 - Keep the action icons unlabeled visually but always give each a real accessible name — icon-only rows save space but must not go nameless.
-- Keep the version counter numeric and terse ("2/2"); it's a position indicator, not a label — don't spell out "Version 2 of 2" inline.
 
 ## Accessibility
-- Every action button needs a descriptive `aria-label` ("Good response", "Bad response", "Regenerate", "Retry", "Edit message", "Copy", "Previous version", "Next version") since the icon alone carries no accessible name.
+- Every action button needs a descriptive `aria-label` ("Good response", "Bad response", "Regenerate", "Retry", "Edit message", "Copy"); the stepper's names come from Conversation Branches since the icon alone carries no accessible name.
 - Thumbs up/down are toggle buttons — expose state with `aria-pressed`, not color alone.
+- A user/assistant pair shares one version, so only one of its two steppers announces version changes — the user bubble's by default — or screen readers hear every change twice.
 - The action row must be reachable by keyboard, not only `:hover` — use `:focus-within` on the bubble so Tab reveals it.
-- Disabled stepper arrows (at the first/last version) must be real `disabled` buttons, not just dimmed, so assistive tech and keyboard users don't land on a dead control.
 - The edit textarea should receive focus automatically when edit mode opens, and focus should land somewhere sensible (the bubble, or the next actionable element) when it closes.
 
 ## Related patterns
 - **Streaming Text** — Use it as well while the assistant reply is still generating, then show this bubble's actions once it's done.
 - **Live Transcript** — Use it before this one for a voice-composed message, and hand the final text into a user bubble when the turn ends.
+- **Conversation Branches** — Use it as well; it defines how the versions behind this bubble's stepper work, and the stepper follows it.
 - **Selection Actions** — Use it instead when the action applies to part of a message rather than the whole thing.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
@@ -87,6 +84,12 @@ export interface ChatBubbleProps {
   /** Total number of versions (edits/regenerations) available for this message. */
   versionCount?: number;
   onVersionChange?: (index: number) => void;
+  /**
+   * Announce version changes to screen readers. A user/assistant pair shares
+   * one version, so only one stepper should announce it — the user bubble by
+   * default. Set it on the assistant bubble if only replies show a stepper.
+   */
+  announceVersion?: boolean;
   className?: string;
 }
 
@@ -99,6 +102,7 @@ export function ChatBubble({
   versionIndex,
   versionCount,
   onVersionChange,
+  announceVersion = role === "user",
   className,
 }: ChatBubbleProps) {
   const [editing, setEditing] = React.useState(false);
@@ -225,7 +229,12 @@ export function ChatBubble({
           )}
 
           {hasVersions && (
-            <VersionNav index={versionIndex} count={versionCount} onChange={onVersionChange} />
+            <VersionNav
+              index={versionIndex}
+              count={versionCount}
+              onChange={onVersionChange}
+              announce={announceVersion}
+            />
           )}
         </div>
       )}
@@ -237,23 +246,35 @@ function VersionNav({
   index,
   count,
   onChange,
+  announce,
 }: {
   index: number;
   count: number;
   onChange: (index: number) => void;
+  announce: boolean;
 }) {
   return (
-    <div className="ml-0.5 flex items-center gap-0.5 border-l pl-1">
+    // Same switcher as Conversation Branches: a labeled nav, and a counter
+    // that reads "Version 2 of 3" and is announced when it changes.
+    <nav aria-label="Message versions" className="ml-0.5 flex items-center gap-0.5 border-l pl-1">
       <IconButton label="Previous version" onClick={() => onChange(index - 1)} disabled={index <= 0}>
-        <ChevronLeft className="size-3.5" />
+        <ChevronLeft className="size-3.5" aria-hidden />
       </IconButton>
-      <span className="min-w-[2.5ch] text-center text-xs tabular-nums text-muted-foreground">
-        {index + 1}/{count}
+      <span
+        className="min-w-8 text-center text-xs tabular-nums text-muted-foreground"
+        aria-live={announce ? "polite" : "off"}
+        aria-atomic="true"
+      >
+        <span className="sr-only">Version </span>
+        {index + 1}
+        <span aria-hidden> / </span>
+        <span className="sr-only"> of </span>
+        {count}
       </span>
       <IconButton label="Next version" onClick={() => onChange(index + 1)} disabled={index >= count - 1}>
-        <ChevronRight className="size-3.5" />
+        <ChevronRight className="size-3.5" aria-hidden />
       </IconButton>
-    </div>
+    </nav>
   );
 }
 
