@@ -17,13 +17,20 @@ export function ComponentPreview({
   preview,
   code,
   pattern,
+  patternPanel,
+  patternDownload,
   prev,
   next,
 }: {
   title: string;
   preview: ReactNode;
   code: ReactNode;
+  /** The Guardrails tab content. */
   pattern?: ReactNode;
+  /** The guardrails as shown in the expanded side panel (defaults to `pattern`). */
+  patternPanel?: ReactNode;
+  /** Download action for the guardrails, shown in the side panel's header. */
+  patternDownload?: ReactNode;
   prev?: PagerLink;
   next?: PagerLink;
 }) {
@@ -104,7 +111,8 @@ export function ComponentPreview({
           <ExpandedSidePanel
             title={title}
             code={code}
-            pattern={pattern}
+            pattern={patternPanel ?? pattern}
+            patternDownload={patternDownload}
             value={panelTab}
             onValueChange={setPanelTab}
             onCollapse={() => setExpanded(false)}
@@ -159,6 +167,7 @@ function ExpandedSidePanel({
   title,
   code,
   pattern,
+  patternDownload,
   value,
   onValueChange,
   onCollapse,
@@ -166,6 +175,7 @@ function ExpandedSidePanel({
   title: string;
   code: ReactNode;
   pattern?: ReactNode;
+  patternDownload?: ReactNode;
   value: string;
   onValueChange: (value: string) => void;
   onCollapse: () => void;
@@ -253,7 +263,10 @@ function ExpandedSidePanel({
             {pattern && <TabsTrigger value="pattern">Guardrails</TabsTrigger>}
             <TabsTrigger value="code">Code</TabsTrigger>
           </TabsList>
-          <CollapseButton onClick={onCollapse} className="ml-auto" />
+          <div className="ml-auto flex items-center gap-2">
+            {pattern && value === "pattern" && patternDownload}
+            <CollapseButton onClick={onCollapse} />
+          </div>
         </div>
         {/* The panel scrolls as a whole, so lift the code blocks' own height cap. */}
         <div className="min-h-0 flex-1 overflow-auto p-4 [&_[data-code-scroll]]:max-h-none">
