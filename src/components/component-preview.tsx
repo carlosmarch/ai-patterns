@@ -91,9 +91,9 @@ export function ComponentPreview({
             <div className="flex h-12 shrink-0 items-center gap-2 border-b px-4 sm:px-6">
               <div className="flex min-w-0 flex-1 items-center gap-1.5 text-sm">
                 <Link
-                  href="/patterns"
-                  aria-label="All patterns"
-                  title="All patterns"
+                  href="/"
+                  aria-label="AI Patterns home"
+                  title="AI Patterns home"
                   className="logo-link flex shrink-0 items-center text-muted-foreground transition-colors hover:text-foreground"
                 >
                   <AnimatedOrigami className="size-4" />
