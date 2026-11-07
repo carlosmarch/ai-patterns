@@ -477,7 +477,7 @@ export function IntroHero({ entries, latest }: { entries: HeroEntry[]; latest?: 
             className="pointer-events-auto mt-12 flex flex-wrap items-center justify-center gap-3"
           >
             <Link
-              href="#first-demo"
+              href="/patterns"
               className="rounded-full bg-foreground px-6 py-3 text-[15px] font-medium text-background transition-transform hover:scale-[1.03] active:scale-[0.98]"
             >
               Browse patterns
