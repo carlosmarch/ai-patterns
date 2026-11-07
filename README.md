@@ -142,6 +142,14 @@ The site is a static export (`output: "export"`) hosted on [Cloudflare Workers](
 - Cloudflare deploy command: `npx wrangler deploy`
 - From your machine: `npx wrangler login`, then `npm run deploy`
 
+### Analytics
+
+Page views and the custom events in `src/lib/analytics.ts` (`code_copied`, `tab_changed`, `spec_downloaded`, `demo_prompt_submitted`, `mcp_install_clicked`, `github_clicked`) go to [Umami](https://umami.is), which is cookieless, so there's no consent banner. Set these as build variables in Cloudflare (Workers Builds → Settings → Variables and secrets → Build):
+
+- `NEXT_PUBLIC_UMAMI_WEBSITE_ID` — the website ID from Umami. Unset = no script is loaded.
+- `NEXT_PUBLIC_UMAMI_SCRIPT_URL` — optional, defaults to `https://cloud.umami.is/script.js`; point it at your own instance if you self-host.
+- `NEXT_PUBLIC_UMAMI_DOMAINS` — optional, defaults to the `SITE_URL` host (`ai-patterns.app`), so localhost and PR previews aren't counted.
+
 ---
 
 ## Adding a pattern

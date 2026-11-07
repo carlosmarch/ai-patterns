@@ -32,6 +32,13 @@ if ("scrollRestoration" in history) {
 }
 `;
 
+// Umami (https://umami.is) — cookieless page views plus the custom events in
+// src/lib/analytics.ts. Off unless NEXT_PUBLIC_UMAMI_WEBSITE_ID is set at build
+// time; data-domains keeps local dev and PR previews out of the numbers.
+const UMAMI_WEBSITE_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+const UMAMI_SCRIPT_URL = process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL ?? "https://cloud.umami.is/script.js";
+const UMAMI_DOMAINS = process.env.NEXT_PUBLIC_UMAMI_DOMAINS ?? new URL(SITE_URL).hostname;
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -84,6 +91,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="flex-1">{children}</div>
         <Footer />
         <StarToast />
+        {UMAMI_WEBSITE_ID && (
+          <Script
+            src={UMAMI_SCRIPT_URL}
+            data-website-id={UMAMI_WEBSITE_ID}
+            data-domains={UMAMI_DOMAINS}
+            strategy="afterInteractive"
+          />
+        )}
       </body>
     </html>
   );

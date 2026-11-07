@@ -6,8 +6,8 @@ declare global {
   }
 }
 
-// No analytics provider is loaded yet; events go to Umami if its script is
-// on the page, and are dropped otherwise.
+// Events go to Umami, whose script the root layout loads when
+// NEXT_PUBLIC_UMAMI_WEBSITE_ID is set; without it (dev, previews) they're dropped.
 function track(event: string, props?: Props) {
   if (typeof window !== "undefined") window.umami?.track(event, props);
 }
