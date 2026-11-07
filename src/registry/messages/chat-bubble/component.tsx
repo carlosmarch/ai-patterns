@@ -175,17 +175,27 @@ function VersionNav({
   onChange: (index: number) => void;
 }) {
   return (
-    <div className="ml-0.5 flex items-center gap-0.5 border-l pl-1">
+    // Same switcher as Conversation Branches: a labeled nav, and a counter
+    // that reads "Version 2 of 3" and is announced when it changes.
+    <nav aria-label="Message versions" className="ml-0.5 flex items-center gap-0.5 border-l pl-1">
       <IconButton label="Previous version" onClick={() => onChange(index - 1)} disabled={index <= 0}>
-        <ChevronLeft className="size-3.5" />
+        <ChevronLeft className="size-3.5" aria-hidden />
       </IconButton>
-      <span className="min-w-[2.5ch] text-center text-xs tabular-nums text-muted-foreground">
-        {index + 1}/{count}
+      <span
+        className="min-w-8 text-center text-xs tabular-nums text-muted-foreground"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <span className="sr-only">Version </span>
+        {index + 1}
+        <span aria-hidden> / </span>
+        <span className="sr-only"> of </span>
+        {count}
       </span>
       <IconButton label="Next version" onClick={() => onChange(index + 1)} disabled={index >= count - 1}>
-        <ChevronRight className="size-3.5" />
+        <ChevronRight className="size-3.5" aria-hidden />
       </IconButton>
-    </div>
+    </nav>
   );
 }
 
