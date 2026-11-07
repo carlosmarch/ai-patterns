@@ -54,6 +54,11 @@ export default async function PatternPage({
   const { prev, next } = getAdjacentEntries(category, slug);
   const toLink = (e: typeof prev) => e && { href: getEntryHref(e), title: e.title, category: e.category };
 
+  const spec = <CodeBlock code={entry.uxDoc} lang="markdown" wrap trackAs="spec" />;
+  const specDownload = (
+    <DownloadButton filename={`${entry.slug}.pattern.md`} content={entry.uxDoc} className="shrink-0" />
+  );
+
   return (
     <main className="mx-auto w-full max-w-3xl py-16">
       <Breadcrumbs
@@ -83,15 +88,13 @@ export default async function PatternPage({
               <p className="text-sm text-muted-foreground">
                 A UX spec for this pattern — written for agents implementing or reusing it, not the code.
               </p>
-              <DownloadButton
-                filename={`${entry.slug}.pattern.md`}
-                content={entry.uxDoc}
-                className="shrink-0"
-              />
+              {specDownload}
             </div>
-            <CodeBlock code={entry.uxDoc} lang="markdown" wrap trackAs="spec" />
+            {spec}
           </div>
         }
+        patternPanel={spec}
+        patternDownload={specDownload}
       />
 
       <PatternPager prev={toLink(prev)} next={toLink(next)} />
