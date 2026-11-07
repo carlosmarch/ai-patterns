@@ -35,8 +35,8 @@ export default function VoiceOrbDemo() {
         ))}
       </div>
 
-      <div className="w-full rounded-2xl border bg-zinc-950 p-4">
-        <VoiceOrb state={state} level={mic.active ? mic.level : undefined} className="text-orange-50" />
+      <div className="w-full rounded-2xl border bg-card p-4">
+        <VoiceOrb state={state} level={mic.active ? mic.level : undefined} className="text-foreground dark:text-orange-50" />
       </div>
 
       <button

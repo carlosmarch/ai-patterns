@@ -17,12 +17,12 @@ A slowly rotating 3D sphere of particles that stands in for the assistant during
 - Sphere: several hundred particles spread evenly over a sphere's surface (golden-angle spiral), lightly varied in size so it reads as dust, not a grid.
 - Depth cue: particles on the near side are larger and brighter; those on the far side shrink and fade, which is what makes a flat canvas read as a ball.
 - Surface ripple: a slow travelling wave displaces each particle along its radius; its amplitude grows with the voice level.
-- Tint: one color (\`currentColor\`), usually a warm white on a dark backdrop. No gradients or per-state hues — state is carried by motion.
+- Tint: one color (\`currentColor\`) that follows the theme — dark particles on a light surface, warm white on a dark one — and updates live when the theme changes. No gradients or per-state hues — state is carried by motion.
 
 ## Behavior
 - \`idle\`: the sphere sits at rest size and turns very slowly, with almost no ripple — present but quiet.
 - \`listening\`: reacts to the user's mic level — it swells and ripples with each syllable.
-- \`thinking\`: the level is ignored; the sphere spins noticeably faster with a soft, steady pulse, so the gap between turns never looks frozen.
+- \`thinking\`: the level is ignored and the sphere twists like a Rubik's cube — one third of it (a slice along x, y or z) turns 90° with an ease-in-out, pauses briefly, then another slice turns. The mechanical, step-by-step motion reads as "working on it" and is clearly different from the organic breathing of listening and speaking. A turn in progress always finishes before the orb leaves this state, so it never stops half-twisted.
 - \`speaking\`: reacts to the assistant's outgoing audio with the largest swell and ripple, so the assistant's turn feels more energetic than the user's.
 - The level is smoothed with a fast attack and slow release: the orb jumps with a syllable and settles gently instead of jittering.
 - Sample the level from a real source (an \`AnalyserNode\` on the mic or the playback element) and pass it as a ref, so the canvas reads it every frame without re-rendering the tree. Without a level, the orb runs a synthetic rhythm for prototypes — never mix the two.
@@ -34,7 +34,7 @@ A slowly rotating 3D sphere of particles that stands in for the assistant during
 
 ## Accessibility
 - The canvas has \`role="img"\` and an \`aria-label\` naming the current state ("Listening", "Speaking"). Announce turn changes through a separate polite live region, not by relabeling the canvas alone.
-- Respect \`prefers-reduced-motion\`: stop the rotation and ripple, and let only the size change gently with the level.
+- Respect \`prefers-reduced-motion\`: stop the rotation, ripple and slice turns, and let only the size change gently with the level.
 - Don't rely on the orb alone to signal turn-taking — pair it with a text state or a speaker label.
 - Keep contrast between the particles and the backdrop high enough that the sphere's outline is visible at rest.
 

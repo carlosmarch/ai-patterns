@@ -31,14 +31,16 @@ const STATE_LABEL: Record<VoiceOrbState, string> = {
 const STATE_MOTION: Record<VoiceOrbState, { gain: number; spin: number; ripple: number }> = {
   idle: { gain: 0, spin: 0.12, ripple: 0.01 },
   listening: { gain: 0.22, spin: 0.25, ripple: 0.05 },
-  thinking: { gain: 0.06, spin: 0.9, ripple: 0.03 },
+  thinking: { gain: 0, spin: 0.15, ripple: 0 },
   speaking: { gain: 0.32, spin: 0.35, ripple: 0.08 },
 };
 
 /**
  * A 3D particle sphere that breathes with the voice signal. Drawn on a 2D
  * canvas with a tiny hand-rolled projection — no WebGL or 3D library — and
- * colored by `currentColor`, so a `text-*` class on the orb sets its tint.
+ * colored by `currentColor`, so a `text-*` class on the orb sets its tint
+ * (and it follows light/dark theme changes live). While thinking, the sphere
+ * twists like a Rubik's cube: one third of it turns 90° at a time.
  */
 export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbProps) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -76,6 +78,8 @@ export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbP
     let angle = 0;
     let smoothed = 0;
     let last = performance.now();
+    let turn: Turn | null = null;
+    let pause = 0;
 
     const draw = (now: number) => {
       const dt = Math.min((now - last) / 1000, 0.05);
@@ -89,6 +93,21 @@ export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbP
       smoothed += (raw - smoothed) * (raw > smoothed ? 0.35 : 0.08);
 
       if (!reducedMotion) angle += dt * motion.spin;
+
+      // Rubik's-cube twist: while thinking, keep turning slices one after another.
+      // A turn in progress always finishes, so leaving "thinking" never leaves a half-twisted ball.
+      if (turn) {
+        turn.progress = Math.min(1, turn.progress + dt / TURN_SECONDS);
+        if (turn.progress >= 1) {
+          for (const p of points) if (inSlice(p, turn)) rotateAxis(p, turn.axis, turn.direction * (Math.PI / 2));
+          turn = null;
+          pause = TURN_PAUSE;
+        }
+      } else if (current === "thinking" && !reducedMotion) {
+        pause -= dt;
+        if (pause <= 0) turn = randomTurn();
+      }
+      const twist = turn ? turn.direction * (Math.PI / 2) * easeInOut(turn.progress) : 0;
 
       const color = getComputedStyle(canvas).color;
       ctx.clearRect(0, 0, width, height);
@@ -106,10 +125,15 @@ export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbP
       const sinX = Math.sin(tilt);
       const focal = 4;
 
-      for (const p of points) {
+      // The turning slice lifts slightly off the ball and settles back, so the twist reads at a glance.
+      const lift = turn ? 1 + 0.1 * Math.sin(Math.PI * turn.progress) : 1;
+
+      for (const base of points) {
+        const turning = turn !== null && inSlice(base, turn);
+        const p = turn && turning ? rotatedCopy(base, turn.axis, twist) : base;
         // Per-particle displacement: a slow wave travelling over the surface.
         const wave = Math.sin(p.x * 4 + t * 2.1) + Math.sin(p.y * 5 - t * 1.7) + Math.sin(p.z * 3 + t * 1.3);
-        const r = swell * (1 + ripple * wave * p.jitter);
+        const r = swell * (1 + ripple * wave * p.jitter) * (turning ? lift : 1);
 
         // Rotate around Y, then tilt around X.
         const x1 = p.x * cosY + p.z * sinY;
@@ -151,6 +175,56 @@ export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbP
 }
 
 type Point = { x: number; y: number; z: number; size: number; jitter: number };
+type Axis = "x" | "y" | "z";
+type Turn = { axis: Axis; slice: -1 | 0 | 1; direction: 1 | -1; progress: number };
+
+const TURN_SECONDS = 0.45;
+const TURN_PAUSE = 0.12;
+const SLICE_EDGE = 1 / 3;
+
+function randomTurn(): Turn {
+  const axes: Axis[] = ["x", "y", "z"];
+  const slices = [-1, 0, 1] as const;
+  return {
+    axis: axes[Math.floor(Math.random() * 3)],
+    slice: slices[Math.floor(Math.random() * 3)],
+    direction: Math.random() < 0.5 ? 1 : -1,
+    progress: 0,
+  };
+}
+
+/** Which third of the sphere (along the turn's axis) a point sits in. */
+function inSlice(p: Point, turn: Turn) {
+  const c = p[turn.axis];
+  const slice = c < -SLICE_EDGE ? -1 : c > SLICE_EDGE ? 1 : 0;
+  return slice === turn.slice;
+}
+
+function rotateAxis(p: Point, axis: Axis, a: number) {
+  const cos = Math.cos(a);
+  const sin = Math.sin(a);
+  const { x, y, z } = p;
+  if (axis === "x") {
+    p.y = y * cos - z * sin;
+    p.z = y * sin + z * cos;
+  } else if (axis === "y") {
+    p.x = x * cos + z * sin;
+    p.z = -x * sin + z * cos;
+  } else {
+    p.x = x * cos - y * sin;
+    p.y = x * sin + y * cos;
+  }
+}
+
+function rotatedCopy(p: Point, axis: Axis, a: number): Point {
+  const copy = { ...p };
+  rotateAxis(copy, axis, a);
+  return copy;
+}
+
+function easeInOut(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+}
 
 /** Evenly distributes points over a unit sphere (golden-angle spiral). */
 function fibonacciSphere(count: number): Point[] {
@@ -170,7 +244,7 @@ function readLevel(level: VoiceOrbProps["level"], state: VoiceOrbState, t: numbe
   if (level && typeof level.current === "number") return clamp(level.current);
   // Synthetic rhythm for prototypes with no audio wired up yet.
   if (state === "idle") return 0;
-  if (state === "thinking") return 0.3 + 0.15 * Math.sin(t * 3);
+  if (state === "thinking") return 0;
   const syllables = Math.max(0, Math.sin(t * 7.3) * Math.sin(t * 2.3) + 0.25 * Math.sin(t * 13.1));
   return clamp(state === "speaking" ? syllables * 1.1 : syllables * 0.8);
 }
