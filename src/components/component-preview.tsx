@@ -118,7 +118,8 @@ export function ComponentPreview({
                   {title}
                 </span>
               </nav>
-              <CopyLinkButton />
+              {/* Not on phones: there's little room, and the address bar shares the link anyway. */}
+              <CopyLinkButton className="max-sm:hidden" />
               {/* Without room for the side panel, Collapse lives here instead. */}
               <CollapseButton onClick={() => setExpanded(false)} className="ml-2 lg:hidden" />
             </div>
@@ -325,10 +326,12 @@ function CollapseButton({ onClick, className }: { onClick: () => void; className
       size="sm"
       onClick={onClick}
       aria-keyshortcuts="Escape"
-      className={className}
+      aria-label="Collapse"
+      className={cn("max-sm:size-8 max-sm:px-0", className)}
     >
       <Minimize2 />
-      Collapse
+      {/* Icon only on phones. */}
+      <span className="max-sm:hidden">Collapse</span>
       <kbd className="hidden rounded border bg-background px-1 font-sans text-xs leading-4 font-medium text-muted-foreground sm:inline">
         Esc
       </kbd>
@@ -375,7 +378,7 @@ function BreadcrumbSlash() {
 }
 
 /** Copies the current URL, which opens the pattern straight into the expanded view. */
-function CopyLinkButton() {
+function CopyLinkButton({ className }: { className?: string }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -385,7 +388,14 @@ function CopyLinkButton() {
   }
 
   return (
-    <Button type="button" variant="ghost" size="sm" onClick={copy} aria-label="Copy link to this view">
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      onClick={copy}
+      aria-label="Copy link to this view"
+      className={className}
+    >
       {copied ? <Check /> : <Link2 />}
       <span className="hidden sm:inline">{copied ? "Copied" : "Copy link"}</span>
     </Button>
