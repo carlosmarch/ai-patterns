@@ -245,7 +245,7 @@ export function CostEstimate({
                   ))}
                 </dl>
                 <p className="mt-2 text-xs text-pretty text-muted-foreground">
-                  You're only charged for what the run actually uses.
+                  You&apos;re only charged for what the run actually uses.
                 </p>
               </motion.div>
             )}
