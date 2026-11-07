@@ -346,7 +346,7 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
     r.add({
       kind: "sources",
       sources: [
-        { title: `${entry.title} — UX spec`, domain: "ai-patterns.dev", url: `/patterns/${entryPath(entry)}`, faviconUrl: favicon("github.com") },
+        { title: `${entry.title} — UX spec`, domain: "ai-patterns.app", url: `/patterns/${entryPath(entry)}`, faviconUrl: favicon("github.com") },
         { title: "carlosmarch/ai-patterns", domain: "github.com", url: `https://github.com/carlosmarch/ai-patterns/tree/main/src/registry/${entryPath(entry)}`, faviconUrl: favicon("github.com") },
       ],
     });
@@ -496,7 +496,7 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
         await r.tool({ toolKind: "file", verb: "Reading", target: "their UX specs", result: "Read 6 specs" });
         await r.say([
           { type: "text", content: "Here's my take, based on the registry specs " },
-          { type: "source", label: "ai-patterns.dev" },
+          { type: "source", label: "ai-patterns.app" },
           {
             type: "text",
             content:
@@ -774,8 +774,8 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
                         roles={ROLES}
                         orgMembers={ORG_MEMBERS}
                         initialAssignees={[
-                          { id: "carlos", name: "Carlos March", email: "carlos@ai-patterns.dev", status: "confirmed", roleId: "admin" },
-                          { id: "ana", name: "Ana López", email: "ana@ai-patterns.dev", status: "confirmed", roleId: "editor" },
+                          { id: "carlos", name: "Carlos March", email: "carlos@ai-patterns.app", status: "confirmed", roleId: "admin" },
+                          { id: "ana", name: "Ana López", email: "ana@ai-patterns.app", status: "confirmed", roleId: "editor" },
                         ]}
                         defaultMessage="Join me in the Origami workspace — we're auditing our AI screens against the pattern catalogue."
                       />

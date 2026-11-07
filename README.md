@@ -4,7 +4,7 @@ A pattern library for AI product UI — the interactions that don't have establi
 
 Each pattern ships as a portable UX contract: anatomy, behavior, accessibility rules, and content guidelines, kept separate from the Tailwind/Radix implementation shown in the "Code" tab. The contract survives transplanting into any design system; only the markup re-expresses.
 
-**[Browse the catalogue](https://ai-patterns.vercel.app/patterns)** or install the Claude Code skill that scaffolds patterns straight into your own project.
+**[Browse the catalogue](https://ai-patterns.app/patterns)** or install the Claude Code skill that scaffolds patterns straight into your own project.
 
 ---
 
@@ -40,21 +40,21 @@ The site is agent-ready: everything a browser sees is also available as Markdown
 
 | Endpoint | What it returns |
 |---|---|
-| [`/llms.txt`](https://ai-patterns.vercel.app/llms.txt) | [llms.txt](https://llmstxt.org) index — every pattern with a link to its Markdown page |
-| [`/llms-full.txt`](https://ai-patterns.vercel.app/llms-full.txt) | Every pattern's full UX spec in one file |
+| [`/llms.txt`](https://ai-patterns.app/llms.txt) | [llms.txt](https://llmstxt.org) index — every pattern with a link to its Markdown page |
+| [`/llms-full.txt`](https://ai-patterns.app/llms-full.txt) | Every pattern's full UX spec in one file |
 | `/<page>.md` | Markdown version of a page — `/index.md`, `/patterns.md`, `/skill.md`, `/patterns/<category>/<slug>.md` (spec + `component.tsx` + npm deps) |
 | `Accept: text/markdown` | The same Markdown, served from the normal page URLs |
-| [`/api/patterns`](https://ai-patterns.vercel.app/api/patterns) | JSON index; `/api/patterns/<category>/<slug>` adds `spec`, `code`, `dependencies` |
+| [`/api/patterns`](https://ai-patterns.app/api/patterns) | JSON index; `/api/patterns/<category>/<slug>` adds `spec`, `code`, `dependencies` |
 | `/mcp` | Stateless MCP server (Streamable HTTP, no auth) with `list_patterns`, `search_patterns`, `get_pattern` |
 | `/robots.txt`, `/sitemap.xml` | Crawlers and AI agents welcome |
 
 Connect the MCP server to Claude Code:
 
 ```
-claude mcp add --transport http ai-patterns https://ai-patterns.vercel.app/mcp
+claude mcp add --transport http ai-patterns https://ai-patterns.app/mcp
 ```
 
-Absolute URLs use `NEXT_PUBLIC_SITE_URL` (default `https://ai-patterns.vercel.app`).
+Absolute URLs use `NEXT_PUBLIC_SITE_URL` (default `https://ai-patterns.app`).
 
 ---
 
