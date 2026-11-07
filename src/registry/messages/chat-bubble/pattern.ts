@@ -49,5 +49,6 @@ A conversational message bubble — user or assistant — with an inline action 
 ## Related patterns
 - **Streaming Text** — Use it as well while the assistant reply is still generating, then show this bubble's actions once it's done.
 - **Live Transcript** — Use it before this one for a voice-composed message, and hand the final text into a user bubble when the turn ends.
+- **Conversation Branches** — Use it as well when editing a sent message should fork the conversation; its version switcher carries the reply and everything after it with each version.
 - **Selection Actions** — Use it instead when the action applies to part of a message rather than the whole thing.
 `;
