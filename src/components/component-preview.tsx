@@ -3,7 +3,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2 } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Link2, Maximize2, Minimize2 } from "lucide-react";
 
 import { AnimatedOrigami } from "@/components/animated-origami";
 import { usePatternExpand } from "@/components/pattern-expand";
@@ -89,7 +89,7 @@ export function ComponentPreview({
         <div className={cn(isExpanded ? "flex min-w-0 flex-1 flex-col" : "contents")}>
           {isExpanded && (
             <div className="flex h-12 shrink-0 items-center gap-2 border-b px-4 sm:px-6">
-              <div className="flex min-w-0 flex-1 items-center gap-1.5 text-sm">
+              <nav aria-label="Breadcrumb" className="flex min-w-0 flex-1 items-center gap-1.5 text-sm">
                 <Link
                   href="/"
                   aria-label="AI Patterns home"
@@ -98,11 +98,16 @@ export function ComponentPreview({
                 >
                   <AnimatedOrigami className="size-4" />
                 </Link>
-                <span aria-hidden="true" className="text-muted-foreground">
-                  /
+                <BreadcrumbSlash />
+                <Link href="/patterns" className="shrink-0 text-muted-foreground transition-colors hover:text-foreground">
+                  Patterns
+                </Link>
+                <BreadcrumbSlash />
+                <span aria-current="page" className="min-w-0 truncate font-medium">
+                  {title}
                 </span>
-                <span className="min-w-0 truncate font-medium">{title}</span>
-              </div>
+              </nav>
+              <CopyLinkButton />
               {/* Without room for the side panel, Collapse lives here instead. */}
               <CollapseButton onClick={() => setExpanded(false)} className="ml-2 lg:hidden" />
             </div>
@@ -350,6 +355,32 @@ function ExpandedPagerLink({ link, direction }: { link?: PagerLink; direction: "
         <span className="hidden max-w-40 truncate md:inline">{link.title}</span>
         {isNext && <Icon />}
       </Link>
+    </Button>
+  );
+}
+
+function BreadcrumbSlash() {
+  return (
+    <span aria-hidden="true" className="text-muted-foreground">
+      /
+    </span>
+  );
+}
+
+/** Copies the current URL, which opens the pattern straight into the expanded view. */
+function CopyLinkButton() {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    await navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1500);
+  }
+
+  return (
+    <Button type="button" variant="ghost" size="sm" onClick={copy} aria-label="Copy link to this view">
+      {copied ? <Check /> : <Link2 />}
+      <span className="hidden sm:inline">{copied ? "Copied" : "Copy link"}</span>
     </Button>
   );
 }
