@@ -3,6 +3,8 @@ import type { MetadataRoute } from "next";
 import { abs, patternUrl } from "@/lib/agent";
 import { registry } from "@/registry";
 
+export const dynamic = "force-static";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: abs("/"), priority: 1 },
