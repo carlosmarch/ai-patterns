@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 
 import type { SeenIn } from "@/lib/teams";
+import type { PatternJob } from "./jobs";
 
 import AgentTriggersDemo from "./agents/agent-triggers/demo";
 import AgentTriggersThumbnail from "./agents/agent-triggers/thumbnail";
@@ -201,6 +202,8 @@ import { pattern as costEstimatePattern } from "./indicators/cost-estimate/patte
 export interface RegistryEntry {
   slug: string;
   category: string;
+  /** What the pattern does for the user — the cross-category "job" facet (see ./jobs.ts). */
+  job: PatternJob;
   title: string;
   description: string;
   Demo: ComponentType;
@@ -216,6 +219,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "create-agent",
     category: "agents",
+    job: "start",
     title: "Create Agent",
     description: "A two-step wizard card for naming an agent, picking its icon, and selecting which event sources activate it.",
     Demo: CreateAgentDemo,
@@ -228,6 +232,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "agent-triggers",
     category: "agents",
+    job: "steer",
     title: "Agent Triggers",
     description: "A configuration panel for listing and toggling the external events that activate an agent, with a manual run control.",
     Demo: AgentTriggersDemo,
@@ -241,6 +246,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "human-in-the-loop",
     category: "agents",
+    job: "oversee",
     title: "Human in the Loop Question",
     description: "A compact dialog that pauses an agent mid-task to collect a structured choice — radio options, a free-text fallback, skip/continue controls, and multi-step pagination.",
     Demo: HumanInTheLoopDemo,
@@ -253,6 +259,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "background-tasks",
     category: "agents",
+    job: "oversee",
     title: "Background Tasks Drawer",
     description:
       "A side drawer that tracks an agent's background work live — running tasks with elapsed time, stats, and stop controls, plus an expandable history of finished commands and output.",
@@ -266,6 +273,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "instruction-tools",
     category: "agents",
+    job: "ask",
     title: "Instruction Tool Insert",
     description:
       "A numbered instruction editor where typing / opens a two-step inline picker — choose a tool, then its connector or target — inserting an atomic, editable chip into the prose.",
@@ -279,6 +287,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "procedure-builder",
     category: "agents",
+    job: "steer",
     title: "Procedure Builder",
     description:
       "A doc-style editor for an agent's step-by-step procedure — a / step picker, IF / ELSE branches with plain-language or code conditions, section jumps, and escalate / switch actions.",
@@ -292,6 +301,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "task-list",
     category: "agents",
+    job: "oversee",
     title: "Task List",
     description:
       "A live, agent-authored plan — an ordered list of steps marked pending, in progress, or completed as the agent works through them.",
@@ -306,6 +316,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "agent-run-card",
     category: "agents",
+    job: "oversee",
     title: "Agent Run Card",
     description:
       "A compact run card with the agent's current step and a timer, a segmented progress bar, and a list of finished steps that stacks up as it reads, edits, tests and pushes.",
@@ -317,6 +328,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "wait-time-handoff",
     category: "agents",
+    job: "oversee",
     title: "Wait Time Handoff",
     description:
       "A collapsible settings card for what an agent does when the customer goes quiet — a wait duration, a Team / Workflow handoff target, the handoff message, and a working-hours option.",
@@ -330,6 +342,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "multi-agent-trace",
     category: "traces",
+    job: "oversee",
     title: "Multi-Agent Trace",
     description: "A tree of parallel sub-agent tasks, each with its own status and step list.",
     Demo: MultiAgentTraceDemo,
@@ -342,6 +355,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "shiny-button",
     category: "buttons",
+    job: "start",
     title: "Shiny Button",
     description: "A button with an animated light sweep across its surface.",
     Demo: ShinyButtonDemo,
@@ -352,6 +366,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "thinking-loader",
     category: "loaders",
+    job: "oversee",
     title: "Thinking Loader",
     description: "A loader with a shimmering label and a live elapsed-time counter.",
     Demo: ThinkingLoaderDemo,
@@ -364,6 +379,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "drawing-icon",
     category: "loaders",
+    job: "oversee",
     title: "Drawing Icon",
     description: "A line icon that draws itself stroke by stroke while the step it stands for is running.",
     Demo: DrawingIconDemo,
@@ -376,6 +392,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "expandable-trace",
     category: "traces",
+    job: "oversee",
     title: "Expandable Trace",
     description: "A collapsible \"Thought for Xs\" summary that expands into a step-by-step trace.",
     Demo: ExpandableTraceDemo,
@@ -388,6 +405,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "stream-of-thought",
     category: "traces",
+    job: "oversee",
     title: "Stream of Thought",
     description: "A live, timed header over reasoning that streams in as a step timeline, then folds into a \"Thought for Ns\" trace when the answer starts.",
     Demo: StreamOfThoughtDemo,
@@ -398,6 +416,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "streaming-text",
     category: "text",
+    job: "oversee",
     title: "Streaming Text",
     description: "A streamed answer with inline sources, actions, and follow-ups.",
     Demo: StreamingTextDemo,
@@ -410,6 +429,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "prompt-bar",
     category: "composer",
+    job: "ask",
     title: "Prompt Bar",
     description: "A composer with @ sources, / commands, a model picker, and dictation.",
     Demo: PromptBarDemo,
@@ -423,6 +443,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "prompt-bar-pro",
     category: "composer",
+    job: "ask",
     title: "Prompt Bar Pro",
     description:
       "A first-run composer with suggestion chips, @ sources, / commands, an environment picker, and an orchestrator picker.",
@@ -436,6 +457,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "quick-chat-dock",
     category: "composer",
+    job: "ask",
     title: "Quick Chat Dock",
     description:
       "A hidden bottom-edge handle that wakes into an action dock on hover and summons a floating prompt bar.",
@@ -449,6 +471,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "message-queue",
     category: "composer",
+    job: "ask",
     title: "Message Queue",
     description:
       "A composer that keeps working mid-turn: ⌘Enter queues follow-ups above the input to send now, edit, or auto-send when the agent finishes.",
@@ -462,6 +485,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "model-picker",
     category: "composer",
+    job: "steer",
     title: "Model Picker",
     description:
       "A composer chip that opens a list of models, each with a one-line description, plan-locked options that lead to an upgrade, and an extended-thinking switch.",
@@ -475,6 +499,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "incognito-toggle",
     category: "composer",
+    job: "trust",
     title: "Incognito Toggle",
     description:
       "A header control that starts a temporary chat, with a persistent banner stating exactly what won't be saved, remembered or used for training.",
@@ -488,6 +513,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "diff-summary",
     category: "code",
+    job: "trust",
     title: "Diff Summary Card",
     description: "A collapsed summary of a batch of file edits, with undo and an overflow list.",
     Demo: DiffSummaryCardDemo,
@@ -501,6 +527,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "diff-tabs",
     category: "code",
+    job: "trust",
     title: "Diff Tabs",
     description: "Per-file chips that switch an inline diff viewer between a batch of changed files.",
     Demo: DiffTabsDemo,
@@ -514,6 +541,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "code-preview",
     category: "code",
+    job: "trust",
     title: "Code Preview Block",
     description: "A code block that flips between the source and a sandboxed live rendering of it.",
     Demo: CodePreviewDemo,
@@ -526,6 +554,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "trigger-condition",
     category: "flowcharts",
+    job: "steer",
     title: "Flowchart",
     description: "Workflow trigger and condition steps on a dotted canvas.",
     Demo: FlowchartDemo,
@@ -538,6 +567,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "chat-bubble",
     category: "messages",
+    job: "trust",
     title: "Chat Bubble with Actions",
     description: "A message bubble with feedback thumbs, edit-and-resubmit, retry/regenerate, and a version stepper.",
     Demo: ChatBubbleDemo,
@@ -551,6 +581,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "tool-approval",
     category: "permissions",
+    job: "oversee",
     title: "Tool Approval",
     description: "A pending tool-call prompt with allow, always-allow, and deny actions.",
     Demo: ToolApprovalDemo,
@@ -564,6 +595,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "connector-panel",
     category: "permissions",
+    job: "steer",
     title: "Connector Panel",
     description:
       "A settings panel for connecting an app or MCP server — shows capabilities overview, groups tools by type, and lets users set per-tool permission levels.",
@@ -578,6 +610,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "memory-panel",
     category: "permissions",
+    job: "trust",
     title: "Memory Panel",
     description:
       "A panel listing what the assistant remembers about the user — edit or forget each memory with undo, switch memory off, forget all — plus a memory-updated notice for the chat.",
@@ -591,6 +624,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "tool-call-chip",
     category: "loaders",
+    job: "oversee",
     title: "Tool Call Chip",
     description: "An inline pill naming an in-flight tool call that resolves into a result summary.",
     Demo: ToolCallChipDemo,
@@ -604,6 +638,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "attachment-chip",
     category: "uploads",
+    job: "ask",
     title: "Attachment Chip",
     description: "A composer's file/image attachment tray with drag-drop, upload progress, and inline preview.",
     Demo: AttachmentTrayDemo,
@@ -616,6 +651,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "image-peek",
     category: "media",
+    job: "trust",
     title: "Image Peek",
     description: "A row of tiny image thumbnails that grows into an anchored preview card with a label, counter, and prev/next stepping.",
     Demo: ImagePeekDemo,
@@ -628,6 +664,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "stop-generation-button",
     category: "buttons",
+    job: "oversee",
     title: "Stop Generation Button",
     description: "A send button that morphs into a stop control mid-stream and back on completion.",
     Demo: StopGenerationButtonDemo,
@@ -641,6 +678,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "terminal-stream",
     category: "code",
+    job: "oversee",
     title: "Terminal Stream",
     description: "An auto-scrolling, collapsible panel streaming raw command output line by line.",
     Demo: TerminalStreamDemo,
@@ -653,6 +691,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "inline-citation",
     category: "text",
+    job: "trust",
     title: "Inline Citation",
     description: "A hoverable, clickable footnote-style source marker inline within text.",
     Demo: InlineCitationDemo,
@@ -666,6 +705,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "sources-stack",
     category: "text",
+    job: "trust",
     title: "Sources Stack",
     description: "An overlapping stack of source favicons with a count, expanding into a linked source list.",
     Demo: SourcesStackDemo,
@@ -678,6 +718,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "source-trust-card",
     category: "text",
+    job: "trust",
     title: "Source Trust Card",
     description: "A paginated single-source card with a trust badge and domain pills for jumping between sources.",
     Demo: SourceTrustCardDemo,
@@ -688,6 +729,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "follow-up-list",
     category: "text",
+    job: "start",
     title: "Follow-Up List",
     description: "A vertical list of suggested next questions shown after a response, each sendable with a tap.",
     Demo: FollowUpListDemo,
@@ -700,6 +742,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "selection-actions",
     category: "text",
+    job: "ask",
     title: "Selection Actions",
     description: "A floating toolbar on text selection for describing edits, explaining, or improving a passage.",
     Demo: SelectionActionsDemo,
@@ -714,6 +757,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "refinement-controls",
     category: "text",
+    job: "steer",
     title: "Refinement Controls",
     description:
       "One-tap adjustments (Rephrase, Shorten, More formal, Bulletize…) and a free-form instruction field docked under an AI output, with every result kept as a steppable version.",
@@ -729,6 +773,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "rate-limit",
     category: "errors",
+    job: "recover",
     title: "Rate Limit",
     description: "A quota-exceeded state with a live countdown to when the user can send again.",
     Demo: RateLimitDemo,
@@ -741,6 +786,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "partial-response",
     category: "errors",
+    job: "recover",
     title: "Partial Response",
     description: "A cut-short assistant reply with Continue and Retry actions.",
     Demo: PartialResponseDemo,
@@ -753,6 +799,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "generation-error",
     category: "errors",
+    job: "recover",
     title: "Generation Error",
     description: "A console-style error card for a failed generation, with details and retry.",
     Demo: GenerationErrorDemo,
@@ -765,6 +812,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "console-error-card",
     category: "errors",
+    job: "recover",
     title: "Console Error Card",
     description: "A structured card surfacing a browser console error with a code frame, call stack, and navigation.",
     Demo: ConsoleErrorCardDemo,
@@ -778,6 +826,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "connectivity-error",
     category: "errors",
+    job: "recover",
     title: "Connectivity Error",
     description: "A dismissible card surfacing a network connection failure with a description and retry/details actions.",
     Demo: ConnectivityErrorDemo,
@@ -790,6 +839,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "response-compare",
     category: "compare",
+    job: "trust",
     title: "Response Compare",
     description: "A side-by-side pair of response panels with independent regenerate and a single preferred pick.",
     Demo: ResponseCompareDemo,
@@ -803,6 +853,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "confidence-indicator",
     category: "indicators",
+    job: "trust",
     title: "Confidence Indicator",
     description: "A badge or inline dot signaling how sure an AI answer or extraction is.",
     Demo: ConfidenceIndicatorDemo,
@@ -815,6 +866,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "ai-disclosure-badge",
     category: "indicators",
+    job: "trust",
     title: "AI Disclosure Badge",
     description:
       "An AI-generated label in chip, image-overlay and inline forms that opens a provenance card: model, time, and whether a person edited it.",
@@ -826,6 +878,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "cost-estimate",
     category: "indicators",
+    job: "oversee",
     title: "Cost Estimate",
     description:
       "A pre-run estimate of what a task will cost, with a live balance meter, a low-balance warning, a top-up when the balance can't cover it and a breakdown.",
@@ -837,6 +890,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "voice-waveform",
     category: "voice",
+    job: "ask",
     title: "Voice Waveform",
     description: "A live amplitude waveform while the AI listens or speaks.",
     Demo: VoiceWaveformDemo,
@@ -850,6 +904,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "voice-orb",
     category: "voice",
+    job: "oversee",
     title: "Voice Orb",
     description: "A 3D particle sphere that breathes and spins with the voice conversation.",
     Demo: VoiceOrbDemo,
@@ -862,6 +917,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "listening-state",
     category: "voice",
+    job: "ask",
     title: "Listening State",
     description: "A pulsing mic indicator showing the AI is actively listening.",
     Demo: ListeningStateDemo,
@@ -874,6 +930,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "live-transcript",
     category: "voice",
+    job: "ask",
     title: "Live Transcript",
     description: "A streaming, speaker-labeled transcription of a voice conversation.",
     Demo: LiveTranscriptDemo,
@@ -887,6 +944,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "command-palette",
     category: "navigation",
+    job: "ask",
     title: "Command Palette",
     description: "A searchable ⌘K overlay for jumping to sessions or running quick actions.",
     Demo: CommandPaletteDemo,
@@ -899,6 +957,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "collaborative-presence",
     category: "collaboration",
+    job: "oversee",
     title: "Collaborative Presence",
     description:
       "An avatar stack showing who has access to a shared record and who is actively viewing it right now.",
@@ -912,6 +971,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "invite-members",
     category: "access",
+    job: "start",
     title: "Invite Members",
     description:
       "A two-step modal for searching or emailing people to a record and assigning each a role, with a live current-members list.",
@@ -925,6 +985,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "analysis-list",
     category: "loaders",
+    job: "oversee",
     title: "Analysis List",
     description: "A full-width indeterminate progress bar over a list whose items resolve from skeletons one by one.",
     Demo: AnalysisListDemo,
@@ -937,6 +998,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "setup-checklist",
     category: "navigation",
+    job: "start",
     title: "Setup Checklist",
     description: "A stepped onboarding card with circular arc progress, dashed-circle pending states, and strikethrough for completed steps.",
     Demo: SetupChecklistDemo,
@@ -949,6 +1011,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "prompt-onboarding",
     category: "onboarding",
+    job: "start",
     title: "Prompt-Driven Onboarding",
     description:
       "A setup screen that hands users a pre-filled prompt to paste into their AI coding agent, with a snippet fallback and a live listener that confirms the first event.",
@@ -963,6 +1026,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "agent-setup-pill",
     category: "onboarding",
+    job: "start",
     title: "Agent Setup Pill",
     description:
       "A floating pill that copies a setup prompt for the user's AI coding agent in one click — outcome label, a row of supported agents, a tooltip that says what the click does, and a separate dismiss button.",
@@ -976,6 +1040,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "describe-filters",
     category: "tables",
+    job: "ask",
     title: "Describe Filters",
     description:
       "A Describe button in a table toolbar that turns a plain-language request into removable filter chips — column filters where a column exists, marked semantic matches where none does.",
@@ -989,6 +1054,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "ai-fill-drawer",
     category: "tables",
+    job: "ask",
     title: "AI Fill Drawer",
     description:
       "A record drawer of key/value fields where the model fills the empty values — each arrives as a sourced suggestion to accept, edit or reject.",
@@ -1002,6 +1068,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "natural-language-query",
     category: "tables",
+    job: "ask",
     title: "Natural Language Query",
     description:
       "A SQL-first query bar that also takes plain language — the mode badge flips to Ask, and Enter translates the request into a visible, editable WHERE clause before running it.",
@@ -1016,6 +1083,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "ai-review-panel",
     category: "review",
+    job: "trust",
     title: "AI Review Panel",
     description:
       "A side panel for checking extracted values one by one — each field shows its value, the model's reasoning and verbatim evidence that highlights in the source, with accept, dismiss and apply-all-pending.",
@@ -1028,6 +1096,10 @@ export const registry: RegistryEntry[] = [
 
 export function getRegistryEntry(category: string, slug: string) {
   return registry.find((entry) => entry.category === category && entry.slug === slug);
+}
+
+export function getEntriesByJob(job: PatternJob) {
+  return registry.filter((entry) => entry.job === job);
 }
 
 export function getCategories() {

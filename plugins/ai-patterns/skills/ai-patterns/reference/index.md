@@ -6,177 +6,183 @@ Shortlist candidates from this table, then open the linked spec file for any
 pattern before recommending or scaffolding it — this table only has the
 one-line description, not the Anatomy/Behavior/Accessibility contract.
 
+The **job** column is what a pattern does for the user, across categories —
+shortlist by it when the need is a goal rather than a UI element:
+`start` (first step), `ask` (get intent in), `steer` (shape how the AI
+works), `oversee` (follow, approve or stop work), `trust` (check results,
+disclose AI and data handling), `recover` (errors and limits).
+
 ### access
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `invite-members` | Invite Members | A two-step modal for searching or emailing people to a record and assigning each a role, with a live current-members list. | [access/invite-members.md](./access/invite-members.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `invite-members` | Invite Members | start | A two-step modal for searching or emailing people to a record and assigning each a role, with a live current-members list. | [access/invite-members.md](./access/invite-members.md) |
 
 ### agents
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `agent-run-card` | Agent Run Card | A compact run card with the agent's current step and a timer, a segmented progress bar, and a list of finished steps that stacks up as it reads, edits, tests and pushes. | [agents/agent-run-card.md](./agents/agent-run-card.md) |
-| `agent-triggers` | Agent Triggers | A configuration panel for listing and toggling the external events that activate an agent, with a manual run control. | [agents/agent-triggers.md](./agents/agent-triggers.md) |
-| `background-tasks` | Background Tasks Drawer | A side drawer that tracks an agent's background work live — running tasks with elapsed time, stats, and stop controls, plus an expandable history of finished commands and output. | [agents/background-tasks.md](./agents/background-tasks.md) |
-| `create-agent` | Create Agent | A two-step wizard card for naming an agent, picking its icon, and selecting which event sources activate it. | [agents/create-agent.md](./agents/create-agent.md) |
-| `human-in-the-loop` | Human in the Loop Question | A compact dialog that pauses an agent mid-task to collect a structured choice — radio options, a free-text fallback, skip/continue controls, and multi-step pagination. | [agents/human-in-the-loop.md](./agents/human-in-the-loop.md) |
-| `instruction-tools` | Instruction Tool Insert | A numbered instruction editor where typing / opens a two-step inline picker — choose a tool, then its connector or target — inserting an atomic, editable chip into the prose. | [agents/instruction-tools.md](./agents/instruction-tools.md) |
-| `procedure-builder` | Procedure Builder | A doc-style editor for an agent's step-by-step procedure — a / step picker, IF / ELSE branches with plain-language or code conditions, section jumps, and escalate / switch actions. | [agents/procedure-builder.md](./agents/procedure-builder.md) |
-| `task-list` | Task List | A live, agent-authored plan — an ordered list of steps marked pending, in progress, or completed as the agent works through them. | [agents/task-list.md](./agents/task-list.md) |
-| `wait-time-handoff` | Wait Time Handoff | A collapsible settings card for what an agent does when the customer goes quiet — a wait duration, a Team / Workflow handoff target, the handoff message, and a working-hours option. | [agents/wait-time-handoff.md](./agents/wait-time-handoff.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `agent-run-card` | Agent Run Card | oversee | A compact run card with the agent's current step and a timer, a segmented progress bar, and a list of finished steps that stacks up as it reads, edits, tests and pushes. | [agents/agent-run-card.md](./agents/agent-run-card.md) |
+| `agent-triggers` | Agent Triggers | steer | A configuration panel for listing and toggling the external events that activate an agent, with a manual run control. | [agents/agent-triggers.md](./agents/agent-triggers.md) |
+| `background-tasks` | Background Tasks Drawer | oversee | A side drawer that tracks an agent's background work live — running tasks with elapsed time, stats, and stop controls, plus an expandable history of finished commands and output. | [agents/background-tasks.md](./agents/background-tasks.md) |
+| `create-agent` | Create Agent | start | A two-step wizard card for naming an agent, picking its icon, and selecting which event sources activate it. | [agents/create-agent.md](./agents/create-agent.md) |
+| `human-in-the-loop` | Human in the Loop Question | oversee | A compact dialog that pauses an agent mid-task to collect a structured choice — radio options, a free-text fallback, skip/continue controls, and multi-step pagination. | [agents/human-in-the-loop.md](./agents/human-in-the-loop.md) |
+| `instruction-tools` | Instruction Tool Insert | ask | A numbered instruction editor where typing / opens a two-step inline picker — choose a tool, then its connector or target — inserting an atomic, editable chip into the prose. | [agents/instruction-tools.md](./agents/instruction-tools.md) |
+| `procedure-builder` | Procedure Builder | steer | A doc-style editor for an agent's step-by-step procedure — a / step picker, IF / ELSE branches with plain-language or code conditions, section jumps, and escalate / switch actions. | [agents/procedure-builder.md](./agents/procedure-builder.md) |
+| `task-list` | Task List | oversee | A live, agent-authored plan — an ordered list of steps marked pending, in progress, or completed as the agent works through them. | [agents/task-list.md](./agents/task-list.md) |
+| `wait-time-handoff` | Wait Time Handoff | oversee | A collapsible settings card for what an agent does when the customer goes quiet — a wait duration, a Team / Workflow handoff target, the handoff message, and a working-hours option. | [agents/wait-time-handoff.md](./agents/wait-time-handoff.md) |
 
 ### buttons
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `shiny-button` | Shiny Button | A button with an animated light sweep across its surface. | [buttons/shiny-button.md](./buttons/shiny-button.md) |
-| `stop-generation-button` | Stop Generation Button | A send button that morphs into a stop control mid-stream and back on completion. | [buttons/stop-generation-button.md](./buttons/stop-generation-button.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `shiny-button` | Shiny Button | start | A button with an animated light sweep across its surface. | [buttons/shiny-button.md](./buttons/shiny-button.md) |
+| `stop-generation-button` | Stop Generation Button | oversee | A send button that morphs into a stop control mid-stream and back on completion. | [buttons/stop-generation-button.md](./buttons/stop-generation-button.md) |
 
 ### code
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `code-preview` | Code Preview Block | A code block that flips between the source and a sandboxed live rendering of it. | [code/code-preview.md](./code/code-preview.md) |
-| `diff-summary` | Diff Summary Card | A collapsed summary of a batch of file edits, with undo and an overflow list. | [code/diff-summary.md](./code/diff-summary.md) |
-| `diff-tabs` | Diff Tabs | Per-file chips that switch an inline diff viewer between a batch of changed files. | [code/diff-tabs.md](./code/diff-tabs.md) |
-| `terminal-stream` | Terminal Stream | An auto-scrolling, collapsible panel streaming raw command output line by line. | [code/terminal-stream.md](./code/terminal-stream.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `code-preview` | Code Preview Block | trust | A code block that flips between the source and a sandboxed live rendering of it. | [code/code-preview.md](./code/code-preview.md) |
+| `diff-summary` | Diff Summary Card | trust | A collapsed summary of a batch of file edits, with undo and an overflow list. | [code/diff-summary.md](./code/diff-summary.md) |
+| `diff-tabs` | Diff Tabs | trust | Per-file chips that switch an inline diff viewer between a batch of changed files. | [code/diff-tabs.md](./code/diff-tabs.md) |
+| `terminal-stream` | Terminal Stream | oversee | An auto-scrolling, collapsible panel streaming raw command output line by line. | [code/terminal-stream.md](./code/terminal-stream.md) |
 
 ### collaboration
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `collaborative-presence` | Collaborative Presence | An avatar stack showing who has access to a shared record and who is actively viewing it right now. | [collaboration/collaborative-presence.md](./collaboration/collaborative-presence.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `collaborative-presence` | Collaborative Presence | oversee | An avatar stack showing who has access to a shared record and who is actively viewing it right now. | [collaboration/collaborative-presence.md](./collaboration/collaborative-presence.md) |
 
 ### compare
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `response-compare` | Response Compare | A side-by-side pair of response panels with independent regenerate and a single preferred pick. | [compare/response-compare.md](./compare/response-compare.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `response-compare` | Response Compare | trust | A side-by-side pair of response panels with independent regenerate and a single preferred pick. | [compare/response-compare.md](./compare/response-compare.md) |
 
 ### composer
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `incognito-toggle` | Incognito Toggle | A header control that starts a temporary chat, with a persistent banner stating exactly what won't be saved, remembered or used for training. | [composer/incognito-toggle.md](./composer/incognito-toggle.md) |
-| `message-queue` | Message Queue | A composer that keeps working mid-turn: ⌘Enter queues follow-ups above the input to send now, edit, or auto-send when the agent finishes. | [composer/message-queue.md](./composer/message-queue.md) |
-| `model-picker` | Model Picker | A composer chip that opens a list of models, each with a one-line description, plan-locked options that lead to an upgrade, and an extended-thinking switch. | [composer/model-picker.md](./composer/model-picker.md) |
-| `prompt-bar` | Prompt Bar | A composer with @ sources, / commands, a model picker, and dictation. | [composer/prompt-bar.md](./composer/prompt-bar.md) |
-| `prompt-bar-pro` | Prompt Bar Pro | A first-run composer with suggestion chips, @ sources, / commands, an environment picker, and an orchestrator picker. | [composer/prompt-bar-pro.md](./composer/prompt-bar-pro.md) |
-| `quick-chat-dock` | Quick Chat Dock | A hidden bottom-edge handle that wakes into an action dock on hover and summons a floating prompt bar. | [composer/quick-chat-dock.md](./composer/quick-chat-dock.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `incognito-toggle` | Incognito Toggle | trust | A header control that starts a temporary chat, with a persistent banner stating exactly what won't be saved, remembered or used for training. | [composer/incognito-toggle.md](./composer/incognito-toggle.md) |
+| `message-queue` | Message Queue | ask | A composer that keeps working mid-turn: ⌘Enter queues follow-ups above the input to send now, edit, or auto-send when the agent finishes. | [composer/message-queue.md](./composer/message-queue.md) |
+| `model-picker` | Model Picker | steer | A composer chip that opens a list of models, each with a one-line description, plan-locked options that lead to an upgrade, and an extended-thinking switch. | [composer/model-picker.md](./composer/model-picker.md) |
+| `prompt-bar` | Prompt Bar | ask | A composer with @ sources, / commands, a model picker, and dictation. | [composer/prompt-bar.md](./composer/prompt-bar.md) |
+| `prompt-bar-pro` | Prompt Bar Pro | ask | A first-run composer with suggestion chips, @ sources, / commands, an environment picker, and an orchestrator picker. | [composer/prompt-bar-pro.md](./composer/prompt-bar-pro.md) |
+| `quick-chat-dock` | Quick Chat Dock | ask | A hidden bottom-edge handle that wakes into an action dock on hover and summons a floating prompt bar. | [composer/quick-chat-dock.md](./composer/quick-chat-dock.md) |
 
 ### errors
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `connectivity-error` | Connectivity Error | A dismissible card surfacing a network connection failure with a description and retry/details actions. | [errors/connectivity-error.md](./errors/connectivity-error.md) |
-| `console-error-card` | Console Error Card | A structured card surfacing a browser console error with a code frame, call stack, and navigation. | [errors/console-error-card.md](./errors/console-error-card.md) |
-| `generation-error` | Generation Error | A console-style error card for a failed generation, with details and retry. | [errors/generation-error.md](./errors/generation-error.md) |
-| `partial-response` | Partial Response | A cut-short assistant reply with Continue and Retry actions. | [errors/partial-response.md](./errors/partial-response.md) |
-| `rate-limit` | Rate Limit | A quota-exceeded state with a live countdown to when the user can send again. | [errors/rate-limit.md](./errors/rate-limit.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `connectivity-error` | Connectivity Error | recover | A dismissible card surfacing a network connection failure with a description and retry/details actions. | [errors/connectivity-error.md](./errors/connectivity-error.md) |
+| `console-error-card` | Console Error Card | recover | A structured card surfacing a browser console error with a code frame, call stack, and navigation. | [errors/console-error-card.md](./errors/console-error-card.md) |
+| `generation-error` | Generation Error | recover | A console-style error card for a failed generation, with details and retry. | [errors/generation-error.md](./errors/generation-error.md) |
+| `partial-response` | Partial Response | recover | A cut-short assistant reply with Continue and Retry actions. | [errors/partial-response.md](./errors/partial-response.md) |
+| `rate-limit` | Rate Limit | recover | A quota-exceeded state with a live countdown to when the user can send again. | [errors/rate-limit.md](./errors/rate-limit.md) |
 
 ### flowcharts
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `trigger-condition` | Flowchart | Workflow trigger and condition steps on a dotted canvas. | [flowcharts/trigger-condition.md](./flowcharts/trigger-condition.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `trigger-condition` | Flowchart | steer | Workflow trigger and condition steps on a dotted canvas. | [flowcharts/trigger-condition.md](./flowcharts/trigger-condition.md) |
 
 ### indicators
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `ai-disclosure-badge` | AI Disclosure Badge | An AI-generated label in chip, image-overlay and inline forms that opens a provenance card: model, time, and whether a person edited it. | [indicators/ai-disclosure-badge.md](./indicators/ai-disclosure-badge.md) |
-| `confidence-indicator` | Confidence Indicator | A badge or inline dot signaling how sure an AI answer or extraction is. | [indicators/confidence-indicator.md](./indicators/confidence-indicator.md) |
-| `cost-estimate` | Cost Estimate | A pre-run estimate of what a task will cost, with a live balance meter, a low-balance warning, a top-up when the balance can't cover it and a breakdown. | [indicators/cost-estimate.md](./indicators/cost-estimate.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `ai-disclosure-badge` | AI Disclosure Badge | trust | An AI-generated label in chip, image-overlay and inline forms that opens a provenance card: model, time, and whether a person edited it. | [indicators/ai-disclosure-badge.md](./indicators/ai-disclosure-badge.md) |
+| `confidence-indicator` | Confidence Indicator | trust | A badge or inline dot signaling how sure an AI answer or extraction is. | [indicators/confidence-indicator.md](./indicators/confidence-indicator.md) |
+| `cost-estimate` | Cost Estimate | oversee | A pre-run estimate of what a task will cost, with a live balance meter, a low-balance warning, a top-up when the balance can't cover it and a breakdown. | [indicators/cost-estimate.md](./indicators/cost-estimate.md) |
 
 ### loaders
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `analysis-list` | Analysis List | A full-width indeterminate progress bar over a list whose items resolve from skeletons one by one. | [loaders/analysis-list.md](./loaders/analysis-list.md) |
-| `drawing-icon` | Drawing Icon | A line icon that draws itself stroke by stroke while the step it stands for is running. | [loaders/drawing-icon.md](./loaders/drawing-icon.md) |
-| `thinking-loader` | Thinking Loader | A loader with a shimmering label and a live elapsed-time counter. | [loaders/thinking-loader.md](./loaders/thinking-loader.md) |
-| `tool-call-chip` | Tool Call Chip | An inline pill naming an in-flight tool call that resolves into a result summary. | [loaders/tool-call-chip.md](./loaders/tool-call-chip.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `analysis-list` | Analysis List | oversee | A full-width indeterminate progress bar over a list whose items resolve from skeletons one by one. | [loaders/analysis-list.md](./loaders/analysis-list.md) |
+| `drawing-icon` | Drawing Icon | oversee | A line icon that draws itself stroke by stroke while the step it stands for is running. | [loaders/drawing-icon.md](./loaders/drawing-icon.md) |
+| `thinking-loader` | Thinking Loader | oversee | A loader with a shimmering label and a live elapsed-time counter. | [loaders/thinking-loader.md](./loaders/thinking-loader.md) |
+| `tool-call-chip` | Tool Call Chip | oversee | An inline pill naming an in-flight tool call that resolves into a result summary. | [loaders/tool-call-chip.md](./loaders/tool-call-chip.md) |
 
 ### media
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `image-peek` | Image Peek | A row of tiny image thumbnails that grows into an anchored preview card with a label, counter, and prev/next stepping. | [media/image-peek.md](./media/image-peek.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `image-peek` | Image Peek | trust | A row of tiny image thumbnails that grows into an anchored preview card with a label, counter, and prev/next stepping. | [media/image-peek.md](./media/image-peek.md) |
 
 ### messages
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `chat-bubble` | Chat Bubble with Actions | A message bubble with feedback thumbs, edit-and-resubmit, retry/regenerate, and a version stepper. | [messages/chat-bubble.md](./messages/chat-bubble.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `chat-bubble` | Chat Bubble with Actions | trust | A message bubble with feedback thumbs, edit-and-resubmit, retry/regenerate, and a version stepper. | [messages/chat-bubble.md](./messages/chat-bubble.md) |
 
 ### navigation
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `command-palette` | Command Palette | A searchable ⌘K overlay for jumping to sessions or running quick actions. | [navigation/command-palette.md](./navigation/command-palette.md) |
-| `setup-checklist` | Setup Checklist | A stepped onboarding card with circular arc progress, dashed-circle pending states, and strikethrough for completed steps. | [navigation/setup-checklist.md](./navigation/setup-checklist.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `command-palette` | Command Palette | ask | A searchable ⌘K overlay for jumping to sessions or running quick actions. | [navigation/command-palette.md](./navigation/command-palette.md) |
+| `setup-checklist` | Setup Checklist | start | A stepped onboarding card with circular arc progress, dashed-circle pending states, and strikethrough for completed steps. | [navigation/setup-checklist.md](./navigation/setup-checklist.md) |
 
 ### onboarding
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `agent-setup-pill` | Agent Setup Pill | A floating pill that copies a setup prompt for the user's AI coding agent in one click — outcome label, a row of supported agents, a tooltip that says what the click does, and a separate dismiss button. | [onboarding/agent-setup-pill.md](./onboarding/agent-setup-pill.md) |
-| `prompt-onboarding` | Prompt-Driven Onboarding | A setup screen that hands users a pre-filled prompt to paste into their AI coding agent, with a snippet fallback and a live listener that confirms the first event. | [onboarding/prompt-onboarding.md](./onboarding/prompt-onboarding.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `agent-setup-pill` | Agent Setup Pill | start | A floating pill that copies a setup prompt for the user's AI coding agent in one click — outcome label, a row of supported agents, a tooltip that says what the click does, and a separate dismiss button. | [onboarding/agent-setup-pill.md](./onboarding/agent-setup-pill.md) |
+| `prompt-onboarding` | Prompt-Driven Onboarding | start | A setup screen that hands users a pre-filled prompt to paste into their AI coding agent, with a snippet fallback and a live listener that confirms the first event. | [onboarding/prompt-onboarding.md](./onboarding/prompt-onboarding.md) |
 
 ### permissions
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `connector-panel` | Connector Panel | A settings panel for connecting an app or MCP server — shows capabilities overview, groups tools by type, and lets users set per-tool permission levels. | [permissions/connector-panel.md](./permissions/connector-panel.md) |
-| `memory-panel` | Memory Panel | A panel listing what the assistant remembers about the user — edit or forget each memory with undo, switch memory off, forget all — plus a memory-updated notice for the chat. | [permissions/memory-panel.md](./permissions/memory-panel.md) |
-| `tool-approval` | Tool Approval | A pending tool-call prompt with allow, always-allow, and deny actions. | [permissions/tool-approval.md](./permissions/tool-approval.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `connector-panel` | Connector Panel | steer | A settings panel for connecting an app or MCP server — shows capabilities overview, groups tools by type, and lets users set per-tool permission levels. | [permissions/connector-panel.md](./permissions/connector-panel.md) |
+| `memory-panel` | Memory Panel | trust | A panel listing what the assistant remembers about the user — edit or forget each memory with undo, switch memory off, forget all — plus a memory-updated notice for the chat. | [permissions/memory-panel.md](./permissions/memory-panel.md) |
+| `tool-approval` | Tool Approval | oversee | A pending tool-call prompt with allow, always-allow, and deny actions. | [permissions/tool-approval.md](./permissions/tool-approval.md) |
 
 ### review
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `ai-review-panel` | AI Review Panel | A side panel for checking extracted values one by one — each field shows its value, the model's reasoning and verbatim evidence that highlights in the source, with accept, dismiss and apply-all-pending. | [review/ai-review-panel.md](./review/ai-review-panel.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `ai-review-panel` | AI Review Panel | trust | A side panel for checking extracted values one by one — each field shows its value, the model's reasoning and verbatim evidence that highlights in the source, with accept, dismiss and apply-all-pending. | [review/ai-review-panel.md](./review/ai-review-panel.md) |
 
 ### tables
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `ai-fill-drawer` | AI Fill Drawer | A record drawer of key/value fields where the model fills the empty values — each arrives as a sourced suggestion to accept, edit or reject. | [tables/ai-fill-drawer.md](./tables/ai-fill-drawer.md) |
-| `describe-filters` | Describe Filters | A Describe button in a table toolbar that turns a plain-language request into removable filter chips — column filters where a column exists, marked semantic matches where none does. | [tables/describe-filters.md](./tables/describe-filters.md) |
-| `natural-language-query` | Natural Language Query | A SQL-first query bar that also takes plain language — the mode badge flips to Ask, and Enter translates the request into a visible, editable WHERE clause before running it. | [tables/natural-language-query.md](./tables/natural-language-query.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `ai-fill-drawer` | AI Fill Drawer | ask | A record drawer of key/value fields where the model fills the empty values — each arrives as a sourced suggestion to accept, edit or reject. | [tables/ai-fill-drawer.md](./tables/ai-fill-drawer.md) |
+| `describe-filters` | Describe Filters | ask | A Describe button in a table toolbar that turns a plain-language request into removable filter chips — column filters where a column exists, marked semantic matches where none does. | [tables/describe-filters.md](./tables/describe-filters.md) |
+| `natural-language-query` | Natural Language Query | ask | A SQL-first query bar that also takes plain language — the mode badge flips to Ask, and Enter translates the request into a visible, editable WHERE clause before running it. | [tables/natural-language-query.md](./tables/natural-language-query.md) |
 
 ### text
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `follow-up-list` | Follow-Up List | A vertical list of suggested next questions shown after a response, each sendable with a tap. | [text/follow-up-list.md](./text/follow-up-list.md) |
-| `inline-citation` | Inline Citation | A hoverable, clickable footnote-style source marker inline within text. | [text/inline-citation.md](./text/inline-citation.md) |
-| `refinement-controls` | Refinement Controls | One-tap adjustments (Rephrase, Shorten, More formal, Bulletize…) and a free-form instruction field docked under an AI output, with every result kept as a steppable version. | [text/refinement-controls.md](./text/refinement-controls.md) |
-| `selection-actions` | Selection Actions | A floating toolbar on text selection for describing edits, explaining, or improving a passage. | [text/selection-actions.md](./text/selection-actions.md) |
-| `source-trust-card` | Source Trust Card | A paginated single-source card with a trust badge and domain pills for jumping between sources. | [text/source-trust-card.md](./text/source-trust-card.md) |
-| `sources-stack` | Sources Stack | An overlapping stack of source favicons with a count, expanding into a linked source list. | [text/sources-stack.md](./text/sources-stack.md) |
-| `streaming-text` | Streaming Text | A streamed answer with inline sources, actions, and follow-ups. | [text/streaming-text.md](./text/streaming-text.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `follow-up-list` | Follow-Up List | start | A vertical list of suggested next questions shown after a response, each sendable with a tap. | [text/follow-up-list.md](./text/follow-up-list.md) |
+| `inline-citation` | Inline Citation | trust | A hoverable, clickable footnote-style source marker inline within text. | [text/inline-citation.md](./text/inline-citation.md) |
+| `refinement-controls` | Refinement Controls | steer | One-tap adjustments (Rephrase, Shorten, More formal, Bulletize…) and a free-form instruction field docked under an AI output, with every result kept as a steppable version. | [text/refinement-controls.md](./text/refinement-controls.md) |
+| `selection-actions` | Selection Actions | ask | A floating toolbar on text selection for describing edits, explaining, or improving a passage. | [text/selection-actions.md](./text/selection-actions.md) |
+| `source-trust-card` | Source Trust Card | trust | A paginated single-source card with a trust badge and domain pills for jumping between sources. | [text/source-trust-card.md](./text/source-trust-card.md) |
+| `sources-stack` | Sources Stack | trust | An overlapping stack of source favicons with a count, expanding into a linked source list. | [text/sources-stack.md](./text/sources-stack.md) |
+| `streaming-text` | Streaming Text | oversee | A streamed answer with inline sources, actions, and follow-ups. | [text/streaming-text.md](./text/streaming-text.md) |
 
 ### traces
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `expandable-trace` | Expandable Trace | A collapsible "Thought for Xs" summary that expands into a step-by-step trace. | [traces/expandable-trace.md](./traces/expandable-trace.md) |
-| `multi-agent-trace` | Multi-Agent Trace | A tree of parallel sub-agent tasks, each with its own status and step list. | [traces/multi-agent-trace.md](./traces/multi-agent-trace.md) |
-| `stream-of-thought` | Stream of Thought | A live, timed header over reasoning that streams in as a step timeline, then folds into a "Thought for Ns" trace when the answer starts. | [traces/stream-of-thought.md](./traces/stream-of-thought.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `expandable-trace` | Expandable Trace | oversee | A collapsible "Thought for Xs" summary that expands into a step-by-step trace. | [traces/expandable-trace.md](./traces/expandable-trace.md) |
+| `multi-agent-trace` | Multi-Agent Trace | oversee | A tree of parallel sub-agent tasks, each with its own status and step list. | [traces/multi-agent-trace.md](./traces/multi-agent-trace.md) |
+| `stream-of-thought` | Stream of Thought | oversee | A live, timed header over reasoning that streams in as a step timeline, then folds into a "Thought for Ns" trace when the answer starts. | [traces/stream-of-thought.md](./traces/stream-of-thought.md) |
 
 ### uploads
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `attachment-chip` | Attachment Chip | A composer's file/image attachment tray with drag-drop, upload progress, and inline preview. | [uploads/attachment-chip.md](./uploads/attachment-chip.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `attachment-chip` | Attachment Chip | ask | A composer's file/image attachment tray with drag-drop, upload progress, and inline preview. | [uploads/attachment-chip.md](./uploads/attachment-chip.md) |
 
 ### voice
 
-| slug | title | description | spec |
-| --- | --- | --- | --- |
-| `listening-state` | Listening State | A pulsing mic indicator showing the AI is actively listening. | [voice/listening-state.md](./voice/listening-state.md) |
-| `live-transcript` | Live Transcript | A streaming, speaker-labeled transcription of a voice conversation. | [voice/live-transcript.md](./voice/live-transcript.md) |
-| `voice-orb` | Voice Orb | A 3D particle sphere that breathes and spins with the voice conversation. | [voice/voice-orb.md](./voice/voice-orb.md) |
-| `voice-waveform` | Voice Waveform | A live amplitude waveform while the AI listens or speaks. | [voice/voice-waveform.md](./voice/voice-waveform.md) |
+| slug | title | job | description | spec |
+| --- | --- | --- | --- | --- |
+| `listening-state` | Listening State | ask | A pulsing mic indicator showing the AI is actively listening. | [voice/listening-state.md](./voice/listening-state.md) |
+| `live-transcript` | Live Transcript | ask | A streaming, speaker-labeled transcription of a voice conversation. | [voice/live-transcript.md](./voice/live-transcript.md) |
+| `voice-orb` | Voice Orb | oversee | A 3D particle sphere that breathes and spins with the voice conversation. | [voice/voice-orb.md](./voice/voice-orb.md) |
+| `voice-waveform` | Voice Waveform | ask | A live amplitude waveform while the AI listens or speaks. | [voice/voice-waveform.md](./voice/voice-waveform.md) |

@@ -29,6 +29,15 @@ Register the new entry in `src/registry/index.ts` (import the `Demo`,
 `Thumbnail` and `pattern`, add a `RegistryEntry`) — this is what makes it appear on
 `/patterns` and `/patterns/<category>/<slug>`.
 
+Every entry also needs a `job` — what the pattern does for the user,
+across categories: `start`, `ask`, `steer`, `oversee`, `trust` or
+`recover` (defined, with descriptions, in `src/registry/jobs.ts`). It
+drives the filter pills on `/patterns` (`?job=<id>`), the job chip on
+the pattern page, the "Patterns by job" section in `llms.txt` and
+`/patterns.md`, the JSON API and the MCP `list_patterns` `job` filter.
+Pick the user's goal, not the UI element: a cost meter is `oversee`, an
+error card is `recover`.
+
 After adding or changing a pattern, regenerate the design skill's
 reference docs:
 

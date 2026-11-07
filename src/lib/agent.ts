@@ -1,6 +1,7 @@
 import { TEAMS } from "@/lib/teams";
 import { MCP_JSON_CONFIG } from "@/lib/mcp-install";
 import { getCategories, getEntryHref, getRegistryEntry, registry, type RegistryEntry } from "@/registry";
+import { getJob, JOBS } from "@/registry/jobs";
 import { componentSources } from "@/registry/sources.generated";
 
 // Everything the site serves to agents instead of browsers — llms.txt,
@@ -60,6 +61,7 @@ export function summarize(entry: RegistryEntry) {
   return {
     slug: entry.slug,
     category: entry.category,
+    job: entry.job,
     title: entry.title,
     description: entry.description,
     url: patternUrl(entry),
@@ -78,6 +80,11 @@ export async function getPatternDetail(entry: RegistryEntry) {
     dependencies: getDependencies(code),
     localImports: getLocalImports(code),
   };
+}
+
+/** The job facet with each job's patterns, in JOBS order. */
+export function groupByJob() {
+  return JOBS.map((job) => ({ ...job, patterns: registry.filter((e) => e.job === job.id) }));
 }
 
 export function groupByCategory() {
@@ -123,12 +130,22 @@ const AGENT_ACCESS = `## For agents
 - [llms-full.txt](${abs("/llms-full.txt")}): every pattern's full spec in one file (code omitted).
 - Markdown: append \`.md\` to any page URL (e.g. \`/patterns.md\`, \`/patterns/buttons/shiny-button.md\`).
 - JSON API: [\`GET /api/patterns\`](${abs("/api/patterns")}) lists every pattern; \`GET /api/patterns/<category>/<slug>\` returns its spec, source code and npm dependencies.
-- MCP server (Streamable HTTP, no auth): \`${abs("/mcp")}\` with tools \`list_patterns\`, \`search_patterns\` and \`get_pattern\`.
+- MCP server (Streamable HTTP, no auth): \`${abs("/mcp")}\` with tools \`list_patterns\` (filter by category or job), \`search_patterns\` and \`get_pattern\`.
 - Claude Code skill — recommends and scaffolds patterns into a project:
 
 \`\`\`
 ${INSTALL_SKILL}
 \`\`\``;
+
+// Categories say what kind of UI a pattern is; jobs say what it does for the
+// user. Agents choosing by need ("make this trustworthy") should start here.
+const JOBS_SECTION = () => `## Patterns by job
+
+Every pattern also has one job — what it does for the user, across categories. Use it to shortlist by need.
+
+${groupByJob()
+  .map((j) => `- **${j.label}** (\`${j.id}\`, "${j.question}"): ${j.description} — ${j.patterns.map((e) => `\`${e.slug}\``).join(", ")}`)
+  .join("\n")}`;
 
 export function buildLlmsTxt() {
   const sections = groupByCategory()
@@ -145,6 +162,8 @@ export function buildLlmsTxt() {
 Each pattern is a portable UX contract. Read its spec before implementing it — the "When not to use" and "Accessibility" sections are the contract; the Tailwind/Radix/Motion code is one default expression of it and can be re-expressed in any design system. Every pattern link below is the Markdown version: spec followed by the full \`component.tsx\`.
 
 ${AGENT_ACCESS}
+
+${JOBS_SECTION()}
 
 ${sections}
 
@@ -187,6 +206,8 @@ Every pattern in the ${SITE_NAME} catalogue, grouped by category. Open a pattern
 
 HTML: ${abs("/patterns")}
 
+${JOBS_SECTION()}
+
 ${sections}
 `;
 }
@@ -199,6 +220,7 @@ export async function buildPatternMarkdown(entry: RegistryEntry) {
 
   const meta = [
     `- Category: ${entry.category}`,
+    `- Job: ${getJob(entry.job)?.label ?? entry.job} — ${getJob(entry.job)?.description ?? ""}`,
     `- Slug: \`${entry.slug}\``,
     `- HTML: ${patternUrl(entry)}`,
     `- JSON: ${patternJsonUrl(entry)}`,

@@ -1,4 +1,4 @@
-import { abs, groupByCategory, SITE_DESCRIPTION, SITE_NAME, summarize } from "@/lib/agent";
+import { abs, groupByCategory, groupByJob, SITE_DESCRIPTION, SITE_NAME, summarize } from "@/lib/agent";
 import { registry } from "@/registry";
 
 // JSON index of the catalogue, exported as /api/patterns/index.json and
@@ -14,6 +14,7 @@ export function GET() {
       description: SITE_DESCRIPTION,
       count: registry.length,
       categories: groupByCategory().map(({ category, patterns }) => ({ category, count: patterns.length })),
+      jobs: groupByJob().map(({ patterns, ...job }) => ({ ...job, count: patterns.length })),
       patterns: registry.map(summarize),
       links: { llms: abs("/llms.txt"), mcp: abs("/mcp") },
     },
