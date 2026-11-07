@@ -176,6 +176,9 @@ import { pattern as naturalLanguageQueryPattern } from "./tables/natural-languag
 import AiReviewPanelDemo from "./review/ai-review-panel/demo";
 import AiReviewPanelThumbnail from "./review/ai-review-panel/thumbnail";
 import { pattern as aiReviewPanelPattern } from "./review/ai-review-panel/pattern";
+import VoiceOrbDemo from "./voice/voice-orb/demo";
+import VoiceOrbThumbnail from "./voice/voice-orb/thumbnail";
+import { pattern as voiceOrbPattern } from "./voice/voice-orb/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -751,6 +754,18 @@ export const registry: RegistryEntry[] = [
     uxDoc: voiceWaveformPattern,
     seenIn: [
       { team: "gemini", source: "https://9to5google.com/2024/08/15/gemini-live-rolling-out/" },
+    ],
+  },
+  {
+    slug: "voice-orb",
+    category: "voice",
+    title: "Voice Orb",
+    description: "A 3D particle sphere that breathes and spins with the voice conversation.",
+    Demo: VoiceOrbDemo,
+    Thumbnail: VoiceOrbThumbnail,
+    uxDoc: voiceOrbPattern,
+    seenIn: [
+      { team: "elevenlabs", source: "https://ui.elevenlabs.io/docs/components/orb" },
     ],
   },
   {
