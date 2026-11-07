@@ -67,7 +67,7 @@ instead of copying these Tailwind classes or the Motion API.
 "use client";
 
 import * as React from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { Check } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -150,8 +150,6 @@ function TaskRow({ task }: { task: Task }) {
 }
 
 function StatusIcon({ status }: { status: TaskStatus }) {
-  const reduceMotion = useReducedMotion();
-
   if (status === "completed") {
     return (
       <span className="flex size-4 items-center justify-center rounded-full bg-muted-foreground" aria-hidden>
@@ -162,17 +160,18 @@ function StatusIcon({ status }: { status: TaskStatus }) {
 
   if (status === "in_progress") {
     return (
-      <motion.svg
+      // A CSS spin, not a Motion `animate`: inside `AnimatePresence initial={false}`
+      // Motion skips the first animation of every nested motion element, so a
+      // task that is already in progress on mount would never start spinning.
+      <svg
         viewBox="0 0 16 16"
-        className="size-4 text-foreground"
+        className="size-4 text-foreground motion-safe:animate-spin motion-safe:[animation-duration:0.9s]"
         fill="none"
         aria-hidden
-        animate={reduceMotion ? undefined : { rotate: 360 }}
-        transition={{ duration: 0.9, ease: "linear", repeat: Infinity }}
       >
         <circle cx="8" cy="8" r="6.25" stroke="currentColor" strokeOpacity={0.15} strokeWidth="1.5" />
         <path d="M8 1.75a6.25 6.25 0 0 1 6.25 6.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      </motion.svg>
+      </svg>
     );
   }
 
