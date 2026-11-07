@@ -13,6 +13,8 @@
 
 export type McpPattern = {
   category: string;
+  /** What the pattern does for the user, one of McpData.jobs[].id. */
+  job: string;
   slug: string;
   title: string;
   description: string;
@@ -26,6 +28,8 @@ export type McpPattern = {
 export type McpData = {
   description: string;
   categories: string[];
+  /** The cross-category "job" facet, in display order. */
+  jobs: { id: string; label: string; description: string }[];
   patterns: McpPattern[];
 };
 
@@ -54,11 +58,12 @@ const tools = (data: McpData) => [
   {
     name: "list_patterns",
     title: "List patterns",
-    description: "List every UI pattern in the catalogue (slug, title, one-line description), optionally filtered to one category.",
+    description: `List every UI pattern in the catalogue (slug, title, one-line description), optionally filtered to one category (the kind of UI) or one job (what it does for the user: ${data.jobs.map((j) => `${j.id} — ${j.description}`).join("; ")}).`,
     inputSchema: {
       type: "object",
       properties: {
         category: { type: "string", enum: data.categories, description: "Only list patterns in this category." },
+        job: { type: "string", enum: data.jobs.map((j) => j.id), description: "Only list patterns that do this job for the user." },
       },
     },
     annotations: { readOnlyHint: true, openWorldHint: false },
@@ -141,8 +146,20 @@ async function callTool(env: McpEnv, name: string, args: Record<string, unknown>
   switch (name) {
     case "list_patterns": {
       const category = typeof args.category === "string" ? args.category : undefined;
-      const groups = groupByCategory(data).filter((g) => !category || g.category === category);
-      if (groups.length === 0) return text(`Unknown category "${category}". Categories: ${data.categories.join(", ")}`, true);
+      const job = typeof args.job === "string" ? args.job : undefined;
+      if (job && !data.jobs.some((j) => j.id === job)) {
+        return text(`Unknown job "${job}". Jobs: ${data.jobs.map((j) => j.id).join(", ")}`, true);
+      }
+      const groups = groupByCategory(data)
+        .filter((g) => !category || g.category === category)
+        .map((g) => ({ ...g, patterns: g.patterns.filter((p) => !job || p.job === job) }))
+        .filter((g) => g.patterns.length > 0);
+      if (groups.length === 0) {
+        if (category && !data.categories.includes(category)) {
+          return text(`Unknown category "${category}". Categories: ${data.categories.join(", ")}`, true);
+        }
+        return text(`No patterns in category "${category}" do the job "${job}".`);
+      }
       return text(groups.map((g) => `## ${g.category}\n${g.patterns.map(line).join("\n")}`).join("\n\n"));
     }
     case "search_patterns": {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AnimatedOrigami } from "@/components/animated-origami";
@@ -9,6 +10,7 @@ import { SeenIn } from "@/components/seen-in";
 import { readComponentSource } from "@/lib/agent";
 import { PatternPager } from "@/components/pattern-pager";
 import { getAdjacentEntries, getEntryHref, getRegistryEntry, registry } from "@/registry";
+import { getJob } from "@/registry/jobs";
 
 export function generateStaticParams() {
   return registry.map(({ category, slug }) => ({ category, slug }));
@@ -54,6 +56,7 @@ export default async function PatternPage({
 
   const source = await readComponentSource(entry);
   const Demo = entry.Demo;
+  const job = getJob(entry.job);
   const { prev, next } = getAdjacentEntries(category, slug);
   const toLink = (e: typeof prev) => e && { href: getEntryHref(e), title: e.title, category: e.category };
 
@@ -81,7 +84,21 @@ export default async function PatternPage({
       <div className="mb-8 space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">{entry.title}</h1>
         <p className="text-muted-foreground">{entry.description}</p>
-        <SeenIn items={entry.seenIn} linked className="pt-2" />
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2">
+          {job && (
+            <Link
+              href={`/patterns?job=${job.id}`}
+              title={job.description}
+              className="inline-flex items-center gap-2.5 text-xs text-muted-foreground"
+            >
+              Job
+              <span className="rounded-full border bg-background px-2.5 py-0.5 font-medium text-foreground transition-colors hover:bg-accent">
+                {job.label}
+              </span>
+            </Link>
+          )}
+          <SeenIn items={entry.seenIn} linked />
+        </div>
       </div>
 
       <ComponentPreview
