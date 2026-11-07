@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 
 export function ComponentPreview({
   title,
+  category,
   preview,
   code,
   pattern,
@@ -23,6 +24,8 @@ export function ComponentPreview({
   next,
 }: {
   title: string;
+  /** The pattern's group, shown in the expanded view's breadcrumb. */
+  category?: { label: string; href: string };
   preview: ReactNode;
   code: ReactNode;
   /** The Guardrails tab content. */
@@ -100,6 +103,17 @@ export function ComponentPreview({
                   Patterns
                 </Link>
                 <BreadcrumbSlash />
+                {category && (
+                  <>
+                    <Link
+                      href={category.href}
+                      className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {category.label}
+                    </Link>
+                    <BreadcrumbSlash />
+                  </>
+                )}
                 <span aria-current="page" className="min-w-0 truncate font-medium">
                   {title}
                 </span>
