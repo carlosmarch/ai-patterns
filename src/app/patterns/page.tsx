@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+
+import { SITE_SHARE_IMAGE } from "@/lib/share";
 import { registry, type RegistryEntry } from "@/registry";
 import { PatternCard } from "@/components/pattern-card";
 
 export const metadata: Metadata = {
   title: "Patterns — AI Patterns",
   description: "Every pattern in the catalogue, grouped by category.",
+  openGraph: { siteName: "AI Patterns", title: "Patterns — AI Patterns", description: "Every pattern in the catalogue, grouped by category.", url: "/patterns", images: SITE_SHARE_IMAGE },
   alternates: { types: { "text/markdown": "/patterns.md", "text/plain": "/llms.txt" } },
 };
 

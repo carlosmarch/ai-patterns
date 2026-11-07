@@ -30,6 +30,13 @@ export async function generateMetadata({
       canonical: href,
       types: { "text/markdown": `${href}.md`, "application/json": `/api/patterns/${category}/${slug}` },
     },
+    openGraph: {
+      type: "article",
+      siteName: "AI Patterns",
+      title: entry.title,
+      description: entry.description,
+      url: href,
+    },
   };
 }
 

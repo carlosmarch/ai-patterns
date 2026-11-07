@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+
+import { SITE_SHARE_IMAGE } from "@/lib/share";
 import Link from "next/link";
 
 import { CodeBlock } from "@/components/code-block";
@@ -11,6 +13,7 @@ import { SkillExamples } from "./skill-examples";
 export const metadata: Metadata = {
   title: "Skill — AI Patterns",
   description: "Install the ai-patterns Claude Code skill to recommend and scaffold patterns in your project.",
+  openGraph: { siteName: "AI Patterns", title: "Skill — AI Patterns", description: "Install the ai-patterns Claude Code skill to recommend and scaffold patterns in your project.", url: "/skill", images: SITE_SHARE_IMAGE },
   alternates: { types: { "text/markdown": "/skill.md", "text/plain": "/llms.txt" } },
 };
 
