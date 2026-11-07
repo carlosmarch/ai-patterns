@@ -38,6 +38,7 @@ A conversational message bubble — user or assistant — with an inline action 
 ## Accessibility
 - Every action button needs a descriptive \`aria-label\` ("Good response", "Bad response", "Regenerate", "Retry", "Edit message", "Copy"); the stepper's names come from Conversation Branches since the icon alone carries no accessible name.
 - Thumbs up/down are toggle buttons — expose state with \`aria-pressed\`, not color alone.
+- A user/assistant pair shares one version, so only one of its two steppers announces version changes — the user bubble's by default — or screen readers hear every change twice.
 - The action row must be reachable by keyboard, not only \`:hover\` — use \`:focus-within\` on the bubble so Tab reveals it.
 - The edit textarea should receive focus automatically when edit mode opens, and focus should land somewhere sensible (the bubble, or the next actionable element) when it closes.
 

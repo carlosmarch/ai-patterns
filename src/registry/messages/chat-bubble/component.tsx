@@ -19,6 +19,12 @@ export interface ChatBubbleProps {
   /** Total number of versions (edits/regenerations) available for this message. */
   versionCount?: number;
   onVersionChange?: (index: number) => void;
+  /**
+   * Announce version changes to screen readers. A user/assistant pair shares
+   * one version, so only one stepper should announce it — the user bubble by
+   * default. Set it on the assistant bubble if only replies show a stepper.
+   */
+  announceVersion?: boolean;
   className?: string;
 }
 
@@ -31,6 +37,7 @@ export function ChatBubble({
   versionIndex,
   versionCount,
   onVersionChange,
+  announceVersion = role === "user",
   className,
 }: ChatBubbleProps) {
   const [editing, setEditing] = React.useState(false);
@@ -157,7 +164,12 @@ export function ChatBubble({
           )}
 
           {hasVersions && (
-            <VersionNav index={versionIndex} count={versionCount} onChange={onVersionChange} />
+            <VersionNav
+              index={versionIndex}
+              count={versionCount}
+              onChange={onVersionChange}
+              announce={announceVersion}
+            />
           )}
         </div>
       )}
@@ -169,10 +181,12 @@ function VersionNav({
   index,
   count,
   onChange,
+  announce,
 }: {
   index: number;
   count: number;
   onChange: (index: number) => void;
+  announce: boolean;
 }) {
   return (
     // Same switcher as Conversation Branches: a labeled nav, and a counter
@@ -183,7 +197,7 @@ function VersionNav({
       </IconButton>
       <span
         className="min-w-8 text-center text-xs tabular-nums text-muted-foreground"
-        aria-live="polite"
+        aria-live={announce ? "polite" : "off"}
         aria-atomic="true"
       >
         <span className="sr-only">Version </span>

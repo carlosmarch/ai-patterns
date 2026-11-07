@@ -42,6 +42,7 @@ A conversational message bubble — user or assistant — with an inline action 
 ## Accessibility
 - Every action button needs a descriptive `aria-label` ("Good response", "Bad response", "Regenerate", "Retry", "Edit message", "Copy"); the stepper's names come from Conversation Branches since the icon alone carries no accessible name.
 - Thumbs up/down are toggle buttons — expose state with `aria-pressed`, not color alone.
+- A user/assistant pair shares one version, so only one of its two steppers announces version changes — the user bubble's by default — or screen readers hear every change twice.
 - The action row must be reachable by keyboard, not only `:hover` — use `:focus-within` on the bubble so Tab reveals it.
 - The edit textarea should receive focus automatically when edit mode opens, and focus should land somewhere sensible (the bubble, or the next actionable element) when it closes.
 
@@ -83,6 +84,12 @@ export interface ChatBubbleProps {
   /** Total number of versions (edits/regenerations) available for this message. */
   versionCount?: number;
   onVersionChange?: (index: number) => void;
+  /**
+   * Announce version changes to screen readers. A user/assistant pair shares
+   * one version, so only one stepper should announce it — the user bubble by
+   * default. Set it on the assistant bubble if only replies show a stepper.
+   */
+  announceVersion?: boolean;
   className?: string;
 }
 
@@ -95,6 +102,7 @@ export function ChatBubble({
   versionIndex,
   versionCount,
   onVersionChange,
+  announceVersion = role === "user",
   className,
 }: ChatBubbleProps) {
   const [editing, setEditing] = React.useState(false);
@@ -221,7 +229,12 @@ export function ChatBubble({
           )}
 
           {hasVersions && (
-            <VersionNav index={versionIndex} count={versionCount} onChange={onVersionChange} />
+            <VersionNav
+              index={versionIndex}
+              count={versionCount}
+              onChange={onVersionChange}
+              announce={announceVersion}
+            />
           )}
         </div>
       )}
@@ -233,10 +246,12 @@ function VersionNav({
   index,
   count,
   onChange,
+  announce,
 }: {
   index: number;
   count: number;
   onChange: (index: number) => void;
+  announce: boolean;
 }) {
   return (
     // Same switcher as Conversation Branches: a labeled nav, and a counter
@@ -247,7 +262,7 @@ function VersionNav({
       </IconButton>
       <span
         className="min-w-8 text-center text-xs tabular-nums text-muted-foreground"
-        aria-live="polite"
+        aria-live={announce ? "polite" : "off"}
         aria-atomic="true"
       >
         <span className="sr-only">Version </span>
