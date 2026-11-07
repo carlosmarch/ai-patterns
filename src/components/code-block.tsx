@@ -26,6 +26,7 @@ export async function CodeBlock({
     <div className="relative">
       <CopyButton text={code} className="absolute right-3 top-3" trackAs={trackAs} />
       <div
+        data-code-scroll
         className={cn(
           "max-h-[520px] overflow-auto rounded-lg border text-sm [&_pre]:p-4",
           wrap && "[&_code]:whitespace-pre-wrap [&_code]:break-words"

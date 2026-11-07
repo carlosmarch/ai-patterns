@@ -30,6 +30,7 @@ export function ComponentPreview({
   const pathname = usePathname();
   const { expanded, setExpanded } = usePatternExpand();
   const [tab, setTab] = useState("preview");
+  const [panelTab, setPanelTab] = useState(pattern ? "pattern" : "code");
 
   function handleTabChange(value: string) {
     setTab(value);
@@ -97,16 +98,28 @@ export function ComponentPreview({
             </Button>
           </div>
         )}
-        <TabsContent
-          value="preview"
-          forceMount
-          className={cn(
-            "flex items-center justify-center bg-muted/30 p-10 data-[state=inactive]:hidden",
-            isExpanded ? "min-h-0 flex-1 overflow-auto" : "min-h-[280px] rounded-lg border"
+        {/* Body: the preview, plus a side panel with the guardrails or code when expanded. */}
+        <div className={cn(isExpanded ? "flex min-h-0 flex-1" : "contents")}>
+          <TabsContent
+            value="preview"
+            forceMount
+            className={cn(
+              "flex items-center justify-center bg-muted/30 p-10 data-[state=inactive]:hidden",
+              isExpanded ? "min-h-0 min-w-0 flex-1 overflow-auto" : "min-h-[280px] rounded-lg border"
+            )}
+          >
+            {preview}
+          </TabsContent>
+          {isExpanded && (
+            <ExpandedSidePanel
+              title={title}
+              code={code}
+              pattern={pattern}
+              value={panelTab}
+              onValueChange={setPanelTab}
+            />
           )}
-        >
-          {preview}
-        </TabsContent>
+        </div>
       </div>
 
       <TabsContent value="code" forceMount className="data-[state=inactive]:hidden">
@@ -117,6 +130,53 @@ export function ComponentPreview({
           {pattern}
         </TabsContent>
       )}
+    </Tabs>
+  );
+}
+
+/**
+ * Side panel of the expanded view: shows the pattern's guardrails next to the
+ * live preview, with a switcher in its header to swap in the code instead.
+ */
+function ExpandedSidePanel({
+  title,
+  code,
+  pattern,
+  value,
+  onValueChange,
+}: {
+  title: string;
+  code: ReactNode;
+  pattern?: ReactNode;
+  value: string;
+  onValueChange: (value: string) => void;
+}) {
+  return (
+    <Tabs
+      value={value}
+      onValueChange={onValueChange}
+      asChild
+      className="hidden w-[440px] shrink-0 gap-0 border-l bg-background lg:flex xl:w-[540px]"
+    >
+      <aside aria-label={`${title} details`}>
+        <div className="flex h-12 shrink-0 items-center border-b px-4">
+          <TabsList>
+            {pattern && <TabsTrigger value="pattern">Guardrails</TabsTrigger>}
+            <TabsTrigger value="code">Code</TabsTrigger>
+          </TabsList>
+        </div>
+        {/* The panel scrolls as a whole, so lift the code blocks' own height cap. */}
+        <div className="min-h-0 flex-1 overflow-auto p-4 [&_[data-code-scroll]]:max-h-none">
+          {pattern && (
+            <TabsContent value="pattern" forceMount className="data-[state=inactive]:hidden">
+              {pattern}
+            </TabsContent>
+          )}
+          <TabsContent value="code" forceMount className="data-[state=inactive]:hidden">
+            {code}
+          </TabsContent>
+        </div>
+      </aside>
     </Tabs>
   );
 }
