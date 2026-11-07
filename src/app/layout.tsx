@@ -49,6 +49,14 @@ export const metadata: Metadata = {
   alternates: {
     types: { "text/markdown": "/index.md", "text/plain": "/llms.txt" },
   },
+  openGraph: {
+    type: "website",
+    siteName: "AI Patterns",
+    title: "AI Patterns",
+    description: "Production components for AI agent UIs — each with a UX spec the harness can read.",
+    url: "/",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

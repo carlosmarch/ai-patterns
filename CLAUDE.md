@@ -90,7 +90,14 @@ Cloudflare build settings: build `npm run build`, deploy
 - **Keep the Worker tiny.** It only runs for `/mcp`, `/api/patterns` and
   404s; don't import the registry, React or Next into it.
 - Highlight code on the server with `src/lib/highlight.ts`. Favicons are
-  static PNGs (`src/app/icon.png`, `apple-icon.png`).
+  static files (`src/app/icon.svg`, `icon.png`, `favicon.ico`,
+  `apple-icon.png`).
+- Share images are `opengraph-image.tsx` routes (site root and each
+  pattern) drawn by `src/lib/og.tsx` at build time; each pattern's card
+  reuses its `thumbnail.tsx`. They export without a file extension, so
+  `scripts/finalize-export.mjs` adds `image/png` rules to `out/_headers`.
+  Pages that set their own `openGraph` must pass `images:
+  SITE_SHARE_IMAGE` (`src/lib/share.ts`) or they lose the image.
 
 ## About the block in AGENTS.md
 

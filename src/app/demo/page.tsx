@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+
+import { SITE_SHARE_IMAGE } from "@/lib/share";
 import { Suspense } from "react";
 
 import { PatternDemo } from "./pattern-demo";
@@ -6,6 +8,7 @@ import { PatternDemo } from "./pattern-demo";
 export const metadata: Metadata = {
   title: "Demo — ai-patterns",
   description: "Every pattern wired up together in one live AI chat interface.",
+  openGraph: { siteName: "AI Patterns", title: "Demo — AI Patterns", description: "Every pattern wired up together in one live AI chat interface.", url: "/demo", images: SITE_SHARE_IMAGE },
 };
 
 export default function DemoPage() {
