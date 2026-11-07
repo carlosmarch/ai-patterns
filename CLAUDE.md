@@ -79,6 +79,15 @@ meet it — that was "Error 1102: Worker exceeded resource limits").
 Cloudflare build settings: build `npm run build`, deploy
 `npx wrangler deploy`.
 
+- **PR previews.** Workers Builds runs `npx wrangler preview` for every
+  non-`main` branch (needs the `previews` block in `wrangler.jsonc`). The
+  preview URL is the branch name with `/` replaced by `-`, then
+  `-ai-patterns.carlosmarchinfo.workers.dev` — e.g. branch
+  `claude/happy-mendel-uo4z5p` →
+  `https://claude-happy-mendel-uo4z5p-ai-patterns.carlosmarchinfo.workers.dev/`.
+  When asked for a PR build, share this URL (a pattern lives at
+  `/patterns/<category>/<slug>`). It only works once the "Workers Builds:
+  ai-patterns" check on the PR has passed.
 - **Everything must be static.** No request-time data: no
   `cookies()`/`headers()`, no dynamic route handlers, no middleware,
   rewrites or `next.config` headers. Every route handler and metadata file
