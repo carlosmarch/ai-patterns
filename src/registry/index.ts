@@ -3,6 +3,22 @@ import type { ComponentType } from "react";
 import type { SeenIn } from "@/lib/teams";
 import type { PatternJob } from "./jobs";
 
+import PromptEnhancerDemo from "./composer/prompt-enhancer/demo";
+import PromptEnhancerThumbnail from "./composer/prompt-enhancer/thumbnail";
+import { pattern as promptEnhancerPattern } from "./composer/prompt-enhancer/pattern";
+import PromptTemplateDemo from "./composer/prompt-template/demo";
+import PromptTemplateThumbnail from "./composer/prompt-template/thumbnail";
+import { pattern as promptTemplatePattern } from "./composer/prompt-template/pattern";
+import ClarifyingQuestionsDemo from "./messages/clarifying-questions/demo";
+import ClarifyingQuestionsThumbnail from "./messages/clarifying-questions/thumbnail";
+import { pattern as clarifyingQuestionsPattern } from "./messages/clarifying-questions/pattern";
+import ConversationBranchesDemo from "./messages/conversation-branches/demo";
+import ConversationBranchesThumbnail from "./messages/conversation-branches/thumbnail";
+import { pattern as conversationBranchesPattern } from "./messages/conversation-branches/pattern";
+import PlanReviewDemo from "./agents/plan-review/demo";
+import PlanReviewThumbnail from "./agents/plan-review/thumbnail";
+import { pattern as planReviewPattern } from "./agents/plan-review/pattern";
+
 import AgentTriggersDemo from "./agents/agent-triggers/demo";
 import AgentTriggersThumbnail from "./agents/agent-triggers/thumbnail";
 import { pattern as agentTriggersPattern } from "./agents/agent-triggers/pattern";
@@ -343,6 +359,18 @@ export const registry: RegistryEntry[] = [
     ],
   },
   {
+    slug: "plan-review",
+    category: "agents",
+    job: "oversee",
+    title: "Plan Review",
+    description:
+      "An editable plan shown before an agent runs — reword, reorder, remove or add steps, or ask for a new plan — that locks once approved.",
+    Demo: PlanReviewDemo,
+    Thumbnail: PlanReviewThumbnail,
+    uxDoc: planReviewPattern,
+    seenIn: [],
+  },
+  {
     slug: "multi-agent-trace",
     category: "traces",
     job: "oversee",
@@ -514,6 +542,30 @@ export const registry: RegistryEntry[] = [
     ],
   },
   {
+    slug: "prompt-enhancer",
+    category: "composer",
+    job: "steer",
+    title: "Prompt Enhancer",
+    description:
+      "An Enhance button that rewrites a short prompt into a specific one in place, highlighting what it added, with one-click undo.",
+    Demo: PromptEnhancerDemo,
+    Thumbnail: PromptEnhancerThumbnail,
+    uxDoc: promptEnhancerPattern,
+    seenIn: [],
+  },
+  {
+    slug: "prompt-template",
+    category: "composer",
+    job: "start",
+    title: "Prompt Template",
+    description:
+      "A prompt written as a sentence with inline blanks — free-text slots that grow as you type and choice slots — that runs once the blanks are filled.",
+    Demo: PromptTemplateDemo,
+    Thumbnail: PromptTemplateThumbnail,
+    uxDoc: promptTemplatePattern,
+    seenIn: [],
+  },
+  {
     slug: "diff-summary",
     category: "code",
     job: "trust",
@@ -580,6 +632,32 @@ export const registry: RegistryEntry[] = [
       { team: "chatgpt", source: "https://community.openai.com/t/chatgpt-bug-introduced-in-response-selector-of-regenerations-and-edits-edit-button-goes-missing/1145664" },
       { team: "claude", source: "https://www.guideflow.com/tutorial/how-to-retry-a-response-in-a-chat-in-claudeai" },
     ],
+  },
+  {
+    slug: "clarifying-questions",
+    category: "messages",
+    job: "start",
+    title: "Clarifying Questions",
+    description:
+      "A short card of questions before an ambiguous task, each pre-filled with the assistant's suggested answer, that collapses into a summary once started.",
+    Demo: ClarifyingQuestionsDemo,
+    Thumbnail: ClarifyingQuestionsThumbnail,
+    uxDoc: clarifyingQuestionsPattern,
+    seenIn: [
+      { team: "chatgpt", source: "https://openai.com/index/introducing-deep-research/" },
+    ],
+  },
+  {
+    slug: "conversation-branches",
+    category: "messages",
+    job: "steer",
+    title: "Conversation Branches",
+    description:
+      "Editing a sent message creates a new branch instead of overwriting it, with a ‹ 2 / 3 › switcher that swaps the message and its reply together.",
+    Demo: ConversationBranchesDemo,
+    Thumbnail: ConversationBranchesThumbnail,
+    uxDoc: conversationBranchesPattern,
+    seenIn: [],
   },
   {
     slug: "tool-approval",
