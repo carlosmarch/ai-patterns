@@ -1,0 +1,11 @@
+# Cloudflare Workers static-assets headers (https://developers.cloudflare.com/workers/static-assets/headers/).
+
+/*
+  Link: </llms.txt>; rel="describedby"; type="text/plain", </mcp>; rel="service"; title="MCP server"
+
+/api/*
+  Content-Type: application/json; charset=utf-8
+  Access-Control-Allow-Origin: *
+
+/workspace/source/*
+  Content-Type: application/json; charset=utf-8

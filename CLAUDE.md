@@ -42,46 +42,55 @@ and the plugin entry in `.claude-plugin/marketplace.json`.
 ## Agent-facing endpoints
 
 `src/lib/agent.ts` builds everything the site serves to agents —
-`/llms.txt`, `/llms-full.txt`, the Markdown twins of pages (`src/app/md/`,
-reached via `.md` URLs or `Accept: text/markdown` rewrites in
-`next.config.ts`), the JSON API (`src/app/api/patterns/`) and the MCP
-server (`src/app/mcp/route.ts`). All read from the registry, so a new
-pattern shows up in them automatically; add a new top-level page to the
-`md` route, the rewrites and `sitemap.ts` if agents should see it.
+`/llms.txt`, `/llms-full.txt`, the Markdown twins of pages (exported by
+`src/app/md/[...path]/route.ts`, then moved to `<page>.md` by
+`scripts/finalize-export.mjs`), the JSON API (`src/app/api/patterns/`) and
+the data for the MCP server (`src/app/api/mcp-data.json/`). All read from
+the registry, so a new pattern shows up in them automatically; add a new
+top-level page to the `md` route and `sitemap.ts` if agents should see it.
+
+The MCP server itself (`src/lib/mcp.ts`) runs in the Cloudflare Worker
+(`worker/index.ts`), not in Next.js, so it must not import the registry or
+React — it works from `/api/mcp-data.json` and the exported `.md` files.
 
 ## Commands
 
-- `npm run dev` — start the site at localhost:3000
+- `npm run dev` — start the site at localhost:3000 (`/mcp` isn't served
+  here; use `npm run preview`)
 - `npm run lint` — ESLint
-- `npm run build` — production build (Next.js only)
-- `npm run preview` — build for Cloudflare and run it locally in workerd
+- `npm run build` — static export to `out/` (runs `sources:build` before
+  and `scripts/finalize-export.mjs` after)
+- `npm run preview` — build, then serve `out/` + the Worker locally with
+  `wrangler dev`
 - `npm run deploy` — build and deploy to Cloudflare Workers
 - `npm run sources:build` — regenerate `src/registry/sources.generated.ts`
-  (every `component.tsx` as a string). Runs automatically before `dev` and
-  `build`.
+  (every `component.tsx` as a string)
 - `npm run skill:build` — regenerate `plugins/ai-patterns/skills/ai-patterns/reference/` from `src/registry/`
 
 There is no test suite/script in this repo yet.
 
 ## Deploying (Cloudflare Workers)
 
-The site runs on Cloudflare Workers through OpenNext (`open-next.config.ts`,
-`wrangler.jsonc`). Keep these constraints in mind:
+The site is a fully static export (`output: "export"` in `next.config.ts`)
+served as Workers static assets (`wrangler.jsonc`). Static files are
+served without running any Worker code, which is what keeps it inside the
+Workers free plan's 10 ms CPU limit per request (a Next.js server can't
+meet it — that was "Error 1102: Worker exceeded resource limits").
+Cloudflare build settings: build `npm run build`, deploy
+`npx wrangler deploy`.
 
-- **Serve prerendered pages.** Pages come from a read-only cache of the
-  HTML prerendered at build time; rendering on request blows the free
-  plan's 10 ms CPU limit (Error 1102). The cache is copied into the assets
-  by `opennextjs-cloudflare deploy`, so the Cloudflare build must run
-  `npx opennextjs-cloudflare build` and deploy with
-  `npx opennextjs-cloudflare deploy` — never a bare `wrangler deploy`.
-  Keep new pages statically prerendered (no request-time data).
-- **No filesystem.** Never `fs.readFile` project files at request time —
-  import them, or bundle them like `sources.generated.ts`.
-- **Bundle size under 3 MiB gzipped**, or deploys fail and the old version
-  keeps serving. Highlight on the server with `src/lib/highlight.ts`
-  (`shiki/core`, JS regex engine); `"shiki"` itself is aliased to a stub
-  on the server (`next.config.ts`). Favicons are static PNGs, not
-  `ImageResponse` routes (which bundle ~600 KB of WASM).
+- **Everything must be static.** No request-time data: no
+  `cookies()`/`headers()`, no dynamic route handlers, no middleware,
+  rewrites or `next.config` headers. Every route handler and metadata file
+  needs `export const dynamic = "force-static"`; dynamic segments need
+  `generateStaticParams`. Response headers go in `public/_headers`.
+- **No exported path may be both a file and a directory** (e.g. a route
+  at `/a` and another at `/a/b`) — the export fails with `EISDIR`. Give
+  leaf routes a file name, as the `md` and `api/patterns/index.json` routes do.
+- **Keep the Worker tiny.** It only runs for `/mcp`, `/api/patterns` and
+  404s; don't import the registry, React or Next into it.
+- Highlight code on the server with `src/lib/highlight.ts`. Favicons are
+  static PNGs (`src/app/icon.png`, `apple-icon.png`).
 
 ## About the block in AGENTS.md
 

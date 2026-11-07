@@ -43,7 +43,6 @@ The site is agent-ready: everything a browser sees is also available as Markdown
 | [`/llms.txt`](https://ai-patterns.app/llms.txt) | [llms.txt](https://llmstxt.org) index — every pattern with a link to its Markdown page |
 | [`/llms-full.txt`](https://ai-patterns.app/llms-full.txt) | Every pattern's full UX spec in one file |
 | `/<page>.md` | Markdown version of a page — `/index.md`, `/patterns.md`, `/skill.md`, `/patterns/<category>/<slug>.md` (spec + `component.tsx` + npm deps) |
-| `Accept: text/markdown` | The same Markdown, served from the normal page URLs |
 | [`/api/patterns`](https://ai-patterns.app/api/patterns) | JSON index; `/api/patterns/<category>/<slug>` adds `spec`, `code`, `dependencies` |
 | `/mcp` | Stateless MCP server (Streamable HTTP, no auth) with `list_patterns`, `search_patterns`, `get_pattern` |
 | `/robots.txt`, `/sitemap.xml` | Crawlers and AI agents welcome |
@@ -122,6 +121,7 @@ Or without naming the skill: "add a thinking state while the agent runs", "desig
 - [Motion](https://motion.dev) for animation
 - [Radix UI](https://www.radix-ui.com) primitives
 - [Shiki](https://shiki.style) for syntax-highlighted code panels
+- [Cloudflare Workers](https://developers.cloudflare.com/workers/) static assets for hosting
 
 ## Running locally
 
@@ -131,6 +131,16 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+`npm run dev` doesn't serve `/mcp`; run `npm run preview` to build the static site and serve it with the Worker locally (`wrangler dev`).
+
+## Deploying
+
+The site is a static export (`output: "export"`) hosted on [Cloudflare Workers](https://developers.cloudflare.com/workers/static-assets/) as static assets, so pages cost no Worker CPU. A small Worker (`worker/index.ts`) only handles `/mcp`, the `/api/patterns` index and 404s.
+
+- Cloudflare build command: `npm run build` (exports to `out/`)
+- Cloudflare deploy command: `npx wrangler deploy`
+- From your machine: `npx wrangler login`, then `npm run deploy`
 
 ---
 
