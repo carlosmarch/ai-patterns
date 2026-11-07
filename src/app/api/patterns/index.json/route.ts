@@ -1,8 +1,9 @@
 import { abs, groupByCategory, SITE_DESCRIPTION, SITE_NAME, summarize } from "@/lib/agent";
 import { registry } from "@/registry";
 
-// JSON index of the catalogue. Each pattern links to its detail endpoint,
-// which carries the spec and source code.
+// JSON index of the catalogue, exported as /api/patterns/index.json and
+// served at /api/patterns by the Worker (worker/index.ts). Each pattern
+// links to its detail endpoint, which carries the spec and source code.
 
 export const dynamic = "force-static";
 

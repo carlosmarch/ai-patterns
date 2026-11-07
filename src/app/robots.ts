@@ -2,12 +2,13 @@ import type { MetadataRoute } from "next";
 
 import { abs } from "@/lib/agent";
 
-// Everyone — search engines and AI agents alike — is welcome. /md/ only
-// holds the targets of the `.md` rewrites, so crawlers should use those URLs.
+// Everyone — search engines and AI agents alike — is welcome.
+
+export const dynamic = "force-static";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/md/", "/sections"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/sections"] },
     sitemap: abs("/sitemap.xml"),
   };
 }

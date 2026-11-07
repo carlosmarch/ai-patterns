@@ -6,6 +6,8 @@ import { getRegistryEntry, registry } from "@/registry";
 // pattern's source and spec from here — highlighted at build time, the
 // same way the pattern pages do it, so no highlighter ships to the browser.
 
+export const dynamic = "force-static";
+
 export function generateStaticParams() {
   return registry.map(({ category, slug }) => ({ category, slug }));
 }

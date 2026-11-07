@@ -43,7 +43,6 @@ The site is agent-ready: everything a browser sees is also available as Markdown
 | [`/llms.txt`](https://ai-patterns.app/llms.txt) | [llms.txt](https://llmstxt.org) index — every pattern with a link to its Markdown page |
 | [`/llms-full.txt`](https://ai-patterns.app/llms-full.txt) | Every pattern's full UX spec in one file |
 | `/<page>.md` | Markdown version of a page — `/index.md`, `/patterns.md`, `/skill.md`, `/patterns/<category>/<slug>.md` (spec + `component.tsx` + npm deps) |
-| `Accept: text/markdown` | The same Markdown, served from the normal page URLs |
 | [`/api/patterns`](https://ai-patterns.app/api/patterns) | JSON index; `/api/patterns/<category>/<slug>` adds `spec`, `code`, `dependencies` |
 | `/mcp` | Stateless MCP server (Streamable HTTP, no auth) with `list_patterns`, `search_patterns`, `get_pattern` |
 | `/robots.txt`, `/sitemap.xml` | Crawlers and AI agents welcome |

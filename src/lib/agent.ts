@@ -21,7 +21,7 @@ export const patternUrl = (e: PatternRef) => abs(getEntryHref(e));
 export const patternMarkdownUrl = (e: PatternRef) => `${patternUrl(e)}.md`;
 export const patternJsonUrl = (e: PatternRef) => abs(`/api/patterns/${e.category}/${e.slug}`);
 
-export const MARKDOWN_HEADERS = { "Content-Type": "text/markdown; charset=utf-8", Vary: "Accept" };
+export const MARKDOWN_HEADERS = { "Content-Type": "text/markdown; charset=utf-8" };
 export const TEXT_HEADERS = { "Content-Type": "text/plain; charset=utf-8" };
 
 export function markdownResponse(body: string) {
@@ -120,7 +120,7 @@ const AGENT_ACCESS = `## For agents
 
 - [llms.txt](${abs("/llms.txt")}): this index.
 - [llms-full.txt](${abs("/llms-full.txt")}): every pattern's full spec in one file (code omitted).
-- Markdown: append \`.md\` to any page URL (e.g. \`/patterns.md\`, \`/patterns/buttons/shiny-button.md\`), or request any page with \`Accept: text/markdown\`.
+- Markdown: append \`.md\` to any page URL (e.g. \`/patterns.md\`, \`/patterns/buttons/shiny-button.md\`).
 - JSON API: [\`GET /api/patterns\`](${abs("/api/patterns")}) lists every pattern; \`GET /api/patterns/<category>/<slug>\` returns its spec, source code and npm dependencies.
 - MCP server (Streamable HTTP, no auth): \`${abs("/mcp")}\` with tools \`list_patterns\`, \`search_patterns\` and \`get_pattern\`.
 - Claude Code skill — recommends and scaffolds patterns into a project:
