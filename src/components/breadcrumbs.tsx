@@ -15,15 +15,15 @@ export interface Crumb {
 export function Breadcrumbs({ items, className }: { items: Crumb[]; className?: string }) {
   return (
     <nav aria-label="Breadcrumb" className={className}>
-      <ol className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+      <ol className="flex min-w-0 items-center gap-1.5 text-sm whitespace-nowrap text-muted-foreground">
         {items.map(({ label, href, icon }, i) => (
           <Fragment key={`${label}-${i}`}>
             {i > 0 && (
-              <li role="presentation" aria-hidden="true">
+              <li role="presentation" aria-hidden="true" className="shrink-0">
                 <ChevronRight className="size-3.5" />
               </li>
             )}
-            <li className={cn(!href && "font-medium text-foreground")}>
+            <li className={cn(href ? "shrink-0" : "min-w-0 truncate font-medium text-foreground")}>
               {href ? (
                 <Link
                   href={href}
