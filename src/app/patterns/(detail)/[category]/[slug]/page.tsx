@@ -61,6 +61,11 @@ export default async function PatternPage({
     <CodeBlock code={entry.uxDoc} lang="markdown" wrap trackAs="spec" download={`${entry.slug}.pattern.md`} />
   );
 
+  const categoryCrumb = {
+    label: entry.category.charAt(0).toUpperCase() + entry.category.slice(1),
+    href: `/patterns#${entry.category}`,
+  };
+
   return (
     <main className="mx-auto w-full max-w-3xl py-16">
       <Breadcrumbs
@@ -68,7 +73,7 @@ export default async function PatternPage({
         items={[
           { label: "AI Patterns home", href: "/", icon: <AnimatedOrigami className="size-4" /> },
           { label: "Patterns", href: "/patterns" },
-          { label: entry.category.charAt(0).toUpperCase() + entry.category.slice(1), href: `/patterns#${entry.category}` },
+          categoryCrumb,
           { label: entry.title },
         ]}
       />
@@ -81,6 +86,7 @@ export default async function PatternPage({
 
       <ComponentPreview
         title={entry.title}
+        category={categoryCrumb}
         prev={toLink(prev)}
         next={toLink(next)}
         preview={<Demo />}
