@@ -374,7 +374,7 @@ export const registry: RegistryEntry[] = [
     slug: "stream-of-thought",
     category: "traces",
     title: "Stream of Thought",
-    description: "Reasoning streams inline in a fading window, then folds into a \"Thought for Ns\" toggle when the answer starts.",
+    description: "A live, timed header over reasoning that streams in as a step timeline, then folds into a \"Thought for Ns\" trace when the answer starts.",
     Demo: StreamOfThoughtDemo,
     Thumbnail: StreamOfThoughtThumbnail,
     uxDoc: streamOfThoughtPattern,

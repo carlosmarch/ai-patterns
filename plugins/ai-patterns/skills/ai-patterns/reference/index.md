@@ -159,7 +159,7 @@ one-line description, not the Anatomy/Behavior/Accessibility contract.
 | --- | --- | --- | --- |
 | `expandable-trace` | Expandable Trace | A collapsible "Thought for Xs" summary that expands into a step-by-step trace. | [traces/expandable-trace.md](./traces/expandable-trace.md) |
 | `multi-agent-trace` | Multi-Agent Trace | A tree of parallel sub-agent tasks, each with its own status and step list. | [traces/multi-agent-trace.md](./traces/multi-agent-trace.md) |
-| `stream-of-thought` | Stream of Thought | Reasoning streams inline in a fading window, then folds into a "Thought for Ns" toggle when the answer starts. | [traces/stream-of-thought.md](./traces/stream-of-thought.md) |
+| `stream-of-thought` | Stream of Thought | A live, timed header over reasoning that streams in as a step timeline, then folds into a "Thought for Ns" trace when the answer starts. | [traces/stream-of-thought.md](./traces/stream-of-thought.md) |
 
 ### uploads
 

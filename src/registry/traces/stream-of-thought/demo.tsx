@@ -6,14 +6,14 @@ import { AnimatePresence, motion } from "motion/react";
 
 import { StreamOfThought, type Thought } from "./component";
 
-const script: Required<Thought>[] = [
+const script: Thought[] = [
   {
     title: "Reading the question",
     body: "They want a loading state for a reasoning model that shows what it's actually thinking, not just a spinner. The answer should stay the focus once it arrives.",
   },
   {
     title: "Weighing the options",
-    body: "A step checklist works for tool calls, but reasoning is prose — it doesn't break into neat, checkable steps. Streaming the text itself feels more honest.",
+    body: "A spinner hides the work, and a raw transcript is too much. Streaming the reasoning as a few named steps keeps it honest and still easy to skim.",
   },
   {
     title: "Keeping it out of the way",
@@ -35,7 +35,6 @@ export default function StreamOfThoughtDemo() {
   const [run, setRun] = React.useState(0);
   const [thoughts, setThoughts] = React.useState<Thought[]>([]);
   const [thinking, setThinking] = React.useState(true);
-  const [seconds, setSeconds] = React.useState(0);
 
   function replay() {
     setThoughts([]);
@@ -44,7 +43,6 @@ export default function StreamOfThoughtDemo() {
   }
 
   React.useEffect(() => {
-    const start = Date.now();
     const words = script.map((t) => t.body.split(" "));
     let index = 0;
     let count = 0;
@@ -55,7 +53,6 @@ export default function StreamOfThoughtDemo() {
         if (index === script.length - 1) {
           window.clearInterval(id);
           setThoughts(script);
-          setSeconds(Math.max(1, Math.round((Date.now() - start) / 1000)));
           setThinking(false);
           return;
         }
@@ -74,7 +71,7 @@ export default function StreamOfThoughtDemo() {
   return (
     <div className="w-full max-w-md space-y-4">
       <div className="space-y-3 rounded-xl border bg-card p-4">
-        <StreamOfThought key={run} thoughts={thoughts} thinking={thinking} durationSeconds={seconds} />
+        <StreamOfThought key={run} thoughts={thoughts} thinking={thinking} />
         <AnimatePresence>
           {!thinking && (
             <motion.p

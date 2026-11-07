@@ -5,49 +5,52 @@
 # Stream of Thought
 
 ## Summary
-The model's reasoning streams inline, as prose, in a short fading window above where the answer will appear. A shimmering "Thinking" header sits on top. When the answer starts, the reasoning collapses into a one-line "Thought for Ns" toggle that anyone can reopen to read the whole thing.
+The model's reasoning streams inline as a timeline of short steps, each a headline and a few lines of prose, under a live header. The header shows the title of the current step sliding into place and a ticking timer, like Thinking Loader. When the answer starts, the timeline collapses into a "Thought for Ns" toggle that expands into the full trace, like Expandable Trace. One component covers the wait, the live reasoning and the record afterwards.
 
 ## When to use
-- Reasoning models that think for several seconds or more before they answer. Watching the thoughts arrive makes the wait feel shorter and shows that work is happening.
-- When the reasoning is prose that the model produces live (or a live summary of it), not a list of discrete tool calls.
-- When people may want to check how the model reached a conclusion, but most people only want the answer.
+- Reasoning models that think for several seconds or more before answering. Watching the thoughts arrive makes the wait feel shorter and shows that work is happening.
+- When the reasoning arrives live as prose (or a live summary of it) that falls into a few named beats.
+- When people may want to check how the model reached its conclusion, but most only want the answer.
 
 ## When not to use
-- For an ordered list of actions with a clear done state per step, such as search, read or edit. Use Expandable Trace or Task List.
-- When there is nothing real to stream. Don't invent placeholder "thoughts" to fill a wait; use Thinking Loader.
+- When there is nothing real to stream. Don't invent placeholder thoughts to fill a wait; use Thinking Loader.
+- When the steps are discrete tool actions with results (search, read, edit) and no prose. Expandable Trace or Task List say that more plainly.
 - When the raw reasoning may contain content you can't show users (policy text, system prompt details). Stream a summary, or don't show it at all.
 
 ## Anatomy
-- Header toggle: the label ("Thinking" with a shimmer while live, "Thought for Ns" when done) and a small chevron. The whole header is the toggle.
-- Reasoning body: indented behind a thin vertical rule so it reads as secondary to the answer.
-- Thought blocks: an optional short headline in a stronger weight, then muted body text. While streaming, only the latest block is still growing.
-- Live window: while thinking, the body is capped to a few lines, with a fade at the top edge so older text dissolves upward instead of being cut off.
-- The answer, below and outside the component, in full-contrast text.
+- **Header toggle:** an icon, a label and a chevron; the whole row is the toggle.
+  - While thinking: a brain icon, the current step's title shimmering and sliding in from below, and an elapsed-seconds counter on the right whose digits roll as they change.
+  - When done: a sparkle icon and "Thought for Ns". The counter is gone.
+- **Timeline:** one step per thought, joined by a thin vertical line. Each step has a mark, a short headline and muted body text.
+- **Step mark:** a pulsing dot on the step that is still streaming; a check on finished steps.
+- **Live window:** while thinking, the timeline is capped to a few lines, with a fade at the top edge so older steps dissolve upward instead of being cut off.
+- **The answer:** below and outside the component, in full-contrast text.
 
 ## Behavior
-- Open by default while thinking. New text appends at the bottom and the window stays scrolled to the newest line.
-- If the person scrolls up inside the live window, stop auto-scrolling until they return to the bottom.
-- When thinking ends, freeze the duration, swap the label to "Thought for Ns", and collapse the body with a short height animation. The answer then fades in below.
-- Once expanded after completion, the body shows all the reasoning with no height cap and no fade.
+- Open by default while thinking. New text appends at the bottom and the window stays scrolled to the newest line. If the person scrolls up inside it, stop auto-scrolling until they return to the bottom.
+- When a new step starts, its title replaces the header label, and the previous step's dot turns into a check.
+- The timer counts whole seconds from when thinking started. It freezes when thinking ends, and that number becomes "Thought for Ns". Pass the server's duration instead when you have it.
+- When thinking ends, the last dot turns into a check and the timeline collapses with a short height animation. The answer then fades in below.
+- After completion, the expanded timeline shows every step in full, with no height cap and no fade.
 - If the person toggles the header at any point, keep their choice. Don't auto-collapse something they just opened, or reopen something they closed.
-- Text appears in small chunks (words or tokens), not letter by letter at a fixed speed, so the rhythm follows the model.
-- With reduced motion, drop the shimmer and the height animation; the text still streams.
+- Text appears in small chunks (words or tokens), following the model's rhythm, not letter by letter at a fixed speed.
+- With reduced motion, drop the shimmer and the height animation; the text still streams and the labels still change.
 
 ## Content guidelines
-- Headlines are short gerund phrases ("Weighing the options"), at most about five words.
+- Step titles are short gerund phrases ("Weighing the options"), at most about five words. They double as the live header label, so they must fit on one line.
 - Body text can be first person and informal. It's thinking, not the answer, and should read that way.
-- Label the finished state with the real elapsed time ("Thought for 9s"). Round to whole seconds, and use minutes past 60s ("Thought for 2m").
+- Use the real elapsed time ("Thought for 9s"). Round to whole seconds, and switch to minutes past 60s ("Thought for 2m").
 - The answer must not depend on the reasoning: it repeats any conclusion it needs, so nobody has to expand the trace to understand it.
 
 ## Accessibility
-- The header is a real `button` with `aria-expanded` and `aria-controls` pointing at the body.
-- Put the label in a `role="status"` region so screen readers hear "Thinking" and then "Thought for Ns". Don't make the streaming body a live region; announcing every token is unusable.
-- Mark the body `aria-busy="true"` while it streams. Make the live window focusable so keyboard users can scroll it.
-- The shimmer is decorative. The label must be readable as plain text at sufficient contrast without it.
+- The header is a real `button` with `aria-expanded` and `aria-controls` pointing at the timeline.
+- Announce state through a visually hidden `role="status"` ("Thinking", then "Thought for N seconds"). Hide the sliding label and the ticking timer from assistive tech, and don't make the streaming body a live region: announcing every token or second is unusable.
+- Mark the timeline `aria-busy="true"` while it streams, and make the live window focusable so keyboard users can scroll it.
+- Use an ordered list for the steps. Shimmer and pulse are decorative; labels must read at sufficient contrast without them.
 
 ## Related patterns
-- Thinking Loader is the minimal version, with a cycling label and no reasoning text.
-- Expandable Trace is the step-by-step version for discrete actions.
+- Thinking Loader is the label-only version: the same live header, with no reasoning text.
+- Expandable Trace is the completed-only version: the same "Thought for Ns" toggle and step timeline, without the live stream.
 - Streaming Text covers how the answer itself streams in below.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
@@ -65,23 +68,23 @@ instead of copying these Tailwind classes or the Motion API.
 
 import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ChevronRight } from "lucide-react";
+import { Brain, Check, ChevronDown, Sparkles } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 export interface Thought {
   /** A short headline for this beat of reasoning, e.g. "Comparing the two options". */
-  title?: string;
+  title: string;
   /** The reasoning text itself. Pass the partial string while it streams. */
   body: string;
 }
 
 export interface StreamOfThoughtProps {
-  /** Thoughts streamed so far. The last one may still be growing. */
+  /** Thoughts streamed so far. The last one is still growing while `thinking` is true. */
   thoughts: Thought[];
   /** True while the model is still reasoning. */
   thinking: boolean;
-  /** Shown in the header once thinking finishes ("Thought for 12s"). */
+  /** Overrides the measured duration shown once thinking finishes ("Thought for 12s"). */
   durationSeconds?: number;
   /** Max height of the live window while streaming, in px. */
   liveHeight?: number;
@@ -92,11 +95,14 @@ export function StreamOfThought({
   thoughts,
   thinking,
   durationSeconds,
-  liveHeight = 132,
+  liveHeight = 148,
   className,
 }: StreamOfThoughtProps) {
   const reduceMotion = useReducedMotion();
   const bodyId = React.useId();
+  const elapsed = useElapsedSeconds(thinking);
+  const seconds = durationSeconds ?? elapsed;
+
   // `null` = follow the default (open while thinking, closed when done).
   // Once the person toggles, their choice wins.
   const [userOpen, setUserOpen] = React.useState<boolean | null>(null);
@@ -119,11 +125,7 @@ export function StreamOfThought({
     pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 8;
   }
 
-  const label = thinking
-    ? "Thinking"
-    : durationSeconds != null
-      ? `Thought for ${durationSeconds}s`
-      : "Thought";
+  const current = thoughts.at(-1)?.title ?? "Thinking";
 
   return (
     <div className={cn("text-sm", className)}>
@@ -132,15 +134,34 @@ export function StreamOfThought({
         onClick={() => setUserOpen(!open)}
         aria-expanded={open}
         aria-controls={bodyId}
-        className="group inline-flex items-center gap-1 rounded-md py-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex w-full items-center gap-2 rounded-md py-1 text-left text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <span role="status">
-          {thinking && !reduceMotion ? <Shimmer>{label}</Shimmer> : label}
+        {thinking ? (
+          <Brain className="size-3.5 shrink-0" aria-hidden />
+        ) : (
+          <Sparkles className="size-3.5 shrink-0" aria-hidden />
+        )}
+        {/* Announces "Thinking" once, then "Thought for Ns" — never the stream itself. */}
+        <span className="sr-only" role="status">
+          {thinking ? "Thinking" : `Thought for ${seconds} seconds`}
         </span>
-        <ChevronRight
-          aria-hidden
-          className={cn("size-3.5 transition-transform duration-200", open && "rotate-90")}
-        />
+        <span aria-hidden className="min-w-0 truncate">
+          {thinking ? (
+            <SlidingLabel label={current} shimmer={!reduceMotion} />
+          ) : (
+            <span className="text-foreground">Thought for {seconds}s</span>
+          )}
+        </span>
+        <span aria-hidden className="ml-auto flex shrink-0 items-center gap-2">
+          {thinking && (
+            <span className="flex font-mono tabular-nums">
+              <SlidingNumber value={String(seconds)} />s
+            </span>
+          )}
+          <ChevronDown
+            className={cn("size-3.5 transition-transform duration-200", open && "rotate-180")}
+          />
+        </span>
       </button>
 
       <AnimatePresence initial={false}>
@@ -157,37 +178,48 @@ export function StreamOfThought({
               ref={scrollRef}
               onScroll={onScroll}
               aria-busy={thinking}
-              tabIndex={thinking ? 0 : undefined}
               aria-label="Reasoning"
+              tabIndex={thinking ? 0 : undefined}
               className={cn(
-                "mt-1 ml-1.5 border-l pl-4 focus-visible:outline-none",
+                "mt-2 focus-visible:outline-none",
                 thinking && "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               )}
               style={
                 thinking
                   ? {
                       maxHeight: liveHeight,
-                      maskImage: "linear-gradient(to bottom, transparent, black 32px)",
-                      WebkitMaskImage: "linear-gradient(to bottom, transparent, black 32px)",
+                      maskImage: "linear-gradient(to bottom, transparent, black 28px)",
+                      WebkitMaskImage: "linear-gradient(to bottom, transparent, black 28px)",
                     }
                   : undefined
               }
             >
-              <div className="space-y-3 py-1">
-                {thoughts.map((thought, i) => (
-                  <motion.div
-                    key={i}
-                    initial={reduceMotion ? false : { opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {thought.title && (
-                      <p className="font-medium text-foreground/90">{thought.title}</p>
-                    )}
-                    <p className="leading-relaxed text-muted-foreground">{thought.body}</p>
-                  </motion.div>
-                ))}
-              </div>
+              <ol>
+                {thoughts.map((thought, i) => {
+                  const last = i === thoughts.length - 1;
+                  const live = thinking && last;
+                  return (
+                    <motion.li
+                      key={i}
+                      initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex gap-3"
+                    >
+                      <div className="flex flex-col items-center pt-0.5">
+                        <StepMark live={live} />
+                        {!last && <span className="my-1 w-px flex-1 bg-border" />}
+                      </div>
+                      <div className={cn("min-w-0", !last && "pb-3")}>
+                        <p className="text-xs font-medium text-foreground/90">{thought.title}</p>
+                        <p className="text-xs leading-relaxed text-muted-foreground">
+                          {thought.body}
+                        </p>
+                      </div>
+                    </motion.li>
+                  );
+                })}
+              </ol>
             </div>
           </motion.div>
         )}
@@ -196,21 +228,103 @@ export function StreamOfThought({
   );
 }
 
-function Shimmer({ children }: { children: React.ReactNode }) {
+/** A pulsing dot while the step streams; a check once it's done. */
+function StepMark({ live }: { live: boolean }) {
   return (
-    <motion.span
-      className="inline-block bg-clip-text text-transparent"
-      style={{
-        backgroundImage:
-          "linear-gradient(90deg, var(--muted-foreground) 30%, var(--foreground) 50%, var(--muted-foreground) 70%)",
-        backgroundSize: "200% 100%",
-      }}
-      initial={{ backgroundPositionX: "150%" }}
-      animate={{ backgroundPositionX: "-50%" }}
-      transition={{ repeat: Infinity, duration: 1.4, ease: "linear", repeatDelay: 0.6 }}
-    >
-      {children}
-    </motion.span>
+    <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-muted">
+      <AnimatePresence mode="wait" initial={false}>
+        {live ? (
+          <motion.span
+            key="live"
+            className="size-1.5 rounded-full bg-muted-foreground"
+            animate={{ opacity: [0.35, 1, 0.35] }}
+            transition={{ repeat: Infinity, duration: 1.2 }}
+          />
+        ) : (
+          <motion.span
+            key="done"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.15 }}
+          >
+            <Check className="size-2.5 text-muted-foreground" />
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </span>
+  );
+}
+
+/** Counts whole seconds while `running`, and freezes when it stops. */
+function useElapsedSeconds(running: boolean) {
+  const [elapsed, setElapsed] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!running) return;
+    const start = Date.now();
+    const id = window.setInterval(() => {
+      setElapsed(Math.floor((Date.now() - start) / 1000));
+    }, 250);
+    return () => window.clearInterval(id);
+  }, [running]);
+
+  return elapsed;
+}
+
+/** The current thought's title slides in from below and shimmers. */
+function SlidingLabel({ label, shimmer }: { label: string; shimmer: boolean }) {
+  return (
+    <span className="relative inline-flex h-[1.4em] items-center overflow-hidden">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={label}
+          className={cn("inline-block whitespace-nowrap", shimmer && "bg-clip-text text-transparent")}
+          style={
+            shimmer
+              ? {
+                  backgroundImage:
+                    "linear-gradient(90deg, var(--muted-foreground) 30%, var(--foreground) 50%, var(--muted-foreground) 70%)",
+                  backgroundSize: "200% 100%",
+                }
+              : undefined
+          }
+          initial={{ y: 10, opacity: 0, backgroundPositionX: "150%" }}
+          animate={{ y: 0, opacity: 1, backgroundPositionX: "-50%" }}
+          exit={{ y: -10, opacity: 0 }}
+          transition={{
+            y: { duration: 0.15, ease: "easeOut" },
+            opacity: { duration: 0.15, ease: "easeOut" },
+            backgroundPositionX: { repeat: Infinity, duration: 1.4, ease: "linear", repeatDelay: 0.6 },
+          }}
+        >
+          {label}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
+/** Each digit slides up and out when it changes. */
+function SlidingNumber({ value }: { value: string }) {
+  return (
+    <span className="inline-flex">
+      {value.split("").map((char, i) => (
+        <span key={i} className="relative inline-block h-[1.2em] w-[0.62em] overflow-hidden">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={`${i}-${char}`}
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -10, opacity: 0 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="absolute inset-0 flex items-center justify-center"
+            >
+              {char}
+            </motion.span>
+          </AnimatePresence>
+        </span>
+      ))}
+    </span>
   );
 }
 ```
