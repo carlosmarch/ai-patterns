@@ -60,6 +60,10 @@ pattern shows up in them automatically; add a new top-level page to the
   project filesystem, so never `fs.readFile` project files at request time —
   import them, or bundle them like this. Highlight code with
   `src/lib/highlight.ts` (JS regex engine), not `codeToHtml` from `"shiki"`.
+  The Worker must stay under Cloudflare's 3 MiB (gzipped) limit, or deploys
+  fail and the old version keeps serving: on the server, `"shiki"` is
+  aliased to a stub (`next.config.ts`), and favicons are static PNGs, not
+  `ImageResponse` routes (which bundle ~600 KB of WASM).
 - `npm run skill:build` — regenerate `plugins/ai-patterns/skills/ai-patterns/reference/` from `src/registry/`
 
 There is no test suite/script in this repo yet.

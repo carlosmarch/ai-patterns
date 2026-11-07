@@ -4,6 +4,13 @@ import type { NextConfig } from "next";
 const acceptsMarkdown = [{ type: "header" as const, key: "accept", value: "(.*)text/markdown(.*)" }];
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    resolveAlias: {
+      // Keep the full Shiki bundle out of the server (see the stub).
+      shiki: { browser: "shiki", default: "./src/lib/shiki-server-stub.ts" },
+    },
+  },
+
   async rewrites() {
     // Markdown twins of the pages live at /md/** (see src/app/md). Reach
     // them by appending `.md` to a page URL, or with `Accept: text/markdown`.
