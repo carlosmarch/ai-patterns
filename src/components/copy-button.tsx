@@ -5,6 +5,7 @@ import { Check, Copy } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { trackCodeCopied, type CodeCopiedType } from "@/lib/analytics";
 
@@ -19,6 +20,7 @@ export function CopyButton({
   trackAs?: CodeCopiedType;
 }) {
   const [copied, setCopied] = React.useState(false);
+  const [hovered, setHovered] = React.useState(false);
   const pathname = usePathname();
 
   async function handleCopy() {
@@ -34,16 +36,22 @@ export function CopyButton({
     }
   }
 
+  // Stays open after a click so "Copied" can be read.
   return (
-    <Button
-      type="button"
-      size="icon"
-      variant="secondary"
-      className={cn("size-7", className)}
-      onClick={handleCopy}
-      aria-label="Copy code"
-    >
-      {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-    </Button>
+    <Tooltip open={hovered || copied} onOpenChange={setHovered}>
+      <TooltipTrigger asChild>
+        <Button
+          type="button"
+          size="icon"
+          variant="secondary"
+          className={cn("size-7", className)}
+          onClick={handleCopy}
+          aria-label="Copy code"
+        >
+          {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{copied ? "Copied" : "Copy"}</TooltipContent>
+    </Tooltip>
   );
 }

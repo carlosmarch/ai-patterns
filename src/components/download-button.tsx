@@ -4,6 +4,7 @@ import { Download } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { trackSpecDownloaded } from "@/lib/analytics";
 
@@ -44,17 +45,21 @@ export function DownloadButton({
 
   if (iconOnly) {
     return (
-      <Button
-        type="button"
-        size="icon"
-        variant="secondary"
-        onClick={handleDownload}
-        aria-label={`Download ${filename}`}
-        title={`Download ${filename}`}
-        className={cn("size-7", className)}
-      >
-        <Download className="size-3.5" />
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            type="button"
+            size="icon"
+            variant="secondary"
+            onClick={handleDownload}
+            aria-label={`Download ${filename}`}
+            className={cn("size-7", className)}
+          >
+            <Download className="size-3.5" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Download {filename}</TooltipContent>
+      </Tooltip>
     );
   }
 
