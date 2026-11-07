@@ -121,6 +121,7 @@ Or without naming the skill: "add a thinking state while the agent runs", "desig
 - [Motion](https://motion.dev) for animation
 - [Radix UI](https://www.radix-ui.com) primitives
 - [Shiki](https://shiki.style) for syntax-highlighted code panels
+- [Cloudflare Workers](https://developers.cloudflare.com/workers/) static assets for hosting
 
 ## Running locally
 
@@ -130,6 +131,16 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+`npm run dev` doesn't serve `/mcp`; run `npm run preview` to build the static site and serve it with the Worker locally (`wrangler dev`).
+
+## Deploying
+
+The site is a static export (`output: "export"`) hosted on [Cloudflare Workers](https://developers.cloudflare.com/workers/static-assets/) as static assets, so pages cost no Worker CPU. A small Worker (`worker/index.ts`) only handles `/mcp`, the `/api/patterns` index and 404s.
+
+- Cloudflare build command: `npm run build` (exports to `out/`)
+- Cloudflare deploy command: `npx wrangler deploy`
+- From your machine: `npx wrangler login`, then `npm run deploy`
 
 ---
 
