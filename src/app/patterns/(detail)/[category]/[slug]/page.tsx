@@ -61,7 +61,8 @@ export default async function PatternPage({
       <Breadcrumbs
         className="mb-6"
         items={[
-          { label: "Patterns", href: "/patterns", icon: <AnimatedOrigami className="size-4" /> },
+          { label: "AI Patterns home", href: "/", icon: <AnimatedOrigami className="size-4" /> },
+          { label: "Patterns", href: "/patterns" },
           { label: entry.category.charAt(0).toUpperCase() + entry.category.slice(1), href: `/patterns#${entry.category}` },
           { label: entry.title },
         ]}
