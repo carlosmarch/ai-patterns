@@ -1,7 +1,7 @@
 export const pattern = `# Voice Waveform
 
 ## Summary
-A row of amplitude bars that visualizes live audio while a voice conversation is active — either the user's mic input while the system listens, or the system's own audio while it speaks. The bar heights track real signal energy, so the shape is never decorative alone: it's the one piece of the UI that proves audio is actually flowing.
+A row of amplitude bars (or a full-width dotted line) that visualizes live audio while a voice conversation is active — either the user's mic input while the system listens, or the system's own audio while it speaks. The bar heights track real signal energy, so the shape is never decorative alone: it's the one piece of the UI that proves audio is actually flowing.
 
 ## When to use
 - Anywhere audio is actively being captured or played back in a voice interface (a voice mode, a call-style assistant, a dictation composer) and the user benefits from seeing that the mic or speaker is live.
@@ -15,9 +15,11 @@ A row of amplitude bars that visualizes live audio while a voice conversation is
 
 ## Anatomy
 - Bars: a fixed-count row of thin, rounded-cap bars, evenly spaced, vertically centered so taller bars grow symmetrically up and down from the middle.
+- Variants: \`bars\` is a centered block of bars for a voice-mode screen; \`dots\` is a full-width dotted line whose dots stretch into short pills as the voice gets louder — compact enough to sit inside a composer while dictating (as in the Claude mobile app).
 - Color by state: idle bars sit low and muted; listening bars pick up an accent color (distinct from the assistant's own color) so users can tell "you're being heard" apart from "it's replying"; speaking bars use the foreground/brand color.
 
 ## Behavior
+- Samples scroll: each new loudness sample enters on the right and pushes older ones left, so the row reads as the last second or two of the voice rather than a static meter. Louder syllables land as taller peaks the moment they're spoken (fast attack) and ease back down (slow release).
 - Bar heights update on every amplitude sample from the real audio source (an \`AnalyserNode\`, a WebRTC audio track, or the transport's own level events) — each bar eases to its new height rather than snapping, so the row reads as a continuous waveform instead of a flicker.
 - \`idle\`: bars sit at a minimum flat height with no motion — audio isn't flowing.
 - \`listening\`: bars react to the user's mic input in real time.
@@ -35,5 +37,6 @@ A row of amplitude bars that visualizes live audio while a voice conversation is
 
 ## Related patterns
 - Listening State — the broader "the system is capturing your voice" indicator this waveform's \`listening\` state visualizes the input for.
+- Prompt Bar Pro — uses the \`dots\` variant as its dictation row, between Cancel and Stop/Send.
 - Live Transcript — shows what the captured audio actually contained, once transcribed; use alongside this component so users get both the raw signal and the recognized text.
 `;

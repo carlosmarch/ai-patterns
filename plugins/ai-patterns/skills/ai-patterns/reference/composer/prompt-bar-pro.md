@@ -19,6 +19,7 @@ An empty-state composer for launching a new agent session: a row of clickable ex
 ## Anatomy
 - Suggestion row: 2-4 example-prompt chips (icon + short phrase) plus a shuffle control to reveal a different sample.
 - Composer bar: leading add/attach action, an environment picker, the auto-growing text field, an orchestrator/agent picker, a dictation toggle, and a start action.
+- Dictation row: while recording, the toolbar is replaced by Cancel (×), a full-width live waveform, Stop (■) and Send (↑) — the Claude mobile app's voice input.
 - Inline `@`/`/` autocomplete popover, anchored above the composer bar, for mentioning sources or invoking commands without leaving the text field.
 
 ## Behavior
@@ -26,6 +27,8 @@ An empty-state composer for launching a new agent session: a row of clickable ex
 - Shuffle swaps the visible suggestions from a larger pool; it does not affect anything already typed in the input.
 - Environment and orchestrator selection are independent of the text content and persist across shuffles.
 - Typing `@` or `/` opens a filtered popover of sources or commands; arrow keys move the highlight, Enter/Tab inserts the highlighted item, and Escape dismisses the popover without clearing what's typed.
+- Tapping the mic starts dictation: the toolbar swaps for the dictation row, the waveform follows the real mic level, and recognized words stream into the text field as they're heard. Cancel (or Escape) throws away what was dictated and keeps what was typed before; Stop keeps the words in the field to edit; Send submits them straight away.
+- If the mic is denied or unavailable, keep the dictation row usable and say so — never leave a waveform implying it's listening when it isn't.
 - The start action stays inactive until there's non-whitespace content, exactly like an ordinary send button — this bar still submits a real message, it's just dressed for a first-run moment.
 
 ## Content guidelines
@@ -37,9 +40,11 @@ An empty-state composer for launching a new agent session: a row of clickable ex
 - Suggestion chips, the shuffle control, and both pickers must be reachable and operable by keyboard.
 - Shuffling suggestions should not silently move keyboard focus; keep focus predictable for a screen-reader or keyboard user who just activated it.
 - The environment and orchestrator pickers need labels that make sense out of context (e.g. "Environment: Computer"), not just the bare selected value, for assistive tech.
+- Announce when recording starts (a polite live region), give Cancel, Stop and Send explicit labels, and move focus into the dictation row so keyboard users can stop it.
 - The `@`/`/` autocomplete popover must be fully operable from the keyboard and communicate the current highlighted item to assistive tech.
 
 ## Related patterns
+- Voice Waveform — the `dots` waveform shown while dictating.
 - A specialized first-run variant of the Prompt Bar — swap to the plain Prompt Bar once a session actually starts.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
@@ -57,12 +62,13 @@ instead of copying these Tailwind classes or the Motion API.
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ChevronDown, ChevronRight, Folder, Link2, Mic, Monitor, Paperclip, Plus, Search, Shuffle } from "lucide-react";
+import { ArrowLeft, ArrowUp, ChevronDown, ChevronRight, Folder, Link2, Mic, Monitor, Paperclip, Plus, Search, Shuffle, Square, X } from "lucide-react";
 
 import { Attachment, AttachmentChip } from "../../uploads/attachment-chip/component";
 
 import { cn } from "@/lib/utils";
 import { StopGenerationButton, type GenerationState } from "../../buttons/stop-generation-button/component";
+import { useMicLevel, VoiceWaveform } from "../../voice/voice-waveform/component";
 
 interface ConnectorItem {
   id: string;
@@ -219,6 +225,57 @@ export function PromptBarPro({
   });
 
   const isDisabled = generationState === "generating";
+
+  // Dictation: the mic's loudness drives the waveform, and (where the browser
+  // supports it) speech recognition streams the words into the editor live.
+  const mic = useMicLevel();
+  const transcriptNode = React.useRef<Text | null>(null);
+  const recognition = React.useRef<SpeechRecognitionLike | null>(null);
+
+  function startDictation() {
+    const el = editorRef.current;
+    if (!el || isDisabled) return;
+    setDictating(true);
+    void mic.start();
+
+    const node = document.createTextNode("");
+    el.appendChild(node);
+    transcriptNode.current = node;
+    const lead = el.textContent && el.textContent !== "" && !/\s$/.test(el.textContent) ? " " : "";
+
+    const Recognition = getSpeechRecognition();
+    if (!Recognition) return;
+    const r = new Recognition();
+    r.continuous = true;
+    r.interimResults = true;
+    r.onresult = (event) => {
+      let text = "";
+      for (let i = 0; i < event.results.length; i++) text += event.results[i][0].transcript;
+      node.textContent = text ? lead + text.trim() : "";
+      updateEditorState();
+    };
+    try {
+      r.start();
+      recognition.current = r;
+    } catch {
+      recognition.current = null;
+    }
+  }
+
+  function finishDictation(mode: "cancel" | "keep" | "send") {
+    recognition.current?.stop();
+    recognition.current = null;
+    mic.stop();
+    setDictating(false);
+    const node = transcriptNode.current;
+    transcriptNode.current = null;
+    if (mode === "cancel") node?.remove();
+    updateEditorState();
+    if (mode === "send") handleSubmit();
+    else editorRef.current?.focus();
+  }
+
+  React.useEffect(() => () => recognition.current?.abort(), []);
 
   function addAttachments(files: FileList | null) {
     if (!files) return;
@@ -523,6 +580,14 @@ export function PromptBarPro({
             </div>
           </div>
 
+          {dictating ? (
+            <DictationBar
+              level={mic.active ? mic.level : undefined}
+              onCancel={() => finishDictation("cancel")}
+              onStop={() => finishDictation("keep")}
+              onSend={() => finishDictation("send")}
+            />
+          ) : (
           <div className="flex flex-wrap items-center gap-y-2 gap-x-1">
             <div ref={attachMenuRef} className="relative shrink-0">
               <button
@@ -771,21 +836,11 @@ export function PromptBarPro({
 
               <button
                 type="button"
-                onClick={() => setDictating((v) => !v)}
-                aria-pressed={dictating}
-                aria-label="Toggle dictation"
-                className={cn(
-                  "relative flex size-8 shrink-0 items-center justify-center rounded-full transition-colors",
-                  dictating ? "text-destructive" : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                )}
+                onClick={startDictation}
+                disabled={isDisabled}
+                aria-label="Dictate"
+                className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
               >
-                {dictating && (
-                  <motion.span
-                    className="absolute inset-0 rounded-full bg-destructive/20"
-                    animate={{ scale: [1, 1.4], opacity: [0, 0.6, 0] }}
-                    transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
-                  />
-                )}
                 <Mic className="size-4" />
               </button>
 
@@ -798,10 +853,84 @@ export function PromptBarPro({
               />
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>
   );
+}
+
+/**
+ * The Claude-mobile dictation row: it takes over the toolbar while recording.
+ * Cancel discards what was dictated, Stop keeps the words in the editor to
+ * edit, and Send submits them straight away.
+ */
+function DictationBar({
+  level,
+  onCancel,
+  onStop,
+  onSend,
+}: {
+  level?: React.RefObject<number>;
+  onCancel: () => void;
+  onStop: () => void;
+  onSend: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.15 }}
+      className="flex items-center gap-3"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onCancel();
+      }}
+    >
+      <button
+        type="button"
+        onClick={onCancel}
+        aria-label="Cancel dictation"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-accent"
+      >
+        <X className="size-4" />
+      </button>
+      <VoiceWaveform state="listening" variant="dots" level={level} className="min-w-0 flex-1" />
+      <span className="sr-only" aria-live="polite">
+        Recording. Speak now.
+      </span>
+      <button
+        type="button"
+        onClick={onStop}
+        aria-label="Stop dictation"
+        autoFocus
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-accent"
+      >
+        <Square className="size-3.5 fill-current" />
+      </button>
+      <button
+        type="button"
+        onClick={onSend}
+        aria-label="Send"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#c6613f] text-white transition-opacity hover:opacity-90"
+      >
+        <ArrowUp className="size-4" />
+      </button>
+    </motion.div>
+  );
+}
+
+interface SpeechRecognitionLike {
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+function getSpeechRecognition(): (new () => SpeechRecognitionLike) | undefined {
+  const w = window as unknown as Record<string, (new () => SpeechRecognitionLike) | undefined>;
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition;
 }
 
 function useClickOutside<T extends HTMLElement>(onOutside: () => void) {
