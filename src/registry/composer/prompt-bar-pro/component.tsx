@@ -851,7 +851,7 @@ function DictationBar({
         type="button"
         onClick={onSend}
         aria-label="Send"
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#c6613f] text-white transition-opacity hover:opacity-90"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition-opacity hover:opacity-90"
       >
         <ArrowUp className="size-4" />
       </button>
