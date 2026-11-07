@@ -1,0 +1,209 @@
+"use client";
+
+import * as React from "react";
+import { AnimatePresence, motion, useReducedMotion, useSpring, useTransform } from "motion/react";
+import { ChevronDown, TriangleAlert } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+
+export interface CostLine {
+  label: string;
+  amount: number;
+}
+
+export interface CostEstimateProps {
+  /** Expected cost. Pass `max` too when the cost can only be given as a range. */
+  min: number;
+  max?: number;
+  /** What the user has left. */
+  balance: number;
+  /** Unit name in the plural ("credits", "tokens"). */
+  unit?: string;
+  /** Rough duration, already formatted ("~2 min"). */
+  duration?: string;
+  /** What the estimate is made of; shown behind "How is this estimated?". */
+  breakdown?: CostLine[];
+  /** Warn when what's left after the run would fall below this share of the balance. */
+  warnBelow?: number;
+  actionLabel?: string;
+  onRun?: () => void;
+  topUpLabel?: string;
+  onTopUp?: () => void;
+  className?: string;
+}
+
+type Level = "ok" | "warn" | "blocked";
+
+export function CostEstimate({
+  min,
+  max,
+  balance,
+  unit = "credits",
+  duration,
+  breakdown,
+  warnBelow = 0.2,
+  actionLabel = "Run",
+  onRun,
+  topUpLabel = "Get more credits",
+  onTopUp,
+  className,
+}: CostEstimateProps) {
+  const [open, setOpen] = React.useState(false);
+  const reduceMotion = useReducedMotion();
+  const id = React.useId();
+
+  const high = Math.max(min, max ?? min);
+  const after = Math.max(0, balance - high);
+  const level: Level = high > balance ? "blocked" : after < balance * warnBelow ? "warn" : "ok";
+  const range = max !== undefined && max !== min;
+
+  const total = Math.max(balance, 1);
+  const usedPct = Math.min(100, (Math.min(high, balance) / total) * 100);
+
+  return (
+    <div className={cn("flex w-full flex-col gap-3 rounded-2xl border bg-card p-4", className)}>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs text-muted-foreground">Estimated cost</p>
+          <p className="mt-0.5 text-lg font-semibold tabular-nums">
+            {range ? (
+              <>
+                <AnimatedNumber value={min} instant={!!reduceMotion} />–<AnimatedNumber value={high} instant={!!reduceMotion} />
+              </>
+            ) : (
+              <>
+                ≈ <AnimatedNumber value={min} instant={!!reduceMotion} />
+              </>
+            )}{" "}
+            <span className="text-sm font-normal text-muted-foreground">{unit}</span>
+            {duration && <span className="text-sm font-normal text-muted-foreground"> · {duration}</span>}
+          </p>
+        </div>
+
+        {level === "blocked" && onTopUp ? (
+          <button
+            type="button"
+            onClick={onTopUp}
+            className="shrink-0 rounded-xl bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
+          >
+            {topUpLabel}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onRun}
+            disabled={level === "blocked"}
+            aria-describedby={`${id}-status`}
+            className="shrink-0 rounded-xl bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {actionLabel}
+          </button>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <div
+          role="meter"
+          aria-label={`Share of balance this run uses`}
+          aria-valuemin={0}
+          aria-valuemax={balance}
+          aria-valuenow={Math.min(high, balance)}
+          aria-valuetext={`${high} of ${balance} ${unit}`}
+          className="relative h-2 w-full overflow-hidden rounded-full bg-muted"
+        >
+          <motion.div
+            className="absolute inset-y-0 left-0 rounded-full bg-muted-foreground/30"
+            initial={false}
+            animate={{ width: `${100 - usedPct}%` }}
+            transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 180, damping: 26 }}
+          />
+          <motion.div
+            className={cn(
+              "absolute inset-y-0 rounded-full",
+              level === "ok" && "bg-foreground",
+              level === "warn" && "bg-amber-500",
+              level === "blocked" && "bg-destructive"
+            )}
+            initial={false}
+            animate={{ left: `${100 - usedPct}%`, width: `${usedPct}%` }}
+            transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 180, damping: 26 }}
+          />
+        </div>
+
+        <div id={`${id}-status`} aria-live="polite" className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs">
+          {level === "blocked" ? (
+            <span className="flex items-center gap-1 font-medium text-destructive">
+              <TriangleAlert className="size-3.5" aria-hidden />
+              Needs {high - balance} more {unit} than you have
+            </span>
+          ) : level === "warn" ? (
+            <span className="flex items-center gap-1 font-medium text-amber-700 dark:text-amber-400">
+              <TriangleAlert className="size-3.5" aria-hidden />
+              Leaves you with {after} {unit}
+            </span>
+          ) : (
+            <span className="text-muted-foreground">
+              {after} {unit} left after this run
+            </span>
+          )}
+          <span className="text-muted-foreground tabular-nums">
+            Balance {balance} {unit}
+          </span>
+        </div>
+      </div>
+
+      {breakdown && breakdown.length > 0 && (
+        <div className="border-t pt-2">
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls={`${id}-breakdown`}
+            onClick={() => setOpen((o) => !o)}
+            className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            How is this estimated?
+            <ChevronDown className={cn("size-3.5 transition-transform", open && "rotate-180")} aria-hidden />
+          </button>
+          <AnimatePresence initial={false}>
+            {open && (
+              <motion.div
+                id={`${id}-breakdown`}
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                className="overflow-hidden"
+              >
+                <dl className="mt-2 flex flex-col gap-1 text-xs">
+                  {breakdown.map((line) => (
+                    <div key={line.label} className="flex justify-between gap-3">
+                      <dt className="text-muted-foreground">{line.label}</dt>
+                      <dd className="tabular-nums">
+                        {line.amount} {unit}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-2 text-xs text-pretty text-muted-foreground">
+                  You&apos;re only charged for what the run actually uses.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AnimatedNumber({ value, instant }: { value: number; instant: boolean }) {
+  const spring = useSpring(value, { stiffness: 220, damping: 30 });
+  const rounded = useTransform(spring, (v) => Math.round(v).toLocaleString());
+
+  React.useEffect(() => {
+    if (instant) spring.jump(value);
+    else spring.set(value);
+  }, [spring, value, instant]);
+
+  return <motion.span>{rounded}</motion.span>;
+}
