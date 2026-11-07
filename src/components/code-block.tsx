@@ -1,6 +1,7 @@
 import { highlight, type HighlightLang } from "@/lib/highlight";
 import { cn } from "@/lib/utils";
 import { CopyButton } from "@/components/copy-button";
+import { DownloadButton } from "@/components/download-button";
 import type { CodeCopiedType } from "@/lib/analytics";
 
 export async function CodeBlock({
@@ -8,6 +9,7 @@ export async function CodeBlock({
   lang = "tsx",
   wrap = false,
   trackAs,
+  download,
 }: {
   code: string;
   lang?: HighlightLang;
@@ -15,12 +17,17 @@ export async function CodeBlock({
   wrap?: boolean;
   /** Passed through to CopyButton for analytics. */
   trackAs?: CodeCopiedType;
+  /** File name to offer the code as a download, next to the Copy button. */
+  download?: string;
 }) {
   const html = await highlight(code, lang);
 
   return (
     <div className="relative">
-      <CopyButton text={code} className="absolute right-3 top-3" trackAs={trackAs} />
+      <div className="absolute right-3 top-3 flex items-center gap-1.5">
+        {download && <DownloadButton iconOnly filename={download} content={code} />}
+        <CopyButton text={code} trackAs={trackAs} />
+      </div>
       <div
         data-code-scroll
         className={cn(

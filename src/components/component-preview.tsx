@@ -19,7 +19,6 @@ export function ComponentPreview({
   code,
   pattern,
   patternPanel,
-  patternDownload,
   prev,
   next,
 }: {
@@ -30,8 +29,6 @@ export function ComponentPreview({
   pattern?: ReactNode;
   /** The guardrails as shown in the expanded side panel (defaults to `pattern`). */
   patternPanel?: ReactNode;
-  /** Download action for the guardrails, shown in the side panel's header. */
-  patternDownload?: ReactNode;
   prev?: PagerLink;
   next?: PagerLink;
 }) {
@@ -138,7 +135,6 @@ export function ComponentPreview({
             title={title}
             code={code}
             pattern={patternPanel ?? pattern}
-            patternDownload={patternDownload}
             value={panelTab}
             onValueChange={setPanelTab}
             onCollapse={() => setExpanded(false)}
@@ -193,7 +189,6 @@ function ExpandedSidePanel({
   title,
   code,
   pattern,
-  patternDownload,
   value,
   onValueChange,
   onCollapse,
@@ -201,7 +196,6 @@ function ExpandedSidePanel({
   title: string;
   code: ReactNode;
   pattern?: ReactNode;
-  patternDownload?: ReactNode;
   value: string;
   onValueChange: (value: string) => void;
   onCollapse: () => void;
@@ -290,7 +284,6 @@ function ExpandedSidePanel({
             <TabsTrigger value="code">Code</TabsTrigger>
           </TabsList>
           <div className="ml-auto flex items-center gap-2">
-            {pattern && value === "pattern" && patternDownload}
             <CollapseButton onClick={onCollapse} />
           </div>
         </div>
