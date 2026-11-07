@@ -79,8 +79,6 @@ straight to any source in the set.
   between sources and the tooltip's fade-in.
 
 ## Related patterns
-- \`Sources Stack\` — better for larger sets browsed as a single list
-  rather than one at a time.
-- \`Inline Citation\` — for footnote-style markers inside response text,
-  rather than a standalone card.
+- **Sources Stack** — Use it instead for larger sets browsed as one list rather than one at a time.
+- **Inline Citation** — Use it instead for footnote-style markers inside response text rather than a standalone card.
 `;

@@ -48,7 +48,7 @@ A structured card that surfaces a browser console error or warning inside an AI 
 - The code frame is \`aria-hidden\` to screen readers if the full error message already conveys the problem — avoid reading out raw code lines.
 
 ## Related patterns
-- Rate Limit — for quota-based errors, not runtime errors.
-- Partial Response — for responses cut short by token or context limits.
-- Terminal Stream — for streaming build/test output where errors surface in line.
+- **Rate Limit** — Use it instead when the error is a quota being hit, not a runtime failure.
+- **Partial Response** — Use it instead when the response was cut short by token or context limits.
+- **Terminal Stream** — Use it instead when errors surface inside streaming build or test output.
 `;

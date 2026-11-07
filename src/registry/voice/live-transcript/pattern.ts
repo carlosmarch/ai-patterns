@@ -38,8 +38,8 @@ A scrolling, speaker-labeled log of a voice conversation's recognized text, upda
 - Respect \`prefers-reduced-motion\` for the blinking cursor — a static dash or steady low-opacity mark communicates "still live" without the flash.
 
 ## Related patterns
-- Listening State — the capture-is-active signal this transcript's content is the output of.
-- Voice Waveform — the raw amplitude visualization that pairs with this transcript's recognized text.
-- Terminal Stream — the same auto-scroll/jump-to-latest scrolling-log mechanics, applied to command output instead of speech.
-- Chat Bubble — once a segment finalizes, hand its text off to a Chat Bubble as the sent message rather than leaving it styled as a transcript segment; the two don't overlap in the same UI element.
+- **Listening State** — Use it as well as the capture-is-active signal this transcript is the output of.
+- **Voice Waveform** — Use it as well for the raw amplitude alongside the recognized text.
+- **Chat Bubble with Actions** — Use it after this one, handing each finalized segment off as a sent message rather than keeping transcript styling.
+- **Terminal Stream** — Use it instead when the scrolling, auto-following log is command output rather than speech.
 `;

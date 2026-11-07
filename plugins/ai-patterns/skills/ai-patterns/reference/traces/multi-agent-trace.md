@@ -36,8 +36,9 @@ A tree/list view of an orchestrator's parallel sub-agent tasks — each with its
 - Status is conveyed by icon and text together, never color alone, since red/green distinctions must survive a color-blind or grayscale viewing.
 
 ## Related patterns
-- Expandable Trace is the single-agent, linear counterpart this pattern extends to parallel work.
-- Tool Call Chip is what an individual step inside one agent's row typically looks like when that step is a specific tool call.
+- **Expandable Trace** — Use it instead when one agent did the work in a single linear sequence.
+- **Tool Call Chip** — Use it as well inside an agent's row when a step is a specific tool call.
+- **Background Tasks Drawer** — Use it instead when the parallel work outlives the response and needs an app-level view.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

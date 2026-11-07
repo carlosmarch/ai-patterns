@@ -38,7 +38,8 @@ A row of per-file chips — each showing a file name and its add/delete line cou
 - Addition/removal styling must not rely on background tint alone if it's the only signal — keep the +/- marker in front of each line so the diff still reads in a high-contrast or no-color mode.
 
 ## Related patterns
-- Diff Summary Card — the collapsed, file-list-only alternative for larger batches or when inline reading isn't the goal; Diff Tabs is the "let me actually read it here" counterpart.
+- **Diff Summary Card** — Use it instead for large batches of changes, or when a list of files matters more than reading the code inline.
+- **Code Preview Block** — Use it instead when the code is new and there is nothing to compare it against.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

@@ -39,9 +39,10 @@ A small "AI-generated" label attached to content an AI produced, which opens a c
 - The overlay variant keeps WCAG AA contrast on any image by sitting on a dark translucent backing.
 
 ## Related patterns
-- Confidence Indicator says how reliable a value is; use both when AI content also needs a reliability signal.
-- Inline Citation and Sources Stack show what the content is based on; this badge only shows who made it.
-- Source Trust Card explains the trustworthiness of a source; the disclosure card is its counterpart for the content itself.
+- **Confidence Indicator** — Use it as well when AI-made content also needs a signal of how reliable it is.
+- **Inline Citation** — Use it as well when people need to see what a claim is based on, not just who made it.
+- **Sources Stack** — Use it as well to show every source an AI answer drew on.
+- **Source Trust Card** — Use it instead when the question is how trustworthy a source is rather than whether the content is AI-made.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

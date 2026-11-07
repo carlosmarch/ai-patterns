@@ -33,5 +33,7 @@ A collapsed-by-default summary line ("Thought for N seconds") that expands into 
 - Never hide information the user needs to trust or act on the primary answer exclusively inside the collapsed trace — the answer must stand on its own without expanding this.
 
 ## Related patterns
-- Thinking Loader is the "in progress" counterpart — this component is what it becomes once work finishes.
+- **Thinking Loader** — Use it instead while work is still in progress, then swap in this trace when it finishes.
+- **Stream of Thought** — Use it instead when the reasoning should stream in live before folding into this trace.
+- **Multi-Agent Trace** — Use it instead when the work was split across parallel sub-agents.
 `;

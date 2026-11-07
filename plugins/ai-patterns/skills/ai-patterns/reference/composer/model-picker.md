@@ -44,9 +44,9 @@ A compact chip in the composer that opens a list of models, each with a one-line
 - The thinking control is a `role="switch"` with a visible label.
 
 ## Related patterns
-- Prompt Bar embeds a minimal model dropdown; use this pattern when models need descriptions, plan gating or a thinking switch.
-- Cost Estimate shows what the chosen model will cost before running — pair them when models are priced differently.
-- Rate Limit is what users hit when they stay on an expensive model; the picker is where they can step down.
+- **Prompt Bar** — Use it instead when a minimal dropdown is enough and models don't need descriptions, plan gating or a thinking switch.
+- **Cost Estimate** — Use it as well when models are priced differently, so people see what the chosen one will cost before running.
+- **Rate Limit** — Use it as well when people hit limits on an expensive model, and point them to the picker to step down.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

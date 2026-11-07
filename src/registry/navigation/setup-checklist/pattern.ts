@@ -41,6 +41,7 @@ A compact onboarding card that surfaces a short list of setup steps, tracks prog
 - The step list should be wrapped in an \`aria-live\` region so screen readers announce completion events.
 
 ## Related patterns
-- Analysis List — sequential item resolution during an AI analysis run, not user-driven.
-- Tool Approval — one-at-a-time permission prompts, not a persistent checklist.
+- **Analysis List** — Use it instead when the items resolve on their own during an AI run rather than being done by the person.
+- **Tool Approval** — Use it instead for one-at-a-time permission prompts rather than a persistent checklist.
+- **Agent Setup Pill** — Use it instead when there is only one setup step, shown as a compact call to action.
 `;

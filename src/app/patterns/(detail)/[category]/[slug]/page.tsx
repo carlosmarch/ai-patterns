@@ -8,7 +8,8 @@ import { ComponentPreview } from "@/components/component-preview";
 import { SeenIn } from "@/components/seen-in";
 import { readComponentSource } from "@/lib/agent";
 import { PatternPager } from "@/components/pattern-pager";
-import { getAdjacentEntries, getEntryHref, getRegistryEntry, registry } from "@/registry";
+import { RelatedPatterns } from "@/components/related-patterns";
+import { getAdjacentEntries, getEntryHref, getRegistryEntry, getRelatedEntries, registry } from "@/registry";
 
 export function generateStaticParams() {
   return registry.map(({ category, slug }) => ({ category, slug }));
@@ -101,6 +102,8 @@ export default async function PatternPage({
         }
         patternPanel={spec}
       />
+
+      <RelatedPatterns items={getRelatedEntries(entry)} />
 
       <PatternPager prev={toLink(prev)} next={toLink(next)} />
     </main>

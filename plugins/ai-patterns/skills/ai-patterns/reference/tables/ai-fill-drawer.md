@@ -55,10 +55,10 @@ A record-details drawer that lists a record's fields as key/value rows and lets 
 - The drawer takes focus when opened. With `prefers-reduced-motion`, it fades instead of sliding.
 
 ## Related patterns
-- Describe Filters — the table this drawer is usually opened from.
-- Confidence Indicator — add next to a suggestion when the model can report how sure it is.
-- Source Trust Card — expand "from <source>" into a full source preview.
-- Background Tasks Drawer — the same drawer shell, for long-running work.
+- **Describe Filters** — Use it as well, since it's the table this drawer is usually opened from.
+- **Confidence Indicator** — Use it as well next to a suggestion when the model can report how sure it is.
+- **Source Trust Card** — Use it as well to expand a suggestion's source into a full preview.
+- **Background Tasks Drawer** — Use it instead when the drawer tracks long-running work rather than suggested values.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

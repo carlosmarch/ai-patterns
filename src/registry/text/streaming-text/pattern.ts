@@ -36,5 +36,7 @@ An answer that reveals itself progressively, as if it's being generated live, wi
 - The cursor is decorative — mark it \`aria-hidden\`.
 
 ## Related patterns
-- Often follows a Thinking Loader / Expandable Trace pair: loader while working, trace for the audit trail, this component for the actual answer.
+- **Thinking Loader** — Use it before this one, while the agent is working and there is no answer text yet.
+- **Expandable Trace** — Use it as well above the answer as the audit trail of how it was reached.
+- **Partial Response** — Use it instead once the stream ends early, so the cut-short answer gets a reason and a way to continue.
 `;

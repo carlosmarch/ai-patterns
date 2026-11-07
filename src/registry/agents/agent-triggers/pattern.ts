@@ -39,7 +39,7 @@ A configuration panel listing the external events that cause an agent to run aut
 - The quick-add platform icons in the footer are icon-only buttons; each must carry an \`aria-label\` naming the platform ("Add GitHub trigger").
 
 ## Related patterns
-- Flowchart: the canvas-level counterpart — Agent Triggers configures the entry-point event, while the Flowchart node describes what conditions gate the work that follows.
-- Tool Approval: also governs what an agent is allowed to do, but at the per-call level rather than the activation level.
-- Setup Checklist: shares the "incomplete step" affordance (the Finish setup label) — use Setup Checklist when onboarding a whole agent for the first time; use Agent Triggers when managing an already-running agent's event sources.
+- **Flowchart** — Use it as well when the work after the trigger has conditions or branches that need a canvas to read.
+- **Tool Approval** — Use it instead when the question is whether the agent may run one specific call, not what events start it.
+- **Setup Checklist** — Use it instead when onboarding a whole agent for the first time, and keep Agent Triggers for managing an existing agent's event sources.
 `;
