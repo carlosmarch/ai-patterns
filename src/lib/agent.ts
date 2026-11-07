@@ -1,4 +1,5 @@
 import { TEAMS } from "@/lib/teams";
+import { MCP_JSON_CONFIG } from "@/lib/mcp-install";
 import { getCategories, getEntryHref, getRegistryEntry, registry, type RegistryEntry } from "@/registry";
 import { componentSources } from "@/registry/sources.generated";
 
@@ -260,6 +261,14 @@ ${INSTALL_SKILL}
 - \`/ai-patterns list\` — every pattern, grouped by category.
 - \`/ai-patterns review\` — scan a project for hand-rolled UI a catalogue pattern could replace (read-only).
 - \`/ai-patterns apply\` (or just describe what you need) — recommend and scaffold a pattern.
+
+## Not on Claude Code?
+
+Connect the MCP server instead (Streamable HTTP, no auth): \`${abs("/mcp")}\`
+
+\`\`\`json
+${MCP_JSON_CONFIG}
+\`\`\`
 
 HTML: ${abs("/skill")}
 `;

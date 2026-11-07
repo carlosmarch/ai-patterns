@@ -12,7 +12,7 @@ function track(event: string, props?: Props) {
   if (typeof window !== "undefined") window.umami?.track(event, props);
 }
 
-export type CodeCopiedType = "component" | "spec" | "install_command";
+export type CodeCopiedType = "component" | "spec" | "install_command" | "mcp_config";
 
 export function trackCodeCopied(props: { type: CodeCopiedType; category?: string; slug?: string }) {
   track("code_copied", props);
@@ -28,6 +28,10 @@ export function trackSpecDownloaded(props: { category: string; slug: string }) {
 
 export function trackDemoPromptSubmitted(props: { is_suggestion: boolean; suggestion_id?: string }) {
   track("demo_prompt_submitted", props);
+}
+
+export function trackMcpInstallClicked(props: { client: string; page: string }) {
+  track("mcp_install_clicked", props);
 }
 
 export function trackGithubClicked(props: { page: string }) {

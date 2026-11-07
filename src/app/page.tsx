@@ -5,6 +5,7 @@ import { BookOpen, Sparkles } from "lucide-react";
 import { getCategories, registry, type RegistryEntry } from "@/registry";
 import { GithubMark } from "@/components/github-mark";
 import { IntroHero, type HeroEntry } from "./intro-hero/intro-hero";
+import { HomeConnect } from "./home-connect";
 import { HomeHero } from "./home-hero";
 import { Card, DemoCard, Section, href } from "./home-parts";
 import { AskVariant, StatsVariant, TabsVariant, TerminalVariant, type SectionItem } from "./sections/variants";
@@ -12,7 +13,7 @@ import { CompareVariant, ComparisonVariant, IndexVariant } from "./sections/vari
 
 // The home page, assembled from the blocks explored on /sections. The story
 // runs pitch → proof → how it works → try it → what's new → the catalogue →
-// how your agent uses it → why not a library → numbers and CTA.
+// how your agent uses it → how to connect it → why not a library → numbers and CTA.
 
 const REPO_URL = "https://github.com/carlosmarch/ai-patterns";
 const FEATURED = "prompt-bar-pro";
@@ -94,6 +95,10 @@ export default function Home() {
 
       <Band>
         <TerminalVariant />
+      </Band>
+
+      <Band narrow>
+        <HomeConnect />
       </Band>
 
       <Band narrow>

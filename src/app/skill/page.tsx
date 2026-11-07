@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { CodeBlock } from "@/components/code-block";
+import { McpInstall } from "@/components/mcp-install";
 import { getCategories, registry } from "@/registry";
 import pluginJson from "../../../plugins/ai-patterns/.claude-plugin/plugin.json";
 import { INSTALL_COMMAND, SKILL_MODES, SKILL_PILLARS, SKILL_STATS_BODY, SKILL_STEPS, SKILL_TAGLINE, SkillPitch } from "./content";
@@ -110,6 +111,18 @@ export default function SkillPage() {
             </li>
           ))}
         </ul>
+      </div>
+
+      {/* MCP */}
+      <div className="mt-16">
+        <h2 className="text-xl font-semibold tracking-tight">Not on Claude Code? Use the MCP server</h2>
+        <p className="mt-2 text-muted-foreground">
+          The same catalogue, for any MCP client. It gives your agent the specs and code, but not the
+          skill&apos;s recommend, review and scaffold workflow.
+        </p>
+        <div className="mt-6">
+          <McpInstall page="skill" />
+        </div>
       </div>
 
       {/* CTA */}
