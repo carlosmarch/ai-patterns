@@ -198,6 +198,9 @@ import { pattern as aiDisclosureBadgePattern } from "./indicators/ai-disclosure-
 import CostEstimateDemo from "./indicators/cost-estimate/demo";
 import CostEstimateThumbnail from "./indicators/cost-estimate/thumbnail";
 import { pattern as costEstimatePattern } from "./indicators/cost-estimate/pattern";
+import ContextUsageDemo from "./indicators/context-usage/demo";
+import ContextUsageThumbnail from "./indicators/context-usage/thumbnail";
+import { pattern as contextUsagePattern } from "./indicators/context-usage/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -886,6 +889,18 @@ export const registry: RegistryEntry[] = [
     Thumbnail: CostEstimateThumbnail,
     uxDoc: costEstimatePattern,
     seenIn: [],
+  },
+  {
+    slug: "context-usage",
+    category: "indicators",
+    job: "oversee",
+    title: "Context Usage",
+    description:
+      "A context-window meter: tokens used against the limit, a segmented bar of what fills it, a legend to inspect each source and a Compact action to free space.",
+    Demo: ContextUsageDemo,
+    Thumbnail: ContextUsageThumbnail,
+    uxDoc: contextUsagePattern,
+    seenIn: [{ team: "claude", source: "https://code.claude.com/docs/en/slash-commands" }],
   },
   {
     slug: "voice-waveform",
