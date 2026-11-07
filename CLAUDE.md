@@ -54,6 +54,12 @@ pattern shows up in them automatically; add a new top-level page to the
 - `npm run dev` — start the site at localhost:3000
 - `npm run lint` — ESLint
 - `npm run build` — production build
+- `npm run sources:build` — regenerate `src/registry/sources.generated.ts`
+  (every `component.tsx` as a string). Runs automatically before `dev` and
+  `build`. The site is deployed on Cloudflare Workers, which have no
+  project filesystem, so never `fs.readFile` project files at request time —
+  import them, or bundle them like this. Highlight code with
+  `src/lib/highlight.ts` (JS regex engine), not `codeToHtml` from `"shiki"`.
 - `npm run skill:build` — regenerate `plugins/ai-patterns/skills/ai-patterns/reference/` from `src/registry/`
 
 There is no test suite/script in this repo yet.

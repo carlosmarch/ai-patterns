@@ -4,11 +4,6 @@ import type { NextConfig } from "next";
 const acceptsMarkdown = [{ type: "header" as const, key: "accept", value: "(.*)text/markdown(.*)" }];
 
 const nextConfig: NextConfig = {
-  // The MCP server reads component sources at request time.
-  outputFileTracingIncludes: {
-    "/mcp": ["./src/registry/**/component.tsx"],
-  },
-
   async rewrites() {
     // Markdown twins of the pages live at /md/** (see src/app/md). Reach
     // them by appending `.md` to a page URL, or with `Accept: text/markdown`.

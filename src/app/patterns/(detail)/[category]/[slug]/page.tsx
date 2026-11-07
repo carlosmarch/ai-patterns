@@ -1,5 +1,3 @@
-import fs from "node:fs/promises";
-import path from "node:path";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -8,6 +6,7 @@ import { CodeBlock } from "@/components/code-block";
 import { ComponentPreview } from "@/components/component-preview";
 import { DownloadButton } from "@/components/download-button";
 import { SeenIn } from "@/components/seen-in";
+import { readComponentSource } from "@/lib/agent";
 import { PatternPager } from "@/components/pattern-pager";
 import { getAdjacentEntries, getEntryHref, getRegistryEntry, registry } from "@/registry";
 
@@ -46,10 +45,7 @@ export default async function PatternPage({
     notFound();
   }
 
-  const source = await fs.readFile(
-    path.join(process.cwd(), "src/registry", category, slug, "component.tsx"),
-    "utf-8"
-  );
+  const source = await readComponentSource(entry);
   const Demo = entry.Demo;
   const { prev, next } = getAdjacentEntries(category, slug);
   const toLink = (e: typeof prev) => e && { href: getEntryHref(e), title: e.title, category: e.category };

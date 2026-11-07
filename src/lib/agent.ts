@@ -1,8 +1,6 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-
 import { TEAMS } from "@/lib/teams";
 import { getCategories, getEntryHref, getRegistryEntry, registry, type RegistryEntry } from "@/registry";
+import { componentSources } from "@/registry/sources.generated";
 
 // Everything the site serves to agents instead of browsers — llms.txt,
 // Markdown twins of the pages, the JSON API and the MCP server — is built
@@ -31,7 +29,9 @@ export function markdownResponse(body: string) {
 }
 
 export async function readComponentSource(e: PatternRef) {
-  return fs.readFile(path.join(process.cwd(), "src/registry", e.category, e.slug, "component.tsx"), "utf-8");
+  const source = componentSources[`${e.category}/${e.slug}`];
+  if (source === undefined) throw new Error(`No component source for ${e.category}/${e.slug}`);
+  return source;
 }
 
 /** npm packages the component imports (skipping `react`, path aliases and relative imports). */

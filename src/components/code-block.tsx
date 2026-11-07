@@ -1,5 +1,4 @@
-import { codeToHtml } from "shiki";
-
+import { highlight, type HighlightLang } from "@/lib/highlight";
 import { cn } from "@/lib/utils";
 import { CopyButton } from "@/components/copy-button";
 import type { CodeCopiedType } from "@/lib/analytics";
@@ -11,16 +10,13 @@ export async function CodeBlock({
   trackAs,
 }: {
   code: string;
-  lang?: string;
+  lang?: HighlightLang;
   /** Wrap long lines instead of scrolling horizontally — use for prose-like content (e.g. markdown). */
   wrap?: boolean;
   /** Passed through to CopyButton for analytics. */
   trackAs?: CodeCopiedType;
 }) {
-  const html = await codeToHtml(code, {
-    lang,
-    theme: "github-dark",
-  });
+  const html = await highlight(code, lang);
 
   return (
     <div className="relative">
