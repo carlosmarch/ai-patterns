@@ -27,6 +27,7 @@ Editing a message that has already been sent creates a new branch of the convers
 - Editing opens the message in place; Enter or Send creates a new branch and switches to it, Escape or Cancel leaves everything as it was. An unchanged or empty edit does nothing.
 - The new branch shows a loading placeholder until its reply arrives; earlier branches keep their replies.
 - Previous and next slide the message and reply together in the direction of travel, so it's clear the whole turn changed.
+- Retry and Regenerate add a version the same way, with the same prompt and a new reply.
 - Everything after the edited message belongs to its branch: switching versions swaps the rest of the conversation too.
 - The host keeps the active version for each message, and new messages continue from the version on screen.
 
@@ -44,7 +45,7 @@ Editing a message that has already been sent creates a new branch of the convers
 ## Related patterns
 - **Response Compare** — Use it instead to see two answers to the same prompt side by side.
 - **Refinement Controls** — Use it instead to tweak an answer without rewriting the question.
-- **Chat Bubble with Actions** — Use it as well; the edit button and version switcher sit alongside its copy and feedback actions.
+- **Chat Bubble with Actions** — Use it as well; its action row hosts the edit button and this version switcher next to copy and feedback.
 - **Prompt Enhancer** — Use it as well to rewrite the prompt before sending it as a new branch.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
