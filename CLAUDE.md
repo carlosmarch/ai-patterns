@@ -53,20 +53,35 @@ pattern shows up in them automatically; add a new top-level page to the
 
 - `npm run dev` — start the site at localhost:3000
 - `npm run lint` — ESLint
-- `npm run build` — production build
+- `npm run build` — production build (Next.js only)
+- `npm run preview` — build for Cloudflare and run it locally in workerd
+- `npm run deploy` — build and deploy to Cloudflare Workers
 - `npm run sources:build` — regenerate `src/registry/sources.generated.ts`
   (every `component.tsx` as a string). Runs automatically before `dev` and
-  `build`. The site is deployed on Cloudflare Workers, which have no
-  project filesystem, so never `fs.readFile` project files at request time —
-  import them, or bundle them like this. Highlight code with
-  `src/lib/highlight.ts` (JS regex engine), not `codeToHtml` from `"shiki"`.
-  The Worker must stay under Cloudflare's 3 MiB (gzipped) limit, or deploys
-  fail and the old version keeps serving: on the server, `"shiki"` is
-  aliased to a stub (`next.config.ts`), and favicons are static PNGs, not
-  `ImageResponse` routes (which bundle ~600 KB of WASM).
+  `build`.
 - `npm run skill:build` — regenerate `plugins/ai-patterns/skills/ai-patterns/reference/` from `src/registry/`
 
 There is no test suite/script in this repo yet.
+
+## Deploying (Cloudflare Workers)
+
+The site runs on Cloudflare Workers through OpenNext (`open-next.config.ts`,
+`wrangler.jsonc`). Keep these constraints in mind:
+
+- **Serve prerendered pages.** Pages come from a read-only cache of the
+  HTML prerendered at build time; rendering on request blows the free
+  plan's 10 ms CPU limit (Error 1102). The cache is copied into the assets
+  by `opennextjs-cloudflare deploy`, so the Cloudflare build must run
+  `npx opennextjs-cloudflare build` and deploy with
+  `npx opennextjs-cloudflare deploy` — never a bare `wrangler deploy`.
+  Keep new pages statically prerendered (no request-time data).
+- **No filesystem.** Never `fs.readFile` project files at request time —
+  import them, or bundle them like `sources.generated.ts`.
+- **Bundle size under 3 MiB gzipped**, or deploys fail and the old version
+  keeps serving. Highlight on the server with `src/lib/highlight.ts`
+  (`shiki/core`, JS regex engine); `"shiki"` itself is aliased to a stub
+  on the server (`next.config.ts`). Favicons are static PNGs, not
+  `ImageResponse` routes (which bundle ~600 KB of WASM).
 
 ## About the block in AGENTS.md
 
