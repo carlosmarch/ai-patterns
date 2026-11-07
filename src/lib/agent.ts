@@ -8,7 +8,7 @@ import { getCategories, getEntryHref, getRegistryEntry, registry, type RegistryE
 // Markdown twins of the pages, the JSON API and the MCP server — is built
 // from here, so all of them describe the registry the same way.
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://ai-patterns.vercel.app").replace(/\/$/, "");
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://ai-patterns.app").replace(/\/$/, "");
 export const SITE_NAME = "AI Patterns";
 export const SITE_DESCRIPTION =
   "A pattern library for AI product UI — tool approval, confidence indicators, agent handoff, error recovery, streaming answers and more. Each pattern is a UX spec (when to use, anatomy, behavior, content, accessibility) plus a copy-paste React implementation (Next.js, TypeScript, Tailwind v4, Motion, Radix).";

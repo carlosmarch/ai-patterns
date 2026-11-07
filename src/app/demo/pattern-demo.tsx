@@ -2233,12 +2233,12 @@ function BlockView({
               { id: "admin", label: "Admin" },
             ]}
             orgMembers={[
-              { id: "1", name: "Carlos March", email: "carlos@ai-patterns.dev" },
-              { id: "2", name: "Ana López", email: "ana@ai-patterns.dev" },
-              { id: "3", name: "James Liu", email: "james@ai-patterns.dev" },
+              { id: "1", name: "Carlos March", email: "carlos@ai-patterns.app" },
+              { id: "2", name: "Ana López", email: "ana@ai-patterns.app" },
+              { id: "3", name: "James Liu", email: "james@ai-patterns.app" },
             ]}
             initialAssignees={[
-              { id: "1", name: "Carlos March", email: "carlos@ai-patterns.dev", status: "confirmed", roleId: "admin" },
+              { id: "1", name: "Carlos March", email: "carlos@ai-patterns.app", status: "confirmed", roleId: "admin" },
             ]}
           />
         </div>

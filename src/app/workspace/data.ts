@@ -65,11 +65,11 @@ export const TEAM: Collaborator[] = [
 ];
 
 export const ORG_MEMBERS = [
-  { id: "carlos", name: "Carlos March", email: "carlos@ai-patterns.dev" },
-  { id: "ana", name: "Ana López", email: "ana@ai-patterns.dev" },
-  { id: "james", name: "James Liu", email: "james@ai-patterns.dev" },
-  { id: "sara", name: "Sara Kim", email: "sara@ai-patterns.dev" },
-  { id: "lena", name: "Lena Novak", email: "lena@ai-patterns.dev" },
+  { id: "carlos", name: "Carlos March", email: "carlos@ai-patterns.app" },
+  { id: "ana", name: "Ana López", email: "ana@ai-patterns.app" },
+  { id: "james", name: "James Liu", email: "james@ai-patterns.app" },
+  { id: "sara", name: "Sara Kim", email: "sara@ai-patterns.app" },
+  { id: "lena", name: "Lena Novak", email: "lena@ai-patterns.app" },
 ];
 
 export const ROLES = [
@@ -155,7 +155,7 @@ export const WEEKLY_CITATIONS: CitationSource[] = [
   },
   {
     title: "Skill recommendations · week 42",
-    domain: "ai-patterns.dev/skill",
+    domain: "ai-patterns.app/skill",
     snippet: "Thinking Loader was shortlisted in 64% of “design a chat screen” requests.",
     url: "#",
   },
@@ -164,7 +164,7 @@ export const WEEKLY_CITATIONS: CitationSource[] = [
 export const WEEKLY_SOURCES: Source[] = [
   { title: "Vercel Analytics", domain: "vercel.com", url: "https://vercel.com/analytics", faviconUrl: favicon("vercel.com") },
   { title: "carlosmarch/ai-patterns", domain: "github.com", url: "https://github.com/carlosmarch/ai-patterns", faviconUrl: favicon("github.com") },
-  { title: "Skill usage logs", domain: "ai-patterns.dev", url: "#", faviconUrl: favicon("claude.ai") },
+  { title: "Skill usage logs", domain: "ai-patterns.app", url: "#", faviconUrl: favicon("claude.ai") },
 ];
 
 export const AUDIT_ATTACHMENT: Attachment = {
@@ -185,7 +185,7 @@ export const AUDIT_ITEMS: AnalysisItem[] = [
 export const AUDIT_TRUST_SOURCES: TrustedSource[] = [
   {
     title: "Stop Generation Button — UX spec",
-    domain: "ai-patterns.dev",
+    domain: "ai-patterns.app",
     description: "“The control morphs back into Send the moment the stream ends — never leave a dead Stop button behind.”",
     url: "/patterns/buttons/stop-generation-button",
     faviconUrl: favicon("github.com"),
@@ -291,22 +291,22 @@ export const SPIKE_AGENTS: Agent[] = [
 export const SPIKE_CITATIONS: CitationSource[] = [
   {
     title: "Session replays · long answers",
-    domain: "replays.ai-patterns.dev",
+    domain: "replays.ai-patterns.app",
     snippet: "212 Stop clicks vs. a 154 baseline. 151 of 212 before the first token.",
     url: "#",
   },
   {
     title: "Thinking Loader — UX spec",
-    domain: "ai-patterns.dev",
+    domain: "ai-patterns.app",
     snippet: "Show a live elapsed-time counter so a long wait reads as progress, not a hang.",
     url: "/patterns/loaders/thinking-loader",
   },
 ];
 
 export const SPIKE_SOURCES: Source[] = [
-  { title: "Session replays", domain: "replays.ai-patterns.dev", url: "#", faviconUrl: favicon("posthog.com") },
-  { title: "Thinking Loader spec", domain: "ai-patterns.dev", url: "/patterns/loaders/thinking-loader", faviconUrl: favicon("github.com") },
-  { title: "Expandable Trace spec", domain: "ai-patterns.dev", url: "/patterns/traces/expandable-trace", faviconUrl: favicon("github.com") },
+  { title: "Session replays", domain: "replays.ai-patterns.app", url: "#", faviconUrl: favicon("posthog.com") },
+  { title: "Thinking Loader spec", domain: "ai-patterns.app", url: "/patterns/loaders/thinking-loader", faviconUrl: favicon("github.com") },
+  { title: "Expandable Trace spec", domain: "ai-patterns.app", url: "/patterns/traces/expandable-trace", faviconUrl: favicon("github.com") },
   { title: "Nielsen Norman — Response times", domain: "nngroup.com", url: "https://www.nngroup.com/articles/response-times-3-important-limits/", faviconUrl: favicon("nngroup.com") },
 ];
 

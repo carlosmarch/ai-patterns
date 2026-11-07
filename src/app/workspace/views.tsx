@@ -1095,8 +1095,8 @@ export const CONNECTORS: ConnectorDef[] = [
     id: "vercel",
     name: "Vercel Analytics",
     domain: "vercel.com",
-    description: "Count Code tab copies, previews, and installs on ai-patterns.dev for the weekly usage report.",
-    detail: "ai-patterns.dev",
+    description: "Count Code tab copies, previews, and installs on ai-patterns.app for the weekly usage report.",
+    detail: "ai-patterns.app",
     connected: true,
     overview: ["Read page and event analytics", "Group events by pattern", "No write access"],
     links: [
@@ -1531,8 +1531,8 @@ export function SetupView({
                   roles={ROLES}
                   orgMembers={ORG_MEMBERS}
                   initialAssignees={[
-                    { id: "carlos", name: "Carlos March", email: "carlos@ai-patterns.dev", status: "confirmed", roleId: "admin" },
-                    { id: "ana", name: "Ana López", email: "ana@ai-patterns.dev", status: "confirmed", roleId: "editor" },
+                    { id: "carlos", name: "Carlos March", email: "carlos@ai-patterns.app", status: "confirmed", roleId: "admin" },
+                    { id: "ana", name: "Ana López", email: "ana@ai-patterns.app", status: "confirmed", roleId: "editor" },
                   ]}
                   defaultMessage={`Join me in the ${AGENT_NAME} workspace — we're auditing our AI screens against the pattern catalogue.`}
                   onSend={(chips) => {
