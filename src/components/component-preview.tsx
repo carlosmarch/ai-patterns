@@ -89,7 +89,7 @@ export function ComponentPreview({
         <div className={cn(isExpanded ? "flex min-w-0 flex-1 flex-col" : "contents")}>
           {isExpanded && (
             <div className="flex h-12 shrink-0 items-center gap-2 border-b px-4 sm:px-6">
-              <nav aria-label="Breadcrumb" className="flex min-w-0 flex-1 items-center gap-1.5 text-sm">
+              <nav aria-label="Breadcrumb" className="flex min-w-0 flex-1 items-center gap-1.5 text-sm whitespace-nowrap">
                 <Link
                   href="/"
                   aria-label="AI Patterns home"
