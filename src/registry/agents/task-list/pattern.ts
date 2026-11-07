@@ -44,8 +44,8 @@ A compact, agent-authored plan: a short ordered list of steps the agent intends 
 - Status is never conveyed by color alone — each state has a distinct glyph shape.
 
 ## Related patterns
-- Setup Checklist — the user-actionable counterpart, where rows are steps the person completes.
-- Multi-Agent Trace — for plans split across parallel sub-agents.
-- Expandable Trace — the detailed log of what happened during each step.
-- Background Tasks Drawer — for monitoring long-running work outside the conversation.
+- **Setup Checklist** — Use it instead when the rows are steps the person completes rather than steps the agent works through.
+- **Multi-Agent Trace** — Use it instead when the plan is split across parallel sub-agents.
+- **Expandable Trace** — Use it as well when people need the detailed log of what happened during each step.
+- **Background Tasks Drawer** — Use it instead when the work runs long and outside the conversation.
 `;

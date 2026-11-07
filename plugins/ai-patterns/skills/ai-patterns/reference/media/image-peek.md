@@ -45,8 +45,8 @@ A row of tiny image thumbnails that enlarges into an anchored preview card on ho
 - With `prefers-reduced-motion`, the scale and slide are replaced by a plain fade.
 
 ## Related patterns
-- Attachment Chip covers images on their way in (the composer); Image Peek covers images an agent has already used or produced.
-- Sources Stack is the equivalent compact-summary-that-expands for links rather than images.
+- **Attachment Chip** — Use it instead for images on their way into the composer rather than images the agent used or produced.
+- **Sources Stack** — Use it instead when the compact summary that expands is for links rather than images.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

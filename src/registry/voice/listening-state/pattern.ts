@@ -43,7 +43,7 @@ A dedicated visual state — a mic glyph with a halo that swells with the user's
 - Never rely on the ripple animation alone to convey "active" — the accent color and label both carry that meaning independently.
 
 ## Related patterns
-- Prompt Bar Pro — its dictation row is the compact, in-composer version of this state (Cancel · waveform · Stop · Send); use this component for a dedicated voice screen.
-- Voice Waveform — shows the live amplitude of the audio this state confirms is being captured; often shown together, with the waveform inside or beside the mic glyph.
-- Live Transcript — shows what capture actually produced once speech is recognized; this state covers the moment before or alongside that text appearing.
+- **Prompt Bar Pro** — Use it instead inside a composer, where its dictation row is the compact version of this state.
+- **Voice Waveform** — Use it as well, inside or beside the mic glyph, to show the live amplitude of what's being captured.
+- **Live Transcript** — Use it as well to show the recognized text once speech is understood.
 `;

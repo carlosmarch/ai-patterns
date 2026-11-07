@@ -35,5 +35,6 @@ A vertical list of suggested next questions shown after an assistant response, e
 - Rows are large tap targets (full-width, generous vertical padding) so the pattern works as well on touch as with a pointer.
 
 ## Related patterns
-- Streaming Text's \`followUps\` chips are the compact counterpart — short, wrapping suggestions that sit inline with other post-response actions rather than as their own list.
+- **Streaming Text** — Use its follow-up chips instead when short suggestions should wrap inline with other post-response actions.
+- **Refinement Controls** — Use it instead when the suggestion is a change to the current answer rather than a next question.
 `;

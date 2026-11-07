@@ -43,7 +43,7 @@ A row of one-tap adjustments — "Rephrase", "Shorten", "More formal", "Bulletiz
 - The free-form input has its own \`aria-label\` since its only visible label is the placeholder; the icon-only send and stepper buttons have \`aria-label\`s.
 
 ## Related patterns
-- Selection Actions — the same idea scoped to a highlighted passage; pair them so users can refine the whole output or just a sentence.
-- Chat Bubble with Actions — its version stepper and regenerate action cover re-running the same prompt; Refinement Controls change the prompt in a named direction instead.
-- Follow-Up List — suggests the next question to ask; Refinement Controls suggest the next change to make to the current answer.
+- **Selection Actions** — Use it as well so people can refine just a sentence as well as the whole output.
+- **Chat Bubble with Actions** — Use it instead when people want to re-run the same prompt rather than change it in a named direction.
+- **Follow-Up List** — Use it instead when the suggestion is the next question to ask rather than a change to the current answer.
 `;

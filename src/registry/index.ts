@@ -1044,3 +1044,23 @@ export function getAdjacentEntries(category: string, slug: string) {
 export function getEntryHref(entry: Pick<RegistryEntry, "category" | "slug">) {
   return `/patterns/${entry.category}/${entry.slug}`;
 }
+
+export interface RelatedEntry {
+  entry: RegistryEntry;
+  /** One sentence on when to use the related pattern instead of, or as well as, this one. */
+  reason: string;
+}
+
+/**
+ * The patterns listed in this pattern's "Related patterns" spec section, in
+ * order. Each bullet reads "- **<Title>** — <when to use it instead or as well>".
+ */
+export function getRelatedEntries(entry: RegistryEntry): RelatedEntry[] {
+  const section = entry.uxDoc.split(/^## Related patterns\s*$/m)[1]?.split(/^## /m)[0] ?? "";
+  const related: RelatedEntry[] = [];
+  for (const [, title, reason] of section.matchAll(/^- \*\*(.+?)\*\* — (.+)$/gm)) {
+    const match = registry.find((e) => e.title === title);
+    if (match && match !== entry) related.push({ entry: match, reason: reason.trim() });
+  }
+  return related;
+}

@@ -46,5 +46,8 @@ A search-first overlay for jumping to or launching something — a session, a do
 - Respect \`prefers-reduced-motion\` by skipping the backdrop fade and panel scale/slide.
 
 ## Related patterns
-- None. This is a standalone navigation/launcher pattern, not part of an agent-status sequence.
+- **Quick Chat Dock** — Use it instead when people should be able to ask the AI from anywhere, not just jump to commands.
+- **Instruction Tool Insert** — Use it instead when the picked item is inserted into written instructions rather than run or opened.
+- **Describe Filters** — Use it instead when people want to narrow a set by intent rather than jump to a known item.
+- **Natural Language Query** — Use it instead when people are asking a question of data rather than looking for a command.
 `;

@@ -46,7 +46,8 @@ A "Describe" button in a table's toolbar that turns into a free-text field where
 - Animations are short opacity/position transitions; respect \`prefers-reduced-motion\` by dropping the stagger and row slide.
 
 ## Related patterns
-- Command Palette — keyword jump to a known item; Describe Filters narrows a set by intent.
-- Refinement Controls — another free-form instruction that produces a reviewable, reversible result.
-- Confidence Indicator — pair with semantic chips when the model can report how sure the match is.
+- **Command Palette** — Use it instead when people want to jump to a known item by keyword rather than narrow a set by intent.
+- **Natural Language Query** — Use it instead for people who can read SQL and want the query itself.
+- **Refinement Controls** — Use it instead when the free-form instruction changes generated text rather than a table.
+- **Confidence Indicator** — Use it as well on semantic chips when the model can report how sure the match is.
 `;

@@ -45,8 +45,8 @@ A side-by-side pair of full response panels answering the same prompt, letting t
 - All actions (Copy, Regenerate, Choose this, and selecting the panel itself) must be reachable and operable by keyboard.
 
 ## Related patterns
-- Chat Bubble with Actions — the single-response equivalent (thumbs up/down, Regenerate) for when there's one reply to judge rather than two to choose between.
-- Diff Summary Card — a different kind of side-by-side comparison (before/after a batch of file edits) rather than two independent generations.
+- **Chat Bubble with Actions** — Use it instead when there is one reply to rate or regenerate rather than two to choose between.
+- **Diff Summary Card** — Use it instead when the comparison is before and after a batch of file edits rather than two independent generations.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

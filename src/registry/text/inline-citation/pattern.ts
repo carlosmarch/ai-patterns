@@ -33,5 +33,7 @@ A small, numbered footnote-style marker set right after a specific claim in the 
 - Never rely on hover alone — keyboard focus and touch tap must open the same popover.
 
 ## Related patterns
-- Streaming Text's inline source chip is the word-level "this came from a search" signal; Inline Citation is the claim-level footnote built on top of a specific source.
+- **Streaming Text** — Use its inline source chip instead when a word-level this-came-from-search signal is enough.
+- **Sources Stack** — Use it as well for an answer-level summary of every source used.
+- **Source Trust Card** — Use it as well to expand a citation into a full source preview.
 `;

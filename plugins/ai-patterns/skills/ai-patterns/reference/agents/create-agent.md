@@ -44,9 +44,9 @@ A 2-step wizard card for creating a named, icon-identified agent and selecting w
 - Step transitions use motion that respects `prefers-reduced-motion` via Motion's default behavior; the `duration: 0.15` transitions are brief enough that they cause minimal disruption even without the media-query guard.
 
 ## Related patterns
-- **Agent Triggers** — the panel displayed after a successful `onCreateAgent` callback. The payload from Create Agent maps directly to Agent Triggers' `title`, `agent`, and `triggers` props.
-- **Setup Checklist** — use for multi-step onboarding of a whole product or feature area when several independent tasks must be completed, not a single wizard with two sequential screens.
-- **Invite Members** — shares the "create something new" modal shape: header preview, multi-step form, terminal action. Reference for visual consistency when both patterns appear in the same product.
+- **Agent Triggers** — Use it as well right after creation, since the Create Agent payload maps straight onto its title, agent and triggers props.
+- **Setup Checklist** — Use it instead when onboarding needs several independent tasks done over time rather than one two-step wizard.
+- **Invite Members** — Use it as a visual reference when both appear in one product, since they share the header preview, multi-step form and final action.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

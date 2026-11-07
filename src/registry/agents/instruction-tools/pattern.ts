@@ -43,8 +43,9 @@ A numbered instruction editor for an agent's playbook where typing \`/\` mid-sen
 - Serialize chips to structured segments (\`{ type: "tool", toolId, optionId }\`), never to their display text, so renames don't break instructions.
 
 ## Related patterns
-- Prompt Bar — @ sources and / commands in a chat composer (single-step, executes immediately).
-- Command Palette — global, modal command search.
-- Create Agent / Agent Triggers — where these instructions typically live.
-- Tool Call Chip — how the same tools appear once the agent actually runs them.
+- **Prompt Bar** — Use it instead when @ sources and / commands go into a chat message that runs immediately, not saved instructions.
+- **Command Palette** — Use it instead when people need global, modal search for commands rather than inserting a tool into prose.
+- **Create Agent** — Use it as well, since agent setup is where these instructions are usually written.
+- **Agent Triggers** — Use it as well to decide when the agent runs, while the instructions decide what it does.
+- **Tool Call Chip** — Use it as well in the conversation, where the same tools show up as chips once the agent actually calls them.
 `;

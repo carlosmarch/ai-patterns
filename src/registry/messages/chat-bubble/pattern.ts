@@ -47,6 +47,7 @@ A conversational message bubble — user or assistant — with an inline action 
 - The edit textarea should receive focus automatically when edit mode opens, and focus should land somewhere sensible (the bubble, or the next actionable element) when it closes.
 
 ## Related patterns
-- Pairs with Streaming Text for the assistant reply while it's still generating; this pattern's action row is the equivalent post-stream toolbar for a persisted chat message rather than a one-off streamed answer.
-- For a voice-composed message, show a Live Transcript while the person is still speaking, then hand the finalized text off into a user bubble once the turn ends — don't run the transcript's interim/final styling inside the bubble itself.
+- **Streaming Text** — Use it as well while the assistant reply is still generating, then show this bubble's actions once it's done.
+- **Live Transcript** — Use it before this one for a voice-composed message, and hand the final text into a user bubble when the turn ends.
+- **Selection Actions** — Use it instead when the action applies to part of a message rather than the whole thing.
 `;

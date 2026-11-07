@@ -37,7 +37,7 @@ A line icon that draws itself stroke by stroke, holds for a beat, then erases an
 - With \`prefers-reduced-motion\`, the icon is shown fully drawn and only gently pulses its opacity.
 
 ## Related patterns
-- Thinking Loader — the generic "working" row; a Drawing Icon can replace its static glyph.
-- Tool Call Chip — animate the chip's icon while the call runs.
-- Analysis List — animate only the active step's icon.
+- **Thinking Loader** — Use it as well, replacing its static glyph with a Drawing Icon for the step that is running.
+- **Tool Call Chip** — Use it as well to animate the chip's icon while the call runs.
+- **Analysis List** — Use it as well to animate only the active step's icon.
 `;

@@ -40,6 +40,7 @@ An empty-state composer for launching a new agent session: a row of clickable ex
 - The \`@\`/\`/\` autocomplete popover must be fully operable from the keyboard and communicate the current highlighted item to assistive tech.
 
 ## Related patterns
-- Voice Waveform — the \`dots\` waveform shown while dictating.
-- A specialized first-run variant of the Prompt Bar — swap to the plain Prompt Bar once a session actually starts.
+- **Prompt Bar** — Use it instead once a session has started and the first-run extras are no longer needed.
+- **Voice Waveform** — Use it as well for the dots waveform shown while dictating.
+- **Attachment Chip** — Use it as well for the tray of files attached to the prompt.
 `;

@@ -35,5 +35,7 @@ A collapsed summary of a batch of file edits an agent just made: a count, an und
 - The overflow toggle should update its accessible name/state (e.g. \`aria-expanded\`) when toggled.
 
 ## Related patterns
-- Often appears as the terminal state of an agent turn, after a Thinking Loader/Expandable Trace sequence — the "here's what I actually changed" summary once work completes.
+- **Diff Tabs** — Use it instead when people should read the changes inline rather than scan a list of files.
+- **Expandable Trace** — Use it as well above the summary when people want the steps that led to the changes.
+- **Tool Approval** — Use it instead before the edits run, when they need approval rather than a summary.
 `;

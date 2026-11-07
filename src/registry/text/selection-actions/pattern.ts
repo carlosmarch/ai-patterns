@@ -38,6 +38,7 @@ A floating toolbar that appears when the user highlights a passage of agent-writ
 - Escape and outside-click both dismiss the toolbar, matching how any other transient popover on the page behaves.
 
 ## Related patterns
-- Chat Bubble with Actions covers whole-message actions (regenerate, edit-and-resubmit) — reach for Selection Actions when the edit is scoped to part of a message instead of the whole thing.
-- Inline Citation uses the same anchored-popover positioning technique for a hover-triggered footnote instead of a click-triggered action toolbar.
+- **Chat Bubble with Actions** — Use it instead when the action applies to the whole message, like regenerate or edit-and-resubmit.
+- **Inline Citation** — Use it as a positioning reference, since it anchors a hover-triggered popover to text in the same way.
+- **Refinement Controls** — Use it as well so people can refine the whole output, not just a passage.
 `;

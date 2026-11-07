@@ -35,7 +35,7 @@ A header control that turns the current chat into a temporary one, plus a banner
 - The mode is shown with text and border style, not colour alone.
 
 ## Related patterns
-- Memory Panel manages what has been remembered; this toggle prevents remembering in the first place.
-- AI Disclosure Badge is the other side of transparency — it labels what the AI made, this labels what the AI will keep.
-- Prompt Bar is the composer this mode restyles; reuse its placeholder slot for the mode hint.
+- **Memory Panel** — Use it as well to review and delete what was remembered, while this toggle stops remembering in the first place.
+- **AI Disclosure Badge** — Use it as well when people also need to know which content the AI made, not just what it will keep.
+- **Prompt Bar** — Use it as well, since this mode restyles the composer and uses its placeholder for the mode hint.
 `;

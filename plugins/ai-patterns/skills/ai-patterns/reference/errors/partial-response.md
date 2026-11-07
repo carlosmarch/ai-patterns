@@ -52,10 +52,10 @@ Three distinct reasons change the copy and available actions:
 - Keyboard: both actions are reachable via Tab; Continue is the last focused element in the component (rightmost in the footer), matching its primary-action status.
 
 ## Related patterns
-- Generation Error — for requests that produced no output at all.
-- Rate Limit — for quota-exceeded states where the user must wait before retrying.
-- Stop Generation Button — the control that triggers the "interrupted" reason for this pattern.
-- Streaming Text — the in-progress version of this component, before the stream ends.
+- **Generation Error** — Use it instead when the request produced no output at all.
+- **Rate Limit** — Use it instead when the person has to wait for a quota to reset before retrying.
+- **Stop Generation Button** — Use it as well, since stopping is what produces the interrupted reason here.
+- **Streaming Text** — Use it before this one, while the answer is still streaming in.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

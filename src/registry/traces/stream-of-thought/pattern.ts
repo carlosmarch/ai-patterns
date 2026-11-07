@@ -45,7 +45,7 @@ The model's reasoning streams inline as a timeline of short steps, each a headli
 - Use an ordered list for the steps. Shimmer and pulse are decorative; labels must read at sufficient contrast without them.
 
 ## Related patterns
-- Thinking Loader is the label-only version: the same live header, with no reasoning text.
-- Expandable Trace is the completed-only version: the same "Thought for Ns" toggle and step timeline, without the live stream.
-- Streaming Text covers how the answer itself streams in below.
+- **Thinking Loader** — Use it instead when there is no reasoning text to show, just the live header.
+- **Expandable Trace** — Use it instead when the reasoning is already complete and doesn't need to stream.
+- **Streaming Text** — Use it as well below for the answer itself as it streams in.
 `;

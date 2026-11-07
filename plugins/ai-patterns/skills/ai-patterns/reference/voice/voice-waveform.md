@@ -40,9 +40,10 @@ A row of amplitude bars (or a full-width dotted line) that visualizes live audio
 - Don't rely on the waveform alone to signal turn-taking (who's talking) — pair it with a persistent state label or speaker indicator for screen reader users and anyone not watching closely.
 
 ## Related patterns
-- Listening State — the broader "the system is capturing your voice" indicator this waveform's `listening` state visualizes the input for.
-- Prompt Bar Pro — uses the `dots` variant as its dictation row, between Cancel and Stop/Send.
-- Live Transcript — shows what the captured audio actually contained, once transcribed; use alongside this component so users get both the raw signal and the recognized text.
+- **Listening State** — Use it as well as the broader is-capturing indicator this waveform visualizes the input for.
+- **Prompt Bar Pro** — Use it as a reference, since it uses the dots variant as its dictation row between Cancel and Stop/Send.
+- **Live Transcript** — Use it as well so people get both the raw signal and the recognized text.
+- **Voice Orb** — Use it instead on a dedicated voice screen where a larger, expressive visual fits.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 
