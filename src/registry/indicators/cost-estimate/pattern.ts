@@ -39,7 +39,8 @@ A card next to the run action that shows what a task will cost before it starts 
 - Animations are skipped when the user prefers reduced motion.
 
 ## Related patterns
-- Rate Limit is for caps on usage over time; this pattern prices a single action before it runs.
-- Model Picker often drives the cost; show the estimate near it when models are priced differently.
-- Human-in-the-Loop and Tool Approval are the confirmation step for risky actions; for expensive ones, the estimate is the confirmation.
+- **Rate Limit** — Use it instead for caps on usage over time rather than the price of a single action.
+- **Model Picker** — Use it as well when models are priced differently, and show the estimate near it.
+- **Tool Approval** — Use it instead when the action is risky rather than expensive, and needs a yes or no.
+- **Human in the Loop Question** — Use it instead when the agent needs a choice from the person, not just confirmation of a cost.
 `;

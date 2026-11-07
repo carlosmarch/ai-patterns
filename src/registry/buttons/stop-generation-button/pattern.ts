@@ -32,5 +32,7 @@ A composer's send control that morphs into a Stop button the instant generation 
 - Disabled state uses the \`disabled\` attribute, not opacity alone, so it's programmatically detectable.
 
 ## Related patterns
-- Thinking Loader is the passive "still working" indicator that typically appears alongside this button — this control is what lets the user act on that same in-progress window.
+- **Thinking Loader** — Use it as well as the passive still-working signal, while this button lets people act on that same wait.
+- **Partial Response** — Use it as well after stopping, to show the cut-short answer with an interrupted reason and a way to continue.
+- **Message Queue** — Use it as well when people should be able to queue their next message instead of stopping the current one.
 `;

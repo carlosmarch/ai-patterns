@@ -45,9 +45,9 @@ A small floating pill that hands setup off to the user's AI coding agent in one 
 - Respect `prefers-reduced-motion`: drop the rise, roll and fan-out; keep plain fades.
 
 ## Related patterns
-- Prompt Onboarding — the full-card version with prompt preview, snippet fallback and first-event status.
-- Setup Checklist — where a dismissed pill's step can live on.
-- Shiny Button — another single, attention-drawing call to action; don't use both on one screen.
+- **Prompt-Driven Onboarding** — Use it instead when there is room for the full card with a prompt preview, snippet fallback and first-event status.
+- **Setup Checklist** — Use it as well so a dismissed pill's step can live on as a checklist item.
+- **Shiny Button** — Use it instead for a different single call to action, and don't show both on one screen.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

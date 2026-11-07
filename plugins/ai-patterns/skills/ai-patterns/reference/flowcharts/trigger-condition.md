@@ -44,8 +44,9 @@ A read-at-a-glance diagram of a workflow's trigger and condition steps, laid out
 - Each chip that opens a picker needs a real `button` element (or equivalent) so it's reachable and operable by keyboard, not a styled `span`.
 
 ## Related patterns
-- Expandable Trace is the lighter-weight, non-branching alternative for a simple ordered list of steps.
-- Prompt Bar uses the same "chip with chevron opens a picker" idea for inline @ and / suggestions.
+- **Expandable Trace** — Use it instead when the steps are a simple ordered list without branches.
+- **Procedure Builder** — Use it instead when the logic reads better as written steps than as a canvas.
+- **Agent Triggers** — Use it as well to configure the event that starts the flow.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

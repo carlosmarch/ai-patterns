@@ -34,5 +34,7 @@ An inline status indicator shown while an agent is working on a response: a smal
 - Respect \`prefers-reduced-motion\`: keep the counter (it's informational) but reduce or remove the shimmer motion.
 
 ## Related patterns
-- Expandable Trace is the "done" counterpart — replace this component with that one the moment work completes.
+- **Expandable Trace** — Use it instead the moment work completes, so the loader becomes a Thought for Ns trace.
+- **Stream of Thought** — Use it instead when the reasoning text itself should stream in under the header.
+- **Tool Call Chip** — Use it instead when the agent is running a specific tool and can say which.
 `;

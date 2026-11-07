@@ -51,9 +51,9 @@ A collapsible settings card that decides what an AI agent does when the person i
 - Motion is limited to short opacity / position transitions; honor `prefers-reduced-motion` by disabling the pill slide and height animation.
 
 ## Related patterns
-- Procedure Builder — where the workflows this card hands off to are authored.
-- Agent Triggers — decides when an agent starts; Wait Time Handoff decides when it gives up.
-- Human in the Loop Question — the question the agent is often waiting on an answer to.
+- **Procedure Builder** — Use it as well to author the workflow this card hands the conversation off to.
+- **Agent Triggers** — Use it as well to decide when the agent starts, while Wait Time Handoff decides when it gives up.
+- **Human in the Loop Question** — Use it as well when the agent is waiting on an answer to a specific question, so the customer knows what to reply to.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

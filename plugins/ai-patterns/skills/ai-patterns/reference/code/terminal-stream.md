@@ -39,8 +39,9 @@ An auto-scrolling, collapsible panel that streams a command's raw output line by
 - Status is conveyed by icon and text together, never color alone.
 
 ## Related patterns
-- Tool Call Chip is the compact, single-call counterpart — reach for this pattern once that call's full output actually matters.
-- Diff Summary is the finished-state counterpart specifically for file-edit output, once raw log lines aren't the right shape anymore.
+- **Tool Call Chip** — Use it instead when only the fact of the call matters, and expand to Terminal Stream when its full output does.
+- **Diff Summary Card** — Use it instead once the command is done and the outcome is file edits rather than log lines.
+- **Console Error Card** — Use it instead when one browser error needs to be surfaced on its own rather than in a stream of output.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

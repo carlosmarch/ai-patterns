@@ -49,9 +49,9 @@ A compact status card for a single agent run. The header names the run and shows
 - Respect \`prefers-reduced-motion\`: no spinning glyph or sweeping segment (a static partial fill marks the running step), and rows and headlines cross-fade instead of sliding.
 
 ## Related patterns
-- Task List — the agent's plan as outcomes; pair it with this card for the actions taken.
-- Expandable Trace — the detailed log behind each finished row.
-- Background Tasks Drawer — for monitoring several runs at once, with stop controls.
-- Tool Call Chip — a single tool call shown inline in a message.
-- Terminal Stream — the raw output of a command step.
+- **Task List** — Use it as well when the agent shares its plan up front, so the plan shows outcomes and this card shows the actions taken.
+- **Expandable Trace** — Use it as well when someone needs the detailed log behind each finished row after the run ends.
+- **Background Tasks Drawer** — Use it instead when people need to monitor and stop several runs at once rather than follow one.
+- **Tool Call Chip** — Use it instead when the run is a single tool call that fits inline in a message.
+- **Terminal Stream** — Use it as well when a command step's raw output matters and should be readable as it streams.
 `;

@@ -40,7 +40,7 @@ A settings panel listing what the assistant remembers about the user, where each
 - The inline editor takes focus when opened; Escape cancels without saving.
 
 ## Related patterns
-- Incognito Toggle is the up-front control: it stops memories being saved for one chat, where this panel manages them afterwards.
-- Connector Panel governs which external sources the AI can read; this panel governs what it has learned about the user.
-- Tool Approval asks before an action runs; memory saves are low-risk enough to happen inline, then be reversed here.
+- **Incognito Toggle** — Use it as well as the up-front control that stops memories being saved for one chat.
+- **Connector Panel** — Use it instead when the question is which external sources the AI can read, not what it has learned.
+- **Tool Approval** — Use it instead when an action is risky enough to ask before it runs, rather than saving inline and reversing here.
 `;

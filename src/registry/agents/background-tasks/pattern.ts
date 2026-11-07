@@ -49,8 +49,8 @@ A side drawer listing the work an agent has kicked off in the background — sub
 - Respect \`prefers-reduced-motion\`: the drawer fades instead of sliding.
 
 ## Related patterns
-- Multi-Agent Trace shows parallel sub-agents inline in a response; this drawer is the persistent, app-level view of the same kind of work.
-- Terminal Stream is what a single shell task's output looks like when watched live.
-- Stop Generation Button handles cancelling the main response; the stop control here cancels one background task.
-- Thinking Loader supplies the shimmer language used for the live activity label.
+- **Multi-Agent Trace** — Use it instead when the parallel work belongs to one response and should be read inline in the conversation.
+- **Terminal Stream** — Use it as well inside a task's expanded row when people need to watch one shell command's output live.
+- **Stop Generation Button** — Use it instead when the thing to cancel is the main response, not one background task.
+- **Thinking Loader** — Use it as well for the live activity label, so running tasks share the same shimmer as the rest of the app.
 `;

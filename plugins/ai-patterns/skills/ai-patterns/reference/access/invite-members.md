@@ -81,9 +81,9 @@ Overlays the modal when the remove icon is clicked on a current member. Shows th
 - Reduce motion: use opacity-only transitions; skip scale and y transforms.
 
 ## Related patterns
-- Collaborative Presence — shows the same assignees as a live avatar stack; pairs naturally as the read view for what Invite Members writes. When both sit side by side, use the `trigger="share"` button so the header doesn't show two avatar stacks
-- Tool Approval — another modal-adjacent permission flow with confirm/deny actions
-- Attachment Chip — chip removal shares the same backspace-to-remove and × affordance
+- **Collaborative Presence** — Use it as well to show who already has access as a live avatar stack beside the header, and switch Invite Members to its share-button trigger so the header doesn't show two stacks.
+- **Tool Approval** — Use it instead when the person is granting an agent permission for one action, not granting people access to a project.
+- **Attachment Chip** — Use it instead when the removable chips are files going into a prompt rather than people being invited.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

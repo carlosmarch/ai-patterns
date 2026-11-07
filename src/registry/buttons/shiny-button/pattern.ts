@@ -32,5 +32,6 @@ A primary call-to-action button with a looping light-sweep animation across its 
 - The animation is decorative only — pause or remove it when the user has \`prefers-reduced-motion\` set.
 
 ## Related patterns
-- None. This is a standalone action affordance, not part of an agent-status sequence.
+- **Agent Setup Pill** — Use it instead when the call to action is connecting an agent, and don't show both on one screen.
+- **Stop Generation Button** — Use it instead when the button controls a running generation rather than inviting a first click.
 `;

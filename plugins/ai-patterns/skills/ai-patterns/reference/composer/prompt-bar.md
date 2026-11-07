@@ -40,7 +40,9 @@ The primary text composer for talking to an agent: a single input that also supp
 - Respect `prefers-reduced-motion` for the dictation pulse; fall back to a solid color change instead of an animated ring.
 
 ## Related patterns
-- Typically pairs with Thinking Loader / Expandable Trace (the agent's working/done states) and Streaming Text (the reply) to form a full turn of conversation.
+- **Prompt Bar Pro** — Use it instead on a first-run screen that needs dictation and a richer composer.
+- **Thinking Loader** — Use it as well for the agent's working state after the message is sent.
+- **Streaming Text** — Use it as well for the reply, so the composer, loader and answer form a full turn.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

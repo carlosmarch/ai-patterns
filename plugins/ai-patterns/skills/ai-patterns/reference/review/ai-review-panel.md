@@ -57,10 +57,10 @@ A side panel for checking values the model extracted from a source document. Eac
 - With `prefers-reduced-motion`, cards fade instead of expanding and the bar jumps to its new widths.
 
 ## Related patterns
-- AI Fill Drawer — fills empty record fields; use it when values come from the web, not one document.
-- Inline Citation — the same source-linking idea inside generated prose.
-- Confidence Indicator — add next to a value when the model reports how sure it is.
-- Human in the Loop — when a single agent action, not a set of values, needs approval.
+- **AI Fill Drawer** — Use it instead when values fill empty record fields from the web rather than coming from one document.
+- **Inline Citation** — Use it instead when the source links belong inside generated prose rather than beside extracted values.
+- **Confidence Indicator** — Use it as well next to a value when the model reports how sure it is.
+- **Human in the Loop Question** — Use it instead when a single agent action needs approval rather than a set of values.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

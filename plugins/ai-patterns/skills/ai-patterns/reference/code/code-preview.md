@@ -44,8 +44,8 @@ A code block in an AI response that can flip between the source and a live rende
 - Animated previews still respect the user's `prefers-reduced-motion` inside the frame if the generated code does; the block's own transitions are short opacity/scale fades.
 
 ## Related patterns
-- Diff Tabs — switching between views of code changes.
-- Drawing Icon — the kind of animated SVG this block is useful for previewing.
+- **Diff Tabs** — Use it instead when the code is a change to existing files and people need to switch between diff views.
+- **Drawing Icon** — Use it as well when the code is an animated SVG that is worth previewing live.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

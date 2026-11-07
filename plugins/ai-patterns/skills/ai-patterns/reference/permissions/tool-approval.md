@@ -40,8 +40,9 @@ A pending permission prompt shown before an agent executes a tool call it doesn'
 - Don't rely on color alone to distinguish Allow from Deny — the label text already carries the meaning, so keep it even under custom theming.
 
 ## Related patterns
-- Diff Summary Card is the after-the-fact counterpart — this pattern gates a call before it runs, that one summarizes calls that already ran.
-- Prompt Bar's chip-with-chevron dropdown is the same disclosure idiom used here for the scope picker.
+- **Diff Summary Card** — Use it instead after the fact, to summarize calls that already ran.
+- **Human in the Loop Question** — Use it instead when the agent needs an open choice rather than a yes or no on one call.
+- **Connector Panel** — Use it as well so people can grant standing permissions and see fewer prompts.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

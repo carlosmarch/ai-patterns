@@ -43,10 +43,10 @@ A slowly rotating 3D sphere of particles that stands in for the assistant during
 - Keep contrast between the particles and the backdrop high enough that the sphere's outline is visible at rest.
 
 ## Related patterns
-- Voice Waveform — the compact, literal level display; use it where the orb doesn't fit.
-- Listening State — the pill-sized "mic is on" indicator for composers.
-- Live Transcript — the text of what's being said, shown below or beside the orb.
-- Thinking Loader — the text-mode equivalent of the orb's `thinking` state.
+- **Voice Waveform** — Use it instead where the orb doesn't fit and a compact, literal level display is enough.
+- **Listening State** — Use it instead in a composer, where a pill-sized mic-is-on indicator fits better.
+- **Live Transcript** — Use it as well below or beside the orb to show what's being said.
+- **Thinking Loader** — Use it instead in a text-only interface for the orb's thinking state.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

@@ -40,7 +40,7 @@ A composer that stays usable while the agent is working. Enter still sends right
 - Respect \`prefers-reduced-motion\`: rows fade instead of sliding and reflowing.
 
 ## Related patterns
-- Stop Generation Button — the send/stop control the composer reuses while busy.
-- Prompt Bar — the base composer this extends.
-- Task List — shows the agent's own plan; the queue holds the user's next instructions.
+- **Stop Generation Button** — Use it as well as the send/stop control the composer shows while the agent is busy.
+- **Prompt Bar** — Use it instead when the agent can't be busy between messages and there is nothing to queue.
+- **Task List** — Use it as well when the agent has its own plan, so the plan shows its steps and the queue holds the user's next instructions.
 `;

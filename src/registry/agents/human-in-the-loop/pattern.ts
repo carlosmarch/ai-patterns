@@ -53,6 +53,6 @@ A compact dialog that pauses an agent mid-task to collect a structured choice fr
 - Avoid auto-advancing on radio selection without an explicit Continue click — screen readers and keyboard users need a stable target.
 
 ## Related patterns
-- **Tool Approval** handles the narrower case of approving or denying a specific pending tool call; Human in the Loop handles open-ended preference collection.
-- **Create Agent** is a broader wizard pattern for structured multi-field setup; use it when the questions involve text fields, toggles, and pickers rather than single-choice options.
+- **Tool Approval** — Use it instead when the agent only needs a yes or no on one pending tool call rather than an open choice.
+- **Create Agent** — Use it instead when the questions need text fields, toggles and pickers rather than single-choice options.
 `;

@@ -45,9 +45,9 @@ A dismissible banner that surfaces a network connectivity failure with a short d
 - The wifi-off icon is `aria-hidden` — the title carries the semantic meaning.
 
 ## Related patterns
-- Rate Limit — for quota-exceeded states, not connectivity failures.
-- Partial Response — for responses cut short by the server, not by a network drop.
-- Console Error Card — for surfacing developer-facing browser errors, not end-user connectivity issues.
+- **Rate Limit** — Use it instead when the request failed because of a quota, not the network.
+- **Partial Response** — Use it instead when the server cut the response short rather than the connection dropping.
+- **Console Error Card** — Use it instead when the error is for developers in the browser console, not end users.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

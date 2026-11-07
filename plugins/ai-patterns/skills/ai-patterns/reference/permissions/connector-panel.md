@@ -48,8 +48,9 @@ A structured settings panel for connecting and configuring an external app or MC
 - The search input has `aria-label="Search tools"`.
 
 ## Related patterns
-- Tool Approval — per-call in-context permission prompt; this panel manages standing permissions set before calls happen.
-- Agent Triggers — similar two-column layout (sidebar overview + main content) for agent configuration.
+- **Tool Approval** — Use it as well for in-context permission on each call, while this panel manages standing permissions set beforehand.
+- **Memory Panel** — Use it as well when people also need to manage what the AI has learned about them, not just what it can read.
+- **Agent Triggers** — Use it as a layout reference, since it shares the sidebar overview plus main content shape.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

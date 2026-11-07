@@ -52,8 +52,9 @@ A dismissible horizontal banner that warns the user their usage is approaching o
 - Countdown ticks should NOT be in a live region themselves — announcing every second would be disruptive. The initial announcement of the full banner is sufficient.
 
 ## Related patterns
-- Generation Error — for individual response failures, not quota states.
-- Partial Response — for responses cut short by token limits rather than user quotas.
+- **Generation Error** — Use it instead when one response failed for a reason other than a quota.
+- **Partial Response** — Use it instead when a response was cut short by token limits rather than usage quotas.
+- **Model Picker** — Use it as well so people can step down to a cheaper model instead of waiting.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

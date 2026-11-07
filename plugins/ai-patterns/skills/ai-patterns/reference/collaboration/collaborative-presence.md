@@ -65,8 +65,8 @@ On desktop, hovering an avatar shows a tooltip above it with the collaborator's 
 - All animations should respect `prefers-reduced-motion`.
 
 ## Related patterns
-- **Invite Members** — the access management counterpart; opens a modal to add or remove people from the same project. Typically placed adjacent to this component.
-- **Sources Stack** — same overlapping circular group visual applied to source favicons. Shares the overlap, cap, and "+N" overflow conventions.
+- **Invite Members** — Use it as well, placed next to the avatar stack, so people can add or remove who has access.
+- **Sources Stack** — Use it instead when the overlapping circles are source favicons rather than people, keeping the same overlap, cap and +N rules.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

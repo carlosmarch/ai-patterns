@@ -37,7 +37,9 @@ A compact "N sources" pill showing overlapping favicons for the sources behind a
 - Each expanded row is a real `<a>` to the source, reachable and activatable by keyboard alone.
 
 ## Related patterns
-- Inline Citation is the claim-level counterpart — a numbered marker tied to one sentence, versus this pattern's answer-level summary of every source used.
+- **Inline Citation** — Use it as well to tie a numbered marker to the one sentence a source supports.
+- **Source Trust Card** — Use it instead when one source needs a full preview and trust signals.
+- **Collaborative Presence** — Use it as a visual reference, since it uses the same overlapping circles for people.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

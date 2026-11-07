@@ -41,6 +41,7 @@ A batch-processing loader: a full-width indeterminate progress bar sits above a 
 - Thumbnail images use empty \`alt=""\` when the adjacent title already names the item, to avoid redundant announcements.
 
 ## Related patterns
-- Thinking Loader — the right choice for a single undifferentiated task instead of a list of sub-items.
-- Tool Call Chip — a single inline chip's running → done transition, useful as the trailing glyph's model for this pattern's per-row status.
+- **Thinking Loader** — Use it instead for a single undifferentiated task with no sub-items to list.
+- **Tool Call Chip** — Use it as the model for each row's running-to-done status glyph.
+- **Drawing Icon** — Use it as well to animate only the active row's icon.
 `;

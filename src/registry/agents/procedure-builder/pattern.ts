@@ -53,7 +53,8 @@ A document-style editor for writing the step-by-step procedure an AI agent follo
 - Syntax highlighting in code mode is a decorative overlay; the underlying textarea holds the real text, so it remains editable and readable by assistive tech.
 
 ## Related patterns
-- Flowchart — the canvas alternative for logic whose shape matters more than its wording.
-- Create Agent and Agent Triggers — decide when an agent runs; a Procedure Builder decides what it does once running.
-- Command Palette — the same search-and-pick interaction, applied to navigation instead of insertion.
+- **Flowchart** — Use it instead when the shape of the logic matters more than its wording and a canvas reads better than a doc.
+- **Create Agent** — Use it as well to set up the agent the procedure belongs to.
+- **Agent Triggers** — Use it as well to decide when the agent runs, while the procedure decides what it does once running.
+- **Command Palette** — Use it instead when the same search-and-pick interaction is for navigating, not inserting steps.
 `;

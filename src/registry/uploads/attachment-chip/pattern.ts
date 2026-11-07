@@ -36,6 +36,8 @@ A compact chip representing one file or image attached to a composer — thumbna
 - Give each remove button a descriptive accessible name (\`Remove quarterly-report.pdf\`), not a bare "×".
 
 ## Related patterns
-- Prompt Bar and Prompt Bar Pro are the composers this tray typically lives inside.
-- Diff Summary is a similar "batch of items with per-item status" pattern for a different context (file edits instead of uploads).
+- **Prompt Bar** — Use it as well, since it's the composer this tray usually lives inside.
+- **Prompt Bar Pro** — Use it as well on a first-run composer that accepts files.
+- **Image Peek** — Use it instead for images the agent has already used or produced rather than images going in.
+- **Diff Summary Card** — Use it instead when the batch of items with per-item status is file edits rather than uploads.
 `;

@@ -54,9 +54,10 @@ A first-run setup screen that replaces "read the docs, find the SDK, copy the co
 - The API key is masked visually; the copy button's label announces success ("API key copied").
 
 ## Related patterns
-- Setup Checklist — re-surfaces this step if the user skips it.
-- Terminal Stream / Background Tasks Drawer — if the product runs its own agent instead of handing the prompt off.
-- Tool Approval — what the user will see inside their coding agent as it applies the setup.
+- **Setup Checklist** — Use it as well to bring this step back if the person skips it.
+- **Terminal Stream** — Use it instead when the product runs its own agent and shows its output, rather than handing the prompt off.
+- **Background Tasks Drawer** — Use it instead when the product runs the setup itself as long-running work.
+- **Tool Approval** — Use it as a reference for what people will see in their coding agent as it applies the setup.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

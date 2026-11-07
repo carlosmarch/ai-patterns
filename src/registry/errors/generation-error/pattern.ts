@@ -46,6 +46,7 @@ Four distinct reasons change the copy and whether Retry is offered:
 - The alert icon is \`aria-hidden\` — the card's text content, not the icon, carries the meaning.
 
 ## Related patterns
-- Partial Response — for streams that produced some content before stopping.
-- Rate Limit — for quota-exceeded states, which are expected and recurring rather than failures.
+- **Partial Response** — Use it instead when the stream produced some content before it stopped.
+- **Rate Limit** — Use it instead for quota-exceeded states, which are expected and recurring rather than failures.
+- **Connectivity Error** — Use it instead when the request failed because the person went offline.
 `;

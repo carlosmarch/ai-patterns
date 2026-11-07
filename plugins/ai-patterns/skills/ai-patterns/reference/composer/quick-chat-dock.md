@@ -43,9 +43,9 @@ A near-invisible handle pinned to the bottom edge of a workspace that wakes into
 - Respect `prefers-reduced-motion`: crossfade instead of morphing and sliding.
 
 ## Related patterns
-- Prompt Bar — the full composer for chat-first surfaces.
-- Command Palette — a keyboard-first launcher that can share the same "search or ask" input.
-- Selection Actions — a similar on-demand toolbar anchored to selected content instead of the screen edge.
+- **Prompt Bar** — Use it instead on chat-first surfaces where the composer is the main thing on the page.
+- **Command Palette** — Use it instead when the input is a keyboard-first launcher for search and commands rather than a docked chat.
+- **Selection Actions** — Use it instead when the toolbar should be anchored to selected content rather than the screen edge.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 

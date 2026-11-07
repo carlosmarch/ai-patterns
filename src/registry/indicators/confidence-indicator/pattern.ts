@@ -37,6 +37,7 @@ A small visual signal attached to an AI-generated claim, answer, or extraction t
 - The reason disclosure toggle needs \`aria-expanded\` and, ideally, is a real \`<button>\` so it's reachable and operable by keyboard.
 
 ## Related patterns
-- Inline Citation — when the reason for low confidence is "check the source," a citation marker is often a better fix than a bare confidence dot.
-- Tool Approval — for actions (not claims) where uncertainty should gate execution rather than just being displayed.
+- **Inline Citation** — Use it instead when the fix for low confidence is checking the source, since a citation gives people somewhere to look.
+- **Tool Approval** — Use it instead when uncertainty is about an action and should gate it, not just be displayed.
+- **AI Disclosure Badge** — Use it as well when people also need to know the value was AI-made.
 `;

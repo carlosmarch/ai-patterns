@@ -36,7 +36,8 @@ A compact inline pill shown while a specific, named tool call is in flight — a
 - Give the icon \`aria-hidden\` and let the text label carry the accessible name.
 
 ## Related patterns
-- Thinking Loader is the generic counterpart for when no specific tool call is active.
-- Expandable Trace is where a sequence of resolved chips typically ends up once a turn completes.
-- Tool Approval is the gate that, when required, appears before a chip like this starts running.
+- **Thinking Loader** — Use it instead when the agent is working but no specific tool call is active.
+- **Expandable Trace** — Use it as well once the turn completes, where a sequence of resolved chips ends up.
+- **Tool Approval** — Use it before the chip when the call needs permission to run.
+- **Terminal Stream** — Use it instead when the call's full output matters and should be readable live.
 `;

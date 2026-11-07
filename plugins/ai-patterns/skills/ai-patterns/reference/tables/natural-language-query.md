@@ -49,9 +49,9 @@ A table's query bar that speaks SQL by default but also accepts plain language. 
 - Focus stays in the bar through translation and running, so the user can refine straight away.
 
 ## Related patterns
-- Describe Filters — the same idea for people who shouldn't see SQL: the request becomes filter chips.
-- Command Palette — keyword jumping, not querying.
-- Refinement Controls — a similar plain-instruction → reviewable-result loop for text.
+- **Describe Filters** — Use it instead for people who shouldn't see SQL, so the request becomes filter chips.
+- **Command Palette** — Use it instead when people are jumping to something by keyword, not querying data.
+- **Refinement Controls** — Use it instead when the plain instruction changes text rather than a query.
 
 ## Default implementation (Tailwind v4 + Radix + Motion)
 
