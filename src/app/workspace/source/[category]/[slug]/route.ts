@@ -1,7 +1,5 @@
-import fs from "node:fs/promises";
-import path from "node:path";
-import { codeToHtml } from "shiki";
-
+import { highlight } from "@/lib/highlight";
+import { readComponentSource } from "@/lib/agent";
 import { getRegistryEntry, registry } from "@/registry";
 
 // The workspace is a client app, so its Code and Guardrails tabs fetch a
@@ -17,10 +15,10 @@ export async function GET(_request: Request, { params }: RouteContext<"/workspac
   const entry = getRegistryEntry(category, slug);
   if (!entry) return Response.json({ error: "Not found" }, { status: 404 });
 
-  const code = await fs.readFile(path.join(process.cwd(), "src/registry", category, slug, "component.tsx"), "utf-8");
+  const code = await readComponentSource(entry);
   const [codeHtml, specHtml] = await Promise.all([
-    codeToHtml(code, { lang: "tsx", theme: "github-dark" }),
-    codeToHtml(entry.uxDoc, { lang: "markdown", theme: "github-dark" }),
+    highlight(code, "tsx"),
+    highlight(entry.uxDoc, "markdown"),
   ]);
 
   return Response.json({ code, codeHtml, specHtml });

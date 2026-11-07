@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import fs from "node:fs/promises";
-import path from "node:path";
 import Link from "next/link";
 
 import { CodeBlock } from "@/components/code-block";
 import { getCategories, registry } from "@/registry";
+import pluginJson from "../../../plugins/ai-patterns/.claude-plugin/plugin.json";
 import { INSTALL_COMMAND, SKILL_MODES, SKILL_PILLARS, SKILL_STATS_BODY, SKILL_STEPS, SKILL_TAGLINE, SkillPitch } from "./content";
 import { SkillCta } from "./skill-cta";
 import { SkillExamples } from "./skill-examples";
@@ -15,14 +14,7 @@ export const metadata: Metadata = {
   alternates: { types: { "text/markdown": "/skill.md", "text/plain": "/llms.txt" } },
 };
 
-export default async function SkillPage() {
-  const pluginJson = JSON.parse(
-    await fs.readFile(
-      path.join(process.cwd(), "plugins/ai-patterns/.claude-plugin/plugin.json"),
-      "utf-8"
-    )
-  ) as { version: string };
-
+export default function SkillPage() {
   const categories = getCategories();
 
   return (

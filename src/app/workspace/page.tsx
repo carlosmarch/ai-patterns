@@ -1,7 +1,6 @@
-import fs from "node:fs/promises";
-import path from "node:path";
 import type { Metadata } from "next";
 
+import plugin from "../../../plugins/ai-patterns/.claude-plugin/plugin.json";
 import { WorkspaceApp } from "./workspace-app";
 
 export const metadata: Metadata = {
@@ -11,11 +10,7 @@ export const metadata: Metadata = {
 
 // The workspace is a full-screen app, so it covers the site header and
 // footer from the root layout instead of sitting inside them.
-export default async function WorkspacePage() {
-  const plugin = JSON.parse(
-    await fs.readFile(path.join(process.cwd(), "plugins/ai-patterns/.claude-plugin/plugin.json"), "utf-8")
-  ) as { version: string };
-
+export default function WorkspacePage() {
   return (
     <main className="fixed inset-0 z-40 bg-background">
       <h1 className="sr-only">Workspace</h1>

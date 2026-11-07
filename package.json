@@ -4,14 +4,19 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "predev": "node scripts/build-sources.mjs",
     "build": "next build",
+    "prebuild": "node scripts/build-sources.mjs",
     "start": "next start",
     "lint": "eslint",
+    "sources:build": "node scripts/build-sources.mjs",
     "skill:build": "node scripts/build-skill.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.3.3",
     "@radix-ui/react-tabs": "^1.1.21",
+    "@shikijs/langs": "^4.4.3",
+    "@shikijs/themes": "^4.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.45.0",
