@@ -41,6 +41,9 @@ import { pattern as drawingIconPattern } from "./loaders/drawing-icon/pattern";
 import ExpandableTraceDemo from "./traces/expandable-trace/demo";
 import ExpandableTraceThumbnail from "./traces/expandable-trace/thumbnail";
 import { pattern as expandableTracePattern } from "./traces/expandable-trace/pattern";
+import StreamOfThoughtDemo from "./traces/stream-of-thought/demo";
+import StreamOfThoughtThumbnail from "./traces/stream-of-thought/thumbnail";
+import { pattern as streamOfThoughtPattern } from "./traces/stream-of-thought/pattern";
 import StreamingTextDemo from "./text/streaming-text/demo";
 import StreamingTextThumbnail from "./text/streaming-text/thumbnail";
 import { pattern as streamingTextPattern } from "./text/streaming-text/pattern";
@@ -366,6 +369,16 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "claude", source: "https://support.claude.com/en/articles/10574485-using-extended-thinking" },
     ],
+  },
+  {
+    slug: "stream-of-thought",
+    category: "traces",
+    title: "Stream of Thought",
+    description: "A live, timed header over reasoning that streams in as a step timeline, then folds into a \"Thought for Ns\" trace when the answer starts.",
+    Demo: StreamOfThoughtDemo,
+    Thumbnail: StreamOfThoughtThumbnail,
+    uxDoc: streamOfThoughtPattern,
+    seenIn: [],
   },
   {
     slug: "streaming-text",
