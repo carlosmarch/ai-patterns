@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ChevronDown, ChevronRight, Folder, Link2, Mic, Monitor, Paperclip, Plus, Search, Shuffle } from "lucide-react";
+import { ArrowLeft, ArrowUp, ChevronDown, ChevronRight, Folder, Link2, Mic, Monitor, Paperclip, Plus, Search, Shuffle, Square, X } from "lucide-react";
 
 import { Attachment, AttachmentChip } from "../../uploads/attachment-chip/component";
 
 import { cn } from "@/lib/utils";
 import { StopGenerationButton, type GenerationState } from "../../buttons/stop-generation-button/component";
+import { useMicLevel, VoiceWaveform } from "../../voice/voice-waveform/component";
 
 interface ConnectorItem {
   id: string;
@@ -164,6 +165,57 @@ export function PromptBarPro({
   });
 
   const isDisabled = generationState === "generating";
+
+  // Dictation: the mic's loudness drives the waveform, and (where the browser
+  // supports it) speech recognition streams the words into the editor live.
+  const mic = useMicLevel();
+  const transcriptNode = React.useRef<Text | null>(null);
+  const recognition = React.useRef<SpeechRecognitionLike | null>(null);
+
+  function startDictation() {
+    const el = editorRef.current;
+    if (!el || isDisabled) return;
+    setDictating(true);
+    void mic.start();
+
+    const node = document.createTextNode("");
+    el.appendChild(node);
+    transcriptNode.current = node;
+    const lead = el.textContent && el.textContent !== "" && !/\s$/.test(el.textContent) ? " " : "";
+
+    const Recognition = getSpeechRecognition();
+    if (!Recognition) return;
+    const r = new Recognition();
+    r.continuous = true;
+    r.interimResults = true;
+    r.onresult = (event) => {
+      let text = "";
+      for (let i = 0; i < event.results.length; i++) text += event.results[i][0].transcript;
+      node.textContent = text ? lead + text.trim() : "";
+      updateEditorState();
+    };
+    try {
+      r.start();
+      recognition.current = r;
+    } catch {
+      recognition.current = null;
+    }
+  }
+
+  function finishDictation(mode: "cancel" | "keep" | "send") {
+    recognition.current?.stop();
+    recognition.current = null;
+    mic.stop();
+    setDictating(false);
+    const node = transcriptNode.current;
+    transcriptNode.current = null;
+    if (mode === "cancel") node?.remove();
+    updateEditorState();
+    if (mode === "send") handleSubmit();
+    else editorRef.current?.focus();
+  }
+
+  React.useEffect(() => () => recognition.current?.abort(), []);
 
   function addAttachments(files: FileList | null) {
     if (!files) return;
@@ -468,6 +520,14 @@ export function PromptBarPro({
             </div>
           </div>
 
+          {dictating ? (
+            <DictationBar
+              level={mic.active ? mic.level : undefined}
+              onCancel={() => finishDictation("cancel")}
+              onStop={() => finishDictation("keep")}
+              onSend={() => finishDictation("send")}
+            />
+          ) : (
           <div className="flex flex-wrap items-center gap-y-2 gap-x-1">
             <div ref={attachMenuRef} className="relative shrink-0">
               <button
@@ -716,21 +776,11 @@ export function PromptBarPro({
 
               <button
                 type="button"
-                onClick={() => setDictating((v) => !v)}
-                aria-pressed={dictating}
-                aria-label="Toggle dictation"
-                className={cn(
-                  "relative flex size-8 shrink-0 items-center justify-center rounded-full transition-colors",
-                  dictating ? "text-destructive" : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                )}
+                onClick={startDictation}
+                disabled={isDisabled}
+                aria-label="Dictate"
+                className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
               >
-                {dictating && (
-                  <motion.span
-                    className="absolute inset-0 rounded-full bg-destructive/20"
-                    animate={{ scale: [1, 1.4], opacity: [0, 0.6, 0] }}
-                    transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
-                  />
-                )}
                 <Mic className="size-4" />
               </button>
 
@@ -743,10 +793,84 @@ export function PromptBarPro({
               />
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>
   );
+}
+
+/**
+ * The Claude-mobile dictation row: it takes over the toolbar while recording.
+ * Cancel discards what was dictated, Stop keeps the words in the editor to
+ * edit, and Send submits them straight away.
+ */
+function DictationBar({
+  level,
+  onCancel,
+  onStop,
+  onSend,
+}: {
+  level?: React.RefObject<number>;
+  onCancel: () => void;
+  onStop: () => void;
+  onSend: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.15 }}
+      className="flex items-center gap-3"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onCancel();
+      }}
+    >
+      <button
+        type="button"
+        onClick={onCancel}
+        aria-label="Cancel dictation"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-accent"
+      >
+        <X className="size-4" />
+      </button>
+      <VoiceWaveform state="listening" variant="dots" level={level} className="min-w-0 flex-1" />
+      <span className="sr-only" aria-live="polite">
+        Recording. Speak now.
+      </span>
+      <button
+        type="button"
+        onClick={onStop}
+        aria-label="Stop dictation"
+        autoFocus
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-accent"
+      >
+        <Square className="size-3.5 fill-current" />
+      </button>
+      <button
+        type="button"
+        onClick={onSend}
+        aria-label="Send"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition-opacity hover:opacity-90"
+      >
+        <ArrowUp className="size-4" />
+      </button>
+    </motion.div>
+  );
+}
+
+interface SpeechRecognitionLike {
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+function getSpeechRecognition(): (new () => SpeechRecognitionLike) | undefined {
+  const w = window as unknown as Record<string, (new () => SpeechRecognitionLike) | undefined>;
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition;
 }
 
 function useClickOutside<T extends HTMLElement>(onOutside: () => void) {

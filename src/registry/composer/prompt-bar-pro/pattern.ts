@@ -15,6 +15,7 @@ An empty-state composer for launching a new agent session: a row of clickable ex
 ## Anatomy
 - Suggestion row: 2-4 example-prompt chips (icon + short phrase) plus a shuffle control to reveal a different sample.
 - Composer bar: leading add/attach action, an environment picker, the auto-growing text field, an orchestrator/agent picker, a dictation toggle, and a start action.
+- Dictation row: while recording, the toolbar is replaced by Cancel (×), a full-width live waveform, Stop (■) and Send (↑) — the Claude mobile app's voice input.
 - Inline \`@\`/\`/\` autocomplete popover, anchored above the composer bar, for mentioning sources or invoking commands without leaving the text field.
 
 ## Behavior
@@ -22,6 +23,8 @@ An empty-state composer for launching a new agent session: a row of clickable ex
 - Shuffle swaps the visible suggestions from a larger pool; it does not affect anything already typed in the input.
 - Environment and orchestrator selection are independent of the text content and persist across shuffles.
 - Typing \`@\` or \`/\` opens a filtered popover of sources or commands; arrow keys move the highlight, Enter/Tab inserts the highlighted item, and Escape dismisses the popover without clearing what's typed.
+- Tapping the mic starts dictation: the toolbar swaps for the dictation row, the waveform follows the real mic level, and recognized words stream into the text field as they're heard. Cancel (or Escape) throws away what was dictated and keeps what was typed before; Stop keeps the words in the field to edit; Send submits them straight away.
+- If the mic is denied or unavailable, keep the dictation row usable and say so — never leave a waveform implying it's listening when it isn't.
 - The start action stays inactive until there's non-whitespace content, exactly like an ordinary send button — this bar still submits a real message, it's just dressed for a first-run moment.
 
 ## Content guidelines
@@ -33,8 +36,10 @@ An empty-state composer for launching a new agent session: a row of clickable ex
 - Suggestion chips, the shuffle control, and both pickers must be reachable and operable by keyboard.
 - Shuffling suggestions should not silently move keyboard focus; keep focus predictable for a screen-reader or keyboard user who just activated it.
 - The environment and orchestrator pickers need labels that make sense out of context (e.g. "Environment: Computer"), not just the bare selected value, for assistive tech.
+- Announce when recording starts (a polite live region), give Cancel, Stop and Send explicit labels, and move focus into the dictation row so keyboard users can stop it.
 - The \`@\`/\`/\` autocomplete popover must be fully operable from the keyboard and communicate the current highlighted item to assistive tech.
 
 ## Related patterns
+- Voice Waveform — the \`dots\` waveform shown while dictating.
 - A specialized first-run variant of the Prompt Bar — swap to the plain Prompt Bar once a session actually starts.
 `;

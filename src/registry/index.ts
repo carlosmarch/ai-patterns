@@ -389,6 +389,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: promptBarPattern,
     seenIn: [
       { team: "cursor", source: "https://cursor.com/docs/context/symbols" },
+      { team: "claude", source: "https://claude.com/download" },
     ],
   },
   {
@@ -754,6 +755,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: voiceWaveformPattern,
     seenIn: [
       { team: "gemini", source: "https://9to5google.com/2024/08/15/gemini-live-rolling-out/" },
+      { team: "claude", source: "https://claude.com/download" },
     ],
   },
   {
