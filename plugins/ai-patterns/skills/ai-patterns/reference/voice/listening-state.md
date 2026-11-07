@@ -5,7 +5,7 @@
 # Listening State
 
 ## Summary
-A dedicated visual state — a pulsing mic glyph with an outward ripple, a status label, and a stop control — that tells the user the system is actively capturing their voice right now. It's the "your mic is live" moment in a voice interface, distinct from showing what was heard (Live Transcript) or how loud it is (Voice Waveform).
+A dedicated visual state — a mic glyph with a halo that swells with the user's voice, a status label with an elapsed timer, and a stop control — that tells the user the system is actively capturing their voice right now. It's the "your mic is live" moment in a voice interface, distinct from showing what was heard (Live Transcript) or how loud it is (Voice Waveform).
 
 ## When to use
 - The instant a voice interface starts capturing audio, whether triggered by a push-to-talk press, a wake word, or an always-on mode — show this before or alongside any transcript text appears.
@@ -18,17 +18,21 @@ A dedicated visual state — a pulsing mic glyph with an outward ripple, a statu
 - Stacked with a second, separate ripple/pulse indicator for the same mic state — one active listening indicator per view.
 
 ## Anatomy
-- Mic glyph: a plain (unfilled) microphone icon, tinted with an accent color while active and muted gray when paused — not a solid-filled badge. This mirrors Prompt Bar's dictation mic exactly, so the two read as the same control at any size.
+- Mic glyph: a plain (unfilled) microphone icon, tinted with an accent color while active, amber when no voice is coming through, and muted gray (crossed-out mic) when paused — not a solid-filled badge.
+- Voice halo: a soft disc behind the glyph whose size and opacity follow the live mic level, so the user sees their own voice land on the control. Only shown when a real level source is wired up.
 - Ripple: a single translucent ring, sized and centered on the glyph itself (not a separate oversized container), that expands outward a short distance and fades to nothing, looping continuously. Because the glyph has no opaque fill behind it, the full ring is visible from the start of each cycle, not just the portion that clears a solid background.
-- Status label: a short live-updating phrase ("Listening…", "Paused") directly below the glyph.
+- Status label: a short live-updating phrase ("Listening…", "Paused", or a silence hint) directly below the glyph, followed by an elapsed timer (`0:07`) while capturing.
 - Stop control: a small button beside the label that ends capture — always reachable without needing to find a separate toolbar.
 
 ## Behavior
+- The halo tracks the real mic level every frame with a fast attack and slow release — it jumps with each syllable and settles between words, never flickers.
+- After a few seconds of near-silence on a real level source, swap the label for a plain hint ("Can't hear you — check your mic"), tint the glyph amber and stop the ambient ripple — a ripple that keeps pulsing while nothing is heard is a lie. The moment sound returns, go straight back to "Listening…".
+- The elapsed timer restarts each time capture starts, and disappears while paused.
 - The ripple only animates while `active` is true; pausing or muting freezes the glyph in a flat, static state with the ripple removed rather than slowed down, so "paused" is unambiguous at a glance.
 - Clicking stop ends the capture session immediately — no confirmation step, since capture is easy to restart and holding it hostage behind a dialog adds friction to a moment that's meant to feel instant.
 - The label updates in place (no layout shift) when switching between active and paused text.
 - On resume, restart the ripple animation from its initial state rather than resuming mid-cycle, so the "just started listening" cue is clear each time.
-- Drive the ripple with a plain keyframe `animate` (scale `[1, 1.4]`, opacity `[0, 0.6, 0]`, 1.2s, `easeOut`, infinite repeat, no separate `initial` or per-instance `delay`) — this is copied verbatim from Prompt Bar's dictation mic, down to the ring's low-alpha color treatment (`/20`). Staggering multiple rings via `delay` on an infinitely-repeating animation is fragile and prone to drifting out of sync; one ring on a clean loop reads just as clearly as "listening."
+- Drive the ripple with a plain keyframe `animate` (scale `[1, 1.5]`, opacity `[0, 0.6, 0]`, 1.4s, `easeOut`, infinite repeat, no separate `initial` or per-instance `delay`), with a low-alpha ring color (`/20`). Staggering multiple rings via `delay` on an infinitely-repeating animation is fragile and prone to drifting out of sync; one ring on a clean loop reads just as clearly as "listening."
 - Fade the ripple's opacity in from 0 and back out to 0 within each cycle rather than starting it at full strength — a ring that starts fully visible and simply expands has to hard-reset to a small, bold ring the instant it disappears, which reads as the ring suddenly shrinking rather than continuing to expand. Fading through 0 at both ends of the loop makes the reset invisible.
 
 ## Content guidelines
@@ -38,11 +42,12 @@ A dedicated visual state — a pulsing mic glyph with an outward ripple, a statu
 ## Accessibility
 - Wrap the label in `aria-live="polite"` so a screen reader announces the active/paused transition without needing focus.
 - The stop control must be a real, focusable `<button>` with an `aria-label` ("Stop listening") since it carries no visible text.
-- Respect `prefers-reduced-motion`: keep the glyph's color state (it's the actual status signal) but suppress or shorten the expanding ripple.
+- Respect `prefers-reduced-motion`: keep the glyph's color state (it's the actual status signal) but hide the expanding ripple and keep the halo from growing — let its opacity alone carry the voice level.
+- Hide the ticking timer from screen readers (`aria-hidden`) so it isn't announced every second; the silence hint goes through the same polite live region as the label.
 - Never rely on the ripple animation alone to convey "active" — the accent color and label both carry that meaning independently.
 
 ## Related patterns
-- Prompt Bar / Prompt Bar Pro — their composer's dictation mic button uses this same single-ring ripple technique at a smaller scale; keep both in sync if the ripple's timing or easing ever changes.
+- Prompt Bar Pro — its dictation row is the compact, in-composer version of this state (Cancel · waveform · Stop · Send); use this component for a dedicated voice screen.
 - Voice Waveform — shows the live amplitude of the audio this state confirms is being captured; often shown together, with the waveform inside or beside the mic glyph.
 - Live Transcript — shows what capture actually produced once speech is recognized; this state covers the moment before or alongside that text appearing.
 
@@ -60,60 +65,182 @@ instead of copying these Tailwind classes or the Motion API.
 "use client";
 
 import * as React from "react";
-import { motion } from "motion/react";
-import { Mic, Square } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { Mic, MicOff, Square } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 export interface ListeningStateProps {
   /** Whether the mic is actively capturing audio. Set false for a paused/muted variant with no ripple. */
   active?: boolean;
+  /**
+   * Live mic loudness (0-1) — e.g. the `level` ref from Voice Waveform's
+   * `useMicLevel()`. Read on every frame, so pass a ref to avoid re-renders.
+   * When given, the halo swells with the voice and a long silence turns the
+   * label into a "can't hear you" hint. When omitted, the glyph just pulses.
+   */
+  level?: React.RefObject<number> | number;
   label?: string;
+  /** Shown instead of `label` after `silenceMs` of near-silence on a real `level`. */
+  silenceHint?: string;
+  silenceMs?: number;
+  /** Show an elapsed-time counter next to the label. */
+  showTimer?: boolean;
   onStop?: () => void;
   className?: string;
 }
 
+const SILENCE_THRESHOLD = 0.04;
+
 export function ListeningState({
   active = true,
+  level,
   label = "Listening…",
+  silenceHint = "Can't hear you — check your mic",
+  silenceMs = 4000,
+  showTimer = true,
   onStop,
   className,
 }: ListeningStateProps) {
+  const haloRef = React.useRef<HTMLSpanElement>(null);
+  const levelRef = React.useRef(level);
+  React.useEffect(() => {
+    levelRef.current = level;
+  });
+
+  const hasLevel = level !== undefined;
+  const [silent, setSilent] = React.useState(false);
+  const [elapsed, setElapsed] = React.useState(0);
+
+  // Elapsed time restarts every time capture (re)starts.
+  React.useEffect(() => {
+    if (!active) return;
+    const started = Date.now();
+    const id = window.setInterval(() => setElapsed(Math.floor((Date.now() - started) / 1000)), 250);
+    return () => {
+      window.clearInterval(id);
+      setElapsed(0);
+    };
+  }, [active]);
+
+  // Halo follows the voice: fast attack, slow release, written straight to the DOM each frame.
+  React.useEffect(() => {
+    if (!active || !hasLevel) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let smoothed = 0;
+    let quietSince = performance.now();
+    let isSilent = false;
+    let frame = 0;
+
+    const tick = (now: number) => {
+      const raw = readLevel(levelRef.current);
+      smoothed += (raw - smoothed) * (raw > smoothed ? 0.4 : 0.1);
+
+      if (raw > SILENCE_THRESHOLD) quietSince = now;
+      const nextSilent = now - quietSince > silenceMs;
+      if (nextSilent !== isSilent) {
+        isSilent = nextSilent;
+        setSilent(nextSilent);
+      }
+
+      const halo = haloRef.current;
+      if (halo) {
+        halo.style.transform = `scale(${reducedMotion ? 1 : 1 + smoothed * 0.7})`;
+        halo.style.opacity = String(0.15 + smoothed * 0.5);
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      setSilent(false);
+    };
+  }, [active, hasLevel, silenceMs]);
+
+  const status = !active ? "Paused" : silent ? silenceHint : label;
+
   return (
     <div className={cn("flex flex-col items-center gap-3", className)}>
       <div
         className={cn(
-          "relative flex size-12 shrink-0 items-center justify-center rounded-full transition-colors",
-          active ? "text-sky-500" : "text-muted-foreground"
+          "relative flex size-14 shrink-0 items-center justify-center rounded-full transition-colors duration-300",
+          !active ? "text-muted-foreground" : silent ? "text-amber-500" : "text-sky-500"
         )}
       >
-        {active && (
-          <motion.span
+        {/* Voice-driven halo: swells with each syllable. */}
+        {active && hasLevel && (
+          <span
+            ref={haloRef}
             aria-hidden
-            className="absolute inset-0 rounded-full bg-sky-500/20"
-            animate={{ scale: [1, 1.4], opacity: [0, 0.6, 0] }}
-            transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
+            className="absolute inset-0 rounded-full bg-current opacity-15 will-change-transform"
           />
         )}
-        <Mic className="size-6" aria-hidden />
+        {/* Ambient ripple: "the mic is live" even between words. */}
+        {active && !silent && (
+          <motion.span
+            key="ripple"
+            aria-hidden
+            className="absolute inset-0 rounded-full bg-current/20 motion-reduce:hidden"
+            animate={{ scale: [1, 1.5], opacity: [0, 0.6, 0] }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut" }}
+          />
+        )}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={active ? "on" : "off"}
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.6, opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="relative"
+          >
+            {active ? <Mic className="size-6" aria-hidden /> : <MicOff className="size-6" aria-hidden />}
+          </motion.span>
+        </AnimatePresence>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex min-h-6 items-center gap-2">
         <span aria-live="polite" className="text-sm text-muted-foreground">
-          {active ? label : "Paused"}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={status}
+              initial={{ opacity: 0, y: 3 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -3 }}
+              transition={{ duration: 0.15 }}
+              className="inline-block"
+            >
+              {status}
+            </motion.span>
+          </AnimatePresence>
         </span>
-        {onStop && (
+        {showTimer && active && (
+          <span className="text-sm tabular-nums text-muted-foreground/70" aria-hidden>
+            {formatElapsed(elapsed)}
+          </span>
+        )}
+        {onStop && active && (
           <button
             type="button"
             onClick={onStop}
             aria-label="Stop listening"
-            className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="flex size-6 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-accent"
           >
-            <Square className="size-3" aria-hidden fill="currentColor" />
+            <Square className="size-2.5" aria-hidden fill="currentColor" />
           </button>
         )}
       </div>
     </div>
   );
+}
+
+function formatElapsed(seconds: number) {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
+function readLevel(level: ListeningStateProps["level"]) {
+  if (typeof level === "number") return Math.min(1, Math.max(0, level));
+  if (level && typeof level.current === "number") return Math.min(1, Math.max(0, level.current));
+  return 0;
 }
 ```
