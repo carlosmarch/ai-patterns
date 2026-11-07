@@ -52,6 +52,11 @@ export interface InstructionToolsProps {
   /** Initial plain-text content, one string per numbered step. */
   defaultSteps?: string[];
   placeholder?: string;
+  /**
+   * Opens the / tool menu at the end of the last step on first render,
+   * without moving focus — for demos and onboarding.
+   */
+  defaultPickerOpen?: boolean;
   onChange?: (steps: InstructionSegment[][]) => void;
   /** Called when the user picks a tool's "Create new…" footer action. */
   onCreateOption?: (toolId: string) => void;
@@ -118,6 +123,8 @@ interface PickerState {
   tool?: InstructionTool;
   query: string;
   activeIndex: number;
+  /** Focus the search input when the picker opens (default true). */
+  autoFocus?: boolean;
 }
 
 interface ChipState {
@@ -150,6 +157,7 @@ export function InstructionTools({
   tools = DEFAULT_TOOLS,
   defaultSteps = [""],
   placeholder = "Type / to insert a tool",
+  defaultPickerOpen = false,
   onChange,
   onCreateOption,
   className,
@@ -209,6 +217,7 @@ export function InstructionTools({
             initialText={step.text}
             tools={tools}
             placeholder={i === 0 ? placeholder : undefined}
+            openOnMount={defaultPickerOpen && step.id === `step-${defaultSteps.length - 1}`}
             onCreateOption={onCreateOption}
             registerEditor={(el) => {
               if (el) editors.current.set(step.id, el);
@@ -231,6 +240,7 @@ interface StepEditorProps {
   initialText: string;
   tools: InstructionTool[];
   placeholder?: string;
+  openOnMount?: boolean;
   onCreateOption?: (toolId: string) => void;
   registerEditor: (el: HTMLDivElement | null) => void;
   onSegments: (segments: InstructionSegment[]) => void;
@@ -242,6 +252,7 @@ function StepEditor({
   initialText,
   tools,
   placeholder,
+  openOnMount,
   onCreateOption,
   registerEditor,
   onSegments,
@@ -266,6 +277,13 @@ function StepEditor({
     if (!el) return;
     el.textContent = initialText;
     registerEditor(el);
+    if (openOnMount) {
+      const host = makeHost();
+      el.append(host);
+      // The picker portals into a DOM node that only exists once the editor has mounted.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPicker({ anchor: host, stage: "tool", query: "", activeIndex: 0, autoFocus: false });
+    }
     return () => registerEditor(null);
     // Mount-only: the editor is uncontrolled after its initial text.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -490,11 +508,23 @@ interface ToolPickerProps {
 function ToolPicker({ picker, tools, onQuery, onActive, onChoose, onBack, onCancel, onDismiss }: ToolPickerProps) {
   const { stage, tool, query, activeIndex } = picker;
   const listId = React.useId();
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const toolItems = stage === "tool" ? filterTools(tools, query) : [];
   const optionItems = stage === "option" && tool ? filterOptions(tool, query) : [];
   const hasCreate = stage === "option" && Boolean(tool?.createLabel);
   const count = stage === "tool" ? toolItems.length : optionItems.length + (hasCreate ? 1 : 0);
   const inputPlaceholder = stage === "tool" ? "Search tools…" : (tool?.optionPlaceholder ?? "Search…");
+
+  // Opened without focus, the input never blurs, so close on an outside click instead.
+  React.useEffect(() => {
+    if (picker.autoFocus !== false) return;
+    function handle(e: MouseEvent) {
+      if (document.activeElement === inputRef.current) return;
+      if (!picker.anchor.contains(e.target as Node)) onCancel();
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [picker.autoFocus, picker.anchor, onCancel]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -520,7 +550,8 @@ function ToolPicker({ picker, tools, onQuery, onActive, onChoose, onBack, onCanc
         <span className="text-foreground">/</span>
         {stage === "option" && tool && <span className="mr-1 font-medium">{tool.verb}</span>}
         <input
-          autoFocus
+          ref={inputRef}
+          autoFocus={picker.autoFocus !== false}
           value={query}
           onChange={(e) => onQuery(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -545,8 +576,11 @@ function ToolPicker({ picker, tools, onQuery, onActive, onChoose, onBack, onCanc
           transition={{ duration: 0.12 }}
           id={listId}
           role="listbox"
-          // Keep focus in the input while clicking items.
-          onMouseDown={(e) => e.preventDefault()}
+          // Keep focus in the input while clicking items (and move it there if the picker opened unfocused).
+          onMouseDown={(e) => {
+            e.preventDefault();
+            inputRef.current?.focus();
+          }}
           className="absolute left-0 top-full z-30 mt-2 w-72 max-w-[80vw] overflow-hidden rounded-xl border bg-popover p-1 text-sm text-popover-foreground shadow-md"
         >
           {count === 0 && <p className="px-2.5 py-2 text-muted-foreground">No matches</p>}
