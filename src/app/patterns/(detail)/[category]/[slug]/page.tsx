@@ -5,7 +5,6 @@ import { AnimatedOrigami } from "@/components/animated-origami";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CodeBlock } from "@/components/code-block";
 import { ComponentPreview } from "@/components/component-preview";
-import { DownloadButton } from "@/components/download-button";
 import { SeenIn } from "@/components/seen-in";
 import { readComponentSource } from "@/lib/agent";
 import { PatternPager } from "@/components/pattern-pager";
@@ -58,9 +57,8 @@ export default async function PatternPage({
   const { prev, next } = getAdjacentEntries(category, slug);
   const toLink = (e: typeof prev) => e && { href: getEntryHref(e), title: e.title, category: e.category };
 
-  const spec = <CodeBlock code={entry.uxDoc} lang="markdown" wrap trackAs="spec" />;
-  const specDownload = (
-    <DownloadButton filename={`${entry.slug}.pattern.md`} content={entry.uxDoc} className="shrink-0" />
+  const spec = (
+    <CodeBlock code={entry.uxDoc} lang="markdown" wrap trackAs="spec" download={`${entry.slug}.pattern.md`} />
   );
 
   return (
@@ -86,20 +84,16 @@ export default async function PatternPage({
         prev={toLink(prev)}
         next={toLink(next)}
         preview={<Demo />}
-        code={<CodeBlock code={source} trackAs="component" />}
+        code={<CodeBlock code={source} trackAs="component" download={`${entry.slug}.tsx`} />}
         pattern={
           <div className="space-y-3">
-            <div className="flex items-center justify-between gap-4">
-              <p className="text-sm text-muted-foreground">
-                A UX spec for this pattern — written for agents implementing or reusing it, not the code.
-              </p>
-              {specDownload}
-            </div>
+            <p className="text-sm text-muted-foreground">
+              A UX spec for this pattern — written for agents implementing or reusing it, not the code.
+            </p>
             {spec}
           </div>
         }
         patternPanel={spec}
-        patternDownload={specDownload}
       />
 
       <PatternPager prev={toLink(prev)} next={toLink(next)} />
