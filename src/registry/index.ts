@@ -182,6 +182,21 @@ import { pattern as aiReviewPanelPattern } from "./review/ai-review-panel/patter
 import VoiceOrbDemo from "./voice/voice-orb/demo";
 import VoiceOrbThumbnail from "./voice/voice-orb/thumbnail";
 import { pattern as voiceOrbPattern } from "./voice/voice-orb/pattern";
+import ModelPickerDemo from "./composer/model-picker/demo";
+import ModelPickerThumbnail from "./composer/model-picker/thumbnail";
+import { pattern as modelPickerPattern } from "./composer/model-picker/pattern";
+import IncognitoToggleDemo from "./composer/incognito-toggle/demo";
+import IncognitoToggleThumbnail from "./composer/incognito-toggle/thumbnail";
+import { pattern as incognitoTogglePattern } from "./composer/incognito-toggle/pattern";
+import MemoryPanelDemo from "./permissions/memory-panel/demo";
+import MemoryPanelThumbnail from "./permissions/memory-panel/thumbnail";
+import { pattern as memoryPanelPattern } from "./permissions/memory-panel/pattern";
+import AiDisclosureBadgeDemo from "./indicators/ai-disclosure-badge/demo";
+import AiDisclosureBadgeThumbnail from "./indicators/ai-disclosure-badge/thumbnail";
+import { pattern as aiDisclosureBadgePattern } from "./indicators/ai-disclosure-badge/pattern";
+import CostEstimateDemo from "./indicators/cost-estimate/demo";
+import CostEstimateThumbnail from "./indicators/cost-estimate/thumbnail";
+import { pattern as costEstimatePattern } from "./indicators/cost-estimate/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -445,6 +460,32 @@ export const registry: RegistryEntry[] = [
     ],
   },
   {
+    slug: "model-picker",
+    category: "composer",
+    title: "Model Picker",
+    description:
+      "A composer chip that opens a list of models, each with a one-line description, plan-locked options that lead to an upgrade, and an extended-thinking switch.",
+    Demo: ModelPickerDemo,
+    Thumbnail: ModelPickerThumbnail,
+    uxDoc: modelPickerPattern,
+    seenIn: [
+      { team: "cursor", source: "https://docs.cursor.com/models" },
+    ],
+  },
+  {
+    slug: "incognito-toggle",
+    category: "composer",
+    title: "Incognito Toggle",
+    description:
+      "A header control that starts a temporary chat, with a persistent banner stating exactly what won't be saved, remembered or used for training.",
+    Demo: IncognitoToggleDemo,
+    Thumbnail: IncognitoToggleThumbnail,
+    uxDoc: incognitoTogglePattern,
+    seenIn: [
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/8914046-temporary-chat-faq" },
+    ],
+  },
+  {
     slug: "diff-summary",
     category: "code",
     title: "Diff Summary Card",
@@ -532,6 +573,19 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "claude", source: "https://support.claude.com/en/articles/11176164" },
       { team: "chatgpt", source: "https://developers.openai.com/api/docs/guides/developer-mode" },
+    ],
+  },
+  {
+    slug: "memory-panel",
+    category: "permissions",
+    title: "Memory Panel",
+    description:
+      "A panel listing what the assistant remembers about the user — edit or forget each memory with undo, switch memory off, forget all — plus a memory-updated notice for the chat.",
+    Demo: MemoryPanelDemo,
+    Thumbnail: MemoryPanelThumbnail,
+    uxDoc: memoryPanelPattern,
+    seenIn: [
+      { team: "chatgpt", source: "https://openai.com/index/memory-and-new-controls-for-chatgpt/" },
     ],
   },
   {
@@ -757,6 +811,28 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "box", source: "https://blog.box.com/confidence-scores-box-ai-extract-know-when-rely-your-extractions" },
     ],
+  },
+  {
+    slug: "ai-disclosure-badge",
+    category: "indicators",
+    title: "AI Disclosure Badge",
+    description:
+      "An AI-generated label in chip, image-overlay and inline forms that opens a provenance card: model, time, and whether a person edited it.",
+    Demo: AiDisclosureBadgeDemo,
+    Thumbnail: AiDisclosureBadgeThumbnail,
+    uxDoc: aiDisclosureBadgePattern,
+    seenIn: [],
+  },
+  {
+    slug: "cost-estimate",
+    category: "indicators",
+    title: "Cost Estimate",
+    description:
+      "A pre-run estimate of what a task will cost, with a live balance meter, a low-balance warning, a top-up when the balance can't cover it and a breakdown.",
+    Demo: CostEstimateDemo,
+    Thumbnail: CostEstimateThumbnail,
+    uxDoc: costEstimatePattern,
+    seenIn: [],
   },
   {
     slug: "voice-waveform",
