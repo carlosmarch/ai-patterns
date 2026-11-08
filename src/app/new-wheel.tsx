@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   animate,
@@ -28,6 +28,30 @@ export interface WheelItem {
   thumb: ReactNode;
 }
 
+// Wheel geometry in px: radius of the ring, card width and height. Plain
+// numbers (not CSS variables or percentages) so every browser — iOS Safari
+// included — puts each card exactly on the ring.
+const SIZES = {
+  sm: { r: 270, w: 120, h: 88 },
+  lg: { r: 400, w: 176, h: 128 },
+};
+type Size = (typeof SIZES)["lg"];
+
+const WIDE_QUERY = "(min-width: 640px)";
+function subscribeWide(onChange: () => void) {
+  const mq = window.matchMedia(WIDE_QUERY);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+function useSize(): Size {
+  const wide = useSyncExternalStore(
+    subscribeWide,
+    () => window.matchMedia(WIDE_QUERY).matches,
+    () => true,
+  );
+  return wide ? SIZES.lg : SIZES.sm;
+}
+
 // Degrees per second while the wheel spins on its own.
 const SPEED = 7;
 // Degrees of spin per pixel dragged.
@@ -40,6 +64,7 @@ const DRAG = 0.22;
 export function NewWheel({ items }: { items: WheelItem[] }) {
   const step = 360 / items.length;
   const rotation = useMotionValue(0);
+  const size = useSize();
   const reduceMotion = useReducedMotion();
   const [active, setActive] = useState(0);
   const [hovered, setHovered] = useState(false);
@@ -76,12 +101,13 @@ export function NewWheel({ items }: { items: WheelItem[] }) {
 
   return (
     <div
-      className="relative [--card:8.5rem] [--r:15rem] sm:[--card:11rem] sm:[--r:25rem]"
+      className="relative"
       onPointerEnter={(e) => e.pointerType === "mouse" && setHovered(true)}
       onPointerLeave={() => setHovered(false)}
     >
       <div
-        className="relative h-[calc(var(--r)+var(--card)*0.62)] touch-pan-y overflow-hidden select-none [mask-image:linear-gradient(to_right,transparent,black_14%,black_86%,transparent)]"
+        style={{ height: size.r + size.h * 0.6 + 12 }}
+        className="relative touch-pan-y overflow-hidden select-none [mask-image:linear-gradient(to_right,transparent,black_14%,black_86%,transparent)]"
         onPointerDown={(e) => {
           tween.current?.stop();
           tween.current = null;
@@ -121,17 +147,19 @@ export function NewWheel({ items }: { items: WheelItem[] }) {
         {/* Track: a faint ring the cards ride on */}
         <div
           aria-hidden
-          className="pointer-events-none absolute bottom-0 left-1/2 size-[calc(var(--r)*2)] -translate-x-1/2 translate-y-1/2 rounded-full border border-dashed"
+          style={{ width: size.r * 2, height: size.r * 2, left: `calc(50% - ${size.r}px)`, bottom: -size.r }}
+          className="pointer-events-none absolute rounded-full border border-dashed"
         />
 
-        {/* The wheel: rotates around the bottom-centre of the frame */}
-        <motion.ul className="absolute bottom-0 left-1/2 size-0" style={{ rotate: rotation }}>
+        {/* The wheel: cards orbit the bottom-centre of the frame */}
+        <ul className="absolute bottom-0 left-1/2 size-0">
           {items.map((entry, i) => (
             <WheelCard
               key={entry.slug}
               entry={entry}
               angle={i * step}
               rotation={rotation}
+              size={size}
               onFocus={() => {
                 setFocused(true);
                 goTo(i);
@@ -139,7 +167,7 @@ export function NewWheel({ items }: { items: WheelItem[] }) {
               onBlur={() => setFocused(false)}
             />
           ))}
-        </motion.ul>
+        </ul>
 
         {/* The hollow of the arc: what the top card is */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center px-6 pb-3 text-center">
@@ -207,41 +235,53 @@ function WheelCard({
   entry,
   angle,
   rotation,
+  size,
   onFocus,
   onBlur,
 }: {
   entry: WheelItem;
   angle: number;
   rotation: MotionValue<number>;
+  size: Size;
   onFocus: () => void;
   onBlur: () => void;
 }) {
-  // How far this card is from the top of the wheel, 0..1 over a quarter turn.
-  const distance = useTransform(rotation, (r) => Math.min(Math.abs(mod(angle + r + 180, 360) - 180), 90) / 90);
+  // This card's place on the ring: 0° is the top, clockwise positive.
+  const theta = useTransform(rotation, (r) => mod(angle + r + 180, 360) - 180);
+  const x = useTransform(theta, (t) => size.r * Math.sin((t * Math.PI) / 180));
+  const y = useTransform(theta, (t) => -size.r * Math.cos((t * Math.PI) / 180));
+  // How far from the top, 0..1 over a quarter turn.
+  const distance = useTransform(theta, (t) => Math.min(Math.abs(t), 90) / 90);
   const scale = useTransform(distance, (d) => 1.06 - d * 0.22);
   const opacity = useTransform(distance, (d) => 1 - d * 0.55);
   const zIndex = useTransform(distance, (d) => Math.round((1 - d) * 100));
 
   return (
     <motion.li
-      className="absolute top-0 left-0"
+      className="absolute"
       style={{
+        left: -size.w / 2,
+        top: -size.h / 2,
+        width: size.w,
+        height: size.h,
+        x,
+        y,
+        rotate: theta,
+        scale,
+        opacity,
         zIndex,
-        transform: `rotate(${angle}deg) translateY(calc(-1 * var(--r)))`,
       }}
     >
-      <motion.div style={{ x: "-50%", y: "-50%", scale, opacity }}>
-        <Link
-          href={entry.href}
-          draggable={false}
-          onFocus={onFocus}
-          onBlur={onBlur}
-          className="group block w-[var(--card)] rounded-xl border bg-muted/60 p-1.5 shadow-[0_10px_30px_-12px_rgb(0_0_0/0.25)] backdrop-blur transition-colors hover:bg-muted"
-        >
-          <div className="aspect-[5/3] rounded-lg border bg-card p-1.5 dark:bg-background">{entry.thumb}</div>
-          <p className="truncate px-1 pt-1.5 pb-0.5 text-[11px] font-medium sm:text-xs">{entry.title}</p>
-        </Link>
-      </motion.div>
+      <Link
+        href={entry.href}
+        draggable={false}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        className="group flex size-full flex-col rounded-xl border bg-muted/60 p-1.5 shadow-[0_10px_30px_-12px_rgb(0_0_0/0.25)] backdrop-blur transition-colors hover:bg-muted"
+      >
+        <div className="min-h-0 flex-1 rounded-lg border bg-card p-1 dark:bg-background">{entry.thumb}</div>
+        <p className="truncate px-1 pt-1.5 pb-0.5 text-[11px] font-medium sm:text-xs">{entry.title}</p>
+      </Link>
     </motion.li>
   );
 }
