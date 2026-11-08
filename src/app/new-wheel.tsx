@@ -180,12 +180,12 @@ export function NewWheel({ items }: { items: WheelItem[] }) {
               transition={{ duration: 0.25 }}
               className="max-w-sm"
             >
-              <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
-                <NewBadge />
-                <span className="capitalize">{item.category}</span>·<span>{item.added}</span>
-              </div>
+              <NewBadge />
               <p className="mt-2 text-lg font-medium tracking-tight sm:text-xl">{item.title}</p>
-              <p className="mt-1 line-clamp-2 hidden text-sm text-muted-foreground sm:block">{item.description}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                <span className="capitalize">{item.category}</span> · {item.added}
+              </p>
+              <p className="mt-2 line-clamp-2 hidden text-sm text-muted-foreground sm:block">{item.description}</p>
               <Link
                 href={item.href}
                 className="pointer-events-auto mt-3 inline-flex items-center gap-1 rounded-full border bg-background px-3 py-1 text-xs font-medium transition-colors hover:bg-accent"
