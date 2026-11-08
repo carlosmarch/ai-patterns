@@ -117,9 +117,11 @@ export function PatternsSidebar({
                             ? { duration: 0 }
                             : { type: "spring", stiffness: 500, damping: 40 }
                         }
-                        className="absolute inset-y-0 -left-px right-0 rounded-r-md bg-muted"
+                        className="absolute inset-y-0 -left-px right-0"
                       >
-                        <span className="absolute inset-y-1 left-0 w-0.5 rounded-full bg-foreground" />
+                        {/* Bar sits on the list's rule; the pill floats clear of it. */}
+                        <span className="absolute inset-y-1 -left-[0.5px] w-0.5 rounded-full bg-foreground" />
+                        <span className="absolute inset-y-0 left-[calc(0.5rem+1px)] right-0 rounded-md bg-muted" />
                       </motion.span>
                     )}
                     <Link
@@ -128,10 +130,12 @@ export function PatternsSidebar({
                       tabIndex={href === tabStop ? 0 : -1}
                       aria-current={isActive ? "page" : undefined}
                       className={cn(
-                        "relative -ml-px flex items-center gap-2 rounded-r-md border-l py-1 pl-3 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+                        "relative ml-2 flex items-center gap-2 rounded-md py-1 pr-2 pl-2 text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+                        // Hover mirrors the selected state: a faint bar on the rule, a faint pill.
+                        "after:absolute after:inset-y-1 after:-left-[calc(0.5rem+1.5px)] after:w-0.5 after:rounded-full after:transition-colors",
                         isActive
-                          ? "border-transparent font-medium text-foreground"
-                          : "border-transparent text-muted-foreground hover:border-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                          ? "font-medium text-foreground"
+                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:after:bg-muted-foreground",
                       )}
                     >
                       {title}
