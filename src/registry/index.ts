@@ -369,9 +369,9 @@ export const registry: RegistryEntry[] = [
     Thumbnail: PlanReviewThumbnail,
     uxDoc: planReviewPattern,
     seenIn: [
-      { team: "cursor", source: "https://www.shapeof.ai/patterns/action-plan" },
-      { team: "replit", source: "https://www.shapeof.ai/patterns/action-plan" },
-      { team: "zapier", source: "https://www.shapeof.ai/patterns/action-plan" },
+      { team: "cursor", source: "https://cursor.com/docs/agent/plan-mode" },
+      { team: "replit", source: "https://docs.replit.com/features/agent/plan-mode" },
+      { team: "zapier", source: "https://help.zapier.com/hc/en-us/articles/15703650952077-Use-the-power-of-AI-to-generate-Zap-workflows" },
     ],
   },
   {
@@ -447,10 +447,9 @@ export const registry: RegistryEntry[] = [
     Thumbnail: StreamOfThoughtThumbnail,
     uxDoc: streamOfThoughtPattern,
     seenIn: [
-      { team: "chatgpt", source: "https://www.shapeof.ai/patterns/stream-of-thought" },
-      { team: "lovable", source: "https://www.shapeof.ai/patterns/stream-of-thought" },
-      { team: "perplexity", source: "https://www.shapeof.ai/patterns/stream-of-thought" },
-      { team: "v0", source: "https://www.shapeof.ai/patterns/stream-of-thought" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/11909943-gpt-5-5-in-chatgpt" },
+      { team: "lovable", source: "https://docs.lovable.dev/features/agent-mode" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/10352903-what-is-pro-search" },
     ],
   },
   {
@@ -520,8 +519,8 @@ export const registry: RegistryEntry[] = [
     uxDoc: messageQueuePattern,
     seenIn: [
       { team: "claude", source: "https://code.claude.com/docs/en/interactive-mode" },
-      { team: "replit", source: "https://www.shapeof.ai/patterns/controls" },
-      { team: "perplexity", source: "https://www.shapeof.ai/patterns/controls" },
+      { team: "replit", source: "https://docs.replit.com/features/agent/steer-and-queue-messages" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/13600190-what-s-new-in-advanced-deep-research" },
     ],
   },
   {
@@ -536,10 +535,10 @@ export const registry: RegistryEntry[] = [
     uxDoc: modelPickerPattern,
     seenIn: [
       { team: "cursor", source: "https://docs.cursor.com/models" },
-      { team: "chatgpt", source: "https://www.shapeof.ai/patterns/model-management" },
-      { team: "claude", source: "https://www.shapeof.ai/patterns/model-management" },
-      { team: "gemini", source: "https://www.shapeof.ai/patterns/model-management" },
-      { team: "v0", source: "https://www.shapeof.ai/patterns/model-management" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/20001354-gpt-6-and-other-models-in-chatgpt" },
+      { team: "claude", source: "https://support.claude.com/en/articles/8664678-change-the-model-effort-and-thinking-settings" },
+      { team: "gemini", source: "https://support.google.com/gemini/answer/18648722?hl=en" },
+      { team: "v0", source: "https://v0.app/changelog" },
     ],
   },
   {
@@ -554,8 +553,8 @@ export const registry: RegistryEntry[] = [
     uxDoc: incognitoTogglePattern,
     seenIn: [
       { team: "chatgpt", source: "https://help.openai.com/en/articles/8914046-temporary-chat-faq" },
-      { team: "gemini", source: "https://www.shapeof.ai/patterns/incognito-mode" },
-      { team: "perplexity", source: "https://www.shapeof.ai/patterns/incognito-mode" },
+      { team: "gemini", source: "https://blog.google/products-and-platforms/products/gemini/temporary-chats-privacy-controls/" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/12639758-incognito-mode-troubleshooting" },
     ],
   },
   {
@@ -568,9 +567,7 @@ export const registry: RegistryEntry[] = [
     Demo: PromptEnhancerDemo,
     Thumbnail: PromptEnhancerThumbnail,
     uxDoc: promptEnhancerPattern,
-    seenIn: [
-      { team: "v0", source: "https://www.shapeof.ai/patterns/prompt-enhancer" },
-    ],
+    seenIn: [],
   },
   {
     slug: "prompt-template",
@@ -583,8 +580,7 @@ export const registry: RegistryEntry[] = [
     Thumbnail: PromptTemplateThumbnail,
     uxDoc: promptTemplatePattern,
     seenIn: [
-      { team: "zapier", source: "https://www.shapeof.ai/patterns/templates" },
-      { team: "coda", source: "https://www.shapeof.ai/patterns/templates" },
+      { team: "zapier", source: "https://help.zapier.com/hc/en-us/articles/44821650010637-Use-a-guided-template" },
     ],
   },
   {
@@ -651,8 +647,8 @@ export const registry: RegistryEntry[] = [
     Thumbnail: ChatBubbleThumbnail,
     uxDoc: chatBubblePattern,
     seenIn: [
-      { team: "chatgpt", source: "https://community.openai.com/t/chatgpt-bug-introduced-in-response-selector-of-regenerations-and-edits-edit-button-goes-missing/1145664" },
-      { team: "claude", source: "https://www.guideflow.com/tutorial/how-to-retry-a-response-in-a-chat-in-claudeai" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/8142208-chatgpt-ios-and-android-app-faq" },
+      { team: "claude", source: "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on" },
     ],
   },
   {
@@ -680,7 +676,7 @@ export const registry: RegistryEntry[] = [
     Thumbnail: ConversationBranchesThumbnail,
     uxDoc: conversationBranchesPattern,
     seenIn: [
-      { team: "chatgpt", source: "https://www.shapeof.ai/patterns/branches" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/6825453-chatgpt-release-notes" },
     ],
   },
   {
@@ -695,7 +691,7 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "claude", source: "https://code.claude.com/docs/en/permissions" },
       { team: "warp", source: "https://docs.warp.dev/agents/local-agents/interacting-with-agents/terminal-and-agent-modes" },
-      { team: "notion", source: "https://www.shapeof.ai/patterns/verification" },
+      { team: "notion", source: "https://www.notion.com/help/choose-how-notion-agent-asks-for-your-approval" },
     ],
   },
   {
@@ -711,8 +707,8 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "claude", source: "https://support.claude.com/en/articles/11176164" },
       { team: "chatgpt", source: "https://developers.openai.com/api/docs/guides/developer-mode" },
-      { team: "intercom", source: "https://www.shapeof.ai/patterns/connectors" },
-      { team: "perplexity", source: "https://www.shapeof.ai/patterns/connectors" },
+      { team: "intercom", source: "https://www.intercom.com/help/en/articles/11461635-add-mcp-connectors-for-popular-apps-or-custom-mcps" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/collections/18799295-connectors-integrations" },
     ],
   },
   {
@@ -727,7 +723,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: memoryPanelPattern,
     seenIn: [
       { team: "chatgpt", source: "https://openai.com/index/memory-and-new-controls-for-chatgpt/" },
-      { team: "gemini", source: "https://www.shapeof.ai/patterns/memory" },
+      { team: "gemini", source: "https://support.google.com/gemini/answer/18617127?hl=en&co=GENIE.Platform%3DDesktop" },
     ],
   },
   {
@@ -755,9 +751,9 @@ export const registry: RegistryEntry[] = [
     uxDoc: attachmentChipPattern,
     seenIn: [
       { team: "claude", source: "https://support.claude.com/en/articles/8241126-upload-files-to-claude" },
-      { team: "figma", source: "https://www.shapeof.ai/patterns/attachments" },
-      { team: "lovable", source: "https://www.shapeof.ai/patterns/attachments" },
-      { team: "perplexity", source: "https://www.shapeof.ai/patterns/attachments" },
+      { team: "figma", source: "https://help.figma.com/hc/en-us/articles/31304529835671-Attach-files-to-a-prompt-in-the-Figma-agent-and-Figma-Make" },
+      { team: "lovable", source: "https://docs.lovable.dev/tips-tricks/using-images" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/10354807-file-uploads" },
     ],
   },
   {
@@ -770,7 +766,7 @@ export const registry: RegistryEntry[] = [
     Thumbnail: ImagePeekThumbnail,
     uxDoc: imagePeekPattern,
     seenIn: [
-      { team: "chatgpt", source: "https://searchengineland.com/chatgpt-more-images-answers-465098" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/9237897-chatgpt-search" },
     ],
   },
   {
@@ -783,9 +779,8 @@ export const registry: RegistryEntry[] = [
     Thumbnail: StopGenerationButtonThumbnail,
     uxDoc: stopGenerationButtonPattern,
     seenIn: [
-      { team: "chatgpt", source: "https://community.openai.com/t/restore-chatgpts-stop-button-without-errors/1132068" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/7996703-troubleshooting-chatgpt-error-messages" },
       { team: "gemini", source: "https://support.google.com/googlebook/answer/18429222" },
-      { team: "claude", source: "https://www.shapeof.ai/patterns/controls" },
     ],
   },
   {
@@ -813,8 +808,8 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/10352895-how-does-perplexity-work" },
       { team: "chatgpt", source: "https://help.openai.com/en/articles/9237897-chatgpt-search" },
-      { team: "intercom", source: "https://www.shapeof.ai/patterns/citations" },
-      { team: "notion", source: "https://www.shapeof.ai/patterns/citations" },
+      { team: "intercom", source: "https://fin.ai/help/en/articles/13975900-copilot-explained" },
+      { team: "notion", source: "https://www.notion.com/help/enterprise-search" },
     ],
   },
   {
@@ -828,7 +823,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: sourcesStackPattern,
     seenIn: [
       { team: "chatgpt", source: "https://help.openai.com/en/articles/9237897-chatgpt-search" },
-      { team: "notion", source: "https://www.shapeof.ai/patterns/references" },
+      { team: "notion", source: "https://www.notion.com/help/enterprise-search" },
     ],
   },
   {
@@ -840,7 +835,7 @@ export const registry: RegistryEntry[] = [
     Demo: SourceTrustCardDemo,
     Thumbnail: SourceTrustCardThumbnail,
     uxDoc: sourceTrustCardPattern,
-    seenIn: [{ team: "perplexity", source: "https://aiuxplayground.com/teardowns/perplexity/citations" }],
+    seenIn: [{ team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/20260806-understanding-source-labels" }],
   },
   {
     slug: "follow-up-list",
@@ -851,10 +846,7 @@ export const registry: RegistryEntry[] = [
     Demo: FollowUpListDemo,
     Thumbnail: FollowUpListThumbnail,
     uxDoc: followUpListPattern,
-    seenIn: [
-      { team: "perplexity", source: "https://www.thekeyword.co/news/perplexity-tests-sponsored-follow-up-question-ads" },
-      { team: "gemini", source: "https://www.shapeof.ai/patterns/suggestions" },
-    ],
+    seenIn: [],
   },
   {
     slug: "selection-actions",
@@ -869,9 +861,9 @@ export const registry: RegistryEntry[] = [
       { team: "notion", source: "https://www.notion.com/help/guides/notion-ai-for-docs" },
       { team: "gemini", source: "https://support.google.com/gemini/answer/14262426" },
       { team: "chatgpt", source: "https://help.openai.com/en/articles/9930697-what-is-the-canvas-feature-in-chatgpt-and-how-do-i-use-it" },
-      { team: "figma", source: "https://www.shapeof.ai/patterns/inline-action" },
-      { team: "copilot", source: "https://www.shapeof.ai/patterns/inline-action" },
-      { team: "lovable", source: "https://www.shapeof.ai/patterns/inline-action" },
+      { team: "figma", source: "https://help.figma.com/hc/en-us/articles/42009840449175-Edit-a-Figma-Make-file" },
+      { team: "copilot", source: "https://docs.github.com/copilot/using-github-copilot/asking-github-copilot-questions-in-your-ide" },
+      { team: "lovable", source: "https://docs.lovable.dev/features/visual-edit" },
     ],
   },
   {
@@ -888,7 +880,7 @@ export const registry: RegistryEntry[] = [
       { team: "gemini", source: "https://support.google.com/gemini/answer/14262426" },
       { team: "chatgpt", source: "https://help.openai.com/en/articles/9930697-what-is-the-canvas-feature-in-chatgpt-and-how-do-i-use-it" },
       { team: "notion", source: "https://www.notion.com/help/guides/notion-ai-for-docs" },
-      { team: "perplexity", source: "https://www.shapeof.ai/patterns/regenerate" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/12802813-how-do-i-change-to-my-preferred-ai-model" },
     ],
   },
   {
@@ -913,9 +905,7 @@ export const registry: RegistryEntry[] = [
     Demo: PartialResponseDemo,
     Thumbnail: PartialResponseThumbnail,
     uxDoc: partialResponsePattern,
-    seenIn: [
-      { team: "cursor", source: "https://forum.cursor.com/t/we-default-stop-the-agent-after-25-tool-calls-please-ask-the-agent-to-continue-manually/58981" },
-    ],
+    seenIn: [],
   },
   {
     slug: "generation-error",
@@ -941,7 +931,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: consoleErrorCardPattern,
     seenIn: [
       { team: "lovable", source: "https://docs.lovable.dev/tips-tricks/troubleshooting" },
-      { team: "v0", source: "https://community.vercel.com/t/runtime-error-on-v0/12485" },
+      { team: "v0", source: "https://v0.app/docs/deployments" },
     ],
   },
   {
@@ -968,7 +958,6 @@ export const registry: RegistryEntry[] = [
     uxDoc: responseComparePattern,
     seenIn: [
       { team: "lmarena", source: "https://lmarena.ai/faq" },
-      { team: "chatgpt", source: "https://community.openai.com/t/stupid-feature-which-response-do-you-prefer-your-choice-will-help-make-chatgpt-better/394873" },
     ],
   },
   {
@@ -995,8 +984,8 @@ export const registry: RegistryEntry[] = [
     Thumbnail: AiDisclosureBadgeThumbnail,
     uxDoc: aiDisclosureBadgePattern,
     seenIn: [
-      { team: "intercom", source: "https://www.shapeof.ai/patterns/disclosure" },
-      { team: "zapier", source: "https://www.shapeof.ai/patterns/disclosure" },
+      { team: "intercom", source: "https://www.intercom.com/help/en/articles/11712008-ai-agent-disclosure" },
+      { team: "zapier", source: "https://help.zapier.com/hc/en-us/articles/27915202201357-Add-a-disclosure-message-to-your-chatbot" },
     ],
   },
   {
@@ -1010,7 +999,7 @@ export const registry: RegistryEntry[] = [
     Thumbnail: CostEstimateThumbnail,
     uxDoc: costEstimatePattern,
     seenIn: [
-      { team: "elevenlabs", source: "https://www.shapeof.ai/patterns/cost-estimates" },
+      { team: "elevenlabs", source: "https://help.elevenlabs.io/hc/en-us/articles/30725662424849-How-much-does-GenFM-cost" },
     ],
   },
   {
@@ -1035,7 +1024,7 @@ export const registry: RegistryEntry[] = [
     Thumbnail: VoiceWaveformThumbnail,
     uxDoc: voiceWaveformPattern,
     seenIn: [
-      { team: "gemini", source: "https://9to5google.com/2024/08/15/gemini-live-rolling-out/" },
+      { team: "gemini", source: "https://support.google.com/gemini/answer/15274899?hl=en&co=GENIE.Platform%3DAndroid" },
       { team: "claude", source: "https://claude.com/download" },
     ],
   },
@@ -1050,8 +1039,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: voiceOrbPattern,
     seenIn: [
       { team: "elevenlabs", source: "https://ui.elevenlabs.io/docs/components/orb" },
-      { team: "chatgpt", source: "https://www.shapeof.ai/patterns/avatar" },
-      { team: "perplexity", source: "https://www.shapeof.ai/patterns/avatar" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/8400625-voice-mode" },
     ],
   },
   {
@@ -1064,7 +1052,7 @@ export const registry: RegistryEntry[] = [
     Thumbnail: ListeningStateThumbnail,
     uxDoc: listeningStatePattern,
     seenIn: [
-      { team: "gemini", source: "https://9to5google.com/2024/08/15/gemini-live-rolling-out/" },
+      { team: "gemini", source: "https://support.google.com/gemini/answer/15274899?hl=en&co=GENIE.Platform%3DAndroid" },
     ],
   },
   {
@@ -1203,8 +1191,8 @@ export const registry: RegistryEntry[] = [
     uxDoc: aiFillDrawerPattern,
     seenIn: [
       { team: "notion", source: "https://www.notion.com/help/autofill" },
-      { team: "linear", source: "https://www.shapeof.ai/patterns/auto-fill" },
-      { team: "coda", source: "https://www.shapeof.ai/patterns/auto-fill" },
+      { team: "linear", source: "https://linear.app/docs/triage-intelligence" },
+      { team: "coda", source: "https://help.coda.io/en/articles/7988177-coda-ai-features" },
     ],
   },
   {
