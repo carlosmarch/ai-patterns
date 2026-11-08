@@ -39,6 +39,25 @@ import type { Source } from "@/registry/text/sources-stack/component";
 import type { StackFrame, CodeFrame } from "@/registry/errors/console-error-card/component";
 import type { TraceStep } from "@/registry/traces/expandable-trace/component";
 import type { TrustedSource } from "@/registry/text/source-trust-card/component";
+import type { AutonomyMode, Capability } from "@/registry/composer/autonomy-mode/component";
+import type { Branch } from "@/registry/messages/conversation-branches/component";
+import type { CheckpointTurn } from "@/registry/agents/checkpoint-restore/component";
+import type { ClarifyingQuestion } from "@/registry/messages/clarifying-questions/component";
+import type { ContextSegment } from "@/registry/indicators/context-usage/component";
+import type { ContextSource } from "@/registry/composer/context-chips/component";
+import type { FillResult } from "@/registry/tables/ai-fill-drawer/component";
+import type { Memory } from "@/registry/permissions/memory-panel/component";
+import type { ModelOption } from "@/registry/composer/model-picker/component";
+import type { PlanStep } from "@/registry/agents/plan-review/component";
+import type { PublishCheck } from "@/registry/agents/publish-gate/component";
+import type { QualityCriterion } from "@/registry/composer/prompt-quality/component";
+import type { RelayCallState, RelayItem, RelayRun } from "@/registry/voice/voice-agent-relay/component";
+import type { ReviewField } from "@/registry/review/ai-review-panel/component";
+import type { RunStep } from "@/registry/agents/agent-run-card/component";
+import type { Task } from "@/registry/agents/task-list/component";
+import type { TemplatePart } from "@/registry/composer/prompt-template/component";
+import type { Thought } from "@/registry/traces/stream-of-thought/component";
+import type { WizardAnswers, WizardStep } from "@/registry/composer/prompt-wizard/component";
 
 // The workspace is a (fictional) UX AI agent for the ai-patterns registry
 // itself: the team asks it to audit AI screens against the catalogue, write
@@ -636,3 +655,448 @@ export const SKILL_SNIPPET = `# In Claude Code, install the skill:
 
 # Then ask for a screen, e.g.
 "Add a prompt bar with a model picker to the chat page"`;
+
+// ---------------------------------------------------------------------------
+// Composer controls — model, autonomy, context window
+// ---------------------------------------------------------------------------
+
+export const MODELS: ModelOption[] = [
+  { id: "swift", label: "Swift", description: "Quick answers about a single pattern." },
+  { id: "atlas", label: "Atlas", description: "Audits, specs and components.", badge: "Default" },
+  { id: "atlas-max", label: "Atlas Max", description: "Whole-project reviews and research.", locked: true },
+];
+
+export const AUTONOMY_CAPABILITIES: Capability[] = [
+  { id: "read", label: "Read the repo" },
+  { id: "edit", label: "Edit components" },
+  { id: "run", label: "Run scripts" },
+];
+
+export const AUTONOMY_MODES: AutonomyMode[] = [
+  { id: "suggest", label: "Suggest", description: "Reads and proposes changes. You apply them.", permissions: { read: "auto", edit: "suggest", run: "suggest" } },
+  { id: "confirm", label: "Confirm", description: "Edits after you approve each change.", permissions: { read: "auto", edit: "ask", run: "ask" } },
+  { id: "execute", label: "Execute", description: "Edits and runs scripts on its own. Stop it any time.", permissions: { read: "auto", edit: "auto", run: "auto" } },
+];
+
+export const CONTEXT_LIMIT = 200_000;
+
+export function contextSegments(blocks: number): ContextSegment[] {
+  return [
+    { id: "chat", label: "Thread", tokens: 6_400 + blocks * 2_150, color: "bg-cyan-500" },
+    { id: "specs", label: "Pattern specs", tokens: 41_800, color: "bg-blue-500" },
+    { id: "tools", label: "Tool results", tokens: 9_300 + blocks * 600, color: "bg-violet-500" },
+    { id: "system", label: "Guidelines", tokens: 4_100, color: "bg-pink-500" },
+    { id: "memory", label: "Memory", tokens: 1_900, color: "bg-emerald-500" },
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// New thread — templates, guided spec, setup pill
+// ---------------------------------------------------------------------------
+
+export const PROMPT_TEMPLATES: { name: string; parts: TemplatePart[] }[] = [
+  {
+    name: "Audit a screen",
+    parts: [
+      "Audit our ",
+      { id: "screen", placeholder: "screen", options: ["chat screen", "settings page", "onboarding flow"], value: "chat screen" },
+      " against the catalogue, focusing on ",
+      { id: "focus", placeholder: "focus", options: ["loading states", "errors", "permissions"], value: "loading states" },
+      ", and flag anything ",
+      { id: "bar", placeholder: "bar", options: ["off-spec", "inaccessible", "missing"], value: "off-spec" },
+      ".",
+    ],
+  },
+  {
+    name: "Compare two patterns",
+    parts: [
+      "Tell me about ",
+      { id: "a", placeholder: "pattern", options: ["Thinking Loader", "Stream of Thought", "Expandable Trace"], value: "Stream of Thought" },
+      " and when I'd use it instead of ",
+      { id: "b", placeholder: "pattern", options: ["Thinking Loader", "Expandable Trace", "Analysis List"], value: "Thinking Loader" },
+      " for ",
+      { id: "case", placeholder: "use case" },
+      ".",
+    ],
+  },
+];
+
+export const SPEC_WIZARD_STEPS: WizardStep[] = [
+  { id: "name", question: "What's the pattern called?", hint: "A short noun phrase, the way it'll appear in the catalogue.", placeholder: "e.g. Agent Handoff" },
+  { id: "job", question: "What does it do for the user?", options: ["Start", "Ask", "Steer", "Oversee", "Trust", "Recover"] },
+  { id: "problem", question: "What problem does it solve?", hint: "One sentence, from the user's side.", placeholder: "e.g. The agent hits a limit and the user doesn't know who picks it up" },
+  { id: "extras", question: "Anything to include?", placeholder: "e.g. Products that ship it, related patterns", optional: true },
+];
+
+export function buildSpecPrompt(a: WizardAnswers) {
+  const name = a.name?.trim();
+  if (!name) return "";
+  let prompt = `Draft a UX spec for ${name}`;
+  if (a.job) prompt += `, a ${a.job.toLowerCase()} pattern`;
+  if (a.problem?.trim()) prompt += `. It solves: ${a.problem.trim().replace(/\.$/, "")}`;
+  if (a.extras?.trim()) prompt += `. Include: ${a.extras.trim().replace(/\.$/, "")}`;
+  return `${prompt}.`;
+}
+
+// ---------------------------------------------------------------------------
+// Flows — spec drafting
+// ---------------------------------------------------------------------------
+
+export const SPEC_QUESTIONS: ClarifyingQuestion[] = [
+  { id: "reader", label: "Who reads the spec first?", options: ["Coding agents", "Designers", "Both"], suggested: "Both" },
+  { id: "depth", label: "How deep?", options: ["Summary only", "Full template", "Full + code notes"], suggested: "Full template" },
+  { id: "evidence", label: "Back it with", options: ["Products that ship it", "Our analytics", "Nothing yet"], suggested: "Products that ship it", allowOther: true },
+];
+
+export const SPEC_PLAN: PlanStep[] = [
+  { id: "a", text: "Read the spec template and two neighbouring specs" },
+  { id: "b", text: "Find three products that ship this pattern" },
+  { id: "c", text: "Draft every section, Summary to Related patterns" },
+  { id: "d", text: "Self-review against the template and tighten" },
+];
+
+export const SPEC_PLAN_ALT: PlanStep[] = [
+  { id: "e", text: "Start from Human in the Loop's spec as the closest neighbour" },
+  { id: "f", text: "Draft Summary, Anatomy and Behavior first" },
+  { id: "g", text: "Leave Content guidelines for your review" },
+];
+
+export const SPEC_TASKS: Omit<Task, "status">[] = [
+  { id: "read", label: "Read the template and neighbouring specs", activeLabel: "Reading the template and neighbouring specs" },
+  { id: "evidence", label: "Find products that ship it", activeLabel: "Finding products that ship it" },
+  { id: "draft", label: "Draft all eight sections", activeLabel: "Drafting all eight sections" },
+  { id: "review", label: "Self-review and tighten", activeLabel: "Self-reviewing and tightening" },
+];
+
+export function specThoughts(topic: string): Thought[] {
+  return [
+    { title: "Reading the request", body: `They want a spec for ${topic}. It has to read well for coding agents and designers, so every section needs a concrete rule, not a vibe.` },
+    { title: "Finding the neighbours", body: "Human in the Loop and Background Tasks sit closest. The spec should say when to pick this one instead, or agents will reach for the wrong pattern." },
+    { title: "Shaping the sections", body: "Lead the Summary with the job it does. Keep Behavior to states and transitions, and put every motion rule behind reduced motion." },
+  ];
+}
+
+export function specSource(topic: string, tight = false) {
+  if (tight) {
+    return `# ${topic}
+**Summary:** A card that shows work moving between an agent and a person — why, what was tried, and who has it now.
+## When to use
+- The agent hits a limit it can't resolve on its own.
+## Anatomy
+- Status line · reason · what was tried · next owner · one action
+## Accessibility
+- Announce the handoff in a polite live region.`;
+  }
+  return `# ${topic}
+## Summary
+A card that shows work moving between an agent and a person: why it moved, what the agent already tried, and who has it now.
+## When to use
+- The agent hits a limit it can't resolve on its own, like a refund over policy.
+- A person must sign off before the work continues.
+## When not to use
+- For a single yes/no decision — use Tool Approval.
+## Anatomy
+- Status line with the next owner
+- The reason, in the agent's own words
+- What it tried, collapsed by default
+- One primary action for the new owner
+## Behavior
+- The card resolves into the new owner's first reply.
+- Reduced motion swaps the slide-in for a fade.
+## Accessibility
+- Announce the handoff in a polite live region.
+## Related patterns
+- Human in the Loop, Background Tasks Drawer, Wait Time Handoff`;
+}
+
+// ---------------------------------------------------------------------------
+// Flows — research (needs wider network access)
+// ---------------------------------------------------------------------------
+
+export const RESEARCH_THOUGHTS: Thought[] = [
+  { title: "Picking where to look", body: "Changelogs and help centres say what actually shipped, so they beat launch posts. Start with the three products the scout tracks most closely." },
+  { title: "Comparing what they show", body: "All three show a step list while the agent runs, and fold it into a summary once it's done. Only one lets you stop a single step." },
+  { title: "Mapping it to the catalogue", body: "That's Agent Run Card for the live view and Task List for the plan. Nothing we ship lets you stop one step yet — worth a spec." },
+];
+
+export const RESEARCH_SOURCES: Source[] = [
+  { title: "Changelog — Agent runs", domain: "linear.app", url: "https://linear.app/changelog", faviconUrl: favicon("linear.app") },
+  { title: "Background agents", domain: "docs.cursor.com", url: "https://docs.cursor.com", faviconUrl: favicon("cursor.com") },
+  { title: "Claude Code on the web", domain: "code.claude.com", url: "https://code.claude.com/docs", faviconUrl: favicon("claude.com") },
+];
+
+// ---------------------------------------------------------------------------
+// Flows — audit cost, memory, contrast run
+// ---------------------------------------------------------------------------
+
+export const AUDIT_COST = {
+  min: 32,
+  max: 40,
+  balance: 120,
+  breakdown: [
+    { label: "Reading 214 files in src/", amount: 18 },
+    { label: "Matching 4 screens × 3.5 credits", amount: 14 },
+  ],
+};
+
+export const GUIDANCE_MEMORY = "Applies the reduced-motion guideline to every shimmer and sweep effect.";
+
+export const MEMORIES: Memory[] = [
+  { id: "m1", text: "Carlos owns the registry; Ana reviews every new spec.", source: "From a thread on 14 Oct" },
+  { id: "m2", text: "Specs follow the Shiny Button section order.", source: "You asked me to remember this" },
+  { id: "m3", text: "Prefers verb-first microcopy (“Ask your agent…”, not “Agent tasks”).", source: "From “Setup checklist microcopy”" },
+  { id: "m4", text: "Ships to Cloudflare Workers — everything must be static.", source: "From CLAUDE.md" },
+];
+
+export const CONTRAST_RUN: (Omit<RunStep, "status" | "durationSeconds"> & { duration: number })[] = [
+  { id: "build", kind: "command", label: "Built the site", activeLabel: "Building the site", detail: "58 pages", duration: 6 },
+  { id: "axe", kind: "test", label: "Ran contrast checks", activeLabel: "Running contrast checks", detail: "2 passed", duration: 5 },
+  { id: "push", kind: "push", label: "Pushed fix/tool-approval-contrast", activeLabel: "Pushing fix/tool-approval-contrast", detail: "4c1e9ab", duration: 4 },
+];
+
+// ---------------------------------------------------------------------------
+// Seeded threads — branches, checkpoints, code preview
+// ---------------------------------------------------------------------------
+
+export const NAME_BRANCHES: Branch[] = [
+  { id: "n1", prompt: "Suggest a name for the pattern where an agent passes work to a person", response: "“Agent Handoff” — it names both sides and matches how support tools already describe it." },
+  { id: "n2", prompt: "Suggest a shorter, verb-first name for it", response: "“Hand off” works as a button label, but as a catalogue title “Agent Handoff” is clearer next to Human in the Loop." },
+];
+
+export const LOADER_CHECKPOINTS: CheckpointTurn[] = [
+  {
+    id: "c1",
+    time: "16:02",
+    prompt: "Add an elapsed-time counter to Thinking Loader.",
+    reply: "Added a counter that appears after 3 seconds, in tabular figures so it doesn't jitter.",
+    changes: [{ path: "thinking-loader/component.tsx", kind: "edit" }],
+  },
+  {
+    id: "c2",
+    time: "16:09",
+    prompt: "Rotate the status words every 2 seconds.",
+    reply: "Status words now cycle every 2s and pause on hover.",
+    changes: [
+      { path: "thinking-loader/component.tsx", kind: "edit" },
+      { path: "thinking-loader/demo.tsx", kind: "edit" },
+    ],
+  },
+  {
+    id: "c3",
+    time: "16:14",
+    prompt: "Make the shimmer sweep faster and brighter.",
+    reply: "Doubled the sweep speed and raised the highlight to 60% opacity.",
+    changes: [{ path: "thinking-loader/shimmer.css", kind: "create" }],
+  },
+];
+
+export const ORIGAMI_SVG = `<svg xmlns="http://www.w3.org/2000/svg"
+     width="24" height="24" viewBox="0 0 24 24"
+     fill="none" stroke="currentColor" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round"
+     class="origami">
+  <style>
+    .origami path {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: fold 3.6s ease-in-out infinite;
+    }
+    .origami path:nth-child(2) { animation-delay: 0.3s; }
+    .origami path:nth-child(3) { animation-delay: 0.6s; }
+    @keyframes fold {
+      0% { stroke-dashoffset: 1; }
+      45%, 65% { stroke-dashoffset: 0; }
+      100% { stroke-dashoffset: -1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .origami path { animation: none; stroke-dashoffset: 0; }
+    }
+  </style>
+  <path pathLength="1" d="M12 12V4a1 1 0 0 1 1-1h6.297a1 1 0 0 1 .651 1.759l-4.696 4.025" />
+  <path pathLength="1" d="m12 21-7.414-7.414A2 2 0 0 1 4 12.172V6.415a1.002 1.002 0 0 1 1.707-.707L20 20.009" />
+  <path pathLength="1" d="m12.214 3.381 8.414 14.966a1 1 0 0 1-.167 1.199l-1.168 1.163a1 1 0 0 1-.706.291H6.351a1 1 0 0 1-.625-.219L3.25 18.8a1 1 0 0 1 .631-1.781l4.165.027" />
+</svg>`;
+
+// ---------------------------------------------------------------------------
+// Agents — publish gate
+// ---------------------------------------------------------------------------
+
+export const PUBLISH_CHECKS: PublishCheck[] = [
+  { id: "specs", label: "Every procedure step names a real pattern", source: "rule", status: "pending" },
+  { id: "tools", label: "Write tools still ask before running", source: "rule", status: "pending" },
+  { id: "secrets", label: "No tokens in guidelines or procedures", source: "rule", status: "pending" },
+  { id: "review", label: "Behavior review on 20 recorded threads", source: "agent", status: "pending" },
+];
+
+export const PUBLISH_FAILS: Record<string, string> = {
+  tools: "“Create issue” in Linear was set to Always allow in the last edit. It would file issues without asking.",
+};
+
+// ---------------------------------------------------------------------------
+// Playground — composers and the voice relay
+// ---------------------------------------------------------------------------
+
+export const PLAYGROUND_COMPLETIONS = [
+  "Which pattern should I use for a 30-second tool call?",
+  "Which pattern should I use when the agent needs permission?",
+  "What should the UI show while the agent is thinking?",
+  "What should the UI show when generation fails?",
+  "How do I let people stop a long answer?",
+  "How do I show where an answer came from?",
+];
+
+export const PLAYGROUND_CONTEXT: ContextSource[] = [
+  { id: "spec-loader", group: "Specs", label: "Thinking Loader", detail: "loaders/thinking-loader", icon: FileCode2 },
+  { id: "spec-approval", group: "Specs", label: "Tool Approval", detail: "permissions/tool-approval", icon: FileCode2 },
+  { id: "figma", group: "Connectors", label: "Chat screen v2", detail: "Figma · edited yesterday", icon: PenTool },
+  { id: "pr", group: "Connectors", label: "#94 Header avatars", detail: "GitHub · open PR", icon: GitPullRequest },
+  { id: "web", group: "Web", label: "WCAG 2.2 contrast", detail: "w3.org/WAI", icon: Eye },
+];
+
+export const PLAYGROUND_CRITERIA: QualityCriterion[] = [
+  {
+    id: "task",
+    label: "Task",
+    tip: "Say what you want — audit, compare, scaffold, explain",
+    test: (p) => /\b(audit|compare|scaffold|explain|review|which|suggest|build|write|draft)\b/i.test(p),
+    insert: "[Which pattern]",
+    at: "start",
+  },
+  { id: "surface", label: "Screen", tip: "Name the screen or moment", test: (p) => /\b(screen|page|modal|chat|composer|onboarding|settings|while|when)\b/i.test(p), insert: " on the [chat screen]" },
+  { id: "constraint", label: "Constraint", tip: "Add a limit — mobile, reduced motion, dark mode", test: (p) => /\b(mobile|reduced motion|dark|keyboard|screen reader|under|without)\b/i.test(p), insert: ", on [mobile]" },
+];
+
+export type RelayStep = { at: number; state?: RelayCallState; item?: Omit<RelayItem, "id">; run?: RelayRun };
+
+export const RELAY_SCRIPT: RelayStep[] = [
+  { at: 600, state: "listening", item: { kind: "you", text: "Swap the chat screen spinner for a Thinking Loader." } },
+  { at: 2400, state: "speaking", item: { kind: "voice", text: "On it — I'll ask Origami to replace the spinner and keep the elapsed timer." } },
+  { at: 3800, item: { kind: "handoff", text: "Replace the spinner in chat-screen.tsx with Thinking Loader" }, run: { title: "Thinking Loader swap", status: "running", step: "Reading chat-screen.tsx" } },
+  { at: 5000, state: "listening" },
+  { at: 6400, item: { kind: "update", text: "It's editing chat-screen.tsx." }, run: { title: "Thinking Loader swap", status: "running", step: "Editing chat-screen.tsx" } },
+  { at: 8200, item: { kind: "you", text: "Does it respect reduced motion?" } },
+  { at: 9600, state: "speaking", item: { kind: "voice", text: "Yes — the shimmer turns into a static label. I'll ask it to add a test for that." } },
+  { at: 11000, item: { kind: "handoff", text: "Add a reduced-motion test for the loader" }, run: { title: "Thinking Loader swap", status: "running", step: "Writing a reduced-motion test" } },
+  { at: 11800, state: "listening" },
+  {
+    at: 14400,
+    state: "speaking",
+    item: { kind: "summary", text: "Done. Two files changed: the loader swap and a reduced-motion test. The diff is in Operator." },
+    run: { title: "Thinking Loader swap", status: "done" },
+  },
+  { at: 17000, state: "listening" },
+];
+
+// ---------------------------------------------------------------------------
+// Insights — usage events, tracked products, pattern requests
+// ---------------------------------------------------------------------------
+
+export interface CopyEvent {
+  id: string;
+  pattern: string;
+  category: string;
+  source: string;
+  week: string;
+  copies: number;
+}
+
+export const COPY_EVENTS: CopyEvent[] = [
+  { id: "1", pattern: "Streaming Text", category: "text", source: "Site", week: "2026-11-02", copies: 1204 },
+  { id: "2", pattern: "Prompt Bar Pro", category: "composer", source: "Site", week: "2026-11-02", copies: 862 },
+  { id: "3", pattern: "Thinking Loader", category: "loaders", source: "Skill", week: "2026-11-02", copies: 731 },
+  { id: "4", pattern: "Tool Approval", category: "permissions", source: "MCP", week: "2026-11-02", copies: 418 },
+  { id: "5", pattern: "Agent Run Card", category: "agents", source: "Skill", week: "2026-11-02", copies: 377 },
+  { id: "6", pattern: "Voice Orb", category: "voice", source: "Site", week: "2026-11-02", copies: 296 },
+  { id: "7", pattern: "Streaming Text", category: "text", source: "Site", week: "2026-10-26", copies: 1130 },
+  { id: "8", pattern: "Thinking Loader", category: "loaders", source: "Skill", week: "2026-10-26", copies: 702 },
+  { id: "9", pattern: "Rate Limit", category: "errors", source: "MCP", week: "2026-10-26", copies: 154 },
+  { id: "10", pattern: "Context Usage", category: "indicators", source: "Site", week: "2026-10-26", copies: 121 },
+  { id: "11", pattern: "Plan Review", category: "agents", source: "Skill", week: "2026-10-19", copies: 98 },
+  { id: "12", pattern: "Listening State", category: "voice", source: "MCP", week: "2026-10-19", copies: 41 },
+];
+
+export interface TrackedProduct {
+  id: string;
+  name: string;
+  domain: string;
+  category: string | null;
+  surface: string | null;
+  patterns: string | null;
+  changelog: string | null;
+  owner: string;
+}
+
+export const TRACKED_PRODUCTS: TrackedProduct[] = [
+  { id: "linear", name: "Linear", domain: "linear.app", category: null, surface: null, patterns: null, changelog: null, owner: "Ana López" },
+  { id: "cursor", name: "Cursor", domain: "cursor.com", category: "Code editor", surface: "Background agents", patterns: "Agent Run Card, Diff Tabs", changelog: "cursor.com/changelog", owner: "James Liu" },
+  { id: "claude", name: "Claude", domain: "claude.com", category: "Assistant", surface: "Chat, Code", patterns: "Artifact Panel, Tool Approval", changelog: "support.claude.com", owner: "Carlos March" },
+  { id: "perplexity", name: "Perplexity", domain: "perplexity.ai", category: "Search", surface: "Answers", patterns: "Sources Stack, Inline Citation", changelog: "perplexity.ai/changelog", owner: "Ana López" },
+  { id: "elevenlabs", name: "ElevenLabs", domain: "elevenlabs.io", category: "Voice", surface: "Agents", patterns: "Voice Orb, Live Transcript", changelog: "elevenlabs.io/blog", owner: "Sara Kim" },
+];
+
+export const PRODUCT_FILL: Record<string, FillResult & { ms: number }> = {
+  category: { value: "Project tracking", source: "linear.app", ms: 900 },
+  surface: { value: "Agents in issues", source: "linear.app/docs/agents", ms: 1500 },
+  patterns: { value: "Agent Run Card, Wait Time Handoff", source: "linear.app/changelog", ms: 2100 },
+  changelog: { value: "linear.app/changelog", source: "Web search", ms: 1200 },
+};
+
+export const REQUEST_DOC = {
+  title: "Request: show when an agent hands work to a person",
+  meta: "From #design-requests · Ana López · 2 days ago",
+  paragraphs: [
+    "Our support agent escalates refunds over $500 to a person, but the customer just sees the chat go quiet. Nobody can tell the work moved, or who has it now.",
+    "Intercom Fin and Zendesk both show a handoff card with the reason and the agent that picked it up. We'd want the same, plus what the agent already tried so the person doesn't start over.",
+    "This is about keeping people informed while work moves between an agent and a teammate — I'd file it under oversight, not errors.",
+    "Ideally it ships before the support redesign in December; it's blocking two screens.",
+  ],
+};
+
+export const REQUEST_FIELDS: ReviewField[] = [
+  {
+    key: "name",
+    label: "Pattern name",
+    value: "Agent Handoff",
+    reasoning: "The request describes an agent passing work to a person and asks for a card that shows it.",
+    evidence: [{ id: "name-1", quote: "show a handoff card with the reason and the agent that picked it up" }],
+  },
+  {
+    key: "job",
+    label: "Job",
+    value: "Oversee",
+    reasoning: "Ana says it's about keeping people informed while work moves, and rules out errors explicitly.",
+    evidence: [{ id: "job-1", quote: "I'd file it under oversight, not errors" }],
+    status: "accepted",
+  },
+  {
+    key: "problem",
+    label: "User problem",
+    value: "Customers can't tell when work moves to a person",
+    reasoning: "The first paragraph names the silent gap after escalation as the problem.",
+    evidence: [{ id: "problem-1", quote: "Nobody can tell the work moved, or who has it now" }],
+  },
+  {
+    key: "seen",
+    label: "Seen in",
+    value: "Intercom Fin, Zendesk",
+    reasoning: "Both are named as shipping a handoff card. Neither has a source link yet.",
+    evidence: [{ id: "seen-1", quote: "Intercom Fin and Zendesk both show a handoff card" }],
+  },
+  {
+    key: "anatomy",
+    label: "Must include",
+    value: "Reason, new owner, what was tried",
+    reasoning: "The request lists the reason and owner from existing products, then adds what the agent tried.",
+    evidence: [
+      { id: "anatomy-1", quote: "the reason and the agent that picked it up" },
+      { id: "anatomy-2", quote: "plus what the agent already tried" },
+    ],
+  },
+  {
+    key: "priority",
+    label: "Priority",
+    value: "High — blocks two screens",
+    reasoning: "It's blocking two screens and has a December deadline. December is a guess at the redesign date.",
+    evidence: [{ id: "priority-1", quote: "it's blocking two screens" }],
+  },
+];

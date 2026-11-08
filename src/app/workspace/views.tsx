@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import {
+  AudioLines,
   ArrowRight,
   ArrowUpRight,
   Bot,
@@ -50,11 +51,30 @@ import { ShinyButton } from "@/registry/buttons/shiny-button/component";
 import { StopGenerationButton } from "@/registry/buttons/stop-generation-button/component";
 import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
 import { VoiceWaveform } from "@/registry/voice/voice-waveform/component";
+import { ContextChipsComposer } from "@/registry/composer/context-chips/component";
+import { MemoryPanel, type Memory } from "@/registry/permissions/memory-panel/component";
+import { MessageQueueComposer } from "@/registry/composer/message-queue/component";
+import { PromptAutocomplete } from "@/registry/composer/prompt-autocomplete/component";
+import { PromptBar } from "@/registry/composer/prompt-bar/component";
+import { PromptEnhancer } from "@/registry/composer/prompt-enhancer/component";
+import { PromptQuality } from "@/registry/composer/prompt-quality/component";
+import { PublishGate, type PublishCheck, type PublishGateStage } from "@/registry/agents/publish-gate/component";
+import { RejectedPromptComposer, type PromptRejection } from "@/registry/errors/rejected-prompt-restore/component";
+import { VoiceAgentRelay, type RelayCallState, type RelayItem, type RelayRun } from "@/registry/voice/voice-agent-relay/component";
+import { VoiceOrb } from "@/registry/voice/voice-orb/component";
+import { WaitTimeHandoff } from "@/registry/agents/wait-time-handoff/component";
 
 import {
   AGENT_ICON,
   AGENT_NAME,
   GUIDELINE_TOOLS,
+  MEMORIES,
+  PLAYGROUND_COMPLETIONS,
+  PLAYGROUND_CONTEXT,
+  PLAYGROUND_CRITERIA,
+  PUBLISH_CHECKS,
+  PUBLISH_FAILS,
+  RELAY_SCRIPT,
   ORG_MEMBERS,
   PROCEDURES,
   PROCEDURE_STEPS,
@@ -185,8 +205,8 @@ function Modal({
 // Train — procedures and guidelines
 // ---------------------------------------------------------------------------
 
-export type TrainTab = "procedures" | "guidelines";
-export type PlaygroundTab = "chat" | "voice";
+export type TrainTab = "procedures" | "guidelines" | "memory";
+export type PlaygroundTab = "chat" | "voice" | "relay";
 
 export function TrainView({ tab, onTabChange: setTab }: { tab: TrainTab; onTabChange: (tab: TrainTab) => void }) {
   const [selected, setSelected] = React.useState(PROCEDURES[0].id);
@@ -204,10 +224,13 @@ export function TrainView({ tab, onTabChange: setTab }: { tab: TrainTab; onTabCh
           items={[
             { id: "procedures", label: "Procedures" },
             { id: "guidelines", label: "Guidelines" },
+            { id: "memory", label: "Memory" },
           ]}
         />
       </ViewHeader>
-      {tab === "procedures" ? (
+      {tab === "memory" ? (
+        <MemoryTab />
+      ) : tab === "procedures" ? (
         <div className="flex min-h-0 flex-1">
           <aside className="hidden w-64 shrink-0 flex-col gap-1 overflow-y-auto border-r p-3 xl:flex">
             {PROCEDURES.map((p) => (
@@ -289,6 +312,33 @@ export function TrainView({ tab, onTabChange: setTab }: { tab: TrainTab; onTabCh
   );
 }
 
+function MemoryTab() {
+  const [memories, setMemories] = React.useState<Memory[]>(MEMORIES);
+  const [enabled, setEnabled] = React.useState(true);
+  return (
+    <Scroll className="px-6 py-6">
+      <div className="mx-auto max-w-2xl space-y-4">
+        <div>
+          <h3 className="text-xl font-semibold tracking-tight">What {AGENT_NAME} remembers</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Facts it picked up across threads and uses in new ones. Edit anything that&apos;s wrong — temporary threads never add to it.
+          </p>
+        </div>
+        <MemoryPanel
+          title="Memory"
+          memories={memories}
+          enabled={enabled}
+          onEnabledChange={setEnabled}
+          onEdit={(id, text) => setMemories((m) => m.map((x) => (x.id === id ? { ...x, text } : x)))}
+          onDelete={(id) => setMemories((m) => m.filter((x) => x.id !== id))}
+          onClearAll={() => setMemories([])}
+          className="max-w-none"
+        />
+      </div>
+    </Scroll>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Playground — try the agent as a user would
 // ---------------------------------------------------------------------------
@@ -321,15 +371,61 @@ export function PlaygroundView({ tab, onTabChange: setTab }: { tab: PlaygroundTa
           items={[
             { id: "chat", label: "Chat" },
             { id: "voice", label: "Voice" },
+            { id: "relay", label: "Relay" },
           ]}
         />
       </ViewHeader>
-      {tab === "chat" ? <ChatPlayground /> : <VoicePlayground />}
+      {tab === "chat" ? <ChatPlayground /> : tab === "voice" ? <VoicePlayground /> : <RelayPlayground />}
     </>
   );
 }
 
+type ComposerKind = "basic" | "bar" | "autocomplete" | "enhancer" | "quality" | "context" | "queue" | "guarded";
+
+const COMPOSERS: { id: ComposerKind; label: string; hint: string }[] = [
+  { id: "basic", label: "Basic", hint: "A plain field with a Send / Stop button." },
+  { id: "bar", label: "Prompt Bar", hint: "Type @ for sources or / for commands." },
+  { id: "autocomplete", label: "Autocomplete", hint: "Start with “Which pattern” — Tab accepts the ghost text." },
+  { id: "enhancer", label: "Enhancer", hint: "Type a rough question, then Enhance rewrites it." },
+  { id: "quality", label: "Quality", hint: "The meter fills as the question gets specific." },
+  { id: "context", label: "Context", hint: "Click + or type @ to attach specs and files." },
+  { id: "queue", label: "Queue", hint: "While it answers, ⌘↵ queues a follow-up." },
+  { id: "guarded", label: "Guarded", hint: "Ask it to delete something — it refuses and hands your prompt back." },
+];
+
+function fakeSuggest(prompt: string, signal: AbortSignal) {
+  return new Promise<string>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      const typed = prompt.toLowerCase();
+      const match = PLAYGROUND_COMPLETIONS.find((c) => c.toLowerCase().startsWith(typed) && c.length > prompt.length);
+      resolve(match ? match.slice(prompt.length) : "");
+    }, 180);
+    signal.addEventListener("abort", () => {
+      clearTimeout(timer);
+      reject(new DOMException("Aborted", "AbortError"));
+    });
+  });
+}
+
+function fakeEnhance(prompt: string) {
+  return new Promise<string>((resolve) =>
+    setTimeout(
+      () =>
+        resolve(
+          `${prompt.trim().replace(/[?.]$/, "")} — which pattern from the catalogue fits best, what should each state look like, and what does its Accessibility section require?`
+        ),
+      1200
+    )
+  );
+}
+
 function ChatPlayground() {
+  const [composer, setComposer] = React.useState<ComposerKind>("basic");
+  const [value, setValue] = React.useState("");
+  const [context, setContext] = React.useState<string[]>(["spec-loader"]);
+  const [includeOpen, setIncludeOpen] = React.useState(true);
+  const [rejection, setRejection] = React.useState<PromptRejection | null>(null);
+  const [checking, setChecking] = React.useState(false);
   const [messages, setMessages] = React.useState<PlaygroundMessage[]>([
     { id: 0, role: "user", text: "My agent runs a tool that takes ~30s. What should the UI show?" },
     { id: 1, role: "assistant", text: PLAYGROUND_REPLIES[0] },
@@ -340,12 +436,15 @@ function ChatPlayground() {
   const bottom = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => () => window.clearTimeout(timer.current), []);
-  React.useEffect(() => bottom.current?.scrollIntoView({ block: "end" }), [messages.length, generating]);
+  React.useEffect(() => {
+    bottom.current?.scrollIntoView({ block: "end" });
+  }, [messages.length, generating]);
 
-  function send() {
-    const text = draft.trim();
+  function send(raw = draft) {
+    const text = raw.trim();
     if (!text || generating) return;
     setDraft("");
+    setValue("");
     setMessages((m) => [...m, { id: m.length, role: "user", text }]);
     setGenerating(true);
     timer.current = window.setTimeout(() => {
@@ -359,8 +458,109 @@ function ChatPlayground() {
     setGenerating(false);
   }
 
+  // The guarded composer: Origami won't start work it isn't allowed to do,
+  // and puts the prompt back so it can be edited instead of retyped.
+  function guardedSend(text: string) {
+    setChecking(true);
+    setValue("");
+    window.setTimeout(() => {
+      setChecking(false);
+      if (/\b(delete|remove|drop|wipe)\b/i.test(text)) {
+        setValue(text);
+        setRejection({
+          prompt: text,
+          reason: "The playground agent can read the catalogue, but it can't delete or change anything in it.",
+          suggestion: "Ask which pattern to use instead, or run it from Operator with edit access.",
+        });
+      } else {
+        setRejection(null);
+        send(text);
+      }
+    }, 700);
+  }
+
+  const active = COMPOSERS.find((c) => c.id === composer)!;
+  let input: React.ReactNode;
+  switch (composer) {
+    case "bar":
+      input = <PromptBar variant="pill" placeholder="Ask as a user would…" onSubmit={(v) => send(v)} className="w-full" />;
+      break;
+    case "autocomplete":
+      input = <PromptAutocomplete value={value} onChange={setValue} getSuggestion={fakeSuggest} onSubmit={(v) => send(v)} placeholder="Ask as a user would…" />;
+      break;
+    case "enhancer":
+      input = <PromptEnhancer value={value} onChange={setValue} onEnhance={fakeEnhance} onSubmit={(v) => send(v)} placeholder="Ask as a user would…" />;
+      break;
+    case "quality":
+      input = <PromptQuality value={value} onChange={setValue} criteria={PLAYGROUND_CRITERIA} onSubmit={(v) => send(v)} placeholder="Ask as a user would…" />;
+      break;
+    case "context":
+      input = (
+        <ContextChipsComposer
+          sources={PLAYGROUND_CONTEXT}
+          value={context}
+          onChange={setContext}
+          auto={{ label: "Patterns page", icon: LayoutGrid, description: "The page you have open", included: includeOpen, onIncludedChange: setIncludeOpen }}
+          onSubmit={(text) => send(text)}
+          placeholder="Ask with context…"
+        />
+      );
+      break;
+    case "queue":
+      input = (
+        <MessageQueueComposer
+          busy={generating}
+          onSend={(text) => {
+            // A queued message arrives once the turn ends, so this never collides with a running reply.
+            if (generating) stop();
+            send(text);
+          }}
+          onStop={stop}
+          placeholder="Ask as a user would…"
+        />
+      );
+      break;
+    case "guarded":
+      input = (
+        <RejectedPromptComposer
+          value={value}
+          onChange={setValue}
+          onSend={guardedSend}
+          rejection={rejection}
+          onDismissRejection={() => setRejection(null)}
+          sending={checking}
+          placeholder="Try “Delete the Voice Orb pattern”"
+        />
+      );
+      break;
+  }
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col items-center bg-muted/30 p-4 sm:p-8">
+    <div className="flex min-h-0 flex-1 flex-col items-center gap-3 bg-muted/30 p-4 sm:p-8">
+      <div className="flex w-full max-w-md flex-col gap-1.5">
+        <div role="radiogroup" aria-label="Composer" className="flex flex-wrap gap-1.5">
+          {COMPOSERS.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              role="radio"
+              aria-checked={composer === c.id}
+              onClick={() => {
+                setComposer(c.id);
+                setValue("");
+                setRejection(null);
+              }}
+              className={cn(
+                "rounded-full px-2.5 py-1 text-xs font-medium transition-colors",
+                composer === c.id ? "bg-foreground text-background" : "bg-background text-muted-foreground ring-1 ring-border hover:text-foreground"
+              )}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+        <p className="px-1 text-xs text-muted-foreground">{active.hint}</p>
+      </div>
       <div className="flex min-h-0 w-full max-w-md flex-1 flex-col overflow-hidden rounded-3xl border bg-background shadow-sm">
         <div className="flex items-center gap-2 border-b px-4 py-3">
           <span className="flex size-7 items-center justify-center rounded-full bg-foreground text-background">
@@ -378,6 +578,9 @@ function ChatPlayground() {
           {generating && <ThinkingLoader className="w-full" />}
           <div ref={bottom} />
         </div>
+        {composer !== "basic" ? (
+          <div className="border-t p-3">{input}</div>
+        ) : (
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -395,10 +598,11 @@ function ChatPlayground() {
           <StopGenerationButton
             state={generating ? "generating" : "idle"}
             disabled={!generating && !draft.trim()}
-            onSubmit={send}
+            onSubmit={() => send()}
             onStop={stop}
           />
         </form>
+        )}
       </div>
     </div>
   );
@@ -446,6 +650,7 @@ function VoicePlayground() {
         <div className="flex min-h-48 flex-col items-center justify-center gap-4 rounded-3xl border bg-background p-6">
           {phase === "idle" && (
             <>
+              <VoiceOrb state="idle" particles={500} className="h-40 w-full text-foreground" />
               <VoiceWaveform state="idle" className="w-full" />
               <button
                 type="button"
@@ -461,6 +666,7 @@ function VoicePlayground() {
           {phase === "transcript" && <VoiceWaveform state="listening" className="w-full" />}
           {phase === "speaking" && (
             <>
+              <VoiceOrb state="speaking" particles={500} className="h-40 w-full text-foreground" />
               <VoiceWaveform state="speaking" className="w-full" />
               <button
                 type="button"
@@ -474,6 +680,82 @@ function VoicePlayground() {
           )}
         </div>
         {segments.length > 0 && <LiveTranscript segments={segments} active={phase === "transcript"} />}
+      </div>
+    </Scroll>
+  );
+}
+
+function RelayPlayground() {
+  const [onCall, setOnCall] = React.useState(false);
+  const [state, setState] = React.useState<RelayCallState>("listening");
+  const [items, setItems] = React.useState<RelayItem[]>([]);
+  const [run, setRun] = React.useState<RelayRun | null>(null);
+  const [seconds, setSeconds] = React.useState(0);
+  const muted = React.useRef(false);
+
+  React.useEffect(() => {
+    if (!onCall) return;
+    const timers = RELAY_SCRIPT.map((step, i) =>
+      window.setTimeout(() => {
+        if (step.state) setState(muted.current ? "muted" : step.state);
+        if (step.item) setItems((prev) => [...prev, { ...step.item!, id: String(i) } as RelayItem]);
+        if (step.run) setRun(step.run);
+      }, step.at)
+    );
+    const clock = window.setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => {
+      timers.forEach(window.clearTimeout);
+      window.clearInterval(clock);
+    };
+  }, [onCall]);
+
+  function start() {
+    setItems([]);
+    setRun(null);
+    setSeconds(0);
+    setState("listening");
+    muted.current = false;
+    setOnCall(true);
+  }
+
+  return (
+    <Scroll className="bg-muted/30 p-4 sm:p-8">
+      <div className="mx-auto flex w-full max-w-md flex-col gap-3">
+        <div>
+          <h3 className="font-semibold tracking-tight">Talk while {AGENT_NAME} works</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            A voice agent takes the request, hands it to {AGENT_NAME}, and reads progress back — without making you watch the thread.
+          </p>
+        </div>
+        {onCall ? (
+          <VoiceAgentRelay
+            state={state}
+            items={items}
+            run={run}
+            elapsed={`${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`}
+            onToggleMute={() => {
+              muted.current = !muted.current;
+              setState(muted.current ? "muted" : "listening");
+            }}
+            onEnd={() => setOnCall(false)}
+          />
+        ) : (
+          <>
+            {run?.status === "done" && (
+              <p className="rounded-xl border bg-card px-3 py-2 text-xs text-muted-foreground">
+                Call ended · {AGENT_NAME}&apos;s full reply and diff are in Operator.
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={start}
+              className="flex items-center justify-center gap-2 rounded-2xl border bg-background px-4 py-3 text-sm font-medium transition-colors hover:bg-accent"
+            >
+              <AudioLines className="size-4" />
+              Start a scripted call
+            </button>
+          </>
+        )}
       </div>
     </Scroll>
   );
@@ -493,8 +775,63 @@ function AgentIcon({ id, className }: { id: string; className?: string }) {
   return id === "origami" ? <AGENT_ICON className={className} /> : <Bot className={className} />;
 }
 
-export function AgentsView() {
+function DeployGate({ onPublished, onToast }: { onPublished: () => void; onToast: (message: string) => void }) {
+  const [checks, setChecks] = React.useState<PublishCheck[]>(PUBLISH_CHECKS);
+  const [stage, setStage] = React.useState<PublishGateStage>("checking");
+  const [run, setRun] = React.useState(0);
+  const fixed = React.useRef(new Set<string>());
+
+  React.useEffect(() => {
+    let cancelled = false;
+    const timers: number[] = [];
+    PUBLISH_CHECKS.forEach((c, i) => {
+      timers.push(
+        window.setTimeout(() => !cancelled && setChecks((prev) => prev.map((p) => (p.id === c.id ? { ...p, status: "running" } : p))), 300 + i * 700),
+        window.setTimeout(() => {
+          if (cancelled) return;
+          const fail = PUBLISH_FAILS[c.id] && !fixed.current.has(c.id);
+          setChecks((prev) => prev.map((p) => (p.id === c.id ? { ...p, status: fail ? "failed" : "passed", detail: fail ? PUBLISH_FAILS[c.id] : undefined } : p)));
+          if (i === PUBLISH_CHECKS.length - 1) setStage(Object.keys(PUBLISH_FAILS).some((id) => !fixed.current.has(id)) ? "blocked" : "ready");
+        }, 900 + i * 700)
+      );
+    });
+    return () => {
+      cancelled = true;
+      timers.forEach(window.clearTimeout);
+    };
+  }, [run]);
+
+  return (
+    <PublishGate
+      target="Origami · production"
+      audience="Everyone in ai-patterns"
+      checks={checks}
+      stage={stage}
+      onFix={(id) => {
+        setChecks((prev) => prev.map((p) => (p.id === id ? { ...p, fixing: true } : p)));
+        window.setTimeout(() => {
+          fixed.current.add(id);
+          setChecks(PUBLISH_CHECKS);
+          setStage("checking");
+          setRun((r) => r + 1);
+        }, 1500);
+      }}
+      onPublish={() => {
+        setStage("publishing");
+        window.setTimeout(() => {
+          setStage("published");
+          onToast("Deployed — new threads use the updated agent.");
+          onPublished();
+        }, 1100);
+      }}
+      className="max-w-none"
+    />
+  );
+}
+
+export function AgentsView({ onToast }: { onToast: (message: string) => void }) {
   const [creating, setCreating] = React.useState(false);
+  const [deploying, setDeploying] = React.useState(false);
   const [agents, setAgents] = React.useState(AGENTS);
   const [selected, setSelected] = React.useState(AGENTS[0].id);
   const [deployed, setDeployed] = React.useState(false);
@@ -523,7 +860,7 @@ export function AgentsView() {
             Deployed
           </span>
         ) : (
-          <ShinyButton onClick={() => setDeployed(true)}>Deploy changes</ShinyButton>
+          <ShinyButton onClick={() => setDeploying(true)}>Deploy changes</ShinyButton>
         )}
       </ViewHeader>
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">
@@ -591,8 +928,31 @@ export function AgentsView() {
             onToggle={() => setDeployed(false)}
             className="w-full max-w-none shadow-sm"
           />
+          <div className="mt-6">
+            <h3 className="text-sm font-medium">When {agent.name} gets stuck</h3>
+            <p className="mb-3 mt-0.5 text-xs text-muted-foreground">How long it waits for an answer before someone else picks the thread up.</p>
+            <WaitTimeHandoff
+              key={agent.id}
+              agentName={agent.name}
+              defaultValue={{ amount: 2, unit: "hours", kind: "team" }}
+              onChange={() => setDeployed(false)}
+              className="max-w-none"
+            />
+          </div>
         </div>
       </div>
+
+      <Modal open={deploying} onClose={() => setDeploying(false)} title="Deploy changes" className="max-w-md">
+        {deploying && (
+          <DeployGate
+            onToast={onToast}
+            onPublished={() => {
+              setDeployed(true);
+              window.setTimeout(() => setDeploying(false), 900);
+            }}
+          />
+        )}
+      </Modal>
 
       <AnimatePresence>
         {creating && (
