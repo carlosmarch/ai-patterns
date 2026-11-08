@@ -51,7 +51,7 @@ export default function Home() {
 
   return (
     <main>
-      <IntroHero entries={heroEntries} latest={newEntries[0] && toHeroEntry(newEntries[0])} />
+      <IntroHero entries={heroEntries} newEntries={newEntries.map(toHeroEntry)} />
 
       <Band>
         <AskVariant items={items} />
