@@ -169,8 +169,16 @@ export function NewWheel({ items }: { items: WheelItem[] }) {
           ))}
         </ul>
 
+        {/* Fade the cards out towards the bottom edge, so the ones low on the
+            ring dissolve instead of looking cut off */}
+        <div
+          aria-hidden
+          style={{ height: size.h * 1.6 }}
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[150] bg-gradient-to-b from-transparent via-background/80 to-background"
+        />
+
         {/* The hollow of the arc: what the top card is */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center px-6 pb-3 text-center">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[200] flex flex-col items-center px-6 pb-3 text-center">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={item.slug}
