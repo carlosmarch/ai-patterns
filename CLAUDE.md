@@ -29,6 +29,12 @@ Register the new entry in `src/registry/index.ts` (import the `Demo`,
 `Thumbnail` and `pattern`, add a `RegistryEntry`) — this is what makes it appear on
 `/patterns` and `/patterns/<category>/<slug>`.
 
+Every entry has an `added` timestamp — when it joined the catalogue, in
+UTC ISO to the minute (e.g. `"2026-11-07T23:13Z"`); use the time you add
+it. The `NEW_COUNT` (10) most recent get the "New" tag (`newEntries` /
+`isNewEntry` in `src/registry/index.ts`): the home page's "New" block, the
+badge on `/patterns` cards and the pattern page, and the sidebar dot.
+
 Every entry also needs a `job` — what the pattern does for the user,
 across categories: `start`, `ask`, `steer`, `oversee`, `trust` or
 `recover` (defined, with descriptions, in `src/registry/jobs.ts`). It
@@ -74,6 +80,11 @@ React — it works from `/api/mcp-data.json` and the exported `.md` files.
 - `npm run deploy` — build and deploy to Cloudflare Workers
 - `npm run sources:build` — regenerate `src/registry/sources.generated.ts`
   (every `component.tsx` as a string)
+- `npm run scout` — the research scout (`scripts/scout.mjs`): searches the
+  products in `research/sources.json` with Claude, codes findings against the
+  registry and writes `research/scout/<date>.md` (needs `ANTHROPIC_API_KEY`;
+  `-- --dry-run` prints instead). Runs on demand (manual dispatch only) in `.github/workflows/scout.yml`,
+  which opens a PR with the report
 - `npm run skill:build` — regenerate `plugins/ai-patterns/skills/ai-patterns/reference/` from `src/registry/`
 
 There is no test suite/script in this repo yet.

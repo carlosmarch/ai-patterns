@@ -1,0 +1,89 @@
+{
+  "lastRun": "2026-11-08",
+  "candidates": [
+    {
+      "slug": "voice-agent-relay",
+      "title": "Voice Relay to a Working Agent",
+      "category": "voice",
+      "job": "oversee",
+      "confidence": "medium",
+      "nearest": "voice-orb",
+      "summary": "A realtime voice call with a front-line voice agent that hands work to the coding agent, answers questions about its progress and speaks short updates while it runs.",
+      "behavior": "With the agent idle and the input empty, the Send slot becomes a waveform \"Start voice chat\" button. The person describes a change out loud; the voice agent hands it to the chat's coding agent. They keep talking while it runs, asking what changed in a diff or how a run is going, and hear short progress notes and a brief spoken summary on completion instead of the full written reply. The call can be muted or ended from outside the app (iOS Lock Screen Live Activity).",
+      "criteria": {
+        "aiSpecific": "(a) Spoken oversight of a long-running agent: the person needs a way to delegate and follow work without reading output.",
+        "observed": "(b) Cursor changelog, 2026-11-06.",
+        "distinct": "(c) Voice Orb/Listening State/Live Transcript cover the conversation itself; here the voice agent is a relay with state about another agent's run, speaks progress and summarises results."
+      },
+      "difference": "Voice is a control and status channel for a separate task-running agent, not the conversation with the model that does the work.",
+      "evidence": [
+        {
+          "product": "Cursor",
+          "url": "https://cursor.com/changelog/voice-chat",
+          "date": "2026-11-06",
+          "quote": "Describe a change out loud, ask what an agent is working on, and hear updates as the work moves forward."
+        }
+      ],
+      "status": "added",
+      "firstSeen": "2026-11-08"
+    },
+    {
+      "slug": "publish-gate",
+      "title": "Publish Gate",
+      "category": "agents",
+      "job": "trust",
+      "confidence": "medium",
+      "nearest": "diff-summary",
+      "summary": "Before an agent-built app goes live, automated and agent-based security checks run; failures go back to the agent to fix, and nothing is published until the person explicitly confirms.",
+      "behavior": "The person picks a domain and chooses to publish. Cursor runs deterministic rules plus agent review for issues such as exposed secrets. If a check fails, the agent says what it needs to fix. Only when checks pass can the person explicitly publish; admins can approve a blocked publish, add review rules and unpublish any app. Sharing is then scoped to people, groups or the team.",
+      "criteria": {
+        "aiSpecific": "(a) Agents generate and ship code the person has not read, so a checkpoint must catch leaked secrets before release.",
+        "observed": "(b) Cursor changelog, 2026-11-05. GitHub Copilot Agent Merge, 2026-11-06.",
+        "distinct": "(c) Tool Approval gates individual actions and Diff Summary reviews code changes; this gates release of the whole artifact on a pass/fail check with admin override."
+      },
+      "difference": "A release-time gate combining automated checks, agent remediation and explicit confirmation.",
+      "evidence": [
+        {
+          "product": "Cursor",
+          "url": "https://cursor.com/changelog/build-live-apps",
+          "date": "2026-11-05",
+          "quote": "Nothing goes live until the checks pass and you explicitly publish the app."
+        },
+        {
+          "product": "GitHub Copilot app",
+          "url": "https://github.blog/changelog/2026-11-06-github-copilot-weekly-releases-november-2/",
+          "date": "2026-11-06",
+          "quote": "Set up Agent Merge directly from a pull request to have Copilot merge it when it\u2019s ready. It now stays enabled while required checks or rules are pending."
+        }
+      ],
+      "status": "added",
+      "firstSeen": "2026-11-08"
+    },
+    {
+      "slug": "rejected-prompt-restore",
+      "title": "Rejected Prompt Restore",
+      "category": "errors",
+      "job": "recover",
+      "confidence": "low",
+      "nearest": "generation-error",
+      "summary": "When an agent refuses the first prompt of a session, the prompt goes back into the composer with the reason shown, so the person can fix it and resend without retyping.",
+      "behavior": "The person sends the opening prompt of a local agent session. If the agent rejects it, no empty or failed session is left behind: the text reappears in the composer, the rejection reason is shown with it, and the person edits and resends.",
+      "criteria": {
+        "aiSpecific": "(a) An agent can decline a request for policy or capability reasons; the person needs to know why and keep their words.",
+        "observed": "(b) Devin Desktop (formerly Windsurf) v3.12.28, 2026-11-07.",
+        "distinct": "(c) Generation Error and Chat Bubble retry a failed reply; here the input itself is returned for editing, with the agent's reason, before a session exists."
+      },
+      "difference": "Recovery keeps the person's prompt and puts it back where they can change it, instead of showing an error after it.",
+      "evidence": [
+        {
+          "product": "Devin Desktop",
+          "url": "https://docs.devin.ai/desktop/changelog",
+          "date": "2026-11-07",
+          "quote": "If a local agent rejects the first prompt, Desktop puts the text back in the composer and shows the reason. You can correct it and resend without retyping."
+        }
+      ],
+      "status": "added",
+      "firstSeen": "2026-11-08"
+    }
+  ]
+}

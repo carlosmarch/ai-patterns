@@ -77,22 +77,98 @@ const pickItems = (items: SectionItem[], slugs: string[]) =>
 /* A · Ask for a pattern — split hero with a chat that answers in patterns   */
 /* ------------------------------------------------------------------------ */
 
-const ASKS: { prompt: string; slugs: string[] }[] = [
+// Each ask cycles through the panel: the question, the patterns the agent
+// lands on, and one line of reasoning for why those fit — the "reasoning too".
+const ASKS: { prompt: string; why: string; slugs: string[] }[] = [
   {
     prompt: "Show me patterns that let people approve what the agent does",
-    slugs: ["tool-approval", "human-in-the-loop", "connector-panel", "agent-triggers", "invite-members"],
+    why: "Gate risky actions before they run, and let people choose how much runs unasked.",
+    slugs: ["tool-approval", "human-in-the-loop", "autonomy-mode", "plan-review", "access-request"],
   },
   {
     prompt: "How should an answer prove where it came from?",
+    why: "Cite inline at the claim, then let people open and judge the source.",
     slugs: ["inline-citation", "sources-stack", "source-trust-card", "confidence-indicator"],
   },
   {
     prompt: "Something for when the model fails halfway through",
+    why: "Keep what already streamed, say what broke, and offer the next step.",
     slugs: ["partial-response", "generation-error", "rate-limit", "connectivity-error", "console-error-card"],
   },
   {
     prompt: "Let people talk to it instead of typing",
-    slugs: ["listening-state", "live-transcript", "prompt-bar", "attachment-chip"],
+    why: "Show it's listening, echo the words live, and hand off to text cleanly.",
+    slugs: ["listening-state", "live-transcript", "voice-waveform", "voice-orb", "prompt-bar"],
+  },
+  {
+    prompt: "People stare at an empty box and don't know what to ask",
+    why: "Replace the blank state with starters, templates and a guided first prompt.",
+    slugs: ["prompt-onboarding", "prompt-template", "prompt-wizard", "prompt-autocomplete", "follow-up-list"],
+  },
+  {
+    prompt: "The agent will take a while. How do I keep people in the loop?",
+    why: "Show the plan, tick off steps as they land, and let people leave and come back.",
+    slugs: ["task-list", "agent-run-card", "background-tasks", "wait-time-handoff", "stop-generation-button"],
+  },
+  {
+    prompt: "How do I show what the model is thinking without a wall of text?",
+    why: "Summarize reasoning as it streams and keep the full trace one click away.",
+    slugs: ["stream-of-thought", "thinking-loader", "expandable-trace", "multi-agent-trace", "tool-call-chip"],
+  },
+  {
+    prompt: "Let people undo what the agent changed",
+    why: "Review the change before keeping it, and restore any earlier point after.",
+    slugs: ["checkpoint-restore", "diff-summary", "diff-tabs", "conversation-branches"],
+  },
+  {
+    prompt: "Users keep asking what this is going to cost them",
+    why: "Estimate before the run, meter during it, and show what's left of the budget.",
+    slugs: ["cost-estimate", "context-usage", "model-picker", "rate-limit"],
+  },
+  {
+    prompt: "Make vague prompts better before they're sent",
+    why: "Flag what's missing, ask one good question, or rewrite it for review.",
+    slugs: ["prompt-quality", "clarifying-questions", "prompt-enhancer", "context-chips"],
+  },
+  {
+    prompt: "Ways to tweak an answer without retyping the prompt",
+    why: "Put the common edits on the answer itself, and compare versions side by side.",
+    slugs: ["response-actions", "refinement-controls", "selection-actions", "response-compare"],
+  },
+  {
+    prompt: "What does the assistant remember about me, and can I turn it off?",
+    why: "Make memory visible and editable, and give people a mode where nothing is kept.",
+    slugs: ["memory-panel", "incognito-toggle", "ai-disclosure-badge", "connector-panel"],
+  },
+  {
+    prompt: "Let people search our data in plain English",
+    why: "Turn the sentence into visible filters or a query people can check and edit.",
+    slugs: ["natural-language-query", "describe-filters", "ai-fill-drawer", "command-palette"],
+  },
+  {
+    prompt: "Help me set up an agent that runs on its own",
+    why: "Name the job, wire its tools, then decide what wakes it up.",
+    slugs: ["create-agent", "agent-setup-pill", "agent-triggers", "trigger-condition", "procedure-builder"],
+  },
+  {
+    prompt: "Where should the generated code or document live?",
+    why: "Give the output its own pane next to the chat, with a preview and a diff.",
+    slugs: ["artifact-panel", "code-preview", "diff-tabs", "terminal-stream"],
+  },
+  {
+    prompt: "Get a new team from sign-up to their first useful run",
+    why: "A short checklist, the right connections, and teammates invited early.",
+    slugs: ["setup-checklist", "connector-panel", "invite-members", "collaborative-presence"],
+  },
+  {
+    prompt: "Let people keep typing while the agent is still busy",
+    why: "Queue the next messages, attach context, and keep a quick dock at hand.",
+    slugs: ["message-queue", "quick-chat-dock", "attachment-chip", "instruction-tools"],
+  },
+  {
+    prompt: "How do I let a reviewer check the AI's work?",
+    why: "Collect findings in one panel, mark AI-made content, and say how sure it is.",
+    slugs: ["ai-review-panel", "analysis-list", "ai-disclosure-badge", "confidence-indicator"],
   },
 ];
 
@@ -119,7 +195,7 @@ type AskPhase = "asking" | "searching" | "found";
 
 function AskPanel({ items }: { items: SectionItem[] }) {
   const reduce = useReducedMotion();
-  const tick = useTick(6000);
+  const tick = useTick(6500);
   const ask = ASKS[tick % ASKS.length];
   const found = pickItems(items, ask.slugs);
   const [phase, setPhase] = useState<AskPhase>("asking");
@@ -139,7 +215,7 @@ function AskPanel({ items }: { items: SectionItem[] }) {
   const shown: AskPhase = reduce ? "found" : phase;
 
   return (
-    <div aria-hidden className="relative min-h-[340px] overflow-hidden rounded-2xl border bg-muted/40 p-5">
+    <div aria-hidden className="relative min-h-[380px] overflow-hidden rounded-2xl border bg-muted/40 p-5">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.p
           key={ask.prompt}
@@ -180,7 +256,24 @@ function AskPanel({ items }: { items: SectionItem[] }) {
         </AnimatePresence>
       </div>
 
-      <div className="-mr-5 mt-3 flex gap-3 [mask-image:linear-gradient(to_right,black_70%,transparent)]">
+      <div className="mt-1 min-h-10 text-sm leading-snug text-muted-foreground">
+        <AnimatePresence mode="wait" initial={false}>
+          {shown === "found" && (
+            <motion.p
+              key={`why-${ask.prompt}`}
+              className="max-w-md"
+              initial={reduce ? { opacity: 0 } : { opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, delay: reduce ? 0 : 0.15 }}
+            >
+              {ask.why}
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className="-mr-5 mt-2 flex gap-3 [mask-image:linear-gradient(to_right,black_70%,transparent)]">
         <AnimatePresence mode="popLayout">
           {shown === "found" &&
             found.map((item, i) => (

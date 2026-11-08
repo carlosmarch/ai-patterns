@@ -62,7 +62,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "AI Patterns",
-  description: "Production components for AI agent UIs — each with a UX spec the harness can read.",
+  description: "An open research project on how user experience evolves as AI learns to act — each pattern a UX spec people and agents can read, with the code to ship it.",
   alternates: {
     types: { "text/markdown": "/index.md", "text/plain": "/llms.txt" },
   },
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "AI Patterns",
     title: "AI Patterns",
-    description: "Production components for AI agent UIs — each with a UX spec the harness can read.",
+    description: "An open research project on how user experience evolves as AI learns to act — each pattern a UX spec people and agents can read, with the code to ship it.",
     url: "/",
   },
   twitter: { card: "summary_large_image" },

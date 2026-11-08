@@ -1,19 +1,27 @@
 import Link from "next/link";
 
+import { NewBadge } from "@/components/new-badge";
 import { SeenIn } from "@/components/seen-in";
-import type { RegistryEntry } from "@/registry";
+import { isNewEntry, type RegistryEntry } from "@/registry";
 
-// The thumbnail card used on the home page groups and the /patterns index:
-// a wireframe print on a white surface, framed by a muted card.
+// The thumbnail card used on the home page and the /patterns index: a
+// wireframe print on a white surface, framed by a muted card. Recently added
+// patterns get the "New" tag on the print.
 export function PatternCard({ entry }: { entry: RegistryEntry }) {
   const { Thumbnail } = entry;
+  const showNew = isNewEntry(entry);
   return (
     <Link
       href={`/patterns/${entry.category}/${entry.slug}`}
       className="group block h-full rounded-xl border bg-muted/40 p-1.5 transition-colors hover:bg-muted/70"
     >
-      <div className="aspect-[5/3] rounded-lg border bg-card p-2 transition-transform duration-300 group-hover:-translate-y-0.5 dark:bg-background">
+      <div className="relative aspect-[5/3] rounded-lg border bg-card p-2 transition-transform duration-300 group-hover:-translate-y-0.5 dark:bg-background">
         <Thumbnail />
+        {showNew && (
+          <span className="absolute top-1.5 left-1.5 rounded-full bg-card dark:bg-background">
+            <NewBadge />
+          </span>
+        )}
       </div>
       <div className="px-1.5 pt-2.5 pb-1.5">
         <div className="flex items-start justify-between gap-2">

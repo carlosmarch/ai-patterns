@@ -2,12 +2,14 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { BookOpen, Sparkles } from "lucide-react";
 
-import { getCategories, registry, type RegistryEntry } from "@/registry";
+import { getCategories, NEW_COUNT, newEntries as latestEntries, registry, type RegistryEntry } from "@/registry";
+import { formatAdded } from "@/components/new-badge";
+import { NewWheel } from "./new-wheel";
 import { GithubMark } from "@/components/github-mark";
 import { IntroHero, type HeroEntry } from "./intro-hero/intro-hero";
 import { HomeConnect } from "./home-connect";
 import { HomeHero } from "./home-hero";
-import { Card, DemoCard, Section, href } from "./home-parts";
+import { Card, Section, href } from "./home-parts";
 import { AskVariant, StatsVariant, TabsVariant, TerminalVariant, type SectionItem } from "./sections/variants";
 import { CompareVariant, ComparisonVariant, IndexVariant } from "./sections/variants-more";
 
@@ -18,7 +20,6 @@ import { CompareVariant, ComparisonVariant, IndexVariant } from "./sections/vari
 const REPO_URL = "https://github.com/carlosmarch/ai-patterns";
 const FEATURED = "prompt-bar-pro";
 const HIDDEN = new Set([FEATURED, "shiny-button"]);
-const NEW = ["natural-language-query", "ai-fill-drawer", "describe-filters"];
 const SEARCH_THUMBS = ["tool-approval", "streaming-text", "inline-citation", "stop-generation-button", "generation-error", "sources-stack"];
 
 const bySlug = new Map(registry.map((entry) => [entry.slug, entry]));
@@ -36,7 +37,7 @@ export default function Home() {
   const visible = registry.filter((e) => !HIDDEN.has(e.slug));
   const heroEntries = registry.filter((e) => !HIDDEN.has(e.slug) || e.slug === FEATURED).map(toHeroEntry);
   const featured = bySlug.get(FEATURED);
-  const newEntries = pick(NEW);
+  const newEntries = latestEntries.filter((e) => !HIDDEN.has(e.slug));
   const items: SectionItem[] = visible.map(({ slug, category, title, Thumbnail }) => ({
     slug,
     category,
@@ -51,7 +52,7 @@ export default function Home() {
 
   return (
     <main>
-      <IntroHero entries={heroEntries} latest={newEntries[0] && toHeroEntry(newEntries[0])} />
+      <IntroHero entries={heroEntries} newEntries={newEntries.map(toHeroEntry)} />
 
       <Band>
         <AskVariant items={items} />
@@ -78,19 +79,30 @@ export default function Home() {
       )}
 
       {newEntries.length > 0 && (
-        <Band narrow>
-          <Section id="first-demo" title="New" action={{ label: "View all", href: "/patterns" }}>
-            <div className="space-y-4">
-              {newEntries.map((entry) => (
-                <DemoCard key={entry.slug} entry={entry} badge="New" />
-              ))}
-            </div>
+        <Band>
+          <Section
+            id="first-demo"
+            title="New"
+            blurb={`The ${NEW_COUNT} latest patterns added to the catalogue. Drag to spin.`}
+            action={{ label: "View all", href: "/patterns" }}
+          >
+            <NewWheel
+              items={newEntries.map((entry) => ({
+                slug: entry.slug,
+                href: href(entry),
+                title: entry.title,
+                category: entry.category,
+                description: entry.description,
+                added: formatAdded(entry.added),
+                thumb: <entry.Thumbnail />,
+              }))}
+            />
           </Section>
         </Band>
       )}
 
       <Band>
-        <IndexVariant items={items} />
+        <IndexVariant items={items} total={registry.length} />
       </Band>
 
       <Band>
@@ -106,7 +118,7 @@ export default function Home() {
       </Band>
 
       <Band narrow>
-        <StatsVariant patternCount={visible.length} categoryCount={getCategories().length} />
+        <StatsVariant patternCount={registry.length} categoryCount={getCategories().length} />
       </Band>
 
       <section className="px-6 py-24 text-center sm:py-32">

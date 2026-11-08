@@ -3,8 +3,20 @@ import type { ComponentType } from "react";
 import type { SeenIn } from "@/lib/teams";
 import type { PatternJob } from "./jobs";
 
+import PromptAutocompleteDemo from "./composer/prompt-autocomplete/demo";
+import PromptAutocompleteThumbnail from "./composer/prompt-autocomplete/thumbnail";
+import PromptQualityDemo from "./composer/prompt-quality/demo";
+import PromptQualityThumbnail from "./composer/prompt-quality/thumbnail";
+import PromptWizardDemo from "./composer/prompt-wizard/demo";
+import PromptWizardThumbnail from "./composer/prompt-wizard/thumbnail";
+import ResponseActionsDemo from "./messages/response-actions/demo";
+import ResponseActionsThumbnail from "./messages/response-actions/thumbnail";
 import PromptEnhancerDemo from "./composer/prompt-enhancer/demo";
 import PromptEnhancerThumbnail from "./composer/prompt-enhancer/thumbnail";
+import { pattern as promptAutocompletePattern } from "./composer/prompt-autocomplete/pattern";
+import { pattern as promptQualityPattern } from "./composer/prompt-quality/pattern";
+import { pattern as promptWizardPattern } from "./composer/prompt-wizard/pattern";
+import { pattern as responseActionsPattern } from "./messages/response-actions/pattern";
 import { pattern as promptEnhancerPattern } from "./composer/prompt-enhancer/pattern";
 import PromptTemplateDemo from "./composer/prompt-template/demo";
 import PromptTemplateThumbnail from "./composer/prompt-template/thumbnail";
@@ -97,6 +109,9 @@ import { pattern as toolApprovalPattern } from "./permissions/tool-approval/patt
 import ConnectorPanelDemo from "./permissions/connector-panel/demo";
 import ConnectorPanelThumbnail from "./permissions/connector-panel/thumbnail";
 import { pattern as connectorPanelPattern } from "./permissions/connector-panel/pattern";
+import AccessRequestDemo from "./permissions/access-request/demo";
+import AccessRequestThumbnail from "./permissions/access-request/thumbnail";
+import { pattern as accessRequestPattern } from "./permissions/access-request/pattern";
 import ToolCallChipDemo from "./loaders/tool-call-chip/demo";
 import ToolCallChipThumbnail from "./loaders/tool-call-chip/thumbnail";
 import { pattern as toolCallChipPattern } from "./loaders/tool-call-chip/pattern";
@@ -172,6 +187,12 @@ import { pattern as collaborativePresencePattern } from "./collaboration/collabo
 import InviteMembersDemo from "./access/invite-members/demo";
 import InviteMembersThumbnail from "./access/invite-members/thumbnail";
 import { pattern as inviteMembersPattern } from "./access/invite-members/pattern";
+import ArchivedSessionDemo from "./agents/archived-session/demo";
+import ArchivedSessionThumbnail from "./agents/archived-session/thumbnail";
+import { pattern as archivedSessionPattern } from "./agents/archived-session/pattern";
+import ShareSessionDemo from "./access/share-session/demo";
+import ShareSessionThumbnail from "./access/share-session/thumbnail";
+import { pattern as shareSessionPattern } from "./access/share-session/pattern";
 import AnalysisListDemo from "./loaders/analysis-list/demo";
 import AnalysisListThumbnail from "./loaders/analysis-list/thumbnail";
 import { pattern as analysisListPattern } from "./loaders/analysis-list/pattern";
@@ -217,10 +238,33 @@ import { pattern as costEstimatePattern } from "./indicators/cost-estimate/patte
 import ContextUsageDemo from "./indicators/context-usage/demo";
 import ContextUsageThumbnail from "./indicators/context-usage/thumbnail";
 import { pattern as contextUsagePattern } from "./indicators/context-usage/pattern";
+import ArtifactPanelDemo from "./messages/artifact-panel/demo";
+import ArtifactPanelThumbnail from "./messages/artifact-panel/thumbnail";
+import { pattern as artifactPanelPattern } from "./messages/artifact-panel/pattern";
+import ContextChipsDemo from "./composer/context-chips/demo";
+import ContextChipsThumbnail from "./composer/context-chips/thumbnail";
+import { pattern as contextChipsPattern } from "./composer/context-chips/pattern";
+import CheckpointRestoreDemo from "./agents/checkpoint-restore/demo";
+import CheckpointRestoreThumbnail from "./agents/checkpoint-restore/thumbnail";
+import { pattern as checkpointRestorePattern } from "./agents/checkpoint-restore/pattern";
+import VoiceAgentRelayDemo from "./voice/voice-agent-relay/demo";
+import VoiceAgentRelayThumbnail from "./voice/voice-agent-relay/thumbnail";
+import { pattern as voiceAgentRelayPattern } from "./voice/voice-agent-relay/pattern";
+import PublishGateDemo from "./agents/publish-gate/demo";
+import PublishGateThumbnail from "./agents/publish-gate/thumbnail";
+import { pattern as publishGatePattern } from "./agents/publish-gate/pattern";
+import RejectedPromptRestoreDemo from "./errors/rejected-prompt-restore/demo";
+import RejectedPromptRestoreThumbnail from "./errors/rejected-prompt-restore/thumbnail";
+import { pattern as rejectedPromptRestorePattern } from "./errors/rejected-prompt-restore/pattern";
+import AutonomyModeDemo from "./composer/autonomy-mode/demo";
+import AutonomyModeThumbnail from "./composer/autonomy-mode/thumbnail";
+import { pattern as autonomyModePattern } from "./composer/autonomy-mode/pattern";
 
 export interface RegistryEntry {
   slug: string;
   category: string;
+  /** When the pattern joined the catalogue, as a UTC ISO timestamp (minute precision). Drives the "New" tag — see `getNewEntries`. */
+  added: string;
   /** What the pattern does for the user — the cross-category "job" facet (see ./jobs.ts). */
   job: PatternJob;
   title: string;
@@ -238,6 +282,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "create-agent",
     category: "agents",
+    added: "2026-09-15T08:55Z",
     job: "start",
     title: "Create Agent",
     description: "A two-step wizard card for naming an agent, picking its icon, and selecting which event sources activate it.",
@@ -251,6 +296,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "agent-triggers",
     category: "agents",
+    added: "2026-09-15T08:39Z",
     job: "steer",
     title: "Agent Triggers",
     description: "A configuration panel for listing and toggling the external events that activate an agent, with a manual run control.",
@@ -265,6 +311,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "human-in-the-loop",
     category: "agents",
+    added: "2026-09-15T11:23Z",
     job: "oversee",
     title: "Human in the Loop Question",
     description: "A compact dialog that pauses an agent mid-task to collect a structured choice — radio options, a free-text fallback, skip/continue controls, and multi-step pagination.",
@@ -278,6 +325,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "background-tasks",
     category: "agents",
+    added: "2026-10-08T08:53Z",
     job: "oversee",
     title: "Background Tasks Drawer",
     description:
@@ -292,6 +340,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "instruction-tools",
     category: "agents",
+    added: "2026-10-18T20:44Z",
     job: "ask",
     title: "Instruction Tool Insert",
     description:
@@ -306,6 +355,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "procedure-builder",
     category: "agents",
+    added: "2026-10-18T20:45Z",
     job: "steer",
     title: "Procedure Builder",
     description:
@@ -320,6 +370,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "task-list",
     category: "agents",
+    added: "2026-11-04T14:20Z",
     job: "oversee",
     title: "Task List",
     description:
@@ -335,6 +386,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "agent-run-card",
     category: "agents",
+    added: "2026-11-05T14:21Z",
     job: "oversee",
     title: "Agent Run Card",
     description:
@@ -347,6 +399,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "wait-time-handoff",
     category: "agents",
+    added: "2026-11-04T16:20Z",
     job: "oversee",
     title: "Wait Time Handoff",
     description:
@@ -361,6 +414,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "plan-review",
     category: "agents",
+    added: "2026-11-07T23:13Z",
     job: "oversee",
     title: "Plan Review",
     description:
@@ -368,11 +422,16 @@ export const registry: RegistryEntry[] = [
     Demo: PlanReviewDemo,
     Thumbnail: PlanReviewThumbnail,
     uxDoc: planReviewPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "cursor", source: "https://cursor.com/docs/agent/plan-mode" },
+      { team: "replit", source: "https://docs.replit.com/features/agent/plan-mode" },
+      { team: "zapier", source: "https://help.zapier.com/hc/en-us/articles/15703650952077-Use-the-power-of-AI-to-generate-Zap-workflows" },
+    ],
   },
   {
     slug: "multi-agent-trace",
     category: "traces",
+    added: "2026-09-12T06:58Z",
     job: "oversee",
     title: "Multi-Agent Trace",
     description: "A tree of parallel sub-agent tasks, each with its own status and step list.",
@@ -386,6 +445,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "shiny-button",
     category: "buttons",
+    added: "2026-09-11T19:54Z",
     job: "start",
     title: "Shiny Button",
     description: "A button with an animated light sweep across its surface.",
@@ -397,6 +457,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "thinking-loader",
     category: "loaders",
+    added: "2026-09-11T19:59Z",
     job: "oversee",
     title: "Thinking Loader",
     description: "A loader with a shimmering label and a live elapsed-time counter.",
@@ -410,6 +471,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "drawing-icon",
     category: "loaders",
+    added: "2026-11-05T11:03Z",
     job: "oversee",
     title: "Drawing Icon",
     description: "A line icon that draws itself stroke by stroke while the step it stands for is running.",
@@ -423,6 +485,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "expandable-trace",
     category: "traces",
+    added: "2026-09-11T19:59Z",
     job: "oversee",
     title: "Expandable Trace",
     description: "A collapsible \"Thought for Xs\" summary that expands into a step-by-step trace.",
@@ -436,17 +499,23 @@ export const registry: RegistryEntry[] = [
   {
     slug: "stream-of-thought",
     category: "traces",
+    added: "2026-11-07T22:34Z",
     job: "oversee",
     title: "Stream of Thought",
     description: "A live, timed header over reasoning that streams in as a step timeline, then folds into a \"Thought for Ns\" trace when the answer starts.",
     Demo: StreamOfThoughtDemo,
     Thumbnail: StreamOfThoughtThumbnail,
     uxDoc: streamOfThoughtPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/11909943-gpt-5-5-in-chatgpt" },
+      { team: "lovable", source: "https://docs.lovable.dev/features/agent-mode" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/10352903-what-is-pro-search" },
+    ],
   },
   {
     slug: "streaming-text",
     category: "text",
+    added: "2026-09-11T20:22Z",
     job: "oversee",
     title: "Streaming Text",
     description: "A streamed answer with inline sources, actions, and follow-ups.",
@@ -460,6 +529,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "prompt-bar",
     category: "composer",
+    added: "2026-09-11T20:37Z",
     job: "ask",
     title: "Prompt Bar",
     description: "A composer with @ sources, / commands, a model picker, and dictation.",
@@ -474,6 +544,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "prompt-bar-pro",
     category: "composer",
+    added: "2026-09-11T21:03Z",
     job: "ask",
     title: "Prompt Bar Pro",
     description:
@@ -488,6 +559,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "quick-chat-dock",
     category: "composer",
+    added: "2026-11-04T13:15Z",
     job: "ask",
     title: "Quick Chat Dock",
     description:
@@ -502,6 +574,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "message-queue",
     category: "composer",
+    added: "2026-11-04T15:38Z",
     job: "ask",
     title: "Message Queue",
     description:
@@ -511,11 +584,14 @@ export const registry: RegistryEntry[] = [
     uxDoc: messageQueuePattern,
     seenIn: [
       { team: "claude", source: "https://code.claude.com/docs/en/interactive-mode" },
+      { team: "replit", source: "https://docs.replit.com/features/agent/steer-and-queue-messages" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/13600190-what-s-new-in-advanced-deep-research" },
     ],
   },
   {
     slug: "model-picker",
     category: "composer",
+    added: "2026-11-07T22:47Z",
     job: "steer",
     title: "Model Picker",
     description:
@@ -525,11 +601,16 @@ export const registry: RegistryEntry[] = [
     uxDoc: modelPickerPattern,
     seenIn: [
       { team: "cursor", source: "https://docs.cursor.com/models" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/20001354-gpt-6-and-other-models-in-chatgpt" },
+      { team: "claude", source: "https://support.claude.com/en/articles/8664678-change-the-model-effort-and-thinking-settings" },
+      { team: "gemini", source: "https://support.google.com/gemini/answer/18648722?hl=en" },
+      { team: "v0", source: "https://v0.app/changelog" },
     ],
   },
   {
     slug: "incognito-toggle",
     category: "composer",
+    added: "2026-11-07T22:47Z",
     job: "trust",
     title: "Incognito Toggle",
     description:
@@ -539,11 +620,74 @@ export const registry: RegistryEntry[] = [
     uxDoc: incognitoTogglePattern,
     seenIn: [
       { team: "chatgpt", source: "https://help.openai.com/en/articles/8914046-temporary-chat-faq" },
+      { team: "gemini", source: "https://blog.google/products-and-platforms/products/gemini/temporary-chats-privacy-controls/" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/12639758-incognito-mode-troubleshooting" },
+    ],
+  },
+  {
+    slug: "prompt-autocomplete",
+    category: "composer",
+    added: "2026-11-08T13:31Z",
+    job: "ask",
+    title: "Prompt Autocomplete",
+    description:
+      "Ghost text that finishes the prompt as you type — Tab takes it all, Right Arrow takes a word, and typing on replaces it.",
+    Demo: PromptAutocompleteDemo,
+    Thumbnail: PromptAutocompleteThumbnail,
+    uxDoc: promptAutocompletePattern,
+    seenIn: [
+      { team: "copilot", source: "https://docs.github.com/en/copilot/how-tos/copilot-in-your-ide/copilot-for-common-tasks/get-ide-code-suggestions" },
+      { team: "warp", source: "https://docs.warp.dev/agent-platform/local-agents/active-ai/" },
+    ],
+  },
+  {
+    slug: "prompt-quality",
+    category: "composer",
+    added: "2026-11-08T13:31Z",
+    job: "steer",
+    title: "Prompt Quality Meter",
+    description:
+      "A meter under the prompt that fills as it gets more specific, with a chip per missing detail that inserts a fill-in phrase, and one tip for what to add next.",
+    Demo: PromptQualityDemo,
+    Thumbnail: PromptQualityThumbnail,
+    uxDoc: promptQualityPattern,
+    seenIn: [],
+  },
+  {
+    slug: "prompt-wizard",
+    category: "composer",
+    added: "2026-11-08T13:31Z",
+    job: "start",
+    title: "Prompt Wizard",
+    description:
+      "A prompt built one question at a time — choices or short answers, with a live preview — ending on an editable review of the finished prompt.",
+    Demo: PromptWizardDemo,
+    Thumbnail: PromptWizardThumbnail,
+    uxDoc: promptWizardPattern,
+    seenIn: [],
+  },
+  {
+    slug: "response-actions",
+    category: "messages",
+    added: "2026-11-08T13:31Z",
+    job: "steer",
+    title: "Response Actions",
+    description:
+      "A toolbar under a finished answer — copy, rate, share and a Regenerate menu with named alternatives — where a thumbs-down asks what went wrong.",
+    Demo: ResponseActionsDemo,
+    Thumbnail: ResponseActionsThumbnail,
+    uxDoc: responseActionsPattern,
+    seenIn: [
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/6825453-chatgpt-release-notes" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/12802813-how-do-i-change-to-my-preferred-ai-model" },
+      { team: "gemini", source: "https://support.google.com/gemini/answer/14262426?hl=en&co=GENIE.Platform%3DDesktop" },
+      { team: "claude", source: "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on" },
     ],
   },
   {
     slug: "prompt-enhancer",
     category: "composer",
+    added: "2026-11-07T23:13Z",
     job: "steer",
     title: "Prompt Enhancer",
     description:
@@ -556,6 +700,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "prompt-template",
     category: "composer",
+    added: "2026-11-07T23:13Z",
     job: "start",
     title: "Prompt Template",
     description:
@@ -563,11 +708,14 @@ export const registry: RegistryEntry[] = [
     Demo: PromptTemplateDemo,
     Thumbnail: PromptTemplateThumbnail,
     uxDoc: promptTemplatePattern,
-    seenIn: [],
+    seenIn: [
+      { team: "zapier", source: "https://help.zapier.com/hc/en-us/articles/44821650010637-Use-a-guided-template" },
+    ],
   },
   {
     slug: "diff-summary",
     category: "code",
+    added: "2026-09-11T20:48Z",
     job: "trust",
     title: "Diff Summary Card",
     description: "A collapsed summary of a batch of file edits, with undo and an overflow list.",
@@ -582,6 +730,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "diff-tabs",
     category: "code",
+    added: "2026-09-12T21:18Z",
     job: "trust",
     title: "Diff Tabs",
     description: "Per-file chips that switch an inline diff viewer between a batch of changed files.",
@@ -596,6 +745,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "code-preview",
     category: "code",
+    added: "2026-11-05T11:03Z",
     job: "trust",
     title: "Code Preview Block",
     description: "A code block that flips between the source and a sandboxed live rendering of it.",
@@ -609,6 +759,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "trigger-condition",
     category: "flowcharts",
+    added: "2026-09-11T21:12Z",
     job: "steer",
     title: "Flowchart",
     description: "Workflow trigger and condition steps on a dotted canvas.",
@@ -622,6 +773,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "chat-bubble",
     category: "messages",
+    added: "2026-09-11T22:23Z",
     job: "trust",
     title: "Chat Bubble with Actions",
     description: "A message bubble with feedback thumbs, edit-and-resubmit, retry/regenerate, and a version stepper.",
@@ -629,13 +781,14 @@ export const registry: RegistryEntry[] = [
     Thumbnail: ChatBubbleThumbnail,
     uxDoc: chatBubblePattern,
     seenIn: [
-      { team: "chatgpt", source: "https://community.openai.com/t/chatgpt-bug-introduced-in-response-selector-of-regenerations-and-edits-edit-button-goes-missing/1145664" },
-      { team: "claude", source: "https://www.guideflow.com/tutorial/how-to-retry-a-response-in-a-chat-in-claudeai" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/8142208-chatgpt-ios-and-android-app-faq" },
+      { team: "claude", source: "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on" },
     ],
   },
   {
     slug: "clarifying-questions",
     category: "messages",
+    added: "2026-11-07T23:13Z",
     job: "start",
     title: "Clarifying Questions",
     description:
@@ -650,6 +803,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "conversation-branches",
     category: "messages",
+    added: "2026-11-07T23:13Z",
     job: "steer",
     title: "Conversation Branches",
     description:
@@ -657,11 +811,14 @@ export const registry: RegistryEntry[] = [
     Demo: ConversationBranchesDemo,
     Thumbnail: ConversationBranchesThumbnail,
     uxDoc: conversationBranchesPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/6825453-chatgpt-release-notes" },
+    ],
   },
   {
     slug: "tool-approval",
     category: "permissions",
+    added: "2026-09-11T22:24Z",
     job: "oversee",
     title: "Tool Approval",
     description: "A pending tool-call prompt with allow, always-allow, and deny actions.",
@@ -671,11 +828,13 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "claude", source: "https://code.claude.com/docs/en/permissions" },
       { team: "warp", source: "https://docs.warp.dev/agents/local-agents/interacting-with-agents/terminal-and-agent-modes" },
+      { team: "notion", source: "https://www.notion.com/help/choose-how-notion-agent-asks-for-your-approval" },
     ],
   },
   {
     slug: "connector-panel",
     category: "permissions",
+    added: "2026-09-15T20:37Z",
     job: "steer",
     title: "Connector Panel",
     description:
@@ -686,11 +845,14 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "claude", source: "https://support.claude.com/en/articles/11176164" },
       { team: "chatgpt", source: "https://developers.openai.com/api/docs/guides/developer-mode" },
+      { team: "intercom", source: "https://www.intercom.com/help/en/articles/11461635-add-mcp-connectors-for-popular-apps-or-custom-mcps" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/collections/18799295-connectors-integrations" },
     ],
   },
   {
     slug: "memory-panel",
     category: "permissions",
+    added: "2026-11-07T22:47Z",
     job: "trust",
     title: "Memory Panel",
     description:
@@ -700,11 +862,13 @@ export const registry: RegistryEntry[] = [
     uxDoc: memoryPanelPattern,
     seenIn: [
       { team: "chatgpt", source: "https://openai.com/index/memory-and-new-controls-for-chatgpt/" },
+      { team: "gemini", source: "https://support.google.com/gemini/answer/18617127?hl=en&co=GENIE.Platform%3DDesktop" },
     ],
   },
   {
     slug: "tool-call-chip",
     category: "loaders",
+    added: "2026-09-12T06:37Z",
     job: "oversee",
     title: "Tool Call Chip",
     description: "An inline pill naming an in-flight tool call that resolves into a result summary.",
@@ -719,6 +883,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "attachment-chip",
     category: "uploads",
+    added: "2026-09-12T06:37Z",
     job: "ask",
     title: "Attachment Chip",
     description: "A composer's file/image attachment tray with drag-drop, upload progress, and inline preview.",
@@ -727,11 +892,15 @@ export const registry: RegistryEntry[] = [
     uxDoc: attachmentChipPattern,
     seenIn: [
       { team: "claude", source: "https://support.claude.com/en/articles/8241126-upload-files-to-claude" },
+      { team: "figma", source: "https://help.figma.com/hc/en-us/articles/31304529835671-Attach-files-to-a-prompt-in-the-Figma-agent-and-Figma-Make" },
+      { team: "lovable", source: "https://docs.lovable.dev/tips-tricks/using-images" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/10354807-file-uploads" },
     ],
   },
   {
     slug: "image-peek",
     category: "media",
+    added: "2026-10-07T07:49Z",
     job: "trust",
     title: "Image Peek",
     description: "A row of tiny image thumbnails that grows into an anchored preview card with a label, counter, and prev/next stepping.",
@@ -739,12 +908,13 @@ export const registry: RegistryEntry[] = [
     Thumbnail: ImagePeekThumbnail,
     uxDoc: imagePeekPattern,
     seenIn: [
-      { team: "chatgpt", source: "https://searchengineland.com/chatgpt-more-images-answers-465098" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/9237897-chatgpt-search" },
     ],
   },
   {
     slug: "stop-generation-button",
     category: "buttons",
+    added: "2026-09-12T06:58Z",
     job: "oversee",
     title: "Stop Generation Button",
     description: "A send button that morphs into a stop control mid-stream and back on completion.",
@@ -752,13 +922,14 @@ export const registry: RegistryEntry[] = [
     Thumbnail: StopGenerationButtonThumbnail,
     uxDoc: stopGenerationButtonPattern,
     seenIn: [
-      { team: "chatgpt", source: "https://community.openai.com/t/restore-chatgpts-stop-button-without-errors/1132068" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/7996703-troubleshooting-chatgpt-error-messages" },
       { team: "gemini", source: "https://support.google.com/googlebook/answer/18429222" },
     ],
   },
   {
     slug: "terminal-stream",
     category: "code",
+    added: "2026-09-12T06:58Z",
     job: "oversee",
     title: "Terminal Stream",
     description: "An auto-scrolling, collapsible panel streaming raw command output line by line.",
@@ -772,6 +943,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "inline-citation",
     category: "text",
+    added: "2026-09-12T06:58Z",
     job: "trust",
     title: "Inline Citation",
     description: "A hoverable, clickable footnote-style source marker inline within text.",
@@ -781,11 +953,14 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/10352895-how-does-perplexity-work" },
       { team: "chatgpt", source: "https://help.openai.com/en/articles/9237897-chatgpt-search" },
+      { team: "intercom", source: "https://fin.ai/help/en/articles/13975900-copilot-explained" },
+      { team: "notion", source: "https://www.notion.com/help/enterprise-search" },
     ],
   },
   {
     slug: "sources-stack",
     category: "text",
+    added: "2026-09-12T07:50Z",
     job: "trust",
     title: "Sources Stack",
     description: "An overlapping stack of source favicons with a count, expanding into a linked source list.",
@@ -794,35 +969,37 @@ export const registry: RegistryEntry[] = [
     uxDoc: sourcesStackPattern,
     seenIn: [
       { team: "chatgpt", source: "https://help.openai.com/en/articles/9237897-chatgpt-search" },
+      { team: "notion", source: "https://www.notion.com/help/enterprise-search" },
     ],
   },
   {
     slug: "source-trust-card",
     category: "text",
+    added: "2026-09-12T23:08Z",
     job: "trust",
     title: "Source Trust Card",
     description: "A paginated single-source card with a trust badge and domain pills for jumping between sources.",
     Demo: SourceTrustCardDemo,
     Thumbnail: SourceTrustCardThumbnail,
     uxDoc: sourceTrustCardPattern,
-    seenIn: [{ team: "perplexity", source: "https://aiuxplayground.com/teardowns/perplexity/citations" }],
+    seenIn: [{ team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/20260806-understanding-source-labels" }],
   },
   {
     slug: "follow-up-list",
     category: "text",
+    added: "2026-09-12T12:42Z",
     job: "start",
     title: "Follow-Up List",
     description: "A vertical list of suggested next questions shown after a response, each sendable with a tap.",
     Demo: FollowUpListDemo,
     Thumbnail: FollowUpListThumbnail,
     uxDoc: followUpListPattern,
-    seenIn: [
-      { team: "perplexity", source: "https://www.thekeyword.co/news/perplexity-tests-sponsored-follow-up-question-ads" },
-    ],
+    seenIn: [],
   },
   {
     slug: "selection-actions",
     category: "text",
+    added: "2026-09-12T13:51Z",
     job: "ask",
     title: "Selection Actions",
     description: "A floating toolbar on text selection for describing edits, explaining, or improving a passage.",
@@ -833,11 +1010,15 @@ export const registry: RegistryEntry[] = [
       { team: "notion", source: "https://www.notion.com/help/guides/notion-ai-for-docs" },
       { team: "gemini", source: "https://support.google.com/gemini/answer/14262426" },
       { team: "chatgpt", source: "https://help.openai.com/en/articles/9930697-what-is-the-canvas-feature-in-chatgpt-and-how-do-i-use-it" },
+      { team: "figma", source: "https://help.figma.com/hc/en-us/articles/42009840449175-Edit-a-Figma-Make-file" },
+      { team: "copilot", source: "https://docs.github.com/copilot/using-github-copilot/asking-github-copilot-questions-in-your-ide" },
+      { team: "lovable", source: "https://docs.lovable.dev/features/visual-edit" },
     ],
   },
   {
     slug: "refinement-controls",
     category: "text",
+    added: "2026-10-18T20:14Z",
     job: "steer",
     title: "Refinement Controls",
     description:
@@ -849,11 +1030,13 @@ export const registry: RegistryEntry[] = [
       { team: "gemini", source: "https://support.google.com/gemini/answer/14262426" },
       { team: "chatgpt", source: "https://help.openai.com/en/articles/9930697-what-is-the-canvas-feature-in-chatgpt-and-how-do-i-use-it" },
       { team: "notion", source: "https://www.notion.com/help/guides/notion-ai-for-docs" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/12802813-how-do-i-change-to-my-preferred-ai-model" },
     ],
   },
   {
     slug: "rate-limit",
     category: "errors",
+    added: "2026-09-12T14:20Z",
     job: "recover",
     title: "Rate Limit",
     description: "A quota-exceeded state with a live countdown to when the user can send again.",
@@ -867,19 +1050,19 @@ export const registry: RegistryEntry[] = [
   {
     slug: "partial-response",
     category: "errors",
+    added: "2026-09-12T14:20Z",
     job: "recover",
     title: "Partial Response",
     description: "A cut-short assistant reply with Continue and Retry actions.",
     Demo: PartialResponseDemo,
     Thumbnail: PartialResponseThumbnail,
     uxDoc: partialResponsePattern,
-    seenIn: [
-      { team: "cursor", source: "https://forum.cursor.com/t/we-default-stop-the-agent-after-25-tool-calls-please-ask-the-agent-to-continue-manually/58981" },
-    ],
+    seenIn: [],
   },
   {
     slug: "generation-error",
     category: "errors",
+    added: "2026-09-14T09:58Z",
     job: "recover",
     title: "Generation Error",
     description: "A console-style error card for a failed generation, with details and retry.",
@@ -893,6 +1076,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "console-error-card",
     category: "errors",
+    added: "2026-09-14T10:42Z",
     job: "recover",
     title: "Console Error Card",
     description: "A structured card surfacing a browser console error with a code frame, call stack, and navigation.",
@@ -901,12 +1085,13 @@ export const registry: RegistryEntry[] = [
     uxDoc: consoleErrorCardPattern,
     seenIn: [
       { team: "lovable", source: "https://docs.lovable.dev/tips-tricks/troubleshooting" },
-      { team: "v0", source: "https://community.vercel.com/t/runtime-error-on-v0/12485" },
+      { team: "v0", source: "https://v0.app/docs/deployments" },
     ],
   },
   {
     slug: "connectivity-error",
     category: "errors",
+    added: "2026-09-14T10:42Z",
     job: "recover",
     title: "Connectivity Error",
     description: "A dismissible card surfacing a network connection failure with a description and retry/details actions.",
@@ -920,6 +1105,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "response-compare",
     category: "compare",
+    added: "2026-09-12T20:41Z",
     job: "trust",
     title: "Response Compare",
     description: "A side-by-side pair of response panels with independent regenerate and a single preferred pick.",
@@ -928,12 +1114,12 @@ export const registry: RegistryEntry[] = [
     uxDoc: responseComparePattern,
     seenIn: [
       { team: "lmarena", source: "https://lmarena.ai/faq" },
-      { team: "chatgpt", source: "https://community.openai.com/t/stupid-feature-which-response-do-you-prefer-your-choice-will-help-make-chatgpt-better/394873" },
     ],
   },
   {
     slug: "confidence-indicator",
     category: "indicators",
+    added: "2026-09-12T20:49Z",
     job: "trust",
     title: "Confidence Indicator",
     description: "A badge or inline dot signaling how sure an AI answer or extraction is.",
@@ -947,6 +1133,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "ai-disclosure-badge",
     category: "indicators",
+    added: "2026-11-07T22:47Z",
     job: "trust",
     title: "AI Disclosure Badge",
     description:
@@ -954,11 +1141,15 @@ export const registry: RegistryEntry[] = [
     Demo: AiDisclosureBadgeDemo,
     Thumbnail: AiDisclosureBadgeThumbnail,
     uxDoc: aiDisclosureBadgePattern,
-    seenIn: [],
+    seenIn: [
+      { team: "intercom", source: "https://www.intercom.com/help/en/articles/11712008-ai-agent-disclosure" },
+      { team: "zapier", source: "https://help.zapier.com/hc/en-us/articles/27915202201357-Add-a-disclosure-message-to-your-chatbot" },
+    ],
   },
   {
     slug: "cost-estimate",
     category: "indicators",
+    added: "2026-11-07T22:47Z",
     job: "oversee",
     title: "Cost Estimate",
     description:
@@ -966,11 +1157,14 @@ export const registry: RegistryEntry[] = [
     Demo: CostEstimateDemo,
     Thumbnail: CostEstimateThumbnail,
     uxDoc: costEstimatePattern,
-    seenIn: [],
+    seenIn: [
+      { team: "elevenlabs", source: "https://help.elevenlabs.io/hc/en-us/articles/30725662424849-How-much-does-GenFM-cost" },
+    ],
   },
   {
     slug: "context-usage",
     category: "indicators",
+    added: "2026-11-07T23:06Z",
     job: "oversee",
     title: "Context Usage",
     description:
@@ -983,6 +1177,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "voice-waveform",
     category: "voice",
+    added: "2026-09-12T21:05Z",
     job: "ask",
     title: "Voice Waveform",
     description: "A live amplitude waveform while the AI listens or speaks.",
@@ -990,13 +1185,14 @@ export const registry: RegistryEntry[] = [
     Thumbnail: VoiceWaveformThumbnail,
     uxDoc: voiceWaveformPattern,
     seenIn: [
-      { team: "gemini", source: "https://9to5google.com/2024/08/15/gemini-live-rolling-out/" },
+      { team: "gemini", source: "https://support.google.com/gemini/answer/15274899?hl=en&co=GENIE.Platform%3DAndroid" },
       { team: "claude", source: "https://claude.com/download" },
     ],
   },
   {
     slug: "voice-orb",
     category: "voice",
+    added: "2026-11-07T22:09Z",
     job: "oversee",
     title: "Voice Orb",
     description: "A 3D particle sphere that breathes and spins with the voice conversation.",
@@ -1005,11 +1201,13 @@ export const registry: RegistryEntry[] = [
     uxDoc: voiceOrbPattern,
     seenIn: [
       { team: "elevenlabs", source: "https://ui.elevenlabs.io/docs/components/orb" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/8400625-voice-mode" },
     ],
   },
   {
     slug: "listening-state",
     category: "voice",
+    added: "2026-09-12T21:05Z",
     job: "ask",
     title: "Listening State",
     description: "A pulsing mic indicator showing the AI is actively listening.",
@@ -1017,12 +1215,13 @@ export const registry: RegistryEntry[] = [
     Thumbnail: ListeningStateThumbnail,
     uxDoc: listeningStatePattern,
     seenIn: [
-      { team: "gemini", source: "https://9to5google.com/2024/08/15/gemini-live-rolling-out/" },
+      { team: "gemini", source: "https://support.google.com/gemini/answer/15274899?hl=en&co=GENIE.Platform%3DAndroid" },
     ],
   },
   {
     slug: "live-transcript",
     category: "voice",
+    added: "2026-09-12T21:05Z",
     job: "ask",
     title: "Live Transcript",
     description: "A streaming, speaker-labeled transcription of a voice conversation.",
@@ -1037,6 +1236,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "command-palette",
     category: "navigation",
+    added: "2026-09-12T22:10Z",
     job: "ask",
     title: "Command Palette",
     description: "A searchable ⌘K overlay for jumping to sessions or running quick actions.",
@@ -1050,6 +1250,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "collaborative-presence",
     category: "collaboration",
+    added: "2026-09-14T08:33Z",
     job: "oversee",
     title: "Collaborative Presence",
     description:
@@ -1064,6 +1265,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "invite-members",
     category: "access",
+    added: "2026-09-14T08:33Z",
     job: "start",
     title: "Invite Members",
     description:
@@ -1078,6 +1280,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "analysis-list",
     category: "loaders",
+    added: "2026-09-14T11:04Z",
     job: "oversee",
     title: "Analysis List",
     description: "A full-width indeterminate progress bar over a list whose items resolve from skeletons one by one.",
@@ -1091,6 +1294,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "setup-checklist",
     category: "navigation",
+    added: "2026-09-14T21:42Z",
     job: "start",
     title: "Setup Checklist",
     description: "A stepped onboarding card with circular arc progress, dashed-circle pending states, and strikethrough for completed steps.",
@@ -1104,6 +1308,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "prompt-onboarding",
     category: "onboarding",
+    added: "2026-10-18T15:39Z",
     job: "start",
     title: "Prompt-Driven Onboarding",
     description:
@@ -1119,6 +1324,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "agent-setup-pill",
     category: "onboarding",
+    added: "2026-11-06T21:56Z",
     job: "start",
     title: "Agent Setup Pill",
     description:
@@ -1133,6 +1339,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "describe-filters",
     category: "tables",
+    added: "2026-11-03T10:55Z",
     job: "ask",
     title: "Describe Filters",
     description:
@@ -1147,6 +1354,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "ai-fill-drawer",
     category: "tables",
+    added: "2026-11-03T12:17Z",
     job: "ask",
     title: "AI Fill Drawer",
     description:
@@ -1156,11 +1364,14 @@ export const registry: RegistryEntry[] = [
     uxDoc: aiFillDrawerPattern,
     seenIn: [
       { team: "notion", source: "https://www.notion.com/help/autofill" },
+      { team: "linear", source: "https://linear.app/docs/triage-intelligence" },
+      { team: "coda", source: "https://help.coda.io/en/articles/7988177-coda-ai-features" },
     ],
   },
   {
     slug: "natural-language-query",
     category: "tables",
+    added: "2026-11-03T13:07Z",
     job: "ask",
     title: "Natural Language Query",
     description:
@@ -1176,6 +1387,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "ai-review-panel",
     category: "review",
+    added: "2026-11-04T16:18Z",
     job: "trust",
     title: "AI Review Panel",
     description:
@@ -1185,10 +1397,182 @@ export const registry: RegistryEntry[] = [
     uxDoc: aiReviewPanelPattern,
     seenIn: [{ team: "datamaran", source: "https://www.datamaran.com/" }],
   },
+  {
+    slug: "artifact-panel",
+    category: "messages",
+    added: "2026-11-08T13:50Z",
+    job: "ask",
+    title: "Artifact Panel",
+    description:
+      "A side panel beside the chat for a document or app the model made — opened from a card in the message, with Preview and Code tabs, a version stepper fed by follow-ups, and Copy.",
+    Demo: ArtifactPanelDemo,
+    Thumbnail: ArtifactPanelThumbnail,
+    uxDoc: artifactPanelPattern,
+    seenIn: [
+      { team: "claude", source: "https://support.claude.com/en/articles/9487310-what-are-artifacts-and-how-do-i-use-them" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/9930697-what-is-the-canvas-feature-in-chatgpt-and-how-do-i-use-it" },
+      { team: "gemini", source: "https://blog.google/products/gemini/gemini-collaboration-features/" },
+    ],
+  },
+  {
+    slug: "context-chips",
+    category: "composer",
+    added: "2026-11-08T13:51Z",
+    job: "steer",
+    title: "Context Chips",
+    description:
+      "Removable chips above the composer for every source the next message will use — added from one searchable menu via + or @, with the automatic context shown as a chip you can exclude.",
+    Demo: ContextChipsDemo,
+    Thumbnail: ContextChipsThumbnail,
+    uxDoc: contextChipsPattern,
+    seenIn: [
+      { team: "copilot", source: "https://code.visualstudio.com/docs/copilot/chat/copilot-chat-context" },
+      { team: "cursor", source: "https://cursor.com/docs/context/symbols" },
+    ],
+  },
+  {
+    slug: "checkpoint-restore",
+    category: "agents",
+    added: "2026-11-08T13:52Z",
+    job: "recover",
+    title: "Checkpoint Restore",
+    description:
+      "An automatic checkpoint before each agent message, with Restore for code, conversation or both — an impact summary of files and messages, what can't be undone, and Redo afterwards.",
+    Demo: CheckpointRestoreDemo,
+    Thumbnail: CheckpointRestoreThumbnail,
+    uxDoc: checkpointRestorePattern,
+    seenIn: [
+      { team: "claude", source: "https://code.claude.com/docs/en/checkpointing" },
+      { team: "cursor", source: "https://docs.cursor.com/agent/chat/checkpoints" },
+      { team: "replit", source: "https://docs.replit.com/core-concepts/agent/checkpoints-and-rollbacks" },
+      { team: "lovable", source: "https://docs.lovable.dev/features/projects/history" },
+    ],
+  },
+  {
+    slug: "autonomy-mode",
+    category: "composer",
+    added: "2026-11-08T13:53Z",
+    job: "steer",
+    title: "Autonomy Mode Switcher",
+    description:
+      "A composer pill that sets how much the agent does on its own — Suggest, Confirm or Execute — with each mode's permissions per action type, a shortcut to cycle, and a distinct look for the top mode.",
+    Demo: AutonomyModeDemo,
+    Thumbnail: AutonomyModeThumbnail,
+    uxDoc: autonomyModePattern,
+    seenIn: [
+      { team: "copilot", source: "https://github.blog/ai-and-ml/github-copilot/copilot-ask-edit-and-agent-modes-what-they-do-and-when-to-use-them/" },
+      { team: "claude", source: "https://code.claude.com/docs/en/permission-modes" },
+      { team: "windsurf", source: "https://docs.windsurf.com/windsurf/cascade/modes" },
+    ],
+  },
+  {
+    slug: "access-request",
+    category: "permissions",
+    added: "2026-11-08T15:32Z",
+    job: "oversee",
+    title: "Access Request",
+    description:
+      "A prompt for the agent to widen its own access — network, credentials, folders — showing the agent's reason beside a system-rendered before → after of each setting, who else it affects, and Approve or Deny.",
+    Demo: AccessRequestDemo,
+    Thumbnail: AccessRequestThumbnail,
+    uxDoc: accessRequestPattern,
+    seenIn: [
+      { team: "claude", source: "https://code.claude.com/docs/en/claude-code-on-the-web" },
+    ],
+  },
+  {
+    slug: "voice-agent-relay",
+    category: "voice",
+    added: "2026-11-08T16:23Z",
+    job: "oversee",
+    title: "Voice Agent Relay",
+    description:
+      "A realtime voice call with a voice agent that hands work to a working agent, answers questions about its progress and speaks short updates and a summary while it runs.",
+    Demo: VoiceAgentRelayDemo,
+    Thumbnail: VoiceAgentRelayThumbnail,
+    uxDoc: voiceAgentRelayPattern,
+    seenIn: [
+      { team: "cursor", source: "https://cursor.com/changelog/voice-chat" },
+    ],
+  },
+  {
+    slug: "publish-gate",
+    category: "agents",
+    added: "2026-11-08T16:24Z",
+    job: "trust",
+    title: "Publish Gate",
+    description:
+      "Automated rules and an agent review run before an agent's work goes live; failures explain themselves and go back to the agent to fix, and nothing is published until the person clicks Publish.",
+    Demo: PublishGateDemo,
+    Thumbnail: PublishGateThumbnail,
+    uxDoc: publishGatePattern,
+    seenIn: [
+      { team: "cursor", source: "https://cursor.com/changelog/build-live-apps" },
+      { team: "copilot", source: "https://github.blog/changelog/2026-11-06-github-copilot-weekly-releases-november-2/" },
+    ],
+  },
+  {
+    slug: "rejected-prompt-restore",
+    category: "errors",
+    added: "2026-11-08T16:25Z",
+    job: "recover",
+    title: "Rejected Prompt Restore",
+    description:
+      "When an agent declines the first prompt of a session, the text goes back into the composer with the agent's reason above it, ready to edit and resend.",
+    Demo: RejectedPromptRestoreDemo,
+    Thumbnail: RejectedPromptRestoreThumbnail,
+    uxDoc: rejectedPromptRestorePattern,
+    seenIn: [
+      { team: "windsurf", source: "https://docs.devin.ai/desktop/changelog" },
+    ],
+  },  {
+    slug: "archived-session",
+    category: "agents",
+    added: "2026-11-08T17:40Z",
+    job: "recover",
+    title: "Archived Session",
+    description:
+      "A muted banner takes the composer's place in an archived agent session; the transcript stays readable and one Unarchive button makes it writable again in place.",
+    Demo: ArchivedSessionDemo,
+    Thumbnail: ArchivedSessionThumbnail,
+    uxDoc: archivedSessionPattern,
+    seenIn: [
+      { team: "claude", source: "https://code.claude.com/docs/en/claude-code-on-the-web" },
+    ],
+  },
+  {
+    slug: "share-session",
+    category: "access",
+    added: "2026-11-08T17:41Z",
+    job: "trust",
+    title: "Share Session",
+    description:
+      "A dialog for making an agent session Private or Public via link, with a warning about what it would expose (like code from a private repository) shown before the choice.",
+    Demo: ShareSessionDemo,
+    Thumbnail: ShareSessionThumbnail,
+    uxDoc: shareSessionPattern,
+    seenIn: [
+      { team: "claude", source: "https://code.claude.com/docs/en/claude-code-on-the-web" },
+    ],
+  },
 ];
 
 export function getRegistryEntry(category: string, slug: string) {
   return registry.find((entry) => entry.category === category && entry.slug === slug);
+}
+
+/** How many of the most recently added patterns carry the "New" tag. */
+export const NEW_COUNT = 10;
+
+/** The `NEW_COUNT` most recently added patterns, newest first (ties keep registry order). */
+export const newEntries: RegistryEntry[] = [...registry]
+  .sort((a, b) => b.added.localeCompare(a.added))
+  .slice(0, NEW_COUNT);
+
+const NEW_SET = new Set(newEntries);
+
+export function isNewEntry(entry: RegistryEntry) {
+  return NEW_SET.has(entry);
 }
 
 export function getEntriesByJob(job: PatternJob) {
@@ -1214,6 +1598,13 @@ export interface RelatedEntry {
   entry: RegistryEntry;
   /** One sentence on when to use the related pattern instead of, or as well as, this one. */
   reason: string;
+}
+
+/** The top-level "- " bullets of one "## <heading>" section of the pattern's spec. */
+export function getSpecList(entry: RegistryEntry, heading: string): string[] {
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const section = entry.uxDoc.split(new RegExp(`^## ${escaped}\\s*$`, "m"))[1]?.split(/^## /m)[0] ?? "";
+  return [...section.matchAll(/^- (.+)$/gm)].map(([, item]) => item.trim());
 }
 
 /**

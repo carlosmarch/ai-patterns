@@ -5,6 +5,7 @@ import {
   siBox,
   siClaude,
   siCloudflare,
+  siCoda,
   siCursor,
   siElevenlabs,
   siFigma,
@@ -27,6 +28,7 @@ import {
   siV0,
   siWarp,
   siWindsurf,
+  siZapier,
   siZedindustries,
   type SimpleIcon,
 } from "simple-icons";
@@ -66,6 +68,8 @@ export const TEAM_IDS = [
   "mongodb",
   "datamaran",
   "cloudflare",
+  "zapier",
+  "coda",
 ] as const;
 
 export type TeamId = (typeof TEAM_IDS)[number];
@@ -130,6 +134,8 @@ const CREDITED: Team[] = [
   glyph("mongodb", siMongodb, "linear-gradient(145deg,#1f3b2c,#0b1d14)", "#47a248"),
   { id: "datamaran", name: "Datamaran", src: "/teams/datamaran.png", bg: "#eb5d36" },
   glyph("cloudflare", siCloudflare, "linear-gradient(145deg,#ffffff,#f1f1f1)", "#f38020"),
+  glyph("zapier", siZapier, "linear-gradient(145deg,#ff7a3d,#ff4f00)"),
+  glyph("coda", siCoda, "linear-gradient(145deg,#f46a54,#d9462f)"),
 ];
 
 const TEAMS_BY_ID = new Map([...TEAMS, ...CREDITED].map((team) => [team.id, team]));

@@ -6,11 +6,13 @@ import { AnimatedOrigami } from "@/components/animated-origami";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CodeBlock } from "@/components/code-block";
 import { ComponentPreview } from "@/components/component-preview";
+import { DosAndDonts } from "@/components/dos-and-donts";
+import { NewBadge } from "@/components/new-badge";
 import { SeenIn } from "@/components/seen-in";
 import { readComponentSource } from "@/lib/agent";
 import { PatternPager } from "@/components/pattern-pager";
 import { RelatedPatterns } from "@/components/related-patterns";
-import { getAdjacentEntries, getEntryHref, getRegistryEntry, getRelatedEntries, registry } from "@/registry";
+import { getAdjacentEntries, getEntryHref, getRegistryEntry, getRelatedEntries, isNewEntry, registry } from "@/registry";
 import { getJob } from "@/registry/jobs";
 
 export function generateStaticParams() {
@@ -83,7 +85,10 @@ export default async function PatternPage({
       />
 
       <div className="mb-8 space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">{entry.title}</h1>
+        <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1 text-3xl font-semibold tracking-tight">
+          {entry.title}
+          {isNewEntry(entry) && <NewBadge className="px-2 py-1 text-xs" />}
+        </h1>
         <p className="text-muted-foreground">{entry.description}</p>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2">
           {job && (
@@ -119,6 +124,8 @@ export default async function PatternPage({
         }
         patternPanel={spec}
       />
+
+      <DosAndDonts entry={entry} />
 
       <RelatedPatterns items={getRelatedEntries(entry)} />
 
