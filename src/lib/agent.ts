@@ -1,5 +1,6 @@
 import { TEAMS } from "@/lib/teams";
 import { MCP_JSON_CONFIG } from "@/lib/mcp-install";
+import { RESEARCH_QUESTION, RESEARCH_STATEMENT } from "@/lib/research";
 import { getCategories, getEntryHref, getRegistryEntry, registry, type RegistryEntry } from "@/registry";
 import { getJob, JOBS } from "@/registry/jobs";
 import { componentSources } from "@/registry/sources.generated";
@@ -11,7 +12,7 @@ import { componentSources } from "@/registry/sources.generated";
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://ai-patterns.app").replace(/\/$/, "");
 export const SITE_NAME = "AI Patterns";
 export const SITE_DESCRIPTION =
-  "A pattern library for AI product UI — tool approval, confidence indicators, agent handoff, error recovery, streaming answers and more. Each pattern is a UX spec (when to use, anatomy, behavior, content, accessibility) plus a copy-paste React implementation (Next.js, TypeScript, Tailwind v4, Motion, Radix).";
+  "An open research project on how user experience changes as AI moves from answering to acting. Each pattern — tool approval, confidence indicators, agent handoff, error recovery, streaming answers and more — is observed in shipping products, written up as a UX spec (when to use, anatomy, behavior, content, accessibility) and paired with a copy-paste React implementation (Next.js, TypeScript, Tailwind v4, Motion, Radix).";
 export const REPO_URL = "https://github.com/carlosmarch/ai-patterns";
 export const INSTALL_SKILL = "/plugin marketplace add carlosmarch/ai-patterns\n/plugin install ai-patterns@ai-patterns";
 
@@ -258,7 +259,15 @@ export function buildHomeMarkdown() {
 
 > ${SITE_DESCRIPTION}
 
-The interactions in AI products that don't have established conventions yet — tool approval, confidence, agent handoff, error recovery, streaming — distilled from shipping products into ${registry.length} patterns across ${getCategories().length} categories.
+## ${RESEARCH_QUESTION}
+
+${RESEARCH_STATEMENT}
+
+Method: **observe** a pattern in products people already use, **specify** it as a portable UX contract, **test** it by giving the spec to agents. ${registry.length} patterns across ${getCategories().length} categories so far. Findings are provisional and get rewritten as products change.
+
+### Open questions
+
+${JOBS.map((j) => `- "${j.question}" — ${j.description} ([${j.label}](${abs(`/patterns?job=${j.id}`)}))`).join("\n")}
 
 - [Browse the patterns](${abs("/patterns.md")})
 - [Claude Code skill](${abs("/skill.md")})
