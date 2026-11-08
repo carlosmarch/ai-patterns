@@ -600,7 +600,8 @@ export function OrbitVariant() {
 
 const INDEX_ROWS = 8;
 
-export function IndexVariant({ items }: { items: SectionItem[] }) {
+/** `total` overrides the heading count when the grid leaves some patterns out (e.g. the home page's featured one). */
+export function IndexVariant({ items, total }: { items: SectionItem[]; total?: number }) {
   const reduce = useReducedMotion();
   const listRef = useRef<HTMLUListElement>(null);
   const [peek, setPeek] = useState<{ category: string; x: number; y: number } | null>(null);
@@ -625,7 +626,7 @@ export function IndexVariant({ items }: { items: SectionItem[] }) {
     <section className="py-6">
       <div className="flex items-end justify-between gap-6">
         <h2 className="text-3xl leading-[1.1] font-semibold tracking-tight sm:text-4xl">
-          {items.length} patterns,
+          {total ?? items.length} patterns,
           <span className="block text-muted-foreground">indexed by what they do.</span>
         </h2>
         <InstallLink className="hidden sm:inline-flex" />
