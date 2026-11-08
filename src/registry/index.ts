@@ -605,7 +605,10 @@ export const registry: RegistryEntry[] = [
     Demo: PromptAutocompleteDemo,
     Thumbnail: PromptAutocompleteThumbnail,
     uxDoc: promptAutocompletePattern,
-    seenIn: [],
+    seenIn: [
+      { team: "copilot", source: "https://docs.github.com/en/copilot/how-tos/copilot-in-your-ide/copilot-for-common-tasks/get-ide-code-suggestions" },
+      { team: "warp", source: "https://docs.warp.dev/agent-platform/local-agents/active-ai/" },
+    ],
   },
   {
     slug: "prompt-quality",
@@ -644,7 +647,12 @@ export const registry: RegistryEntry[] = [
     Demo: ResponseActionsDemo,
     Thumbnail: ResponseActionsThumbnail,
     uxDoc: responseActionsPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/6825453-chatgpt-release-notes" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/12802813-how-do-i-change-to-my-preferred-ai-model" },
+      { team: "gemini", source: "https://support.google.com/gemini/answer/14262426?hl=en&co=GENIE.Platform%3DDesktop" },
+      { team: "claude", source: "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on" },
+    ],
   },
   {
     slug: "prompt-enhancer",
