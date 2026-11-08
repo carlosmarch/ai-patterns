@@ -3,8 +3,8 @@ import { PatternExpandProvider } from "@/components/pattern-expand";
 import { isNewEntry, registry } from "@/registry";
 
 // Route group layout for /patterns/<category>/<slug>: it stays mounted while
-// moving between patterns. The sidebar is in the normal page flow, so it
-// scrolls together with the page.
+// moving between patterns. The sidebar sticks below the header and scrolls on
+// its own, so the selected pattern stays in view beside its page.
 export default function PatternDetailLayout({ children }: { children: React.ReactNode }) {
   const groups: PatternsSidebarGroup[] = [];
   for (const entry of registry) {
