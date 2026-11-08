@@ -142,6 +142,20 @@ Open [http://localhost:3000](http://localhost:3000).
 
 `npm run dev` doesn't serve `/mcp`; run `npm run preview` to build the static site and serve it with the Worker locally (`wrangler dev`).
 
+## Research scout
+
+`/research` samples patterns from shipping products' public docs, help centres and changelogs. `scripts/scout.mjs` automates that step:
+
+1. **Search** — Claude, with web search and web fetch, reads what the products in `research/sources.json` shipped in the last `lookbackDays`, plus an open search, and notes each AI-specific interaction with its URL and a quote.
+2. **Analyse** — a second call codes every finding against the inclusion criteria and the current registry: a **new candidate** (with category, job, nearest entry and evidence), a **new source** for an existing pattern's `seenIn`, or **rejected** with the failing criterion.
+3. **Report** — `research/scout/<date>.md`, with `research/scout/state.json` remembering open candidates so later runs add evidence instead of re-proposing them.
+
+It never edits the registry. `.github/workflows/scout.yml` runs it every Monday (or on demand, with an optional lookback) and opens a PR with the report. It needs an `ANTHROPIC_API_KEY` repository secret and "Allow GitHub Actions to create and approve pull requests" enabled.
+
+```bash
+ANTHROPIC_API_KEY=… npm run scout -- --days 30 --dry-run
+```
+
 ## Deploying
 
 The site is a static export (`output: "export"`) hosted on [Cloudflare Workers](https://developers.cloudflare.com/workers/static-assets/) as static assets, so pages cost no Worker CPU. A small Worker (`worker/index.ts`) only handles `/mcp`, the `/api/patterns` index and 404s.

@@ -80,6 +80,11 @@ React — it works from `/api/mcp-data.json` and the exported `.md` files.
 - `npm run deploy` — build and deploy to Cloudflare Workers
 - `npm run sources:build` — regenerate `src/registry/sources.generated.ts`
   (every `component.tsx` as a string)
+- `npm run scout` — the research scout (`scripts/scout.mjs`): searches the
+  products in `research/sources.json` with Claude, codes findings against the
+  registry and writes `research/scout/<date>.md` (needs `ANTHROPIC_API_KEY`;
+  `-- --dry-run` prints instead). Runs weekly in `.github/workflows/scout.yml`,
+  which opens a PR with the report
 - `npm run skill:build` — regenerate `plugins/ai-patterns/skills/ai-patterns/reference/` from `src/registry/`
 
 There is no test suite/script in this repo yet.
