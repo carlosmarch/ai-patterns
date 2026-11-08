@@ -3,10 +3,15 @@
 import * as React from "react";
 import Link from "next/link";
 import {
+  Archive,
   ArrowLeft,
   ArrowRight,
   BookOpen,
   Bot,
+  ChartColumn,
+  Globe,
+  Lock,
+  Share,
   Check,
   ChevronDown,
   ChevronRight,
@@ -15,7 +20,6 @@ import {
   History,
   LayoutGrid,
   ListChecks,
-  Loader2,
   MessagesSquare,
   Package,
   Plug,
@@ -31,16 +35,50 @@ import type { SkillExample } from "@/app/skill/skill-examples";
 import { BackgroundTasksDrawer, type BackgroundTask } from "@/registry/agents/background-tasks/component";
 import { CollaborativePresence } from "@/registry/collaboration/collaborative-presence/component";
 import { CommandPalette, type CommandPaletteGroup, type CommandPaletteItem } from "@/registry/navigation/command-palette/component";
-import { InviteMembers } from "@/registry/access/invite-members/component";
+import { siClaude, siCursor, siGithubcopilot, siWindsurf, type SimpleIcon } from "simple-icons";
+import { AgentSetupPill, type SetupAgent } from "@/registry/onboarding/agent-setup-pill/component";
+import { ArchivedSessionBanner } from "@/registry/agents/archived-session/component";
+import { ArtifactPanel, ArtifactSplit } from "@/registry/messages/artifact-panel/component";
+import { AutonomyModePicker } from "@/registry/composer/autonomy-mode/component";
+import { ContextUsage } from "@/registry/indicators/context-usage/component";
+import { DrawingIcon } from "@/registry/loaders/drawing-icon/component";
+import { IncognitoToggle, TemporaryChatBanner } from "@/registry/composer/incognito-toggle/component";
+import { ModelPicker } from "@/registry/composer/model-picker/component";
 import { PromptBarPro } from "@/registry/composer/prompt-bar-pro/component";
+import { PromptTemplate } from "@/registry/composer/prompt-template/component";
+import { PromptWizard } from "@/registry/composer/prompt-wizard/component";
+import { QuickChatDock } from "@/registry/composer/quick-chat-dock/component";
+import { ShareSessionDialog } from "@/registry/access/share-session/component";
+import type { ClarifyingAnswers } from "@/registry/messages/clarifying-questions/component";
+import type { AccessRequestDecision } from "@/registry/permissions/access-request/component";
+import type { PlanStep } from "@/registry/agents/plan-review/component";
+import type { Task } from "@/registry/agents/task-list/component";
 import type { Agent } from "@/registry/traces/multi-agent-trace/component";
 import type { AnalysisItem } from "@/registry/loaders/analysis-list/component";
 import type { LogLine } from "@/registry/code/terminal-stream/component";
+import type { RunStep } from "@/registry/agents/agent-run-card/component";
 import type { StreamSegment } from "@/registry/text/streaming-text/component";
 
 import {
   AGENT_ICON,
   AGENT_NAME,
+  AUTONOMY_CAPABILITIES,
+  AUTONOMY_MODES,
+  CONTEXT_LIMIT,
+  GUIDANCE_MEMORY,
+  MODELS,
+  PROMPT_TEMPLATES,
+  RESEARCH_SOURCES,
+  RESEARCH_THOUGHTS,
+  SKILL_PROMPT,
+  SPEC_PLAN,
+  SPEC_QUESTIONS,
+  SPEC_TASKS,
+  SPEC_WIZARD_STEPS,
+  buildSpecPrompt,
+  contextSegments,
+  specSource,
+  specThoughts,
   COMPOSER_COMMANDS,
   COMPOSER_SOURCES,
   COMPOSER_SUGGESTIONS,
@@ -49,8 +87,6 @@ import {
   GUIDANCE_ITEMS,
   GUIDANCE_QUESTIONS,
   INITIAL_TASKS,
-  ORG_MEMBERS,
-  ROLES,
   SKILL_BUILD_DIFF,
   SKILL_BUILD_SCRIPT,
   SPIKE_LIVE_AGENTS,
@@ -66,7 +102,8 @@ import {
 } from "./data";
 import { entryPath, findEntry, firstBullet, loadSource, matchEntry, relatedEntries, specSection } from "./catalogue";
 import { PatternsView, SkillView } from "./library";
-import { BlockView, nextId, seedThreads, type Block, type BlockBody, type BlockHandlers, type Thread } from "./thread";
+import { InsightsView, type InsightsTab } from "./insights";
+import { BlockView, nextId, segmentsText, seedThreads, toArtifact, type Block, type BlockBody, type BlockHandlers, type Thread } from "./thread";
 import {
   CONNECTORS,
   ChangelogView,
@@ -76,6 +113,7 @@ import {
   MobileMenuContext,
   PlaygroundView,
   SetupView,
+  Tabs,
   TrainView,
   WorkflowsView,
   type ConnectorDef,
@@ -85,6 +123,7 @@ import {
 
 type View =
   | "operator"
+  | "insights"
   | "train"
   | "playground"
   | "agents"
@@ -122,6 +161,17 @@ const NAV_GROUPS: NavGroup[] = [
         children: [
           { id: "chat", label: "Chat" },
           { id: "voice", label: "Voice" },
+          { id: "relay", label: "Relay" },
+        ],
+      },
+      {
+        id: "insights",
+        label: "Insights",
+        icon: ChartColumn,
+        children: [
+          { id: "usage", label: "Usage" },
+          { id: "products", label: "Products" },
+          { id: "requests", label: "Requests" },
         ],
       },
     ],
@@ -136,6 +186,7 @@ const NAV_GROUPS: NavGroup[] = [
         children: [
           { id: "procedures", label: "Procedures" },
           { id: "guidelines", label: "Guidelines" },
+          { id: "memory", label: "Memory" },
         ],
       },
       { id: "workflows", label: "Workflows", icon: Workflow },
@@ -162,7 +213,7 @@ const NAV_ALL = [...NAV_GROUPS.flatMap((g) => g.items), ...NAV_SETTINGS];
 
 // Shortcuts in the icon rail, in order; a divider sits between the groups.
 const RAIL: View[][] = [
-  ["operator", "patterns", "skill", "agents"],
+  ["operator", "insights", "patterns", "skill", "agents"],
   ["connectors", "workflows"],
 ];
 
@@ -184,7 +235,8 @@ function titleFrom(prompt: string) {
 }
 
 type Flow =
-  | { kind: "spike" | "guidance" | "bulk" | "summary" | "explore" | "list" | "review" | "default" }
+  | { kind: "spike" | "guidance" | "bulk" | "summary" | "explore" | "list" | "review" | "research" | "default" }
+  | { kind: "spec"; topic: string }
   | { kind: "pattern" | "scaffold"; entry: RegistryEntry; viaSkill?: boolean };
 
 // Which scripted flow a prompt should run. Prompts that name a pattern are
@@ -195,7 +247,10 @@ type Flow =
 function flowFor(prompt: string): Flow {
   const p = prompt.toLowerCase();
   const entry = matchEntry(p);
+  const spec = prompt.match(/\b(?:draft|write)\b.*?\bspec\b(?:\s+for)?\s+(?:an?\s+|the\s+)?(.+?)(?:\s+pattern)?(?:[,.:—]|$)/i);
+  if (spec && !entry) return { kind: "spec", topic: spec[1].replace(/^(?:pattern|a pattern)\s+/i, "").replace(/\b\w/g, (c) => c.toUpperCase()) };
   if (entry) return { kind: /^(scaffold|build|add|apply|swap)\b/.test(p) ? "scaffold" : "pattern", entry };
+  if (p.includes("research") || p.includes("competitor") || p.includes("other products")) return { kind: "research" };
   if (p.includes("stop") || p.includes("drop-off") || p.includes("abandon")) return { kind: "spike" };
   if (p.includes("guideline") || p.includes("guidance")) return { kind: "guidance" };
   if (p.includes("skill") || p.includes("reference docs") || p.includes("rebuild")) return { kind: "bulk" };
@@ -222,6 +277,8 @@ interface Runner {
   say: (segments: StreamSegment[]) => Promise<void>;
   tool: (opts: { toolKind: "search" | "file" | "code" | "network"; verb: string; target: string; result: string; duration?: number }) => Promise<void>;
   until: <T>(make: (resolve: (value: T) => void) => BlockBody) => Promise<{ id: string; value: T }>;
+  /** The text of the last thing `say` streamed, for Copy under the answer. */
+  lastText: () => string;
 }
 
 export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
@@ -242,6 +299,8 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
   const [toast, setToast] = React.useState<string | null>(null);
   const [patternPath, setPatternPath] = React.useState<string | null>(null);
   const [patternCategory, setPatternCategory] = React.useState<string | null>(null);
+  const [insightsTab, setInsightsTab] = React.useState<InsightsTab>("usage");
+  const [temporary, setTemporary] = React.useState(false);
   const runsRef = React.useRef<Record<string, number>>({});
 
   const activeThread = threads.find((t) => t.id === activeId) ?? null;
@@ -297,7 +356,9 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
         id = add(make((value) => (alive() ? resolve({ id, value }) : reject(CANCELLED))));
       });
 
+    let last = "";
     const r: Runner = {
+      lastText: () => last,
       add,
       update,
       remove,
@@ -312,6 +373,7 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
         }
       },
       async say(segments) {
+        last = segmentsText(segments);
         const { id } = await until<void>((done) => ({ kind: "stream", segments, onDone: () => done() }));
         update(id, { done: true, onDone: undefined } as Partial<Block>);
         await wait(200);
@@ -403,6 +465,10 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
 
       case "review": {
         await r.think(700);
+        await r.say(text("A full audit reads every component in src/. Here's what it'll cost before I start:"));
+        const cost = await r.until<void>((done) => ({ kind: "cost", onRun: () => done() }));
+        r.remove(cost.id);
+        r.add({ kind: "note", text: "You started the audit · 36 credits" });
         await r.say(text("Scanning for hand-rolled AI UI a catalogue pattern already covers. Read-only — I won't edit anything:"));
         const { id, value } = await r.until<AnalysisItem[]>((done) => ({
           kind: "analysis",
@@ -465,6 +531,7 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
         r.add({ kind: "diff", files: GUIDANCE_DIFF, timestamp: "just now" });
         await r.wait(300);
         await r.say(text("Updated both guidelines. I'll apply them to every audit and spec from now on — they're live in Train › Guidelines."));
+        r.add({ kind: "memory-notice", text: GUIDANCE_MEMORY });
         return;
       }
 
@@ -479,6 +546,57 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
           detail: "npm run skill:build",
         });
         return;
+
+      case "spec": {
+        const { topic } = flow;
+        await r.think(600);
+        await r.say(text(`I'll draft the ${topic} spec in the catalogue's eight-section template. First:`));
+        const clarify = await r.until<ClarifyingAnswers>((done) => ({ kind: "clarify", questions: SPEC_QUESTIONS, onDone: done }));
+        r.update(clarify.id, { onDone: undefined } as Partial<Block>);
+        const thought = await r.until<void>((done) => ({ kind: "thought", thoughts: specThoughts(topic), live: { onDone: () => done() } }));
+        r.update(thought.id, { live: undefined, duration: 7 } as Partial<Block>);
+        const plan = await r.until<PlanStep[]>((done) => ({ kind: "plan", steps: SPEC_PLAN, estimate: "~1 min · 12 credits", onDone: done }));
+        r.update(plan.id, { onDone: undefined } as Partial<Block>);
+        const tasks = await r.until<Task[]>((done) => ({
+          kind: "tasks",
+          tasks: SPEC_TASKS.slice(0, Math.max(plan.value.length, 3)).map((t, i) => ({ ...t, status: i === 0 ? "in_progress" : "pending" })),
+          live: { onDone: done },
+        }));
+        r.update(tasks.id, { tasks: tasks.value, live: undefined } as Partial<Block>);
+        const slug = topic.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+        const draft = { id: "v1", note: "First draft", source: specSource(topic) };
+        const artifactId = r.add({ kind: "artifact", artifact: { id: slug, title: `${topic} — UX spec`, kind: "Spec", versions: [draft] }, generating: true });
+        await r.wait(1600);
+        r.update(artifactId, {
+          generating: false,
+          artifact: { id: slug, title: `${topic} — UX spec`, kind: "Spec", versions: [draft, { id: "v2", note: "Tightened after self-review", source: specSource(topic, true) }] },
+        } as Partial<Block>);
+        await r.say(text(`Drafted ${topic} and tightened it to the essentials — both versions are in the panel. Tell me which sections to expand before it goes to review.`));
+        r.add({ kind: "followups", items: ["Tell me about Human in the Loop", "Review my guidelines"] });
+        return;
+      }
+
+      case "research": {
+        await r.think(600);
+        await r.say(text("The products worth checking publish their changes outside the domains I'm allowed to read. I need your OK first:"));
+        const access = await r.until<AccessRequestDecision>((done) => ({ kind: "access", onDecision: done }));
+        r.update(access.id, { onDecision: undefined } as Partial<Block>);
+        if (access.value === "deny") {
+          await r.say(text("Understood — I'll stick to the registry. Agent Run Card and Task List are the closest patterns we already ship."));
+          return;
+        }
+        await r.tool({ toolKind: "network", verb: "Fetching", target: "3 changelogs", result: "Read 41 entries from the last 90 days" });
+        const thought = await r.until<void>((done) => ({ kind: "thought", thoughts: RESEARCH_THOUGHTS, live: { onDone: () => done() } }));
+        r.update(thought.id, { live: undefined, duration: 9 } as Partial<Block>);
+        await r.say([
+          { type: "text", content: "All three show a step list while the agent runs and fold it into a summary when it's done — that's Agent Run Card " },
+          { type: "source", label: "linear.app" },
+          { type: "text", content: ". Only Cursor lets you stop a single step, which nothing in the catalogue covers yet." },
+        ]);
+        r.add({ kind: "sources", sources: RESEARCH_SOURCES });
+        r.add({ kind: "followups", items: ["Draft a spec for Step Stop Control", "Tell me about Agent Run Card"] });
+        return;
+      }
 
       case "explore":
         await r.think(600);
@@ -507,6 +625,15 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
     }
   }
 
+  // Runs a flow, then puts Copy / rate / regenerate under the answer.
+  function answer(threadId: string, prompt: string, flow: Flow) {
+    startRun(threadId, async (r) => {
+      await runFlow(r, flow);
+      const said = r.lastText();
+      if (said) r.add({ kind: "actions", text: said, prompt });
+    });
+  }
+
   function submitPrompt(prompt: string, flow: Flow = flowFor(prompt)) {
     const raw = prompt.trim();
     if (!raw) return;
@@ -514,17 +641,25 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
 
     if (!threadId || view !== "operator") {
       threadId = nextId("thread");
-      const thread: Thread = { id: threadId, title: titleFrom(raw), group: "Today", blocks: [] };
-      setThreads((prev) => [thread, ...prev]);
+      const thread: Thread = {
+        id: threadId,
+        title: titleFrom(raw),
+        group: "Today",
+        blocks: [],
+        temporary: temporary || undefined,
+        badge: temporary ? "Temporary" : undefined,
+      };
+      setThreads((prev) => [thread, ...prev.filter((t) => !t.temporary)]);
       setActiveId(threadId);
       setView("operator");
+      setTemporary(false);
     } else if (running[threadId]) {
       return;
     }
 
     const id = threadId;
     patchThread(id, (t) => ({ ...t, blocks: [...t.blocks, { id: nextId("u"), kind: "user", text: raw }] }));
-    startRun(id, (r) => runFlow(r, flow));
+    answer(id, raw, flow);
   }
 
   function upsertTask(task: BackgroundTask) {
@@ -545,6 +680,17 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
   const handlers: BlockHandlers = {
     onFollowUp: (prompt) => submitPrompt(prompt),
     onOpenPattern: openPattern,
+    onToast: setToast,
+    onManageMemory: () => navigate("train", "memory"),
+    onRegenerate(blockId, prompt) {
+      if (!activeThread || running[activeThread.id]) return;
+      const threadId = activeThread.id;
+      patchThread(threadId, (t) => ({
+        ...t,
+        blocks: [...t.blocks.filter((b) => b.id !== blockId), { id: nextId("note"), kind: "note", text: "Regenerated" }],
+      }));
+      answer(threadId, prompt, flowFor(prompt));
+    },
     onUpgrade: () => setToast("Team plans unlock longer generations — ask your workspace admin."),
     onApproval(blockId, action, decision) {
       if (!activeThread) return;
@@ -576,21 +722,28 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
       });
 
       startRun(threadId, async (r) => {
-        const script: Omit<LogLine, "id">[] = isSkill
-          ? SKILL_BUILD_SCRIPT
-          : [
-              { text: "$ npm run build", level: "default" },
-              { text: "✓ Compiled successfully in 7.2s", level: "success" },
-              { text: "✓ Generating static pages (58/58)", level: "success" },
-              { text: "$ git push origin fix/tool-approval-contrast", level: "default" },
-              { text: "✓ Pushed 1 commit", level: "success" },
-            ];
-        const command = isSkill ? "npm run skill:build" : "npm run build && git push";
-        const { id, value } = await r.until<LogLine[]>((done) => ({ kind: "terminal", command, lines: [], live: { script, onDone: done } }));
-        r.update(id, { lines: value, live: undefined } as Partial<Block>);
-        setTasks((prev) =>
-          prev.map((t) => (t.id === taskId ? { ...t, status: "done", activity: undefined, output: value.map((l) => l.text).join("\n") } : t))
-        );
+        let output: string;
+        if (isSkill) {
+          const { id, value } = await r.until<LogLine[]>((done) => ({
+            kind: "terminal",
+            command: "npm run skill:build",
+            lines: [],
+            live: { script: SKILL_BUILD_SCRIPT, onDone: done },
+          }));
+          r.update(id, { lines: value, live: undefined } as Partial<Block>);
+          output = value.map((l) => l.text).join("\n");
+        } else {
+          // A multi-step run reads better as a run card than as raw logs.
+          const { id, value } = await r.until<{ steps: RunStep[]; elapsed: number }>((done) => ({
+            kind: "run",
+            title: "Ship the contrast fix",
+            doneLabel: "Pushed the contrast fix",
+            live: { onDone: (steps, elapsed) => done({ steps, elapsed }) },
+          }));
+          r.update(id, { steps: value.steps, elapsed: value.elapsed, live: undefined } as Partial<Block>);
+          output = value.steps.map((s) => `${s.label} · ${s.detail}`).join("\n");
+        }
+        setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: "done", activity: undefined, output } : t)));
         if (isSkill) {
           r.add({ kind: "diff", files: SKILL_BUILD_DIFF, timestamp: "just now" });
           await r.wait(300);
@@ -704,10 +857,13 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
     if (next === "patterns") setPatternPath(null);
     if (next === "train" && sub) setTrainTab(sub as TrainTab);
     if (next === "playground" && sub) setPlaygroundTab(sub as PlaygroundTab);
+    if (next === "insights" && sub) setInsightsTab(sub as InsightsTab);
     setMobileNav(false);
   }
 
   function openThread(id: string | null) {
+    // Temporary threads are dropped as soon as you leave them — that's the promise.
+    setThreads((prev) => prev.filter((t) => !t.temporary || t.id === id));
     setView("operator");
     setActiveId(id);
     setMobileNav(false);
@@ -718,7 +874,7 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
   const navSidebar = (
     <NavSidebar
       view={view}
-      subView={view === "train" ? trainTab : view === "playground" ? playgroundTab : undefined}
+      subView={view === "train" ? trainTab : view === "playground" ? playgroundTab : view === "insights" ? insightsTab : undefined}
       onNavigate={navigate}
       setupDone={setupDone}
       onToast={setToast}
@@ -768,24 +924,20 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
                         className="absolute right-0 top-0 z-30"
                       />
                     </div>
-                    <div className="hidden sm:block">
-                      <InviteMembers
-                        trigger="share"
-                        roles={ROLES}
-                        orgMembers={ORG_MEMBERS}
-                        initialAssignees={[
-                          { id: "carlos", name: "Carlos March", email: "carlos@ai-patterns.app", status: "confirmed", roleId: "admin" },
-                          { id: "ana", name: "Ana López", email: "ana@ai-patterns.app", status: "confirmed", roleId: "editor" },
-                        ]}
-                        defaultMessage="Join me in the Origami workspace — we're auditing our AI screens against the pattern catalogue."
+                    {activeThread && !activeThread.temporary && (
+                      <ShareThreadButton
+                        thread={activeThread}
+                        onVisibility={(visibility) => patchThread(activeThread.id, (t) => ({ ...t, visibility }))}
                       />
-                    </div>
+                    )}
                     <TasksButton count={runningTasks} onClick={() => setTasksOpen((o) => !o)} />
                   </div>
                 </div>
                 {activeThread ? (
                   <ThreadPane
+                    key={activeThread.id}
                     thread={activeThread}
+                    onUnarchive={() => patchThread(activeThread.id, (t) => ({ ...t, archived: false }))}
                     generating={!!running[activeThread.id]}
                     handlers={handlers}
                     onSubmit={submitPrompt}
@@ -796,6 +948,9 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
                     threads={threads}
                     onSubmit={submitPrompt}
                     onOpenThread={openThread}
+                    temporary={temporary}
+                    onTemporary={setTemporary}
+                    onToast={setToast}
                   />
                 )}
               </>
@@ -803,9 +958,10 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
               <TrainView tab={trainTab} onTabChange={setTrainTab} />
             ) : view === "playground" ? (
               <PlaygroundView tab={playgroundTab} onTabChange={setPlaygroundTab} />
+            ) : view === "insights" ? (
+              <InsightsView tab={insightsTab} onTabChange={setInsightsTab} onToast={setToast} />
             ) : view === "agents" ? (
-              <AgentsView />
-
+              <AgentsView onToast={setToast} />
             ) : view === "changelog" ? (
               <ChangelogView />
             ) : view === "patterns" ? (
@@ -840,6 +996,15 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
               />
             )}
           </section>
+
+          {/* Ask Origami from any other view; a question opens a new Operator thread. */}
+          {view !== "operator" && view !== "playground" && (
+            <QuickChatDock
+              placeholder={`Ask ${AGENT_NAME} about this page…`}
+              onSubmit={(value) => submitPrompt(value)}
+              onOpenAgent={(draft) => (draft.trim() ? submitPrompt(draft) : openThread(null))}
+            />
+          )}
 
           {/* Above the header's floating presence panel (z-30) so avatars don't poke through the drawer. */}
           <div className="pointer-events-none absolute inset-y-0 right-0 z-40 flex w-full justify-end">
@@ -1240,12 +1405,16 @@ function ThreadList({
               >
                 <span className="min-w-0 flex-1 truncate">{t.title}</span>
                 {running[t.id] ? (
-                  <Loader2 className="size-3.5 shrink-0 animate-spin text-muted-foreground" aria-label="Working" />
+                  <DrawingIcon icon="origami" size={14} label="Working" className="shrink-0 text-muted-foreground" />
+                ) : t.archived ? (
+                  <Archive className="size-3.5 shrink-0 text-muted-foreground" aria-label="Archived" />
                 ) : t.badge ? (
                   <span
                     className={cn(
                       "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium",
-                      t.badge === "Failed"
+                      t.badge === "Temporary"
+                        ? "border border-dashed text-muted-foreground"
+                        : t.badge === "Failed"
                         ? "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300"
                         : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
                     )}
@@ -1304,21 +1473,64 @@ function firstPrompt(thread: Thread) {
   return user && user.kind === "user" ? user.text : "No messages yet";
 }
 
+function brandMark(icon: SimpleIcon, color?: string) {
+  return (
+    <svg viewBox="0 0 24 24" role="img" aria-label={icon.title} fill={color ?? "currentColor"}>
+      <path d={icon.path} />
+    </svg>
+  );
+}
+
+const SETUP_AGENTS: SetupAgent[] = [
+  { id: "claude", label: "Claude Code", icon: brandMark(siClaude, `#${siClaude.hex}`) },
+  { id: "cursor", label: "Cursor", icon: brandMark(siCursor) },
+  { id: "copilot", label: "GitHub Copilot", icon: brandMark(siGithubcopilot) },
+  { id: "windsurf", label: "Windsurf", icon: brandMark(siWindsurf) },
+];
+
+type ComposeMode = "ask" | "template" | "guided";
+
+const COMPOSER_PROPS = {
+  suggestions: COMPOSER_SUGGESTIONS,
+  sources: COMPOSER_SOURCES,
+  commands: COMPOSER_COMMANDS,
+  environments: [
+    { id: "repo", label: "carlosmarch/ai-patterns" },
+    { id: "figma", label: "Figma · Chat screen v2" },
+  ],
+  orchestrators: [
+    { id: "origami", label: AGENT_NAME },
+    { id: "reviewer", label: "Spec reviewer" },
+  ],
+};
+
 function NewThread({
   threads,
   onSubmit,
   onOpenThread,
+  temporary,
+  onTemporary,
+  onToast,
 }: {
   threads: Thread[];
   onSubmit: (prompt: string) => void;
   onOpenThread: (id: string) => void;
+  temporary: boolean;
+  onTemporary: (temporary: boolean) => void;
+  onToast: (message: string) => void;
 }) {
   const greeting = useGreeting();
-  const recent = threads.filter((t) => !t.badge && t.blocks.length > 0).slice(0, 6);
+  const recent = threads.filter((t) => !t.badge && !t.archived && t.blocks.length > 0).slice(0, 6);
+  const [mode, setMode] = React.useState<ComposeMode>("ask");
+  const [template, setTemplate] = React.useState(0);
+  const [pill, setPill] = React.useState(true);
 
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col px-4 pb-12 pt-10 sm:px-8 lg:pt-[8vh]">
+    <div className="relative min-h-0 flex-1 overflow-y-auto">
+      <div className="absolute right-4 top-4 z-10 sm:right-6">
+        <IncognitoToggle active={temporary} onActiveChange={onTemporary} label="Temporary" />
+      </div>
+      <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col px-4 pb-12 pt-14 sm:px-8 lg:pt-[8vh]">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1336,23 +1548,60 @@ function NewThread({
           <p className="mt-5 h-5 text-sm text-muted-foreground">{greeting}</p>
           <h3 className="mt-1 text-balance font-serif text-3xl tracking-tight sm:text-5xl">Hey {USER_NAME}, what&apos;s on your mind?</h3>
 
-          <PromptBarPro
-            suggestions={COMPOSER_SUGGESTIONS}
-            visibleCount={COMPOSER_SUGGESTIONS.length}
-            sources={COMPOSER_SOURCES}
-            commands={COMPOSER_COMMANDS}
-            environments={[
-              { id: "repo", label: "carlosmarch/ai-patterns" },
-              { id: "figma", label: "Figma · Chat screen v2" },
-            ]}
-            orchestrators={[
-              { id: "origami", label: AGENT_NAME },
-              { id: "reviewer", label: "Spec reviewer" },
-            ]}
-            placeholder="Ask anything — / for commands, @ for sources"
-            onSubmit={onSubmit}
-            className="mt-8 w-full text-left"
-          />
+          <div className="mt-8 flex w-full flex-col gap-3 text-left">
+            <TemporaryChatBanner
+              active={temporary}
+              description="This thread won't appear in your history or train Origami's memory, and it's gone when you leave it."
+              onExit={() => onTemporary(false)}
+            />
+            <div className="flex justify-center">
+              <Tabs
+                value={mode}
+                onChange={setMode}
+                items={[
+                  { id: "ask", label: "Ask" },
+                  { id: "template", label: "Template" },
+                  { id: "guided", label: "New spec" },
+                ]}
+              />
+            </div>
+            {mode === "ask" ? (
+              <PromptBarPro
+                {...COMPOSER_PROPS}
+                visibleCount={COMPOSER_SUGGESTIONS.length}
+                placeholder="Ask anything — / for commands, @ for sources"
+                onSubmit={onSubmit}
+                className="w-full"
+              />
+            ) : mode === "template" ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap justify-center gap-2">
+                  {PROMPT_TEMPLATES.map((t, i) => (
+                    <button
+                      key={t.name}
+                      type="button"
+                      onClick={() => setTemplate(i)}
+                      className={cn(
+                        "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                        template === i ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {t.name}
+                    </button>
+                  ))}
+                </div>
+                <PromptTemplate
+                  key={template}
+                  title={PROMPT_TEMPLATES[template].name}
+                  parts={PROMPT_TEMPLATES[template].parts}
+                  onSubmit={(prompt) => onSubmit(prompt)}
+                  submitLabel={`Ask ${AGENT_NAME}`}
+                />
+              </div>
+            ) : (
+              <PromptWizard title="New pattern spec" steps={SPEC_WIZARD_STEPS} build={buildSpecPrompt} onSubmit={(prompt) => onSubmit(prompt)} submitLabel="Draft the spec" />
+            )}
+          </div>
         </motion.div>
 
         <section aria-labelledby="start-with" className="mt-12">
@@ -1410,7 +1659,103 @@ function NewThread({
             </div>
           </section>
         )}
+
+        <AnimatePresence>
+          {pill && (
+            <motion.div key="pill" exit={{ opacity: 0 }} className="mt-10 flex justify-center">
+              <AgentSetupPill
+                label={`Use ${AGENT_NAME}'s patterns in your coding agent`}
+                prompt={SKILL_PROMPT}
+                agents={SETUP_AGENTS}
+                onCopy={() => onToast("Prompt copied — paste it into your coding agent.")}
+                onDismiss={() => setPill(false)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
+    </div>
+  );
+}
+
+function ShareThreadButton({ thread, onVisibility }: { thread: Thread; onVisibility: (v: "private" | "public") => void }) {
+  const [open, setOpen] = React.useState(false);
+  const visibility = thread.visibility ?? "private";
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="hidden items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent sm:flex"
+      >
+        {visibility === "public" ? <Globe className="size-3.5" /> : <Lock className="size-3.5" />}
+        <Share className="size-3.5" />
+        Share
+      </button>
+      <ShareSessionDialog
+        open={open}
+        onOpenChange={setOpen}
+        visibility={visibility}
+        onVisibilityChange={(next) => new Promise<void>((resolve) => window.setTimeout(() => (onVisibility(next), resolve()), 500))}
+        shareUrl={`https://ai-patterns.app/workspace/s/${thread.id}`}
+        title="Share this thread"
+        exposureWarning="This thread reads from carlosmarch/ai-patterns and Figma. Anyone with the link sees the files and screens Origami quoted."
+        policyNote="Shared threads are read-only. Turn sharing off any time to break the link."
+      />
+    </>
+  );
+}
+
+function ContextButton({ blocks }: { blocks: number }) {
+  const [open, setOpen] = React.useState(false);
+  const [compacted, setCompacted] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+  const segments = contextSegments(compacted ? Math.round(blocks * 0.2) : blocks);
+  const used = segments.reduce((n, s) => n + s.tokens, 0);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => !ref.current?.contains(e.target as Node) && setOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("pointerdown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-label={`Context window: ${Math.round((used / CONTEXT_LIMIT) * 100)}% used`}
+        className="flex items-center gap-1.5 rounded-full px-2 py-1 text-xs tabular-nums text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+      >
+        <span className="relative h-1.5 w-8 overflow-hidden rounded-full bg-muted">
+          <span className="absolute inset-y-0 left-0 rounded-full bg-foreground/60" style={{ width: `${Math.min(100, (used / CONTEXT_LIMIT) * 100)}%` }} />
+        </span>
+        {Math.round((used / CONTEXT_LIMIT) * 100)}%
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            className="absolute bottom-full right-0 z-50 mb-2 w-80 shadow-xl"
+          >
+            <ContextUsage
+              segments={segments}
+              limit={CONTEXT_LIMIT}
+              title="Thread context"
+              onCompact={() => new Promise<void>((resolve) => window.setTimeout(() => (setCompacted(true), resolve()), 900))}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -1421,60 +1766,127 @@ function ThreadPane({
   handlers,
   onSubmit,
   onStop,
+  onUnarchive,
 }: {
   thread: Thread;
   generating: boolean;
   handlers: BlockHandlers;
   onSubmit: (prompt: string) => void;
   onStop: () => void;
+  onUnarchive: () => void;
 }) {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const bottomRef = React.useRef<HTMLDivElement>(null);
-  const lastThread = React.useRef(thread.id);
+  const [model, setModel] = React.useState("atlas");
+  const [thinking, setThinking] = React.useState(false);
+  const [autonomy, setAutonomy] = React.useState("confirm");
+  const [artifactId, setArtifactId] = React.useState<string | null>(null);
+  const [artifactVersion, setArtifactVersion] = React.useState(0);
+
+  const artifactBlock = thread.blocks.find((b): b is Extract<Block, { kind: "artifact" }> => b.kind === "artifact" && b.id === artifactId);
+  const lastArtifact = [...thread.blocks].reverse().find((b) => b.kind === "artifact");
+
+  // Open a new artifact as soon as Origami starts writing it, and follow its newest version.
+  const artifactSig = lastArtifact?.kind === "artifact" ? `${lastArtifact.id}:${lastArtifact.artifact.versions.length}:${!!lastArtifact.generating}` : "";
+  const [seenSig, setSeenSig] = React.useState(artifactSig);
+  if (artifactSig !== seenSig && lastArtifact?.kind === "artifact") {
+    setSeenSig(artifactSig);
+    if (lastArtifact.generating) setArtifactId(lastArtifact.id);
+    if (lastArtifact.generating || lastArtifact.id === artifactId) setArtifactVersion(lastArtifact.artifact.versions.length - 1);
+  }
 
   React.useEffect(() => {
-    const switched = lastThread.current !== thread.id;
-    lastThread.current = thread.id;
-    if (switched) {
-      scrollRef.current?.scrollTo({ top: 0 });
-      return;
-    }
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [thread.id, thread.blocks.length]);
+  }, [thread.blocks.length]);
 
-  return (
+  React.useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, []);
+
+  const paneHandlers: BlockHandlers = {
+    ...handlers,
+    openArtifactId: artifactId,
+    onOpenArtifact: (id) => {
+      const block = thread.blocks.find((b) => b.id === id);
+      setArtifactId(id);
+      if (block?.kind === "artifact") setArtifactVersion(block.artifact.versions.length - 1);
+    },
+  };
+
+  const composer = (
+    <div className="mx-auto w-full max-w-2xl">
+      <PromptBarPro
+        {...COMPOSER_PROPS}
+        visibleCount={2}
+        placeholder={`Reply to ${AGENT_NAME}…`}
+        onSubmit={onSubmit}
+        generating={generating}
+        onStop={onStop}
+      />
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1">
+          <ModelPicker
+            models={MODELS}
+            value={model}
+            onChange={setModel}
+            thinking={thinking}
+            onThinkingChange={setThinking}
+            thinkingLabel="Think longer"
+            onUpgrade={handlers.onUpgrade}
+          />
+          <AutonomyModePicker modes={AUTONOMY_MODES} capabilities={AUTONOMY_CAPABILITIES} value={autonomy} onChange={setAutonomy} />
+        </div>
+        <ContextButton blocks={thread.blocks.length} />
+      </div>
+    </div>
+  );
+
+  const chat = (
     <div className="flex min-h-0 flex-1 flex-col">
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-2xl space-y-5 px-6 py-8">
           {thread.blocks.map((block) => (
-            <BlockView key={block.id} block={block} handlers={handlers} />
+            <BlockView key={block.id} block={block} handlers={paneHandlers} />
           ))}
           <div ref={bottomRef} />
         </div>
       </div>
-      <div className="shrink-0 border-t bg-background/80 px-6 pb-5 pt-4 backdrop-blur">
-        <div className="mx-auto w-full max-w-2xl">
-          <PromptBarPro
-            key={thread.id}
-            suggestions={COMPOSER_SUGGESTIONS}
-            visibleCount={2}
-            sources={COMPOSER_SOURCES}
-            commands={COMPOSER_COMMANDS}
-            environments={[
-              { id: "repo", label: "carlosmarch/ai-patterns" },
-              { id: "figma", label: "Figma · Chat screen v2" },
-            ]}
-            orchestrators={[
-              { id: "origami", label: AGENT_NAME },
-              { id: "reviewer", label: "Spec reviewer" },
-            ]}
-            placeholder={`Reply to ${AGENT_NAME}…`}
-            onSubmit={onSubmit}
-            generating={generating}
-            onStop={onStop}
-          />
-        </div>
+      <div className="shrink-0 border-t bg-background/80 px-6 pb-4 pt-4 backdrop-blur">
+        {thread.archived ? (
+          <ArchivedSessionBanner
+            archived
+            message="This thread is archived. Unarchive it to keep working in it."
+            detail="Archived after 30 days without activity."
+            onUnarchive={() => new Promise<void>((resolve) => window.setTimeout(() => (onUnarchive(), resolve()), 800))}
+            className="mx-auto w-full max-w-2xl"
+          >
+            {composer}
+          </ArchivedSessionBanner>
+        ) : (
+          composer
+        )}
       </div>
+    </div>
+  );
+
+  return (
+    <div className="flex min-h-0 flex-1">
+      <ArtifactSplit
+        open={!!artifactBlock}
+        chat={chat}
+        panel={
+          artifactBlock ? (
+            <ArtifactPanel
+              key="panel"
+              artifact={toArtifact(artifactBlock.artifact)}
+              version={Math.min(artifactVersion, artifactBlock.artifact.versions.length - 1)}
+              onVersionChange={setArtifactVersion}
+              onClose={() => setArtifactId(null)}
+              generating={artifactBlock.generating}
+            />
+          ) : null
+        }
+      />
     </div>
   );
 }

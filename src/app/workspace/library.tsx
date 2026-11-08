@@ -8,12 +8,18 @@ import { DownloadButton } from "@/components/download-button";
 import { GithubMark } from "@/components/github-mark";
 import { cn } from "@/lib/utils";
 import { ConnectivityError } from "@/registry/errors/connectivity-error/component";
+import {
+  DescribeFiltersTable,
+  type DescribeFiltersColumn,
+  type DescribedFilter,
+} from "@/registry/tables/describe-filters/component";
+import { JOBS } from "@/registry/jobs";
 import { getCategories, registry, type RegistryEntry } from "@/registry";
 import { INSTALL_COMMAND, SKILL_MODES, SKILL_PILLARS, SKILL_STATS_BODY, SKILL_STEPS, SKILL_TAGLINE, SkillPitch } from "@/app/skill/content";
 import { SkillExamples, type SkillExample } from "@/app/skill/skill-examples";
 
 import { AGENT_ICON, AGENT_NAME } from "./data";
-import { entryPath, findEntry, loadSource, type PatternSource } from "./catalogue";
+import { entryPath, findEntry, loadSource, specSection, type PatternSource } from "./catalogue";
 import { Scroll, Tabs, ViewHeader } from "./views";
 
 // The same catalogue and skill docs as /patterns and /skill, as views inside
@@ -42,6 +48,7 @@ export function PatternsView({
   onAsk: (entry: RegistryEntry) => void;
 }) {
   const [query, setQuery] = React.useState("");
+  const [layout, setLayout] = React.useState<"grid" | "table">("grid");
   // Kept across patterns, so browsing the menu on the Code tab stays on Code.
   const [tab, setTab] = React.useState<DetailTab>("preview");
   const entry = findEntry(selected);
@@ -67,6 +74,14 @@ export function PatternsView({
         </ViewHeader>
       ) : (
         <ViewHeader title="Patterns" badge={`${registry.length}`}>
+          <Tabs
+            value={layout}
+            onChange={setLayout}
+            items={[
+              { id: "grid", label: "Grid" },
+              { id: "table", label: "Table" },
+            ]}
+          />
           <label className="hidden items-center gap-2 rounded-full border px-3 py-1.5 text-sm focus-within:ring-2 focus-within:ring-ring/40 sm:flex">
             <Search className="size-4 text-muted-foreground" />
             <input
@@ -83,11 +98,89 @@ export function PatternsView({
         <PatternMenu selected={entry ? selected : null} category={entry ? null : category} onSelect={onSelect} onCategory={openCategory} />
         {entry ? (
           <PatternDetail key={selected} entry={entry} tab={tab} onSelect={onSelect} onAsk={onAsk} />
+        ) : layout === "table" ? (
+          <Scroll className="p-4 sm:p-6">
+            <PatternTable onSelect={onSelect} />
+          </Scroll>
         ) : (
           <PatternGrid query={query} onQuery={setQuery} onSelect={onSelect} category={category} onCategory={onCategory} />
         )}
       </div>
     </>
+  );
+}
+
+interface PatternRow {
+  id: string;
+  name: string;
+  category: string;
+  job: string;
+  added: string;
+  /** Hidden: what the describe field matches by meaning. */
+  about: string;
+}
+
+const PATTERN_ROWS: PatternRow[] = registry.map((e) => ({
+  id: entryPath(e),
+  name: e.title,
+  category: e.category,
+  job: JOBS.find((j) => j.id === e.job)?.label ?? e.job,
+  added: e.added,
+  about: `${e.title} ${e.description} ${specSection(e.uxDoc, "Summary")}`.toLowerCase(),
+}));
+
+const addedDate = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+
+let filterId = 0;
+const fid = () => `pf${++filterId}`;
+
+const STOP_WORDS = new Set(["show", "me", "patterns", "pattern", "for", "the", "a", "an", "of", "that", "with", "about", "and", "to", "in", "on", "only", "all", "what", "which", "added", "new"]);
+
+// Stands in for a model reading the column schema and the description.
+async function describePatterns(description: string) {
+  await new Promise((r) => setTimeout(r, 900));
+  const d = description.toLowerCase();
+  const filters: DescribedFilter<PatternRow>[] = [];
+  const job = JOBS.find((j) => d.includes(j.label.toLowerCase()) || d.includes(j.id));
+  if (job) filters.push({ id: fid(), kind: "column", field: "Job", operator: "is", value: job.label, test: (r) => r.job === job.label });
+  const category = getCategories().find((c) => d.includes(c));
+  if (category) filters.push({ id: fid(), kind: "column", field: "Category", operator: "is", value: category, test: (r) => r.category === category });
+  if (/this month|recent|lately|new/.test(d)) {
+    filters.push({ id: fid(), kind: "column", field: "Added", operator: "is after", value: "Oct 1", test: (r) => r.added >= "2026-10-01" });
+  }
+  const words = d.split(/[^a-z]+/).filter((w) => w.length > 3 && !STOP_WORDS.has(w) && w !== job?.id && w !== category);
+  if (words.length && !(job || category) ) {
+    filters.push({ id: fid(), kind: "semantic", field: "About", operator: "matches", value: words.join(" "), test: (r) => words.some((w) => r.about.includes(w.replace(/s$/, ""))) });
+  }
+  if (filters.length === 0) throw new Error("Nothing to filter on");
+  return { filters };
+}
+
+function PatternTable({ onSelect }: { onSelect: (path: string) => void }) {
+  const columns: DescribeFiltersColumn<PatternRow>[] = [
+    {
+      key: "name",
+      label: "Pattern",
+      render: (r) => (
+        <button type="button" onClick={() => onSelect(r.id)} className="font-medium hover:underline">
+          {r.name}
+        </button>
+      ),
+    },
+    { key: "category", label: "Category", render: (r) => <span className="text-muted-foreground">{r.category}</span> },
+    { key: "job", label: "Job", render: (r) => <span className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground">{r.job}</span> },
+    { key: "added", label: "Added", className: "whitespace-nowrap", render: (r) => <span className="text-muted-foreground">{addedDate.format(new Date(r.added))}</span> },
+  ];
+  return (
+    <DescribeFiltersTable
+      columns={columns}
+      rows={PATTERN_ROWS}
+      onDescribe={describePatterns}
+      searchText={(r) => `${r.name} ${r.category}`}
+      suggestions={["Patterns that help people recover", "Voice patterns added recently", "Anything about permission"]}
+      describePlaceholder="Show me patterns for…"
+      className="mx-auto max-w-4xl"
+    />
   );
 }
 

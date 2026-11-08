@@ -29,11 +29,32 @@ import { TerminalStream, type LogLine } from "@/registry/code/terminal-stream/co
 import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
 import { ToolApproval, type ToolApprovalDecision as ApprovalDecision } from "@/registry/permissions/tool-approval/component";
 import { ToolCallChip, type ToolCallKind, type ToolCallStatus } from "@/registry/loaders/tool-call-chip/component";
+import { AccessRequest, type AccessRequestDecision } from "@/registry/permissions/access-request/component";
+import { AgentRunCard, type RunStep } from "@/registry/agents/agent-run-card/component";
+import { AiDisclosureBadge } from "@/registry/indicators/ai-disclosure-badge/component";
+import { ArtifactCard, type Artifact } from "@/registry/messages/artifact-panel/component";
+import { CheckpointTimeline, type RestoredState } from "@/registry/agents/checkpoint-restore/component";
+import { ClarifyingQuestions, type ClarifyingAnswers, type ClarifyingQuestion } from "@/registry/messages/clarifying-questions/component";
+import { CodePreviewBlock } from "@/registry/code/code-preview/component";
+import { ConversationBranches, type Branch } from "@/registry/messages/conversation-branches/component";
+import { CostEstimate } from "@/registry/indicators/cost-estimate/component";
+import { MemoryUpdatedNotice } from "@/registry/permissions/memory-panel/component";
+import { PlanReview, type PlanStep } from "@/registry/agents/plan-review/component";
+import { ResponseActions, type RegenerateOption, type ResponseRating } from "@/registry/messages/response-actions/component";
+import { StreamOfThought, type Thought } from "@/registry/traces/stream-of-thought/component";
+import { TaskList, type Task } from "@/registry/agents/task-list/component";
 import { getCategories, registry } from "@/registry";
 
 import { entryPath } from "./catalogue";
 import {
+  AGENT_NAME,
   AUDIT_ATTACHMENT,
+  AUDIT_COST,
+  CONTRAST_RUN,
+  LOADER_CHECKPOINTS,
+  NAME_BRANCHES,
+  ORIGAMI_SVG,
+  SPEC_PLAN_ALT,
   AUDIT_DIFF_FILES,
   AUDIT_DIFF_TABS,
   AUDIT_ITEMS,
@@ -97,7 +118,29 @@ export type BlockBody =
   | { kind: "rate-limit"; resetAt: number }
   | { kind: "screenshots" }
   | { kind: "console-error" }
+  | { kind: "clarify"; questions: ClarifyingQuestion[]; onDone?: (answers: ClarifyingAnswers) => void }
+  | { kind: "plan"; steps: PlanStep[]; estimate?: string; onDone?: (steps: PlanStep[]) => void }
+  | { kind: "tasks"; tasks: Task[]; live?: { onDone: (final: Task[]) => void } }
+  | { kind: "thought"; thoughts: Thought[]; duration?: number; live?: { onDone: () => void } }
+  | { kind: "artifact"; artifact: ArtifactData; generating?: boolean }
+  | { kind: "access"; onDecision?: (decision: AccessRequestDecision) => void }
+  | { kind: "cost"; onRun?: () => void }
+  | { kind: "memory-notice"; text: string }
+  | { kind: "run"; title: string; doneLabel: string; steps?: RunStep[]; elapsed?: number; live?: { onDone: (steps: RunStep[], elapsed: number) => void } }
+  /** Copy, rate and regenerate under a finished answer; `prompt` is what a regenerate re-runs. */
+  | { kind: "actions"; text: string; prompt: string }
+  | { kind: "branches" }
+  | { kind: "checkpoints" }
+  | { kind: "code-preview" }
   );
+
+/** A serializable artifact; previews are rendered from `source` when shown. */
+export interface ArtifactData {
+  id: string;
+  title: string;
+  kind: string;
+  versions: { id: string; note?: string; source: string }[];
+}
 
 export type Block = BlockBody & { id: string };
 
@@ -109,6 +152,11 @@ export interface Thread {
   group: ThreadGroup;
   blocks: Block[];
   badge?: string;
+  /** Archived threads swap the composer for an unarchive banner. */
+  archived?: boolean;
+  /** Temporary threads aren't kept once you leave them. */
+  temporary?: boolean;
+  visibility?: "private" | "public";
 }
 
 let idCounter = 0;
@@ -239,6 +287,39 @@ export function seedThreads(): Thread[] {
       ],
     },
     {
+      id: "naming",
+      title: "Name the handoff pattern",
+      group: "Yesterday",
+      blocks: [b({ kind: "branches" })],
+    },
+    {
+      id: "loader-checkpoints",
+      title: "Thinking Loader polish",
+      group: "Yesterday",
+      blocks: [
+        b({ kind: "checkpoints" }),
+        b({ kind: "note", text: "Hover a checkpoint and choose Restore to undo the shimmer change." }),
+      ],
+    },
+    {
+      id: "favicon",
+      title: "Animate the Origami mark",
+      group: "Yesterday",
+      blocks: [
+        b({ kind: "user", text: "Animate the Origami mark for the loading state — SVG only, no JS" }),
+        b({
+          kind: "thought",
+          duration: 6,
+          thoughts: [
+            { title: "Keeping it static-safe", body: "It's for a static export, so CSS keyframes inside the SVG — no script, works as an <img>." },
+            { title: "Drawing, not spinning", body: "Fold each stroke in with stroke-dashoffset, staggered, the same rhythm as Drawing Icon." },
+          ],
+        }),
+        b({ kind: "assistant", text: "Each fold draws in, holds, then erases — and it stops under reduced motion. Flip to Preview to watch it:" }),
+        b({ kind: "code-preview" }),
+      ],
+    },
+    {
       id: "checklist",
       title: "Setup checklist microcopy",
       group: "Yesterday",
@@ -247,6 +328,19 @@ export function seedThreads(): Thread[] {
         b({
           kind: "assistant",
           text: "Mostly. “Agent task” is jargon for a first-run user — try “Ask your agent for something”. It names the action and the outcome, and it matches the verb-first style of the other steps.",
+        }),
+      ],
+    },
+    {
+      id: "roadmap",
+      title: "Q3 catalogue roadmap",
+      group: "Earlier",
+      archived: true,
+      blocks: [
+        b({ kind: "user", text: "Which categories should we grow in Q3?" }),
+        b({
+          kind: "assistant",
+          text: "Voice and agents — both had more requests than patterns. I'd add a voice relay and an agent run card first; they shipped in October.",
         }),
       ],
     },
@@ -367,6 +461,196 @@ function LiveTerminal({ block }: { block: Extract<Block, { kind: "terminal" }> }
       className="w-full max-w-md"
     />
   );
+}
+
+function LiveThought({ block }: { block: Extract<Block, { kind: "thought" }> }) {
+  const [shown, setShown] = React.useState<Thought[]>(block.live ? [] : block.thoughts);
+  const live = useLatest(block.live);
+
+  React.useEffect(() => {
+    if (!live.current) return;
+    const script = block.thoughts;
+    const words = script.map((t) => t.body.split(" "));
+    let index = 0;
+    let count = 0;
+    const id = window.setInterval(() => {
+      count += 2;
+      if (count >= words[index].length) {
+        if (index === script.length - 1) {
+          window.clearInterval(id);
+          setShown(script);
+          live.current?.onDone();
+          return;
+        }
+        index += 1;
+        count = 0;
+      }
+      setShown([...script.slice(0, index), { title: script[index].title, body: words[index].slice(0, count).join(" ") }]);
+    }, 70);
+    return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <StreamOfThought
+      thoughts={shown}
+      thinking={!!block.live && shown !== block.thoughts}
+      durationSeconds={block.duration}
+      className="w-full max-w-md"
+    />
+  );
+}
+
+function LiveTasks({ block }: { block: Extract<Block, { kind: "tasks" }> }) {
+  const [tasks, setTasks] = React.useState(block.tasks);
+  const live = useLatest(block.live);
+
+  React.useEffect(() => {
+    if (!live.current) return;
+    const active = tasks.findIndex((t) => t.status === "in_progress");
+    if (active === -1) {
+      live.current.onDone(tasks);
+      return;
+    }
+    const t = window.setTimeout(
+      () =>
+        setTasks((prev) =>
+          prev.map((task, i) =>
+            i === active ? { ...task, status: "completed" } : i === active + 1 ? { ...task, status: "in_progress" } : task
+          )
+        ),
+      1100
+    );
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasks]);
+
+  return <TaskList tasks={tasks} label="Origami's plan" className="w-full max-w-md" />;
+}
+
+/** Simulated seconds per real second, so the run plays in a few seconds. */
+const RUN_SPEED = 4;
+
+function LiveRun({ block }: { block: Extract<Block, { kind: "run" }> }) {
+  const [steps, setSteps] = React.useState<RunStep[]>(
+    () =>
+      block.steps ??
+      CONTRAST_RUN.map((s, i): RunStep => ({ id: s.id, kind: s.kind, label: s.label, activeLabel: s.activeLabel, detail: s.detail, status: i === 0 ? "running" : "pending" }))
+  );
+  const [elapsed, setElapsed] = React.useState(block.elapsed ?? 0);
+  const stepStart = React.useRef(0);
+  const live = useLatest(block.live);
+  const running = steps.some((s) => s.status === "running");
+
+  React.useEffect(() => {
+    if (!running || !live.current) return;
+    const id = window.setInterval(() => setElapsed((e) => e + 1), 1000 / RUN_SPEED);
+    return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [running]);
+
+  React.useEffect(() => {
+    if (!live.current) return;
+    const index = steps.findIndex((s) => s.status === "running");
+    if (index === -1) {
+      live.current.onDone(steps, elapsed);
+      return;
+    }
+    const took = elapsed - stepStart.current;
+    if (took < (CONTRAST_RUN.find((s) => s.id === steps[index].id)?.duration ?? 4)) return;
+    stepStart.current = elapsed;
+    setSteps((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, status: "done", durationSeconds: took } : i === index + 1 ? { ...s, status: "running" } : s))
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [elapsed, steps]);
+
+  return <AgentRunCard title={block.title} steps={steps} elapsedSeconds={elapsed} doneLabel={block.doneLabel} className="w-full max-w-md" />;
+}
+
+const REGENERATE_OPTIONS: RegenerateOption[] = [
+  { id: "concise", label: "More concise", hint: "Same answer, fewer words" },
+  { id: "swift", label: "Try with Swift", hint: "Quicker, less detail" },
+];
+
+function AnswerActions({ block, handlers }: { block: Extract<Block, { kind: "actions" }>; handlers: BlockHandlers }) {
+  const [rating, setRating] = React.useState<ResponseRating>(null);
+  return (
+    <ResponseActions
+      text={block.text}
+      rating={rating}
+      onRate={setRating}
+      onFeedback={() => handlers.onToast("Thanks — that goes straight to the Origami team.")}
+      onRegenerate={() => handlers.onRegenerate(block.id, block.prompt)}
+      regenerateOptions={REGENERATE_OPTIONS}
+      onShare={() => "https://ai-patterns.app/workspace/s/7f3a9c2e"}
+      className="-ml-2 -mt-3"
+    />
+  );
+}
+
+function NamingBranches() {
+  const [branches, setBranches] = React.useState<Branch[]>(NAME_BRANCHES);
+  const [active, setActive] = React.useState(NAME_BRANCHES.length - 1);
+  return (
+    <ConversationBranches
+      branches={branches}
+      active={active}
+      onActiveChange={setActive}
+      onEdit={(prompt) => {
+        const id = `n${Date.now()}`;
+        setBranches((prev) => [...prev, { id, prompt }]);
+        setActive(branches.length);
+        window.setTimeout(() => {
+          setBranches((prev) =>
+            prev.map((x) => (x.id === id ? { ...x, response: "“Handoff Card” — it says what's on screen, and it sorts next to Human in the Loop in the agents category." } : x))
+          );
+        }, 1200);
+      }}
+      className="w-full"
+    />
+  );
+}
+
+function LoaderCheckpoints() {
+  const [restored, setRestored] = React.useState<RestoredState | null>(null);
+  return (
+    <CheckpointTimeline
+      turns={LOADER_CHECKPOINTS}
+      restored={restored}
+      onRestore={setRestored}
+      onRedo={() => setRestored(null)}
+      untrackedNote="Restores files Origami changed. Builds and pushes stay as they are."
+      className="w-full"
+    />
+  );
+}
+
+/** Renders the small markdown subset artifact sources use. */
+export function ArtifactDoc({ source }: { source: string }) {
+  return (
+    <div className="max-w-prose space-y-2 text-sm leading-relaxed">
+      <AiDisclosureBadge
+        details={{ model: "Atlas", generatedAt: "Just now", note: "Drafted from the spec template. Review before it ships." }}
+        className="mb-1"
+      />
+      {source.split("\n").map((line, i) => {
+        if (line.startsWith("# ")) return <h4 key={i} className="text-base font-semibold">{line.slice(2)}</h4>;
+        if (line.startsWith("## ")) return <h5 key={i} className="pt-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{line.slice(3)}</h5>;
+        if (line.startsWith("- ")) return <p key={i} className="pl-3 text-muted-foreground">• {line.slice(2)}</p>;
+        if (!line.trim()) return null;
+        return (
+          <p key={i} className="text-muted-foreground">
+            {line.split(/\*\*(.+?)\*\*/).map((part, j) => (j % 2 ? <strong key={j} className="text-foreground">{part}</strong> : part))}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
+export function toArtifact(data: ArtifactData): Artifact {
+  return { ...data, versions: data.versions.map((v) => ({ ...v, preview: <ArtifactDoc source={v.source} /> })) };
 }
 
 function VersionedBubble({ versions, text }: { versions?: string[]; text: string }) {
@@ -507,6 +791,12 @@ export interface BlockHandlers {
   onRetry: (blockId: string, action: string) => void;
   onUpgrade: () => void;
   onOpenPattern: (path: string) => void;
+  onRegenerate: (blockId: string, prompt: string) => void;
+  onManageMemory: () => void;
+  onToast: (message: string) => void;
+  /** Set by the thread pane: which artifact block is open in the side panel. */
+  openArtifactId?: string | null;
+  onOpenArtifact?: (blockId: string) => void;
 }
 
 export function BlockView({ block, handlers }: { block: Block; handlers: BlockHandlers }) {
@@ -612,12 +902,96 @@ export function BlockView({ block, handlers }: { block: Block; handlers: BlockHa
       );
     case "console-error":
       return <ContrastConsoleError />;
+    case "clarify":
+      return (
+        <ClarifyingQuestions
+          intro="Three quick questions — I've picked my best guess for each."
+          questions={block.questions}
+          onSubmit={(answers) => block.onDone?.(answers)}
+          submitLabel="Start drafting"
+          className="w-full max-w-md"
+        />
+      );
+    case "plan":
+      return (
+        <PlanReview
+          title="Plan for the spec"
+          steps={block.steps}
+          estimate={block.estimate}
+          onApprove={(steps) => block.onDone?.(steps)}
+          onRegenerate={() => new Promise((resolve) => window.setTimeout(() => resolve(SPEC_PLAN_ALT), 1000))}
+          approveLabel="Approve and draft"
+          className="w-full max-w-md"
+        />
+      );
+    case "tasks":
+      return <LiveTasks key={block.live ? "live" : "static"} block={block} />;
+    case "thought":
+      return <LiveThought key={block.live ? "live" : "static"} block={block} />;
+    case "artifact":
+      return (
+        <ArtifactCard
+          artifact={toArtifact(block.artifact)}
+          version={block.artifact.versions.length - 1}
+          generating={block.generating}
+          open={handlers.openArtifactId === block.id}
+          onOpen={() => handlers.onOpenArtifact?.(block.id)}
+          className="w-full max-w-md"
+        />
+      );
+    case "access":
+      return (
+        <AccessRequest
+          title="Widen network access?"
+          target={{ name: "Origami research", scope: "This workspace" }}
+          requester={AGENT_NAME}
+          reason="I need to read Linear's, Cursor's and Claude's changelogs and docs — they're outside the allowed domains."
+          changes={[
+            { id: "hosts", label: "Allowed domains", from: "12 domains", to: "+ linear.app, cursor.com, claude.com", widens: true },
+            { id: "mode", label: "Access", from: "Read registry only", to: "Read public web pages" },
+          ]}
+          impact="Applies to this thread and to the weekly research scout until you remove it in Connectors."
+          approveLabel="Allow these domains"
+          onDecision={(d) => block.onDecision?.(d)}
+          className="w-full max-w-md"
+        />
+      );
+    case "cost":
+      return (
+        <CostEstimate
+          min={AUDIT_COST.min}
+          max={AUDIT_COST.max}
+          balance={AUDIT_COST.balance}
+          duration="~2 min"
+          breakdown={AUDIT_COST.breakdown}
+          actionLabel="Run the audit"
+          onRun={() => block.onRun?.()}
+          onTopUp={handlers.onUpgrade}
+          className="w-full max-w-md"
+        />
+      );
+    case "memory-notice":
+      return <MemoryUpdatedNotice text={block.text} onManage={handlers.onManageMemory} />;
+    case "run":
+      return <LiveRun key={block.live ? "live" : "static"} block={block} />;
+    case "actions":
+      return <AnswerActions block={block} handlers={handlers} />;
+    case "branches":
+      return <NamingBranches />;
+    case "checkpoints":
+      return <LoaderCheckpoints />;
+    case "code-preview":
+      return <CodePreviewBlock code={ORIGAMI_SVG} lang="svg" defaultView="preview" className="w-full max-w-xl" />;
   }
 }
 
 function WeeklyFindings() {
   return (
     <div className="w-full max-w-md space-y-3 text-sm leading-relaxed text-foreground/90">
+      <AiDisclosureBadge
+        variant="inline"
+        details={{ model: "Atlas", generatedAt: "Today, 9:00", note: "Counts come from analytics; the trend call is a judgement." }}
+      />
       <p>
         Streaming Text was the most-copied pattern again with 1,204 copies
         <InlineCitation index={1} source={WEEKLY_CITATIONS[0]} />, and Prompt Bar Pro climbed 38% week over week. The
