@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   AudioLines,
   ArrowRight,
+  ArrowUp,
   ArrowUpRight,
   Bot,
   CalendarClock,
@@ -22,7 +23,9 @@ import {
   Menu,
   MessageSquare,
   Mic,
+  MicOff,
   MousePointer2,
+  PhoneOff,
   Play,
   Plus,
   RotateCcw,
@@ -356,8 +359,10 @@ const PLAYGROUND_REPLIES = [
 ];
 
 const VOICE_SCRIPT: { speaker: TranscriptSegment["speaker"]; text: string }[] = [
-  { speaker: "user", text: "Which pattern should I use while the agent is listening?" },
-  { speaker: "assistant", text: "Listening State while the mic is open, a Live Transcript as you talk, then a Voice Waveform while I answer." },
+  { speaker: "user", text: "Which pattern should I use while the agent is thinking?" },
+  { speaker: "assistant", text: "Stream of Thought for a reasoning model, or a Thinking Loader if you only need a status." },
+  { speaker: "user", text: "And on a voice call like this one?" },
+  { speaker: "assistant", text: "A Voice Orb. One shape listens, thinks and speaks, so the call never changes layout under you." },
 ];
 
 export function PlaygroundView({ tab, onTabChange: setTab }: { tab: PlaygroundTab; onTabChange: (tab: PlaygroundTab) => void }) {
@@ -380,10 +385,11 @@ export function PlaygroundView({ tab, onTabChange: setTab }: { tab: PlaygroundTa
   );
 }
 
-type ComposerKind = "basic" | "bar" | "autocomplete" | "enhancer" | "quality" | "context" | "queue" | "guarded";
+type ComposerKind = "basic" | "dictate" | "bar" | "autocomplete" | "enhancer" | "quality" | "context" | "queue" | "guarded";
 
 const COMPOSERS: { id: ComposerKind; label: string; hint: string }[] = [
   { id: "basic", label: "Basic", hint: "A plain field with a Send / Stop button." },
+  { id: "dictate", label: "Dictate", hint: "Press the mic and the question is typed for you as you talk." },
   { id: "bar", label: "Prompt Bar", hint: "Type @ for sources or / for commands." },
   { id: "autocomplete", label: "Autocomplete", hint: "Start with “Which pattern” — Tab accepts the ghost text." },
   { id: "enhancer", label: "Enhancer", hint: "Type a rough question, then Enhance rewrites it." },
@@ -416,6 +422,96 @@ function fakeEnhance(prompt: string) {
         ),
       1200
     )
+  );
+}
+
+const DICTATION = "Which pattern should I use when a tool call takes thirty seconds?";
+
+/** Voice input for the chat: Listening State while the mic opens, then a dotted waveform as words land in the field. */
+function DictationComposer({
+  value,
+  onChange,
+  onSubmit,
+  disabled,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: (value: string) => void;
+  disabled?: boolean;
+}) {
+  const [phase, setPhase] = React.useState<"idle" | "opening" | "capturing">("idle");
+  const timers = React.useRef<number[]>([]);
+  const clear = () => {
+    timers.current.forEach(window.clearTimeout);
+    timers.current = [];
+  };
+  React.useEffect(() => clear, []);
+
+  function startDictation() {
+    clear();
+    onChange("");
+    setPhase("opening");
+    const words = DICTATION.split(" ");
+    timers.current.push(window.setTimeout(() => setPhase("capturing"), 1200));
+    words.forEach((_, i) => timers.current.push(window.setTimeout(() => onChange(words.slice(0, i + 1).join(" ")), 1500 + i * 180)));
+    timers.current.push(window.setTimeout(() => setPhase("idle"), 1500 + words.length * 180 + 300));
+  }
+
+  function stop() {
+    clear();
+    setPhase("idle");
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {phase === "opening" ? (
+        <div className="flex min-h-12 items-center justify-center rounded-2xl border px-3 py-2">
+          <ListeningState label="Listening…" showTimer onStop={stop} />
+        </div>
+      ) : (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (value.trim() && !disabled) onSubmit(value);
+          }}
+          className="flex items-center gap-2 rounded-2xl border px-3 py-2"
+        >
+          {phase === "capturing" ? (
+            <VoiceWaveform state="listening" variant="dots" className="h-8 min-w-0 flex-1" />
+          ) : (
+            <input
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="Type, or press the mic and talk…"
+              aria-label="Message"
+              className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            />
+          )}
+          <button
+            type="button"
+            onClick={phase === "capturing" ? stop : startDictation}
+            aria-label={phase === "capturing" ? "Stop dictation" : "Dictate"}
+            className={cn(
+              "flex size-8 shrink-0 items-center justify-center rounded-full transition-colors",
+              phase === "capturing" ? "bg-foreground text-background" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+            )}
+          >
+            {phase === "capturing" ? <Check className="size-4" /> : <Mic className="size-4" />}
+          </button>
+          {phase === "idle" && (
+            <button
+              type="submit"
+              disabled={!value.trim() || disabled}
+              aria-label="Send"
+              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition-opacity disabled:opacity-40"
+            >
+              <ArrowUp className="size-4" />
+            </button>
+          )}
+        </form>
+      )}
+      {phase === "capturing" && <p className="truncate px-1 text-xs text-muted-foreground">{value}</p>}
+    </div>
   );
 }
 
@@ -482,6 +578,9 @@ function ChatPlayground() {
   const active = COMPOSERS.find((c) => c.id === composer)!;
   let input: React.ReactNode;
   switch (composer) {
+    case "dictate":
+      input = <DictationComposer value={value} onChange={setValue} onSubmit={(v) => send(v)} disabled={generating} />;
+      break;
     case "bar":
       input = <PromptBar variant="pill" placeholder="Ask as a user would…" onSubmit={(v) => send(v)} className="w-full" />;
       break;
@@ -608,78 +707,133 @@ function ChatPlayground() {
   );
 }
 
+type CallState = "off" | "listening" | "thinking" | "speaking";
+
+const CALL_LABEL: Record<CallState, string> = {
+  off: "Start a test call",
+  listening: "Listening",
+  thinking: "Thinking",
+  speaking: "Speaking",
+};
+
+// One orb for the whole call: it changes state, never shape or place, so the
+// person always looks at the same thing. The transcript is the record below it.
 function VoicePlayground() {
-  const [phase, setPhase] = React.useState<"idle" | "listening" | "transcript" | "speaking">("idle");
+  const [call, setCall] = React.useState<CallState>("off");
+  const [muted, setMuted] = React.useState(false);
   const [segments, setSegments] = React.useState<TranscriptSegment[]>([]);
+  const mutedRef = React.useRef(false);
+  const runRef = React.useRef(0);
 
-  React.useEffect(() => {
-    if (phase !== "listening") return;
-    const t = window.setTimeout(() => setPhase("transcript"), 1600);
-    return () => window.clearTimeout(t);
-  }, [phase]);
+  React.useEffect(() => () => void (runRef.current += 1), []);
 
-  React.useEffect(() => {
-    if (phase !== "transcript") return;
-    let cancelled = false;
-    (async () => {
+  async function run() {
+    const token = ++runRef.current;
+    const alive = () => runRef.current === token;
+    const sleep = async (ms: number) => {
+      await new Promise((r) => setTimeout(r, ms));
+      // Muting holds the call where it is until the mic is back.
+      while (alive() && mutedRef.current) await new Promise((r) => setTimeout(r, 200));
+      if (!alive()) throw new Error("ended");
+    };
+    const stream = async (id: string, speaker: TranscriptSegment["speaker"], text: string) => {
+      const words = text.split(" ");
+      for (let i = 1; i <= words.length; i++) {
+        await sleep(speaker === "user" ? 110 : 85);
+        setSegments((prev) => [...prev.filter((x) => x.id !== id), { id, speaker, text: words.slice(0, i).join(" "), final: i === words.length }]);
+      }
+    };
+    try {
+      setSegments([]);
       for (let turn = 0; turn < VOICE_SCRIPT.length; turn++) {
         const { speaker, text } = VOICE_SCRIPT[turn];
-        const words = text.split(" ");
-        for (let i = 1; i <= words.length; i++) {
-          if (cancelled) return;
-          const partial = words.slice(0, i).join(" ");
-          setSegments((prev) => [...prev.filter((s) => s.id !== `v${turn}`), { id: `v${turn}`, speaker, text: partial, final: i === words.length }]);
-          await new Promise((r) => setTimeout(r, 70));
+        if (speaker === "user") {
+          setCall("listening");
+          await sleep(900);
+          await stream(`v${turn}`, speaker, text);
+          await sleep(300);
+          setCall("thinking");
+          await sleep(1300);
+        } else {
+          setCall("speaking");
+          await stream(`v${turn}`, speaker, text);
+          await sleep(500);
         }
       }
-      if (!cancelled) setPhase("speaking");
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [phase]);
+      setCall("listening");
+    } catch {
+      // The call ended mid-script.
+    }
+  }
 
   function start() {
-    setSegments([]);
-    setPhase("listening");
+    mutedRef.current = false;
+    setMuted(false);
+    void run();
   }
+
+  function end() {
+    runRef.current += 1;
+    setCall("off");
+  }
+
+  function toggleMute() {
+    mutedRef.current = !mutedRef.current;
+    setMuted(mutedRef.current);
+  }
+
+  const orbState = call === "off" || muted ? "idle" : call;
 
   return (
     <Scroll className="bg-muted/30 p-4 sm:p-8">
-      <div className="mx-auto flex w-full max-w-md flex-col gap-4">
-        <div className="flex min-h-48 flex-col items-center justify-center gap-4 rounded-3xl border bg-background p-6">
-          {phase === "idle" && (
-            <>
-              <VoiceOrb state="idle" particles={500} className="h-40 w-full text-foreground" />
-              <VoiceWaveform state="idle" className="w-full" />
+      <div className="mx-auto w-full max-w-md overflow-hidden rounded-3xl border bg-background">
+        <div className="flex flex-col items-center gap-4 p-6">
+          <VoiceOrb state={orbState} className="h-56 w-full text-foreground dark:text-orange-50" />
+          <p aria-live="polite" className="h-5 text-sm text-muted-foreground">
+            {call === "off" ? `Talk to ${AGENT_NAME} the way your users would` : muted ? "Muted" : `${CALL_LABEL[call]}…`}
+          </p>
+          {call === "off" ? (
+            <button
+              type="button"
+              onClick={start}
+              className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            >
+              <Mic className="size-4" />
+              {segments.length ? "Call again" : CALL_LABEL.off}
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={start}
-                className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                onClick={toggleMute}
+                aria-pressed={muted}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm transition-colors hover:bg-accent",
+                  muted && "bg-accent"
+                )}
               >
-                <Mic className="size-4" />
-                Start a test call
+                {muted ? <MicOff className="size-4" /> : <Mic className="size-4" />}
+                {muted ? "Unmute" : "Mute"}
               </button>
-            </>
-          )}
-          {phase === "listening" && <ListeningState label="Listening…" onStop={() => setPhase("idle")} />}
-          {phase === "transcript" && <VoiceWaveform state="listening" className="w-full" />}
-          {phase === "speaking" && (
-            <>
-              <VoiceOrb state="speaking" particles={500} className="h-40 w-full text-foreground" />
-              <VoiceWaveform state="speaking" className="w-full" />
               <button
                 type="button"
-                onClick={() => setPhase("idle")}
-                className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                onClick={end}
+                className="flex items-center gap-1.5 rounded-full bg-red-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
               >
-                <X className="size-3" />
-                End call
+                <PhoneOff className="size-4" />
+                End
               </button>
-            </>
+            </div>
           )}
         </div>
-        {segments.length > 0 && <LiveTranscript segments={segments} active={phase === "transcript"} />}
+        {/* The transcript is the record of this call, so it lives on the same surface as the orb. */}
+        {segments.length > 0 && (
+          <LiveTranscript
+            segments={segments}
+            active={call === "listening" && !muted}
+            className="rounded-none border-0 border-t bg-transparent"
+          />
+        )}
       </div>
     </Scroll>
   );
@@ -727,6 +881,7 @@ function RelayPlayground() {
             A voice agent takes the request, hands it to {AGENT_NAME}, and reads progress back — without making you watch the thread.
           </p>
         </div>
+        <div className="overflow-hidden rounded-2xl border bg-card">
         {onCall ? (
           <VoiceAgentRelay
             state={state}
@@ -738,24 +893,27 @@ function RelayPlayground() {
               setState(muted.current ? "muted" : "listening");
             }}
             onEnd={() => setOnCall(false)}
+            className="rounded-none border-0 bg-transparent"
           />
         ) : (
-          <>
-            {run?.status === "done" && (
-              <p className="rounded-xl border bg-card px-3 py-2 text-xs text-muted-foreground">
-                Call ended · {AGENT_NAME}&apos;s full reply and diff are in Operator.
-              </p>
-            )}
+          <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
+            <span className="flex size-12 items-center justify-center rounded-full bg-muted">
+              <AudioLines className="size-5" />
+            </span>
+            <p className="text-sm text-muted-foreground">
+              {run?.status === "done" ? `Call ended · ${AGENT_NAME}'s full reply and diff are in Operator.` : "No call yet."}
+            </p>
             <button
               type="button"
               onClick={start}
-              className="flex items-center justify-center gap-2 rounded-2xl border bg-background px-4 py-3 text-sm font-medium transition-colors hover:bg-accent"
+              className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
             >
               <AudioLines className="size-4" />
-              Start a scripted call
+              {run ? "Call again" : "Start a scripted call"}
             </button>
-          </>
+          </div>
         )}
+        </div>
       </div>
     </Scroll>
   );

@@ -73,7 +73,6 @@ import {
   SKILL_PROMPT,
   SPEC_PLAN,
   SPEC_QUESTIONS,
-  SPEC_TASKS,
   SPEC_WIZARD_STEPS,
   buildSpecPrompt,
   contextSegments,
@@ -556,10 +555,12 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
         const thought = await r.until<void>((done) => ({ kind: "thought", thoughts: specThoughts(topic), live: { onDone: () => done() } }));
         r.update(thought.id, { live: undefined, duration: 7 } as Partial<Block>);
         const plan = await r.until<PlanStep[]>((done) => ({ kind: "plan", steps: SPEC_PLAN, estimate: "~1 min · 12 credits", onDone: done }));
-        r.update(plan.id, { onDone: undefined } as Partial<Block>);
+        // Once approved, the plan *becomes* the progress list — one card, not a plan followed by a copy of it.
+        await r.wait(500);
+        r.remove(plan.id);
         const tasks = await r.until<Task[]>((done) => ({
           kind: "tasks",
-          tasks: SPEC_TASKS.slice(0, Math.max(plan.value.length, 3)).map((t, i) => ({ ...t, status: i === 0 ? "in_progress" : "pending" })),
+          tasks: plan.value.map((step, i) => ({ id: step.id, label: step.text, status: i === 0 ? "in_progress" : "pending" })),
           live: { onDone: done },
         }));
         r.update(tasks.id, { tasks: tasks.value, live: undefined } as Partial<Block>);
@@ -1549,11 +1550,6 @@ function NewThread({
           <h3 className="mt-1 text-balance font-serif text-3xl tracking-tight sm:text-5xl">Hey {USER_NAME}, what&apos;s on your mind?</h3>
 
           <div className="mt-8 flex w-full flex-col gap-3 text-left">
-            <TemporaryChatBanner
-              active={temporary}
-              description="This thread won't appear in your history or train Origami's memory, and it's gone when you leave it."
-              onExit={() => onTemporary(false)}
-            />
             <div className="flex justify-center">
               <Tabs
                 value={mode}
@@ -1565,6 +1561,11 @@ function NewThread({
                 ]}
               />
             </div>
+            <TemporaryChatBanner
+              active={temporary}
+              description="This thread won't appear in your history or train Origami's memory, and it's gone when you leave it."
+              onExit={() => onTemporary(false)}
+            />
             {mode === "ask" ? (
               <PromptBarPro
                 {...COMPOSER_PROPS}

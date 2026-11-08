@@ -338,8 +338,10 @@ function RequestReview({ onToast }: { onToast: (message: string) => void }) {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-3 p-3 sm:flex-row sm:p-4">
-      <article ref={doc} className="min-h-48 min-w-0 flex-1 overflow-y-auto rounded-2xl border bg-card px-5 py-4 text-sm leading-relaxed">
+    <div className="flex min-h-0 flex-1 p-3 sm:p-4">
+    {/* The request and the fields pulled from it are one review: evidence in the panel lights up the text beside it. */}
+    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden rounded-2xl border bg-card p-3 sm:flex-row">
+      <article ref={doc} className="min-h-48 min-w-0 flex-1 overflow-y-auto px-4 py-3 text-sm leading-relaxed">
         <h3 className="font-medium">{REQUEST_DOC.title}</h3>
         <p className="mb-4 text-xs text-muted-foreground">{REQUEST_DOC.meta}</p>
         {REQUEST_DOC.paragraphs.map((p, i) => (
@@ -374,6 +376,7 @@ function RequestReview({ onToast }: { onToast: (message: string) => void }) {
         onStatusChange={(key, status) => status === "accepted" && onToast(`Accepted ${REQUEST_FIELDS.find((f) => f.key === key)?.label}.`)}
         className="min-h-0 sm:w-[22rem] sm:shrink-0"
       />
+    </div>
     </div>
   );
 }
