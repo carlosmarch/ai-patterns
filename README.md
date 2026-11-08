@@ -144,11 +144,7 @@ The site is a static export (`output: "export"`) hosted on [Cloudflare Workers](
 
 ### Analytics
 
-Page views and the custom events in `src/lib/analytics.ts` (`code_copied`, `tab_changed`, `spec_downloaded`, `demo_prompt_submitted`, `mcp_install_clicked`, `github_clicked`) go to [Umami](https://umami.is), which is cookieless, so there's no consent banner. Set these as build variables in Cloudflare (Workers Builds → Settings → Variables and secrets → Build):
-
-- `NEXT_PUBLIC_UMAMI_WEBSITE_ID` — the website ID from Umami. Unset = no script is loaded.
-- `NEXT_PUBLIC_UMAMI_SCRIPT_URL` — optional, defaults to `https://cloud.umami.is/script.js`; point it at your own instance if you self-host.
-- `NEXT_PUBLIC_UMAMI_DOMAINS` — optional, defaults to the `SITE_URL` host (`ai-patterns.app`), so localhost and PR previews aren't counted.
+Page views and the custom events in `src/lib/analytics.ts` (`code_copied`, `tab_changed`, `spec_downloaded`, `demo_prompt_submitted`, `mcp_install_clicked`, `github_clicked`) go to Google Analytics 4. Set `NEXT_PUBLIC_GA_MEASUREMENT_ID` (the `G-…` ID of your GA4 web stream) as a build variable in Cloudflare (Workers Builds → Settings → Variables and secrets → Build). Unset = no tag is loaded. GA is only configured on the `SITE_URL` host (`ai-patterns.app`), so localhost and PR previews aren't counted.
 
 ---
 

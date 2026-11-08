@@ -2,14 +2,14 @@ type Props = Record<string, string | number | boolean | undefined>;
 
 declare global {
   interface Window {
-    umami?: { track: (event: string, props?: Props) => void };
+    gtag?: (command: "event", event: string, params?: Props) => void;
   }
 }
 
-// Events go to Umami, whose script the root layout loads when
-// NEXT_PUBLIC_UMAMI_WEBSITE_ID is set; without it (dev, previews) they're dropped.
+// Events go to Google Analytics 4, which the root layout loads when
+// NEXT_PUBLIC_GA_MEASUREMENT_ID is set; without it (dev, previews) they're dropped.
 function track(event: string, props?: Props) {
-  if (typeof window !== "undefined") window.umami?.track(event, props);
+  if (typeof window !== "undefined") window.gtag?.("event", event, props);
 }
 
 export type CodeCopiedType = "component" | "spec" | "install_command" | "mcp_config";

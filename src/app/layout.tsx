@@ -32,12 +32,24 @@ if ("scrollRestoration" in history) {
 }
 `;
 
-// Umami (https://umami.is) — cookieless page views plus the custom events in
-// src/lib/analytics.ts. Off unless NEXT_PUBLIC_UMAMI_WEBSITE_ID is set at build
-// time; data-domains keeps local dev and PR previews out of the numbers.
-const UMAMI_WEBSITE_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
-const UMAMI_SCRIPT_URL = process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL ?? "https://cloud.umami.is/script.js";
-const UMAMI_DOMAINS = process.env.NEXT_PUBLIC_UMAMI_DOMAINS ?? new URL(SITE_URL).hostname;
+// Google Analytics 4 — page views plus the custom events in src/lib/analytics.ts.
+// Off unless NEXT_PUBLIC_GA_MEASUREMENT_ID is set at build time.
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const GA_HOSTNAME = new URL(SITE_URL).hostname;
+// Loads gtag.js itself, and only on the production host, so elsewhere
+// window.gtag stays undefined and track() calls are no-ops.
+const GA_INIT_SCRIPT = `
+if (location.hostname === ${JSON.stringify(GA_HOSTNAME)}) {
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { dataLayer.push(arguments); };
+  gtag("js", new Date());
+  gtag("config", ${JSON.stringify(GA_MEASUREMENT_ID)});
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://www.googletagmanager.com/gtag/js?id=" + ${JSON.stringify(GA_MEASUREMENT_ID)};
+  document.head.appendChild(s);
+}
+`;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -91,13 +103,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="flex-1">{children}</div>
         <Footer />
         <StarToast />
-        {UMAMI_WEBSITE_ID && (
-          <Script
-            src={UMAMI_SCRIPT_URL}
-            data-website-id={UMAMI_WEBSITE_ID}
-            data-domains={UMAMI_DOMAINS}
-            strategy="afterInteractive"
-          />
+        {GA_MEASUREMENT_ID && (
+          <Script id="ga-init" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: GA_INIT_SCRIPT }} />
         )}
       </body>
     </html>
