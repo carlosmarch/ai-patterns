@@ -322,10 +322,11 @@ function PermissionMark({ permission }: { permission: Permission }) {
     <span
       aria-hidden
       className={cn(
-        "inline-block size-1.5 rounded-full align-middle",
-        permission === "auto" && "bg-current",
-        permission === "ask" && "border border-current",
-        permission === "suggest" && "border border-dashed border-current opacity-70"
+        "inline-block align-middle",
+        permission === "auto" && "size-2 rounded-full bg-current",
+        permission === "ask" && "size-2 rounded-full border-[1.5px] border-current",
+        // A dash: proposed, not done.
+        permission === "suggest" && "h-[1.5px] w-2 rounded-full bg-current"
       )}
     />
   );

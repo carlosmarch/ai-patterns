@@ -133,7 +133,7 @@ export const ArtifactCard = React.forwardRef<HTMLButtonElement, ArtifactCardProp
         </span>
       </span>
       <span className="shrink-0 text-xs font-medium text-muted-foreground group-hover:text-foreground">
-        {open ? "Open" : "View"}
+        {open ? "Viewing" : "View"}
       </span>
     </button>
   );

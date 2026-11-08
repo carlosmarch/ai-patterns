@@ -351,7 +351,7 @@ export function ContextChipsComposer({
               role="listbox"
               aria-multiselectable
               aria-label="Context sources"
-              className="max-h-64 overflow-auto p-1"
+              className="max-h-56 overflow-auto p-1"
             >
               {groups.length === 0 && (
                 <li className="px-2.5 py-6 text-center text-xs text-muted-foreground">Nothing matches “{query}”</li>
