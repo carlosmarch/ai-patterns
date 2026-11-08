@@ -221,6 +221,8 @@ import { pattern as contextUsagePattern } from "./indicators/context-usage/patte
 export interface RegistryEntry {
   slug: string;
   category: string;
+  /** When the pattern joined the catalogue, as a UTC ISO timestamp (minute precision). Drives the "New" tag — see `getNewEntries`. */
+  added: string;
   /** What the pattern does for the user — the cross-category "job" facet (see ./jobs.ts). */
   job: PatternJob;
   title: string;
@@ -238,6 +240,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "create-agent",
     category: "agents",
+    added: "2026-09-15T08:55Z",
     job: "start",
     title: "Create Agent",
     description: "A two-step wizard card for naming an agent, picking its icon, and selecting which event sources activate it.",
@@ -251,6 +254,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "agent-triggers",
     category: "agents",
+    added: "2026-09-15T08:39Z",
     job: "steer",
     title: "Agent Triggers",
     description: "A configuration panel for listing and toggling the external events that activate an agent, with a manual run control.",
@@ -265,6 +269,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "human-in-the-loop",
     category: "agents",
+    added: "2026-09-15T11:23Z",
     job: "oversee",
     title: "Human in the Loop Question",
     description: "A compact dialog that pauses an agent mid-task to collect a structured choice — radio options, a free-text fallback, skip/continue controls, and multi-step pagination.",
@@ -278,6 +283,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "background-tasks",
     category: "agents",
+    added: "2026-10-08T08:53Z",
     job: "oversee",
     title: "Background Tasks Drawer",
     description:
@@ -292,6 +298,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "instruction-tools",
     category: "agents",
+    added: "2026-10-18T20:44Z",
     job: "ask",
     title: "Instruction Tool Insert",
     description:
@@ -306,6 +313,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "procedure-builder",
     category: "agents",
+    added: "2026-10-18T20:45Z",
     job: "steer",
     title: "Procedure Builder",
     description:
@@ -320,6 +328,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "task-list",
     category: "agents",
+    added: "2026-11-04T14:20Z",
     job: "oversee",
     title: "Task List",
     description:
@@ -335,6 +344,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "agent-run-card",
     category: "agents",
+    added: "2026-11-05T14:21Z",
     job: "oversee",
     title: "Agent Run Card",
     description:
@@ -347,6 +357,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "wait-time-handoff",
     category: "agents",
+    added: "2026-11-04T16:20Z",
     job: "oversee",
     title: "Wait Time Handoff",
     description:
@@ -361,6 +372,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "plan-review",
     category: "agents",
+    added: "2026-11-07T23:13Z",
     job: "oversee",
     title: "Plan Review",
     description:
@@ -377,6 +389,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "multi-agent-trace",
     category: "traces",
+    added: "2026-09-12T06:58Z",
     job: "oversee",
     title: "Multi-Agent Trace",
     description: "A tree of parallel sub-agent tasks, each with its own status and step list.",
@@ -390,6 +403,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "shiny-button",
     category: "buttons",
+    added: "2026-09-11T19:54Z",
     job: "start",
     title: "Shiny Button",
     description: "A button with an animated light sweep across its surface.",
@@ -401,6 +415,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "thinking-loader",
     category: "loaders",
+    added: "2026-09-11T19:59Z",
     job: "oversee",
     title: "Thinking Loader",
     description: "A loader with a shimmering label and a live elapsed-time counter.",
@@ -414,6 +429,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "drawing-icon",
     category: "loaders",
+    added: "2026-11-05T11:03Z",
     job: "oversee",
     title: "Drawing Icon",
     description: "A line icon that draws itself stroke by stroke while the step it stands for is running.",
@@ -427,6 +443,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "expandable-trace",
     category: "traces",
+    added: "2026-09-11T19:59Z",
     job: "oversee",
     title: "Expandable Trace",
     description: "A collapsible \"Thought for Xs\" summary that expands into a step-by-step trace.",
@@ -440,6 +457,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "stream-of-thought",
     category: "traces",
+    added: "2026-11-07T22:34Z",
     job: "oversee",
     title: "Stream of Thought",
     description: "A live, timed header over reasoning that streams in as a step timeline, then folds into a \"Thought for Ns\" trace when the answer starts.",
@@ -455,6 +473,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "streaming-text",
     category: "text",
+    added: "2026-09-11T20:22Z",
     job: "oversee",
     title: "Streaming Text",
     description: "A streamed answer with inline sources, actions, and follow-ups.",
@@ -468,6 +487,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "prompt-bar",
     category: "composer",
+    added: "2026-09-11T20:37Z",
     job: "ask",
     title: "Prompt Bar",
     description: "A composer with @ sources, / commands, a model picker, and dictation.",
@@ -482,6 +502,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "prompt-bar-pro",
     category: "composer",
+    added: "2026-09-11T21:03Z",
     job: "ask",
     title: "Prompt Bar Pro",
     description:
@@ -496,6 +517,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "quick-chat-dock",
     category: "composer",
+    added: "2026-11-04T13:15Z",
     job: "ask",
     title: "Quick Chat Dock",
     description:
@@ -510,6 +532,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "message-queue",
     category: "composer",
+    added: "2026-11-04T15:38Z",
     job: "ask",
     title: "Message Queue",
     description:
@@ -526,6 +549,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "model-picker",
     category: "composer",
+    added: "2026-11-07T22:47Z",
     job: "steer",
     title: "Model Picker",
     description:
@@ -544,6 +568,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "incognito-toggle",
     category: "composer",
+    added: "2026-11-07T22:47Z",
     job: "trust",
     title: "Incognito Toggle",
     description:
@@ -560,6 +585,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "prompt-enhancer",
     category: "composer",
+    added: "2026-11-07T23:13Z",
     job: "steer",
     title: "Prompt Enhancer",
     description:
@@ -572,6 +598,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "prompt-template",
     category: "composer",
+    added: "2026-11-07T23:13Z",
     job: "start",
     title: "Prompt Template",
     description:
@@ -586,6 +613,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "diff-summary",
     category: "code",
+    added: "2026-09-11T20:48Z",
     job: "trust",
     title: "Diff Summary Card",
     description: "A collapsed summary of a batch of file edits, with undo and an overflow list.",
@@ -600,6 +628,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "diff-tabs",
     category: "code",
+    added: "2026-09-12T21:18Z",
     job: "trust",
     title: "Diff Tabs",
     description: "Per-file chips that switch an inline diff viewer between a batch of changed files.",
@@ -614,6 +643,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "code-preview",
     category: "code",
+    added: "2026-11-05T11:03Z",
     job: "trust",
     title: "Code Preview Block",
     description: "A code block that flips between the source and a sandboxed live rendering of it.",
@@ -627,6 +657,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "trigger-condition",
     category: "flowcharts",
+    added: "2026-09-11T21:12Z",
     job: "steer",
     title: "Flowchart",
     description: "Workflow trigger and condition steps on a dotted canvas.",
@@ -640,6 +671,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "chat-bubble",
     category: "messages",
+    added: "2026-09-11T22:23Z",
     job: "trust",
     title: "Chat Bubble with Actions",
     description: "A message bubble with feedback thumbs, edit-and-resubmit, retry/regenerate, and a version stepper.",
@@ -654,6 +686,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "clarifying-questions",
     category: "messages",
+    added: "2026-11-07T23:13Z",
     job: "start",
     title: "Clarifying Questions",
     description:
@@ -668,6 +701,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "conversation-branches",
     category: "messages",
+    added: "2026-11-07T23:13Z",
     job: "steer",
     title: "Conversation Branches",
     description:
@@ -682,6 +716,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "tool-approval",
     category: "permissions",
+    added: "2026-09-11T22:24Z",
     job: "oversee",
     title: "Tool Approval",
     description: "A pending tool-call prompt with allow, always-allow, and deny actions.",
@@ -697,6 +732,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "connector-panel",
     category: "permissions",
+    added: "2026-09-15T20:37Z",
     job: "steer",
     title: "Connector Panel",
     description:
@@ -714,6 +750,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "memory-panel",
     category: "permissions",
+    added: "2026-11-07T22:47Z",
     job: "trust",
     title: "Memory Panel",
     description:
@@ -729,6 +766,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "tool-call-chip",
     category: "loaders",
+    added: "2026-09-12T06:37Z",
     job: "oversee",
     title: "Tool Call Chip",
     description: "An inline pill naming an in-flight tool call that resolves into a result summary.",
@@ -743,6 +781,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "attachment-chip",
     category: "uploads",
+    added: "2026-09-12T06:37Z",
     job: "ask",
     title: "Attachment Chip",
     description: "A composer's file/image attachment tray with drag-drop, upload progress, and inline preview.",
@@ -759,6 +798,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "image-peek",
     category: "media",
+    added: "2026-10-07T07:49Z",
     job: "trust",
     title: "Image Peek",
     description: "A row of tiny image thumbnails that grows into an anchored preview card with a label, counter, and prev/next stepping.",
@@ -772,6 +812,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "stop-generation-button",
     category: "buttons",
+    added: "2026-09-12T06:58Z",
     job: "oversee",
     title: "Stop Generation Button",
     description: "A send button that morphs into a stop control mid-stream and back on completion.",
@@ -786,6 +827,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "terminal-stream",
     category: "code",
+    added: "2026-09-12T06:58Z",
     job: "oversee",
     title: "Terminal Stream",
     description: "An auto-scrolling, collapsible panel streaming raw command output line by line.",
@@ -799,6 +841,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "inline-citation",
     category: "text",
+    added: "2026-09-12T06:58Z",
     job: "trust",
     title: "Inline Citation",
     description: "A hoverable, clickable footnote-style source marker inline within text.",
@@ -815,6 +858,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "sources-stack",
     category: "text",
+    added: "2026-09-12T07:50Z",
     job: "trust",
     title: "Sources Stack",
     description: "An overlapping stack of source favicons with a count, expanding into a linked source list.",
@@ -829,6 +873,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "source-trust-card",
     category: "text",
+    added: "2026-09-12T23:08Z",
     job: "trust",
     title: "Source Trust Card",
     description: "A paginated single-source card with a trust badge and domain pills for jumping between sources.",
@@ -840,6 +885,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "follow-up-list",
     category: "text",
+    added: "2026-09-12T12:42Z",
     job: "start",
     title: "Follow-Up List",
     description: "A vertical list of suggested next questions shown after a response, each sendable with a tap.",
@@ -851,6 +897,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "selection-actions",
     category: "text",
+    added: "2026-09-12T13:51Z",
     job: "ask",
     title: "Selection Actions",
     description: "A floating toolbar on text selection for describing edits, explaining, or improving a passage.",
@@ -869,6 +916,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "refinement-controls",
     category: "text",
+    added: "2026-10-18T20:14Z",
     job: "steer",
     title: "Refinement Controls",
     description:
@@ -886,6 +934,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "rate-limit",
     category: "errors",
+    added: "2026-09-12T14:20Z",
     job: "recover",
     title: "Rate Limit",
     description: "A quota-exceeded state with a live countdown to when the user can send again.",
@@ -899,6 +948,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "partial-response",
     category: "errors",
+    added: "2026-09-12T14:20Z",
     job: "recover",
     title: "Partial Response",
     description: "A cut-short assistant reply with Continue and Retry actions.",
@@ -910,6 +960,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "generation-error",
     category: "errors",
+    added: "2026-09-14T09:58Z",
     job: "recover",
     title: "Generation Error",
     description: "A console-style error card for a failed generation, with details and retry.",
@@ -923,6 +974,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "console-error-card",
     category: "errors",
+    added: "2026-09-14T10:42Z",
     job: "recover",
     title: "Console Error Card",
     description: "A structured card surfacing a browser console error with a code frame, call stack, and navigation.",
@@ -937,6 +989,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "connectivity-error",
     category: "errors",
+    added: "2026-09-14T10:42Z",
     job: "recover",
     title: "Connectivity Error",
     description: "A dismissible card surfacing a network connection failure with a description and retry/details actions.",
@@ -950,6 +1003,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "response-compare",
     category: "compare",
+    added: "2026-09-12T20:41Z",
     job: "trust",
     title: "Response Compare",
     description: "A side-by-side pair of response panels with independent regenerate and a single preferred pick.",
@@ -963,6 +1017,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "confidence-indicator",
     category: "indicators",
+    added: "2026-09-12T20:49Z",
     job: "trust",
     title: "Confidence Indicator",
     description: "A badge or inline dot signaling how sure an AI answer or extraction is.",
@@ -976,6 +1031,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "ai-disclosure-badge",
     category: "indicators",
+    added: "2026-11-07T22:47Z",
     job: "trust",
     title: "AI Disclosure Badge",
     description:
@@ -991,6 +1047,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "cost-estimate",
     category: "indicators",
+    added: "2026-11-07T22:47Z",
     job: "oversee",
     title: "Cost Estimate",
     description:
@@ -1005,6 +1062,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "context-usage",
     category: "indicators",
+    added: "2026-11-07T23:06Z",
     job: "oversee",
     title: "Context Usage",
     description:
@@ -1017,6 +1075,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "voice-waveform",
     category: "voice",
+    added: "2026-09-12T21:05Z",
     job: "ask",
     title: "Voice Waveform",
     description: "A live amplitude waveform while the AI listens or speaks.",
@@ -1031,6 +1090,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "voice-orb",
     category: "voice",
+    added: "2026-11-07T22:09Z",
     job: "oversee",
     title: "Voice Orb",
     description: "A 3D particle sphere that breathes and spins with the voice conversation.",
@@ -1045,6 +1105,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "listening-state",
     category: "voice",
+    added: "2026-09-12T21:05Z",
     job: "ask",
     title: "Listening State",
     description: "A pulsing mic indicator showing the AI is actively listening.",
@@ -1058,6 +1119,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "live-transcript",
     category: "voice",
+    added: "2026-09-12T21:05Z",
     job: "ask",
     title: "Live Transcript",
     description: "A streaming, speaker-labeled transcription of a voice conversation.",
@@ -1072,6 +1134,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "command-palette",
     category: "navigation",
+    added: "2026-09-12T22:10Z",
     job: "ask",
     title: "Command Palette",
     description: "A searchable ⌘K overlay for jumping to sessions or running quick actions.",
@@ -1085,6 +1148,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "collaborative-presence",
     category: "collaboration",
+    added: "2026-09-14T08:33Z",
     job: "oversee",
     title: "Collaborative Presence",
     description:
@@ -1099,6 +1163,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "invite-members",
     category: "access",
+    added: "2026-09-14T08:33Z",
     job: "start",
     title: "Invite Members",
     description:
@@ -1113,6 +1178,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "analysis-list",
     category: "loaders",
+    added: "2026-09-14T11:04Z",
     job: "oversee",
     title: "Analysis List",
     description: "A full-width indeterminate progress bar over a list whose items resolve from skeletons one by one.",
@@ -1126,6 +1192,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "setup-checklist",
     category: "navigation",
+    added: "2026-09-14T21:42Z",
     job: "start",
     title: "Setup Checklist",
     description: "A stepped onboarding card with circular arc progress, dashed-circle pending states, and strikethrough for completed steps.",
@@ -1139,6 +1206,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "prompt-onboarding",
     category: "onboarding",
+    added: "2026-10-18T15:39Z",
     job: "start",
     title: "Prompt-Driven Onboarding",
     description:
@@ -1154,6 +1222,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "agent-setup-pill",
     category: "onboarding",
+    added: "2026-11-06T21:56Z",
     job: "start",
     title: "Agent Setup Pill",
     description:
@@ -1168,6 +1237,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "describe-filters",
     category: "tables",
+    added: "2026-11-03T10:55Z",
     job: "ask",
     title: "Describe Filters",
     description:
@@ -1182,6 +1252,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "ai-fill-drawer",
     category: "tables",
+    added: "2026-11-03T12:17Z",
     job: "ask",
     title: "AI Fill Drawer",
     description:
@@ -1198,6 +1269,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "natural-language-query",
     category: "tables",
+    added: "2026-11-03T13:07Z",
     job: "ask",
     title: "Natural Language Query",
     description:
@@ -1213,6 +1285,7 @@ export const registry: RegistryEntry[] = [
   {
     slug: "ai-review-panel",
     category: "review",
+    added: "2026-11-04T16:18Z",
     job: "trust",
     title: "AI Review Panel",
     description:
@@ -1226,6 +1299,20 @@ export const registry: RegistryEntry[] = [
 
 export function getRegistryEntry(category: string, slug: string) {
   return registry.find((entry) => entry.category === category && entry.slug === slug);
+}
+
+/** How many of the most recently added patterns carry the "New" tag. */
+export const NEW_COUNT = 10;
+
+/** The `NEW_COUNT` most recently added patterns, newest first (ties keep registry order). */
+export const newEntries: RegistryEntry[] = [...registry]
+  .sort((a, b) => b.added.localeCompare(a.added))
+  .slice(0, NEW_COUNT);
+
+const NEW_SET = new Set(newEntries);
+
+export function isNewEntry(entry: RegistryEntry) {
+  return NEW_SET.has(entry);
 }
 
 export function getEntriesByJob(job: PatternJob) {

@@ -29,6 +29,12 @@ Register the new entry in `src/registry/index.ts` (import the `Demo`,
 `Thumbnail` and `pattern`, add a `RegistryEntry`) — this is what makes it appear on
 `/patterns` and `/patterns/<category>/<slug>`.
 
+Every entry has an `added` timestamp — when it joined the catalogue, in
+UTC ISO to the minute (e.g. `"2026-11-07T23:13Z"`); use the time you add
+it. The `NEW_COUNT` (10) most recent get the "New" tag (`newEntries` /
+`isNewEntry` in `src/registry/index.ts`): the home page's "New" block, the
+badge on `/patterns` cards and the pattern page, and the sidebar dot.
+
 Every entry also needs a `job` — what the pattern does for the user,
 across categories: `start`, `ask`, `steer`, `oversee`, `trust` or
 `recover` (defined, with descriptions, in `src/registry/jobs.ts`). It

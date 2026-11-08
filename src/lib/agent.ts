@@ -62,6 +62,7 @@ export function summarize(entry: RegistryEntry) {
     slug: entry.slug,
     category: entry.category,
     job: entry.job,
+    added: entry.added,
     title: entry.title,
     description: entry.description,
     url: patternUrl(entry),

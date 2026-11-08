@@ -1,19 +1,20 @@
 import { PatternsSidebar, type PatternsSidebarGroup } from "@/components/patterns-sidebar";
 import { PatternExpandProvider } from "@/components/pattern-expand";
-import { registry } from "@/registry";
+import { isNewEntry, registry } from "@/registry";
 
 // Route group layout for /patterns/<category>/<slug>: it stays mounted while
 // moving between patterns. The sidebar is in the normal page flow, so it
 // scrolls together with the page.
 export default function PatternDetailLayout({ children }: { children: React.ReactNode }) {
   const groups: PatternsSidebarGroup[] = [];
-  for (const { category, slug, title } of registry) {
+  for (const entry of registry) {
+    const { category, slug, title } = entry;
     let group = groups.find((g) => g.category === category);
     if (!group) {
       group = { category, items: [] };
       groups.push(group);
     }
-    group.items.push({ slug, title });
+    group.items.push({ slug, title, isNew: isNewEntry(entry) });
   }
 
   return (
