@@ -29,8 +29,7 @@ export function HomeResearch() {
 
   return (
     <section aria-labelledby="research-title" className="py-6">
-      <p className="font-mono text-[11px] tracking-wider text-muted-foreground uppercase">An open research project</p>
-      <h2 id="research-title" className="mt-3 max-w-3xl text-3xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-4xl">
+      <h2 id="research-title" className="max-w-3xl text-3xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-4xl">
         {RESEARCH_QUESTION}
         <span className="block text-muted-foreground">We study it one pattern at a time.</span>
       </h2>
