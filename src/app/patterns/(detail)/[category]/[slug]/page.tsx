@@ -6,6 +6,7 @@ import { AnimatedOrigami } from "@/components/animated-origami";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CodeBlock } from "@/components/code-block";
 import { ComponentPreview } from "@/components/component-preview";
+import { DosAndDonts } from "@/components/dos-and-donts";
 import { SeenIn } from "@/components/seen-in";
 import { readComponentSource } from "@/lib/agent";
 import { PatternPager } from "@/components/pattern-pager";
@@ -119,6 +120,8 @@ export default async function PatternPage({
         }
         patternPanel={spec}
       />
+
+      <DosAndDonts entry={entry} />
 
       <RelatedPatterns items={getRelatedEntries(entry)} />
 
