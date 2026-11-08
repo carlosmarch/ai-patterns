@@ -4,6 +4,9 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/** The non-job view of the most recently added patterns (`?job=new`). */
+export const NEW_ID = "new";
+
 export type JobFilterOption = { id: string; label: string; question: string; description: string; count: number };
 
 // The pill row on /patterns that switches between the full catalogue and
@@ -13,11 +16,14 @@ export type JobFilterOption = { id: string; label: string; question: string; des
 export function JobFilter({
   jobs,
   total,
+  newCount,
   views,
 }: {
   jobs: JobFilterOption[];
   total: number;
-  /** One rendered view per job id, plus "all". */
+  /** How many patterns carry the "New" tag (the `new` view). */
+  newCount: number;
+  /** One rendered view per job id, plus "all" and "new". */
   views: Record<string, React.ReactNode>;
 }) {
   const [job, setJob] = React.useState("all");
@@ -26,7 +32,7 @@ export function JobFilter({
     const fromUrl = new URLSearchParams(window.location.search).get("job");
     // Syncing from the URL after hydration; the server always renders "all".
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (fromUrl && jobs.some((j) => j.id === fromUrl)) setJob(fromUrl);
+    if (fromUrl && (fromUrl === NEW_ID || jobs.some((j) => j.id === fromUrl))) setJob(fromUrl);
   }, [jobs]);
 
   function choose(id: string) {
@@ -41,15 +47,31 @@ export function JobFilter({
 
   return (
     <div className="mt-8">
-      <div role="group" aria-label="Filter by job" className="-mx-1 flex flex-wrap gap-1.5 px-1">
+      <div role="group" aria-label="Filter patterns" className="-mx-1 flex flex-wrap gap-1.5 px-1">
         <Pill active={job === "all"} onClick={() => choose("all")} label="All" count={total} />
+        {newCount > 0 && (
+          <Pill
+            active={job === NEW_ID}
+            onClick={() => choose(NEW_ID)}
+            label={
+              <>
+                <span aria-hidden className="size-1.5 rounded-full bg-blue-500" />
+                New
+              </>
+            }
+            count={newCount}
+            title="The most recently added patterns"
+          />
+        )}
         {jobs.map((j) => (
           <Pill key={j.id} active={job === j.id} onClick={() => choose(j.id)} label={j.label} count={j.count} title={j.question} />
         ))}
       </div>
 
       <p aria-live="polite" className="mt-3 min-h-5 text-sm text-pretty text-muted-foreground">
-        {current ? (
+        {job === NEW_ID ? (
+          `The ${newCount} latest patterns added to the catalogue, newest first.`
+        ) : current ? (
           <>
             <span className="font-medium text-foreground">“{/[?.!]$/.test(current.question) ? current.question : `${current.question}.`}”</span> {current.description}
           </>
@@ -72,7 +94,7 @@ function Pill({
 }: {
   active: boolean;
   onClick: () => void;
-  label: string;
+  label: React.ReactNode;
   count: number;
   title?: string;
 }) {

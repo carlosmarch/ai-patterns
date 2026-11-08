@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { SITE_SHARE_IMAGE } from "@/lib/share";
-import { getEntriesByJob, registry, type RegistryEntry } from "@/registry";
+import { getEntriesByJob, newEntries, registry, type RegistryEntry } from "@/registry";
 import { JOBS } from "@/registry/jobs";
 import { JobFilter } from "@/components/job-filter";
 import { PatternCard } from "@/components/pattern-card";
@@ -47,6 +47,17 @@ export default function PatternsIndexPage() {
   const jobs = JOBS.map((job) => ({ ...job, count: getEntriesByJob(job.id).length }));
   const views: Record<string, ReactNode> = { all: <PatternGroups entries={registry} /> };
   for (const job of JOBS) views[job.id] = <PatternGroups entries={getEntriesByJob(job.id)} />;
+  // `NEW_ID` in job-filter.tsx — a literal here, since values exported from a
+  // client module aren't readable in a server component.
+  views.new = (
+    <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      {newEntries.map((entry) => (
+        <li key={`${entry.category}/${entry.slug}`}>
+          <PatternCard entry={entry} />
+        </li>
+      ))}
+    </ul>
+  );
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-16">
@@ -55,7 +66,7 @@ export default function PatternsIndexPage() {
         Copy-paste animated UI patterns for AI products, organized by category.
       </p>
 
-      <JobFilter jobs={jobs} total={registry.length} views={views} />
+      <JobFilter jobs={jobs} total={registry.length} newCount={newEntries.length} views={views} />
     </main>
   );
 }
