@@ -54,7 +54,6 @@ import type { QualityCriterion } from "@/registry/composer/prompt-quality/compon
 import type { RelayCallState, RelayItem, RelayRun } from "@/registry/voice/voice-agent-relay/component";
 import type { ReviewField } from "@/registry/review/ai-review-panel/component";
 import type { RunStep } from "@/registry/agents/agent-run-card/component";
-import type { Task } from "@/registry/agents/task-list/component";
 import type { TemplatePart } from "@/registry/composer/prompt-template/component";
 import type { Thought } from "@/registry/traces/stream-of-thought/component";
 import type { WizardAnswers, WizardStep } from "@/registry/composer/prompt-wizard/component";
@@ -759,13 +758,6 @@ export const SPEC_PLAN_ALT: PlanStep[] = [
   { id: "e", text: "Start from Human in the Loop's spec as the closest neighbour" },
   { id: "f", text: "Draft Summary, Anatomy and Behavior first" },
   { id: "g", text: "Leave Content guidelines for your review" },
-];
-
-export const SPEC_TASKS: Omit<Task, "status">[] = [
-  { id: "read", label: "Read the template and neighbouring specs", activeLabel: "Reading the template and neighbouring specs" },
-  { id: "evidence", label: "Find products that ship it", activeLabel: "Finding products that ship it" },
-  { id: "draft", label: "Draft all eight sections", activeLabel: "Drafting all eight sections" },
-  { id: "review", label: "Self-review and tighten", activeLabel: "Self-reviewing and tightening" },
 ];
 
 export function specThoughts(topic: string): Thought[] {

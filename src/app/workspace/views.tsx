@@ -465,7 +465,7 @@ function DictationComposer({
   return (
     <div className="flex flex-col gap-2">
       {phase === "opening" ? (
-        <div className="flex justify-center py-1">
+        <div className="flex min-h-12 items-center justify-center rounded-2xl border px-3 py-2">
           <ListeningState label="Listening…" showTimer onStop={stop} />
         </div>
       ) : (
@@ -786,8 +786,8 @@ function VoicePlayground() {
 
   return (
     <Scroll className="bg-muted/30 p-4 sm:p-8">
-      <div className="mx-auto flex w-full max-w-md flex-col gap-4">
-        <div className="flex flex-col items-center gap-4 rounded-3xl border bg-background p-6">
+      <div className="mx-auto w-full max-w-md overflow-hidden rounded-3xl border bg-background">
+        <div className="flex flex-col items-center gap-4 p-6">
           <VoiceOrb state={orbState} className="h-56 w-full text-foreground dark:text-orange-50" />
           <p aria-live="polite" className="h-5 text-sm text-muted-foreground">
             {call === "off" ? `Talk to ${AGENT_NAME} the way your users would` : muted ? "Muted" : `${CALL_LABEL[call]}…`}
@@ -826,7 +826,14 @@ function VoicePlayground() {
             </div>
           )}
         </div>
-        {segments.length > 0 && <LiveTranscript segments={segments} active={call === "listening" && !muted} />}
+        {/* The transcript is the record of this call, so it lives on the same surface as the orb. */}
+        {segments.length > 0 && (
+          <LiveTranscript
+            segments={segments}
+            active={call === "listening" && !muted}
+            className="rounded-none border-0 border-t bg-transparent"
+          />
+        )}
       </div>
     </Scroll>
   );
@@ -874,6 +881,7 @@ function RelayPlayground() {
             A voice agent takes the request, hands it to {AGENT_NAME}, and reads progress back — without making you watch the thread.
           </p>
         </div>
+        <div className="overflow-hidden rounded-2xl border bg-card">
         {onCall ? (
           <VoiceAgentRelay
             state={state}
@@ -885,24 +893,27 @@ function RelayPlayground() {
               setState(muted.current ? "muted" : "listening");
             }}
             onEnd={() => setOnCall(false)}
+            className="rounded-none border-0 bg-transparent"
           />
         ) : (
-          <>
-            {run?.status === "done" && (
-              <p className="rounded-xl border bg-card px-3 py-2 text-xs text-muted-foreground">
-                Call ended · {AGENT_NAME}&apos;s full reply and diff are in Operator.
-              </p>
-            )}
+          <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
+            <span className="flex size-12 items-center justify-center rounded-full bg-muted">
+              <AudioLines className="size-5" />
+            </span>
+            <p className="text-sm text-muted-foreground">
+              {run?.status === "done" ? `Call ended · ${AGENT_NAME}'s full reply and diff are in Operator.` : "No call yet."}
+            </p>
             <button
               type="button"
               onClick={start}
-              className="flex items-center justify-center gap-2 rounded-2xl border bg-background px-4 py-3 text-sm font-medium transition-colors hover:bg-accent"
+              className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
             >
               <AudioLines className="size-4" />
-              Start a scripted call
+              {run ? "Call again" : "Start a scripted call"}
             </button>
-          </>
+          </div>
         )}
+        </div>
       </div>
     </Scroll>
   );
