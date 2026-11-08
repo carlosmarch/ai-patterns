@@ -3,8 +3,20 @@ import type { ComponentType } from "react";
 import type { SeenIn } from "@/lib/teams";
 import type { PatternJob } from "./jobs";
 
+import PromptAutocompleteDemo from "./composer/prompt-autocomplete/demo";
+import PromptAutocompleteThumbnail from "./composer/prompt-autocomplete/thumbnail";
+import PromptQualityDemo from "./composer/prompt-quality/demo";
+import PromptQualityThumbnail from "./composer/prompt-quality/thumbnail";
+import PromptWizardDemo from "./composer/prompt-wizard/demo";
+import PromptWizardThumbnail from "./composer/prompt-wizard/thumbnail";
+import ResponseActionsDemo from "./messages/response-actions/demo";
+import ResponseActionsThumbnail from "./messages/response-actions/thumbnail";
 import PromptEnhancerDemo from "./composer/prompt-enhancer/demo";
 import PromptEnhancerThumbnail from "./composer/prompt-enhancer/thumbnail";
+import { pattern as promptAutocompletePattern } from "./composer/prompt-autocomplete/pattern";
+import { pattern as promptQualityPattern } from "./composer/prompt-quality/pattern";
+import { pattern as promptWizardPattern } from "./composer/prompt-wizard/pattern";
+import { pattern as responseActionsPattern } from "./messages/response-actions/pattern";
 import { pattern as promptEnhancerPattern } from "./composer/prompt-enhancer/pattern";
 import PromptTemplateDemo from "./composer/prompt-template/demo";
 import PromptTemplateThumbnail from "./composer/prompt-template/thumbnail";
@@ -217,6 +229,18 @@ import { pattern as costEstimatePattern } from "./indicators/cost-estimate/patte
 import ContextUsageDemo from "./indicators/context-usage/demo";
 import ContextUsageThumbnail from "./indicators/context-usage/thumbnail";
 import { pattern as contextUsagePattern } from "./indicators/context-usage/pattern";
+import ArtifactPanelDemo from "./messages/artifact-panel/demo";
+import ArtifactPanelThumbnail from "./messages/artifact-panel/thumbnail";
+import { pattern as artifactPanelPattern } from "./messages/artifact-panel/pattern";
+import ContextChipsDemo from "./composer/context-chips/demo";
+import ContextChipsThumbnail from "./composer/context-chips/thumbnail";
+import { pattern as contextChipsPattern } from "./composer/context-chips/pattern";
+import CheckpointRestoreDemo from "./agents/checkpoint-restore/demo";
+import CheckpointRestoreThumbnail from "./agents/checkpoint-restore/thumbnail";
+import { pattern as checkpointRestorePattern } from "./agents/checkpoint-restore/pattern";
+import AutonomyModeDemo from "./composer/autonomy-mode/demo";
+import AutonomyModeThumbnail from "./composer/autonomy-mode/thumbnail";
+import { pattern as autonomyModePattern } from "./composer/autonomy-mode/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -580,6 +604,66 @@ export const registry: RegistryEntry[] = [
       { team: "chatgpt", source: "https://help.openai.com/en/articles/8914046-temporary-chat-faq" },
       { team: "gemini", source: "https://blog.google/products-and-platforms/products/gemini/temporary-chats-privacy-controls/" },
       { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/12639758-incognito-mode-troubleshooting" },
+    ],
+  },
+  {
+    slug: "prompt-autocomplete",
+    category: "composer",
+    added: "2026-11-08T13:31Z",
+    job: "ask",
+    title: "Prompt Autocomplete",
+    description:
+      "Ghost text that finishes the prompt as you type — Tab takes it all, Right Arrow takes a word, and typing on replaces it.",
+    Demo: PromptAutocompleteDemo,
+    Thumbnail: PromptAutocompleteThumbnail,
+    uxDoc: promptAutocompletePattern,
+    seenIn: [
+      { team: "copilot", source: "https://docs.github.com/en/copilot/how-tos/copilot-in-your-ide/copilot-for-common-tasks/get-ide-code-suggestions" },
+      { team: "warp", source: "https://docs.warp.dev/agent-platform/local-agents/active-ai/" },
+    ],
+  },
+  {
+    slug: "prompt-quality",
+    category: "composer",
+    added: "2026-11-08T13:31Z",
+    job: "steer",
+    title: "Prompt Quality Meter",
+    description:
+      "A meter under the prompt that fills as it gets more specific, with a chip per missing detail that inserts a fill-in phrase, and one tip for what to add next.",
+    Demo: PromptQualityDemo,
+    Thumbnail: PromptQualityThumbnail,
+    uxDoc: promptQualityPattern,
+    seenIn: [],
+  },
+  {
+    slug: "prompt-wizard",
+    category: "composer",
+    added: "2026-11-08T13:31Z",
+    job: "start",
+    title: "Prompt Wizard",
+    description:
+      "A prompt built one question at a time — choices or short answers, with a live preview — ending on an editable review of the finished prompt.",
+    Demo: PromptWizardDemo,
+    Thumbnail: PromptWizardThumbnail,
+    uxDoc: promptWizardPattern,
+    seenIn: [],
+  },
+  {
+    slug: "response-actions",
+    category: "messages",
+    added: "2026-11-08T13:31Z",
+    job: "steer",
+    title: "Response Actions",
+    description:
+      "A toolbar under a finished answer — copy, rate, share and a Regenerate menu with named alternatives — where a thumbs-down asks what went wrong.",
+    Demo: ResponseActionsDemo,
+    Thumbnail: ResponseActionsThumbnail,
+    uxDoc: responseActionsPattern,
+    seenIn: [
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/6825453-chatgpt-release-notes" },
+      { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/12802813-how-do-i-change-to-my-preferred-ai-model" },
+      { team: "gemini", source: "https://support.google.com/gemini/answer/14262426?hl=en&co=GENIE.Platform%3DDesktop" },
+      { team: "claude", source: "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on" },
     ],
   },
   {
@@ -1294,6 +1378,74 @@ export const registry: RegistryEntry[] = [
     Thumbnail: AiReviewPanelThumbnail,
     uxDoc: aiReviewPanelPattern,
     seenIn: [{ team: "datamaran", source: "https://www.datamaran.com/" }],
+  },
+  {
+    slug: "artifact-panel",
+    category: "messages",
+    added: "2026-11-08T13:50Z",
+    job: "ask",
+    title: "Artifact Panel",
+    description:
+      "A side panel beside the chat for a document or app the model made — opened from a card in the message, with Preview and Code tabs, a version stepper fed by follow-ups, and Copy.",
+    Demo: ArtifactPanelDemo,
+    Thumbnail: ArtifactPanelThumbnail,
+    uxDoc: artifactPanelPattern,
+    seenIn: [
+      { team: "claude", source: "https://support.claude.com/en/articles/9487310-what-are-artifacts-and-how-do-i-use-them" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/9930697-what-is-the-canvas-feature-in-chatgpt-and-how-do-i-use-it" },
+      { team: "gemini", source: "https://blog.google/products/gemini/gemini-collaboration-features/" },
+    ],
+  },
+  {
+    slug: "context-chips",
+    category: "composer",
+    added: "2026-11-08T13:51Z",
+    job: "steer",
+    title: "Context Chips",
+    description:
+      "Removable chips above the composer for every source the next message will use — added from one searchable menu via + or @, with the automatic context shown as a chip you can exclude.",
+    Demo: ContextChipsDemo,
+    Thumbnail: ContextChipsThumbnail,
+    uxDoc: contextChipsPattern,
+    seenIn: [
+      { team: "copilot", source: "https://code.visualstudio.com/docs/copilot/chat/copilot-chat-context" },
+      { team: "cursor", source: "https://cursor.com/docs/context/symbols" },
+    ],
+  },
+  {
+    slug: "checkpoint-restore",
+    category: "agents",
+    added: "2026-11-08T13:52Z",
+    job: "recover",
+    title: "Checkpoint Restore",
+    description:
+      "An automatic checkpoint before each agent message, with Restore for code, conversation or both — an impact summary of files and messages, what can't be undone, and Redo afterwards.",
+    Demo: CheckpointRestoreDemo,
+    Thumbnail: CheckpointRestoreThumbnail,
+    uxDoc: checkpointRestorePattern,
+    seenIn: [
+      { team: "claude", source: "https://code.claude.com/docs/en/checkpointing" },
+      { team: "cursor", source: "https://docs.cursor.com/agent/chat/checkpoints" },
+      { team: "replit", source: "https://docs.replit.com/core-concepts/agent/checkpoints-and-rollbacks" },
+      { team: "lovable", source: "https://docs.lovable.dev/features/projects/history" },
+    ],
+  },
+  {
+    slug: "autonomy-mode",
+    category: "composer",
+    added: "2026-11-08T13:53Z",
+    job: "steer",
+    title: "Autonomy Mode Switcher",
+    description:
+      "A composer pill that sets how much the agent does on its own — Suggest, Confirm or Execute — with each mode's permissions per action type, a shortcut to cycle, and a distinct look for the top mode.",
+    Demo: AutonomyModeDemo,
+    Thumbnail: AutonomyModeThumbnail,
+    uxDoc: autonomyModePattern,
+    seenIn: [
+      { team: "copilot", source: "https://github.blog/ai-and-ml/github-copilot/copilot-ask-edit-and-agent-modes-what-they-do-and-when-to-use-them/" },
+      { team: "claude", source: "https://code.claude.com/docs/en/permission-modes" },
+      { team: "windsurf", source: "https://docs.windsurf.com/windsurf/cascade/modes" },
+    ],
   },
 ];
 
