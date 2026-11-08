@@ -90,7 +90,7 @@ export default function Home() {
       )}
 
       <Band>
-        <IndexVariant items={items} />
+        <IndexVariant items={items} total={registry.length} />
       </Band>
 
       <Band>
@@ -106,7 +106,7 @@ export default function Home() {
       </Band>
 
       <Band narrow>
-        <StatsVariant patternCount={visible.length} categoryCount={getCategories().length} />
+        <StatsVariant patternCount={registry.length} categoryCount={getCategories().length} />
       </Band>
 
       <section className="px-6 py-24 text-center sm:py-32">
