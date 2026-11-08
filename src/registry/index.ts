@@ -368,7 +368,11 @@ export const registry: RegistryEntry[] = [
     Demo: PlanReviewDemo,
     Thumbnail: PlanReviewThumbnail,
     uxDoc: planReviewPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "cursor", source: "https://www.shapeof.ai/patterns/action-plan" },
+      { team: "replit", source: "https://www.shapeof.ai/patterns/action-plan" },
+      { team: "zapier", source: "https://www.shapeof.ai/patterns/action-plan" },
+    ],
   },
   {
     slug: "multi-agent-trace",
@@ -442,7 +446,12 @@ export const registry: RegistryEntry[] = [
     Demo: StreamOfThoughtDemo,
     Thumbnail: StreamOfThoughtThumbnail,
     uxDoc: streamOfThoughtPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://www.shapeof.ai/patterns/stream-of-thought" },
+      { team: "lovable", source: "https://www.shapeof.ai/patterns/stream-of-thought" },
+      { team: "perplexity", source: "https://www.shapeof.ai/patterns/stream-of-thought" },
+      { team: "v0", source: "https://www.shapeof.ai/patterns/stream-of-thought" },
+    ],
   },
   {
     slug: "streaming-text",
@@ -511,6 +520,8 @@ export const registry: RegistryEntry[] = [
     uxDoc: messageQueuePattern,
     seenIn: [
       { team: "claude", source: "https://code.claude.com/docs/en/interactive-mode" },
+      { team: "replit", source: "https://www.shapeof.ai/patterns/controls" },
+      { team: "perplexity", source: "https://www.shapeof.ai/patterns/controls" },
     ],
   },
   {
@@ -525,6 +536,10 @@ export const registry: RegistryEntry[] = [
     uxDoc: modelPickerPattern,
     seenIn: [
       { team: "cursor", source: "https://docs.cursor.com/models" },
+      { team: "chatgpt", source: "https://www.shapeof.ai/patterns/model-management" },
+      { team: "claude", source: "https://www.shapeof.ai/patterns/model-management" },
+      { team: "gemini", source: "https://www.shapeof.ai/patterns/model-management" },
+      { team: "v0", source: "https://www.shapeof.ai/patterns/model-management" },
     ],
   },
   {
@@ -539,6 +554,8 @@ export const registry: RegistryEntry[] = [
     uxDoc: incognitoTogglePattern,
     seenIn: [
       { team: "chatgpt", source: "https://help.openai.com/en/articles/8914046-temporary-chat-faq" },
+      { team: "gemini", source: "https://www.shapeof.ai/patterns/incognito-mode" },
+      { team: "perplexity", source: "https://www.shapeof.ai/patterns/incognito-mode" },
     ],
   },
   {
@@ -551,7 +568,9 @@ export const registry: RegistryEntry[] = [
     Demo: PromptEnhancerDemo,
     Thumbnail: PromptEnhancerThumbnail,
     uxDoc: promptEnhancerPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "v0", source: "https://www.shapeof.ai/patterns/prompt-enhancer" },
+    ],
   },
   {
     slug: "prompt-template",
@@ -563,7 +582,10 @@ export const registry: RegistryEntry[] = [
     Demo: PromptTemplateDemo,
     Thumbnail: PromptTemplateThumbnail,
     uxDoc: promptTemplatePattern,
-    seenIn: [],
+    seenIn: [
+      { team: "zapier", source: "https://www.shapeof.ai/patterns/templates" },
+      { team: "coda", source: "https://www.shapeof.ai/patterns/templates" },
+    ],
   },
   {
     slug: "diff-summary",
@@ -657,7 +679,9 @@ export const registry: RegistryEntry[] = [
     Demo: ConversationBranchesDemo,
     Thumbnail: ConversationBranchesThumbnail,
     uxDoc: conversationBranchesPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://www.shapeof.ai/patterns/branches" },
+    ],
   },
   {
     slug: "tool-approval",
@@ -671,6 +695,7 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "claude", source: "https://code.claude.com/docs/en/permissions" },
       { team: "warp", source: "https://docs.warp.dev/agents/local-agents/interacting-with-agents/terminal-and-agent-modes" },
+      { team: "notion", source: "https://www.shapeof.ai/patterns/verification" },
     ],
   },
   {
@@ -686,6 +711,8 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "claude", source: "https://support.claude.com/en/articles/11176164" },
       { team: "chatgpt", source: "https://developers.openai.com/api/docs/guides/developer-mode" },
+      { team: "intercom", source: "https://www.shapeof.ai/patterns/connectors" },
+      { team: "perplexity", source: "https://www.shapeof.ai/patterns/connectors" },
     ],
   },
   {
@@ -700,6 +727,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: memoryPanelPattern,
     seenIn: [
       { team: "chatgpt", source: "https://openai.com/index/memory-and-new-controls-for-chatgpt/" },
+      { team: "gemini", source: "https://www.shapeof.ai/patterns/memory" },
     ],
   },
   {
@@ -727,6 +755,9 @@ export const registry: RegistryEntry[] = [
     uxDoc: attachmentChipPattern,
     seenIn: [
       { team: "claude", source: "https://support.claude.com/en/articles/8241126-upload-files-to-claude" },
+      { team: "figma", source: "https://www.shapeof.ai/patterns/attachments" },
+      { team: "lovable", source: "https://www.shapeof.ai/patterns/attachments" },
+      { team: "perplexity", source: "https://www.shapeof.ai/patterns/attachments" },
     ],
   },
   {
@@ -754,6 +785,7 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "chatgpt", source: "https://community.openai.com/t/restore-chatgpts-stop-button-without-errors/1132068" },
       { team: "gemini", source: "https://support.google.com/googlebook/answer/18429222" },
+      { team: "claude", source: "https://www.shapeof.ai/patterns/controls" },
     ],
   },
   {
@@ -781,6 +813,8 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/10352895-how-does-perplexity-work" },
       { team: "chatgpt", source: "https://help.openai.com/en/articles/9237897-chatgpt-search" },
+      { team: "intercom", source: "https://www.shapeof.ai/patterns/citations" },
+      { team: "notion", source: "https://www.shapeof.ai/patterns/citations" },
     ],
   },
   {
@@ -794,6 +828,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: sourcesStackPattern,
     seenIn: [
       { team: "chatgpt", source: "https://help.openai.com/en/articles/9237897-chatgpt-search" },
+      { team: "notion", source: "https://www.shapeof.ai/patterns/references" },
     ],
   },
   {
@@ -818,6 +853,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: followUpListPattern,
     seenIn: [
       { team: "perplexity", source: "https://www.thekeyword.co/news/perplexity-tests-sponsored-follow-up-question-ads" },
+      { team: "gemini", source: "https://www.shapeof.ai/patterns/suggestions" },
     ],
   },
   {
@@ -833,6 +869,9 @@ export const registry: RegistryEntry[] = [
       { team: "notion", source: "https://www.notion.com/help/guides/notion-ai-for-docs" },
       { team: "gemini", source: "https://support.google.com/gemini/answer/14262426" },
       { team: "chatgpt", source: "https://help.openai.com/en/articles/9930697-what-is-the-canvas-feature-in-chatgpt-and-how-do-i-use-it" },
+      { team: "figma", source: "https://www.shapeof.ai/patterns/inline-action" },
+      { team: "copilot", source: "https://www.shapeof.ai/patterns/inline-action" },
+      { team: "lovable", source: "https://www.shapeof.ai/patterns/inline-action" },
     ],
   },
   {
@@ -849,6 +888,7 @@ export const registry: RegistryEntry[] = [
       { team: "gemini", source: "https://support.google.com/gemini/answer/14262426" },
       { team: "chatgpt", source: "https://help.openai.com/en/articles/9930697-what-is-the-canvas-feature-in-chatgpt-and-how-do-i-use-it" },
       { team: "notion", source: "https://www.notion.com/help/guides/notion-ai-for-docs" },
+      { team: "perplexity", source: "https://www.shapeof.ai/patterns/regenerate" },
     ],
   },
   {
@@ -954,7 +994,10 @@ export const registry: RegistryEntry[] = [
     Demo: AiDisclosureBadgeDemo,
     Thumbnail: AiDisclosureBadgeThumbnail,
     uxDoc: aiDisclosureBadgePattern,
-    seenIn: [],
+    seenIn: [
+      { team: "intercom", source: "https://www.shapeof.ai/patterns/disclosure" },
+      { team: "zapier", source: "https://www.shapeof.ai/patterns/disclosure" },
+    ],
   },
   {
     slug: "cost-estimate",
@@ -966,7 +1009,9 @@ export const registry: RegistryEntry[] = [
     Demo: CostEstimateDemo,
     Thumbnail: CostEstimateThumbnail,
     uxDoc: costEstimatePattern,
-    seenIn: [],
+    seenIn: [
+      { team: "elevenlabs", source: "https://www.shapeof.ai/patterns/cost-estimates" },
+    ],
   },
   {
     slug: "context-usage",
@@ -1005,6 +1050,8 @@ export const registry: RegistryEntry[] = [
     uxDoc: voiceOrbPattern,
     seenIn: [
       { team: "elevenlabs", source: "https://ui.elevenlabs.io/docs/components/orb" },
+      { team: "chatgpt", source: "https://www.shapeof.ai/patterns/avatar" },
+      { team: "perplexity", source: "https://www.shapeof.ai/patterns/avatar" },
     ],
   },
   {
@@ -1156,6 +1203,8 @@ export const registry: RegistryEntry[] = [
     uxDoc: aiFillDrawerPattern,
     seenIn: [
       { team: "notion", source: "https://www.notion.com/help/autofill" },
+      { team: "linear", source: "https://www.shapeof.ai/patterns/auto-fill" },
+      { team: "coda", source: "https://www.shapeof.ai/patterns/auto-fill" },
     ],
   },
   {
