@@ -3,7 +3,8 @@ import type { ReactNode } from "react";
 import { BookOpen, Sparkles } from "lucide-react";
 
 import { getCategories, NEW_COUNT, newEntries as latestEntries, registry, type RegistryEntry } from "@/registry";
-import { PatternCard } from "@/components/pattern-card";
+import { formatAdded } from "@/components/new-badge";
+import { NewWheel } from "./new-wheel";
 import { GithubMark } from "@/components/github-mark";
 import { IntroHero, type HeroEntry } from "./intro-hero/intro-hero";
 import { HomeConnect } from "./home-connect";
@@ -82,16 +83,20 @@ export default function Home() {
           <Section
             id="first-demo"
             title="New"
-            blurb={`The ${NEW_COUNT} latest patterns added to the catalogue, newest first.`}
+            blurb={`The ${NEW_COUNT} latest patterns added to the catalogue. Drag to spin.`}
             action={{ label: "View all", href: "/patterns" }}
           >
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              {newEntries.map((entry) => (
-                <li key={entry.slug}>
-                  <PatternCard entry={entry} compact />
-                </li>
-              ))}
-            </ul>
+            <NewWheel
+              items={newEntries.map((entry) => ({
+                slug: entry.slug,
+                href: href(entry),
+                title: entry.title,
+                category: entry.category,
+                description: entry.description,
+                added: formatAdded(entry.added),
+                thumb: <entry.Thumbnail />,
+              }))}
+            />
           </Section>
         </Band>
       )}
