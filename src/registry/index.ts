@@ -1216,6 +1216,13 @@ export interface RelatedEntry {
   reason: string;
 }
 
+/** The top-level "- " bullets of one "## <heading>" section of the pattern's spec. */
+export function getSpecList(entry: RegistryEntry, heading: string): string[] {
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const section = entry.uxDoc.split(new RegExp(`^## ${escaped}\\s*$`, "m"))[1]?.split(/^## /m)[0] ?? "";
+  return [...section.matchAll(/^- (.+)$/gm)].map(([, item]) => item.trim());
+}
+
 /**
  * The patterns listed in this pattern's "Related patterns" spec section, in
  * order. Each bullet reads "- **<Title>** — <when to use it instead or as well>".
