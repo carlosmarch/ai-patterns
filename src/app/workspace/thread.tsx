@@ -203,9 +203,8 @@ export function seedThreads(): Thread[] {
         b({ kind: "analysis", items: AUDIT_ITEMS }),
         b({ kind: "selection" }),
         b({ kind: "trust" }),
-        b({ kind: "assistant", text: "I fixed the three components that don't match their spec. Flip through the files:" }),
+        b({ kind: "assistant", text: "I fixed the three components that don't match their spec — open View changes to flip through the files:" }),
         b({ kind: "difftabs" }),
-        b({ kind: "diff", files: AUDIT_DIFF_FILES, timestamp: "2h ago" }),
         b({ kind: "assistant", text: "Your generation error copy is also long and vague. Here's a starting point — tune it with the controls below." }),
         b({ kind: "refine" }),
       ],
@@ -589,6 +588,17 @@ function AnswerActions({ block, handlers }: { block: Extract<Block, { kind: "act
   );
 }
 
+/** The summary is the receipt; View changes opens the per-file diffs right under it, as one piece. */
+function AuditChanges() {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div className="w-full max-w-md space-y-2">
+      <DiffSummaryCard files={AUDIT_DIFF_FILES} timestamp="2h ago" onViewChanges={() => setOpen((o) => !o)} className="w-full" />
+      {open && <DiffTabs files={AUDIT_DIFF_TABS} className="w-full" />}
+    </div>
+  );
+}
+
 function NamingBranches() {
   const [branches, setBranches] = React.useState<Branch[]>(NAME_BRANCHES);
   const [active, setActive] = React.useState(NAME_BRANCHES.length - 1);
@@ -653,16 +663,41 @@ export function toArtifact(data: ArtifactData): Artifact {
   return { ...data, versions: data.versions.map((v) => ({ ...v, preview: <ArtifactDoc source={v.source} /> })) };
 }
 
-function VersionedBubble({ versions, text }: { versions?: string[]; text: string }) {
+/**
+ * The agent's replies read as plain text — the same voice as streamed answers —
+ * so seeded and live threads look alike. Bubbles are for the person's messages.
+ */
+function AgentReply({ versions, text }: { versions?: string[]; text: string }) {
   const [index, setIndex] = React.useState(versions ? versions.length - 1 : 0);
   return (
-    <ChatBubble
-      role="assistant"
-      content={versions?.[index] ?? text}
-      versionIndex={versions ? index : undefined}
-      versionCount={versions?.length}
-      onVersionChange={setIndex}
-    />
+    <div className="w-full max-w-md space-y-1">
+      <p className="text-sm leading-relaxed text-foreground/90">{versions?.[index] ?? text}</p>
+      {versions && versions.length > 1 && (
+        <div className="flex items-center gap-1 text-xs tabular-nums text-muted-foreground">
+          <button
+            type="button"
+            aria-label="Previous version"
+            disabled={index === 0}
+            onClick={() => setIndex((i) => i - 1)}
+            className="rounded px-1 hover:text-foreground disabled:opacity-40"
+          >
+            ‹
+          </button>
+          <span aria-live="polite">
+            {index + 1}/{versions.length}
+          </span>
+          <button
+            type="button"
+            aria-label="Next version"
+            disabled={index === versions.length - 1}
+            onClick={() => setIndex((i) => i + 1)}
+            className="rounded px-1 hover:text-foreground disabled:opacity-40"
+          >
+            ›
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -673,7 +708,7 @@ function PartialTranslation() {
     <PartialResponse
       key={key}
       content={TRANSLATE_PARTIAL}
-      reason="interrupted"
+      reason="error"
       resuming={resuming}
       onResume={() => {
         setResuming(true);
@@ -804,12 +839,12 @@ export function BlockView({ block, handlers }: { block: Block; handlers: BlockHa
     case "user":
       return (
         <div className="flex flex-col items-end gap-2">
-          {block.attachment && <AttachmentTray attachments={[block.attachment]} className="w-full max-w-xs" />}
+          {block.attachment && <AttachmentTray attachments={[block.attachment]} className="w-auto border-0 bg-transparent p-0" />}
           <ChatBubble role="user" content={block.text} />
         </div>
       );
     case "assistant":
-      return <VersionedBubble versions={block.versions} text={block.text} />;
+      return <AgentReply versions={block.versions} text={block.text} />;
     case "stream":
       return block.done ? (
         <StaticSegments segments={block.segments} />
@@ -872,7 +907,7 @@ export function BlockView({ block, handlers }: { block: Block; handlers: BlockHa
     case "catalogue":
       return <CatalogueList paths={block.paths} onOpen={handlers.onOpenPattern} />;
     case "difftabs":
-      return <DiffTabs files={AUDIT_DIFF_TABS} className="w-full max-w-md" />;
+      return <AuditChanges />;
     case "trust":
       return <SourceTrustCard sources={AUDIT_TRUST_SOURCES} />;
     case "selection":
