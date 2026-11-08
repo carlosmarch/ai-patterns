@@ -1,0 +1,358 @@
+"use client";
+
+import * as React from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { FilePen, FilePlus, FileX, History, RotateCcw, RotateCw, TriangleAlert } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+
+export interface FileChange {
+  path: string;
+  kind: "edit" | "create" | "delete";
+}
+
+export interface CheckpointTurn {
+  id: string;
+  /** The user's message. A checkpoint is taken just before it runs. */
+  prompt: string;
+  /** The agent's reply, in one or two sentences. */
+  reply: string;
+  /** Files the agent changed while answering this turn. */
+  changes: FileChange[];
+  /** When the checkpoint was taken, already formatted ("10:42"). */
+  time: string;
+}
+
+export type RestoreMode = "both" | "code" | "conversation";
+
+export interface RestoredState {
+  /** Index of the turn whose checkpoint was restored; it and every later turn are undone. */
+  index: number;
+  mode: RestoreMode;
+}
+
+export interface CheckpointTimelineProps {
+  turns: CheckpointTurn[];
+  restored?: RestoredState | null;
+  onRestore: (state: RestoredState) => void;
+  /** Roll forward: put back everything the last restore undid. */
+  onRedo: () => void;
+  /** What a restore can't undo, said plainly. */
+  untrackedNote?: string;
+  className?: string;
+}
+
+const MODES: { id: RestoreMode; label: string; hint: string }[] = [
+  { id: "both", label: "Code and conversation", hint: "Start again from this message" },
+  { id: "code", label: "Code only", hint: "Keep the conversation, undo the file changes" },
+  { id: "conversation", label: "Conversation only", hint: "Keep the files, rewind the chat" },
+];
+
+const CHANGE_ICON = { edit: FilePen, create: FilePlus, delete: FileX } as const;
+
+export function CheckpointTimeline({
+  turns,
+  restored,
+  onRestore,
+  onRedo,
+  untrackedNote = "Terminal commands and database changes aren't undone.",
+  className,
+}: CheckpointTimelineProps) {
+  const [confirming, setConfirming] = React.useState<number | null>(null);
+
+  const hidesConversation = restored && restored.mode !== "code";
+  const visible = hidesConversation ? turns.slice(0, restored.index) : turns;
+  const undone = restored ? turns.slice(restored.index) : [];
+
+  return (
+    <ol className={cn("flex flex-col", className)} aria-label="Conversation with checkpoints">
+      {visible.map((turn, i) => {
+        const codeReverted = restored?.mode === "code" && i >= restored.index;
+        return (
+          <li key={turn.id} className="flex flex-col">
+            {restored?.mode === "code" && i === restored.index && (
+              <RestoredBanner turns={undone} mode={restored.mode} onRedo={onRedo} />
+            )}
+            <CheckpointMarker
+              turn={turn}
+              index={i}
+              disabled={Boolean(restored)}
+              open={confirming === i}
+              onOpen={() => setConfirming(confirming === i ? null : i)}
+              onCancel={() => setConfirming(null)}
+              onConfirm={(mode) => {
+                setConfirming(null);
+                onRestore({ index: i, mode });
+              }}
+              later={turns.slice(i)}
+              untrackedNote={untrackedNote}
+            />
+            <TurnBody turn={turn} reverted={codeReverted} />
+          </li>
+        );
+      })}
+      {hidesConversation && (
+        <li>
+          <RestoredBanner turns={undone} mode={restored.mode} onRedo={onRedo} />
+        </li>
+      )}
+    </ol>
+  );
+}
+
+function CheckpointMarker({
+  turn,
+  index,
+  disabled,
+  open,
+  onOpen,
+  onCancel,
+  onConfirm,
+  later,
+  untrackedNote,
+}: {
+  turn: CheckpointTurn;
+  index: number;
+  disabled: boolean;
+  open: boolean;
+  onOpen: () => void;
+  onCancel: () => void;
+  onConfirm: (mode: RestoreMode) => void;
+  later: CheckpointTurn[];
+  untrackedNote: string;
+}) {
+  const reduce = useReducedMotion();
+  const [mode, setMode] = React.useState<RestoreMode>("both");
+  const id = React.useId();
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const firstRadioRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (open) firstRadioRef.current?.focus();
+  }, [open]);
+
+  const files = uniqueFiles(later);
+  const messages = later.length * 2;
+
+  function cancel() {
+    onCancel();
+    triggerRef.current?.focus();
+  }
+
+  return (
+    <div className="group/checkpoint py-1">
+      <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+        <span className="h-px flex-1 border-t border-dashed" aria-hidden />
+        <History className="size-3" aria-hidden />
+        <span>
+          Checkpoint {index + 1} · {turn.time}
+        </span>
+        <button
+          ref={triggerRef}
+          type="button"
+          disabled={disabled}
+          aria-expanded={open}
+          aria-controls={open ? `${id}-confirm` : undefined}
+          onClick={onOpen}
+          className={cn(
+            "flex items-center gap-1 rounded-md px-1.5 py-0.5 font-medium text-foreground transition-opacity hover:bg-accent disabled:hidden",
+            // Quiet until wanted: shown on hover or keyboard focus, always while open.
+            !open && "opacity-0 group-hover/checkpoint:opacity-100 focus-visible:opacity-100"
+          )}
+        >
+          <RotateCcw className="size-3" aria-hidden />
+          Restore
+          <span className="sr-only"> to before “{turn.prompt}”</span>
+        </button>
+        <span className="h-px flex-1 border-t border-dashed" aria-hidden />
+      </div>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            id={`${id}-confirm`}
+            role="group"
+            aria-labelledby={`${id}-title`}
+            initial={reduce ? { opacity: 0 } : { opacity: 0, height: 0 }}
+            animate={reduce ? { opacity: 1 } : { opacity: 1, height: "auto" }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, height: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="overflow-hidden"
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                e.preventDefault();
+                cancel();
+              }
+            }}
+          >
+            <div className="mt-2 rounded-xl border bg-card p-3">
+              <p id={`${id}-title`} className="text-sm font-medium">
+                Restore to before this message?
+              </p>
+              <fieldset className="mt-2 space-y-1">
+                <legend className="sr-only">What to restore</legend>
+                {MODES.map((m, i) => (
+                  <label
+                    key={m.id}
+                    className={cn(
+                      "flex cursor-pointer items-start gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-accent/60",
+                      mode === m.id && "bg-accent/60"
+                    )}
+                  >
+                    <input
+                      ref={i === 0 ? firstRadioRef : undefined}
+                      type="radio"
+                      name={`${id}-mode`}
+                      value={m.id}
+                      checked={mode === m.id}
+                      onChange={() => setMode(m.id)}
+                      className="mt-0.5 accent-foreground"
+                    />
+                    <span>
+                      <span className="block text-sm">{m.label}</span>
+                      <span className="block text-xs text-muted-foreground">{m.hint}</span>
+                    </span>
+                  </label>
+                ))}
+              </fieldset>
+
+              <div className="mt-2 rounded-lg bg-muted/60 px-2.5 py-2 text-xs text-muted-foreground">
+                <p className="font-medium text-foreground">
+                  {[
+                    mode !== "conversation" && `Reverts ${files.length} file${files.length === 1 ? "" : "s"}`,
+                    mode !== "code" && `removes ${messages} message${messages === 1 ? "" : "s"}`,
+                  ]
+                    .filter(Boolean)
+                    .join(" and ")
+                    .replace(/^./, (c) => c.toUpperCase())}
+                </p>
+                {mode !== "conversation" && files.length > 0 && (
+                  <ul className="mt-1 space-y-0.5 font-mono text-[11px]">
+                    {files.map((f) => {
+                      const Icon = CHANGE_ICON[f.kind];
+                      return (
+                        <li key={f.path} className="flex items-center gap-1.5">
+                          <Icon className="size-3 shrink-0" aria-hidden />
+                          <span className="truncate">{f.path}</span>
+                          <span className="sr-only">({f.kind === "create" ? "will be deleted" : f.kind === "delete" ? "will come back" : "edits undone"})</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                {mode !== "conversation" && (
+                  <p className="mt-1.5 flex items-start gap-1.5">
+                    <TriangleAlert className="mt-px size-3 shrink-0" aria-hidden />
+                    {untrackedNote}
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-3 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={cancel}
+                  className="h-8 rounded-lg px-3 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onConfirm(mode)}
+                  className="h-8 rounded-lg bg-foreground px-3 text-xs font-medium text-background"
+                >
+                  Restore
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function TurnBody({ turn, reverted }: { turn: CheckpointTurn; reverted?: boolean }) {
+  return (
+    <div className="space-y-2 pb-3">
+      <p className="ml-auto w-fit max-w-[85%] rounded-2xl bg-muted px-3 py-2 text-sm">{turn.prompt}</p>
+      <p className="text-sm text-muted-foreground">{turn.reply}</p>
+      {turn.changes.length > 0 && (
+        <ul className={cn("flex flex-wrap gap-1.5", reverted && "opacity-50")}>
+          {turn.changes.map((c) => {
+            const Icon = CHANGE_ICON[c.kind];
+            return (
+              <li
+                key={c.path}
+                className={cn(
+                  "flex items-center gap-1 rounded-md border px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground",
+                  reverted && "line-through"
+                )}
+              >
+                <Icon className="size-3" aria-hidden />
+                {c.path}
+              </li>
+            );
+          })}
+          {reverted && <li className="self-center text-[11px] font-medium text-muted-foreground">Reverted</li>}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function RestoredBanner({
+  turns,
+  mode,
+  onRedo,
+}: {
+  turns: CheckpointTurn[];
+  mode: RestoreMode;
+  onRedo: () => void;
+}) {
+  const reduce = useReducedMotion();
+  const ref = React.useRef<HTMLDivElement>(null);
+  const files = uniqueFiles(turns).length;
+  const messages = turns.length * 2;
+
+  // The button that was pressed is gone; put focus on the result instead.
+  React.useEffect(() => {
+    ref.current?.focus();
+  }, []);
+
+  const parts = [
+    mode !== "conversation" && `${files} file${files === 1 ? "" : "s"} reverted`,
+    mode !== "code" && `${messages} message${messages === 1 ? "" : "s"} removed`,
+  ].filter(Boolean);
+
+  return (
+    <motion.div
+      ref={ref}
+      tabIndex={-1}
+      role="status"
+      initial={reduce ? { opacity: 0 } : { opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="my-2 flex items-center gap-3 rounded-xl border border-dashed px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+    >
+      <RotateCcw className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium">Restored to checkpoint</p>
+        <p className="text-xs text-muted-foreground">{parts.join(" · ")}</p>
+      </div>
+      <button
+        type="button"
+        onClick={onRedo}
+        className="flex h-7 shrink-0 items-center gap-1 rounded-lg border px-2 text-xs font-medium hover:bg-accent"
+      >
+        <RotateCw className="size-3" aria-hidden />
+        Redo
+      </button>
+    </motion.div>
+  );
+}
+
+function uniqueFiles(turns: CheckpointTurn[]): FileChange[] {
+  const map = new Map<string, FileChange>();
+  for (const t of turns) for (const c of t.changes) if (!map.has(c.path)) map.set(c.path, c);
+  return [...map.values()];
+}
