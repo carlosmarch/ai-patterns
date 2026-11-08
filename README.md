@@ -1,6 +1,14 @@
 # ai-patterns
 
-A pattern library for AI product UI — the interactions that don't have established conventions yet: tool approval, confidence indicators, agent handoff, error recovery, streaming answers, and more.
+An open research project on how user experience changes as AI moves from answering to acting — and a pattern library for the interactions that don't have established conventions yet: tool approval, confidence indicators, agent handoff, error recovery, streaming answers, and more.
+
+**How do interfaces change when software starts acting for us?** Chat was the first answer, not the last. The project studies the question one pattern at a time:
+
+1. **Observe** — every pattern starts in a product people already use, credited under "Seen in".
+2. **Specify** — it's written down as a portable UX contract, apart from any one design system.
+3. **Test** — the spec is the experiment: agents read it through the skill, MCP and Markdown, and the code shows what it turns into.
+
+The open questions are the six jobs people need an AI to do for them — *I don't know what to ask*, *Do this for me*, *Do it this way*, *What is it doing, and can I step in?*, *Can I believe it?*, *Something went wrong* — and each pattern is a provisional answer to one of them. Findings get rewritten as products change.
 
 Each pattern ships as a portable UX contract: anatomy, behavior, accessibility rules, and content guidelines, kept separate from the Tailwind/Radix implementation shown in the "Code" tab. The contract survives transplanting into any design system; only the markup re-expresses.
 

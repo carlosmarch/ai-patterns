@@ -9,12 +9,13 @@ import { GithubMark } from "@/components/github-mark";
 import { IntroHero, type HeroEntry } from "./intro-hero/intro-hero";
 import { HomeConnect } from "./home-connect";
 import { HomeHero } from "./home-hero";
+import { HomeResearch } from "./home-research";
 import { Card, Section, href } from "./home-parts";
 import { AskVariant, StatsVariant, TabsVariant, TerminalVariant, type SectionItem } from "./sections/variants";
 import { CompareVariant, ComparisonVariant, IndexVariant } from "./sections/variants-more";
 
 // The home page, assembled from the blocks explored on /sections. The story
-// runs pitch → proof → how it works → try it → what's new → the catalogue →
+// runs pitch → the research question → proof → how it works → try it → what's new → the catalogue →
 // how your agent uses it → how to connect it → why not a library → numbers and CTA.
 
 const REPO_URL = "https://github.com/carlosmarch/ai-patterns";
@@ -53,6 +54,10 @@ export default function Home() {
   return (
     <main>
       <IntroHero entries={heroEntries} newEntries={newEntries.map(toHeroEntry)} />
+
+      <Band>
+        <HomeResearch />
+      </Band>
 
       <Band>
         <AskVariant items={items} />
