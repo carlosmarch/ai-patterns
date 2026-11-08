@@ -14,8 +14,9 @@ export interface PatternsSidebarGroup {
 
 /**
  * Sidebar listing every pattern, grouped by category, with the
- * current pattern highlighted. Shown on the pattern detail pages; it is
- * part of the normal page flow and scrolls with the page.
+ * current pattern highlighted. Shown on the pattern detail pages; it sticks
+ * below the site header and scrolls on its own, so the current pattern stays
+ * in view while its page is shown beside it.
  *
  * Keyboard: the list is a single Tab stop (roving tabindex on the current
  * pattern). Once focus is inside, ↑ / ↓ move to the previous / next pattern
@@ -41,18 +42,17 @@ export function PatternsSidebar({
   const activeIndex = hrefs.indexOf(pathname);
   const tabStop = activeIndex === -1 ? hrefs[0] : pathname;
 
-  // A navigation scrolls the window to the top (see <ScrollRestoration>).
-  // When it came from the arrow keys, bring the focused item back into view
-  // once that has happened.
+  // Keep the current pattern visible inside the sidebar's own scroll area.
+  // On first load it is centred; after that the list only moves as far as
+  // needed. Scrolls the nav alone — never the window, which
+  // <ScrollRestoration> owns.
+  const hasPositioned = React.useRef(false);
   React.useEffect(() => {
     const nav = navRef.current;
-    if (!nav || !nav.contains(document.activeElement)) return;
-    const frame = requestAnimationFrame(() => {
-      (document.activeElement as HTMLElement | null)?.scrollIntoView({
-        block: "nearest",
-      });
-    });
-    return () => cancelAnimationFrame(frame);
+    const link = nav?.querySelector<HTMLElement>('a[aria-current="page"]');
+    if (!nav || !link) return;
+    revealInNav(nav, link, hasPositioned.current ? "nearest" : "center");
+    hasPositioned.current = true;
   }, [pathname]);
 
   function onKeyDown(e: React.KeyboardEvent<HTMLElement>) {
@@ -84,17 +84,20 @@ export function PatternsSidebar({
     if (next === current) return;
     const link = links[next];
     link.focus({ preventScroll: true });
-    link.scrollIntoView({ block: "nearest" });
+    if (navRef.current) revealInNav(navRef.current, link, "nearest");
     router.push(link.getAttribute("href")!);
   }
 
   return (
-    <nav
+    // layoutScroll: the active pill's layout animation measures correctly
+    // while the nav itself is scrolled.
+    <motion.nav
       ref={navRef}
+      layoutScroll
       aria-label="All patterns"
       aria-keyshortcuts="ArrowUp ArrowDown"
       onKeyDown={onKeyDown}
-      className="hidden w-56 shrink-0 py-16 pr-4 lg:block"
+      className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-56 shrink-0 self-start overflow-y-auto overscroll-contain py-16 pr-4 [scrollbar-width:thin] lg:block"
     >
       <div className="space-y-6">
         {groups.map(({ category, items }) => (
@@ -155,6 +158,23 @@ export function PatternsSidebar({
           </div>
         ))}
       </div>
-    </nav>
+    </motion.nav>
   );
+}
+
+/** Scroll `nav` (only) so `el` is inside its visible area. */
+function revealInNav(nav: HTMLElement, el: HTMLElement, mode: "nearest" | "center") {
+  const navRect = nav.getBoundingClientRect();
+  const elRect = el.getBoundingClientRect();
+  const margin = 48;
+  const top = elRect.top - navRect.top + nav.scrollTop;
+  let next = nav.scrollTop;
+  if (mode === "center") {
+    next = top - (nav.clientHeight - elRect.height) / 2;
+  } else if (elRect.top < navRect.top + margin) {
+    next = top - margin;
+  } else if (elRect.bottom > navRect.bottom - margin) {
+    next = top + elRect.height - nav.clientHeight + margin;
+  }
+  if (next !== nav.scrollTop) nav.scrollTo({ top: Math.max(0, next) });
 }
