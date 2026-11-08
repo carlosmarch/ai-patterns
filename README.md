@@ -144,7 +144,9 @@ The site is a static export (`output: "export"`) hosted on [Cloudflare Workers](
 
 ### Analytics
 
-Page views and the custom events in `src/lib/analytics.ts` (`code_copied`, `tab_changed`, `spec_downloaded`, `demo_prompt_submitted`, `mcp_install_clicked`, `github_clicked`) go to Google Analytics 4. Set `NEXT_PUBLIC_GA_MEASUREMENT_ID` (the `G-…` ID of your GA4 web stream) as a build variable in Cloudflare (Workers Builds → Settings → Variables and secrets → Build). Unset = no tag is loaded. GA is only configured on the `SITE_URL` host (`ai-patterns.app`), so localhost and PR previews aren't counted.
+The site loads Google Tag Manager (container `GTM-WKPZ539R`, set in `src/app/layout.tsx`), only on the `SITE_URL` host (`ai-patterns.app`), so localhost and PR previews send nothing. Which tags run (GA4, …) is configured in GTM.
+
+The custom events in `src/lib/analytics.ts` (`code_copied`, `tab_changed`, `spec_downloaded`, `demo_prompt_submitted`, `mcp_install_clicked`, `github_clicked`) are pushed to `dataLayer` as `{ event, ...params }`; pick them up in GTM with a Custom Event trigger and Data Layer Variables for the params. Navigation is client-side, so page views after the first need GA4's history-based page views (on by default in enhanced measurement) or a History Change trigger.
 
 ---
 

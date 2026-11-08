@@ -32,21 +32,19 @@ if ("scrollRestoration" in history) {
 }
 `;
 
-// Google Analytics 4 — page views plus the custom events in src/lib/analytics.ts.
-// Off unless NEXT_PUBLIC_GA_MEASUREMENT_ID is set at build time.
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
-const GA_HOSTNAME = new URL(SITE_URL).hostname;
-// Loads gtag.js itself, and only on the production host, so elsewhere
-// window.gtag stays undefined and track() calls are no-ops.
-const GA_INIT_SCRIPT = `
-if (location.hostname === ${JSON.stringify(GA_HOSTNAME)}) {
+// Google Tag Manager — the container decides which tags (GA4, …) run. The
+// custom events in src/lib/analytics.ts are pushed to dataLayer for it.
+// Only loaded on the production host, so local dev and PR previews send nothing.
+const GTM_ID = "GTM-WKPZ539R";
+const GTM_HOSTNAME = new URL(SITE_URL).hostname;
+const GTM_INIT_SCRIPT = `
+if (location.hostname === ${JSON.stringify(GTM_HOSTNAME)}) {
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function () { dataLayer.push(arguments); };
+  function gtag(){dataLayer.push(arguments);}
   gtag("js", new Date());
-  gtag("config", ${JSON.stringify(GA_MEASUREMENT_ID)});
   var s = document.createElement("script");
   s.async = true;
-  s.src = "https://www.googletagmanager.com/gtag/js?id=" + ${JSON.stringify(GA_MEASUREMENT_ID)};
+  s.src = "https://www.googletagmanager.com/gtm.js?id=${GTM_ID}";
   document.head.appendChild(s);
 }
 `;
@@ -103,9 +101,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="flex-1">{children}</div>
         <Footer />
         <StarToast />
-        {GA_MEASUREMENT_ID && (
-          <Script id="ga-init" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: GA_INIT_SCRIPT }} />
-        )}
+        <Script id="gtm-init" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: GTM_INIT_SCRIPT }} />
       </body>
     </html>
   );
