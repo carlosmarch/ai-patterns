@@ -1,0 +1,61 @@
+# Weekly research scout (method 3.1 on /research): searches shipping products'
+# changelogs, help centres and docs for new AI interface patterns, codes them
+# against the registry, and opens a PR with the report in research/scout/.
+#
+# Needs the ANTHROPIC_API_KEY repository secret, and "Allow GitHub Actions to
+# create and approve pull requests" under Settings → Actions → General.
+name: Research scout
+
+on:
+  schedule:
+    - cron: "17 6 * * 1" # Mondays 06:17 UTC
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Look back this many days (default: lookbackDays in research/sources.json)"
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: research-scout
+  cancel-in-progress: false
+
+jobs:
+  scout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Search and analyse
+        id: scout
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/scout.mjs ${{ inputs.days && format('--days {0}', inputs.days) || '' }}
+
+      - name: Open a PR with the report
+        if: steps.scout.outputs.found != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT: ${{ steps.scout.outputs.report }}
+        run: |
+          branch="scout/$(date -u +%F)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898729+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add research/scout
+          git commit -m "Scout report $(date -u +%F)"
+          git push -u origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "Scout report $(date -u +%F)" \
+            --body "$(head -c 60000 "$REPORT")"

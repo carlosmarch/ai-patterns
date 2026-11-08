@@ -51,7 +51,7 @@ export const METHOD = [
   {
     id: "3.1",
     title: "Sampling",
-    body: "Candidates come from shipping products' public documentation, help centres and changelogs. A candidate is included when it (a) addresses a problem that exists because an AI is involved, (b) is observed in at least one public product, or argued from a documented failure, and (c) differs from existing entries in behavior, not only appearance.",
+    body: "Candidates come from shipping products' public documentation, help centres and changelogs. A candidate is included when it (a) addresses a problem that exists because an AI is involved, (b) is observed in at least one public product, or argued from a documented failure, and (c) differs from existing entries in behavior, not only appearance. Sampling is automated: a weekly scout searches a watchlist of products' changelogs and help centres, codes each finding against these criteria and the current corpus, and proposes new candidates and new sources for existing patterns as a reviewable report. Nothing enters the corpus without review.",
   },
   {
     id: "3.2",
@@ -88,6 +88,10 @@ export const LIMITATIONS = [
   {
     title: "Observation, not usage",
     body: "Patterns are inferred from what products ship and document, not from usage data or controlled studies with people.",
+  },
+  {
+    title: "Automated sampling",
+    body: "The scout is a language model reading public pages: it can miss features, misread them or over-report variants, and its watchlist is curated by hand. Its reports are leads to verify, not findings.",
   },
   {
     title: "Single coder",
