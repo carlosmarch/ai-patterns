@@ -32,6 +32,23 @@ if ("scrollRestoration" in history) {
 }
 `;
 
+// Google Tag Manager — the container decides which tags (GA4, …) run. The
+// custom events in src/lib/analytics.ts are pushed to dataLayer for it.
+// Only loaded on the production host, so local dev and PR previews send nothing.
+const GTM_ID = "GTM-WKPZ539R";
+const GTM_HOSTNAME = new URL(SITE_URL).hostname;
+const GTM_INIT_SCRIPT = `
+if (location.hostname === ${JSON.stringify(GTM_HOSTNAME)}) {
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag("js", new Date());
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://www.googletagmanager.com/gtm.js?id=${GTM_ID}";
+  document.head.appendChild(s);
+}
+`;
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -84,6 +101,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="flex-1">{children}</div>
         <Footer />
         <StarToast />
+        <Script id="gtm-init" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: GTM_INIT_SCRIPT }} />
       </body>
     </html>
   );

@@ -2,14 +2,15 @@ type Props = Record<string, string | number | boolean | undefined>;
 
 declare global {
   interface Window {
-    umami?: { track: (event: string, props?: Props) => void };
+    dataLayer?: Record<string, unknown>[];
   }
 }
 
-// No analytics provider is loaded yet; events go to Umami if its script is
-// on the page, and are dropped otherwise.
+// Events are pushed to Google Tag Manager's dataLayer, which the root layout
+// creates only on the production host; elsewhere (dev, previews) they're dropped.
+// In GTM, a Custom Event trigger on the event name picks them up.
 function track(event: string, props?: Props) {
-  if (typeof window !== "undefined") window.umami?.track(event, props);
+  if (typeof window !== "undefined") window.dataLayer?.push({ event, ...props });
 }
 
 export type CodeCopiedType = "component" | "spec" | "install_command" | "mcp_config";
