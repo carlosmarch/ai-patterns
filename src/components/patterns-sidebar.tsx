@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 export interface PatternsSidebarGroup {
   category: string;
-  items: { slug: string; title: string }[];
+  items: { slug: string; title: string; isNew?: boolean }[];
 }
 
 /**
@@ -34,7 +34,7 @@ export function PatternsSidebar({
               {category}
             </h2>
             <ul className="space-y-0.5 border-l">
-              {items.map(({ slug, title }) => {
+              {items.map(({ slug, title, isNew }) => {
                 const href = `/patterns/${category}/${slug}`;
                 const isActive = pathname === href;
                 return (
@@ -43,13 +43,21 @@ export function PatternsSidebar({
                       href={href}
                       aria-current={isActive ? "page" : undefined}
                       className={cn(
-                        "-ml-px block border-l py-1 pl-3 text-sm transition-colors",
+                        "-ml-px flex items-center gap-2 border-l py-1 pl-3 text-sm transition-colors",
                         isActive
                           ? "border-foreground font-medium text-foreground"
                           : "border-transparent text-muted-foreground hover:border-muted-foreground hover:text-foreground",
                       )}
                     >
                       {title}
+                      {isNew && (
+                        <span
+                          title="New pattern"
+                          className="size-1.5 shrink-0 rounded-full bg-blue-500"
+                        >
+                          <span className="sr-only">(new)</span>
+                        </span>
+                      )}
                     </Link>
                   </li>
                 );

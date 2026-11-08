@@ -6,7 +6,7 @@ import type { RegistryEntry } from "@/registry";
 import { SeenIn } from "@/components/seen-in";
 import type { SeenIn as SeenInRef } from "@/lib/teams";
 
-// Layout pieces for the home page: section headers and the live demo cards.
+// Layout pieces for the home page: section headers and the live demo card.
 
 export const href = (entry: RegistryEntry) => `/patterns/${entry.category}/${entry.slug}`;
 
@@ -52,7 +52,6 @@ export function Card({
   title,
   description,
   href,
-  badge,
   seenIn,
   className,
   children,
@@ -60,7 +59,6 @@ export function Card({
   title: string;
   description: string;
   href: string;
-  badge?: string;
   seenIn?: SeenInRef[];
   className?: string;
   children: ReactNode;
@@ -70,14 +68,7 @@ export function Card({
       <div className="overflow-hidden rounded-lg border bg-card dark:bg-background">{children}</div>
       <div className="flex items-end justify-between gap-4 px-3 pt-3 pb-2">
         <div className="min-w-0">
-          <h3 className="flex items-center gap-2 text-sm font-medium">
-            {title}
-            {badge && (
-              <span className="rounded-md bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-blue-600 dark:text-blue-400">
-                {badge}
-              </span>
-            )}
-          </h3>
+          <h3 className="text-sm font-medium">{title}</h3>
           <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
         </div>
         <div className="flex shrink-0 items-center gap-3">
@@ -92,16 +83,5 @@ export function Card({
         </div>
       </div>
     </article>
-  );
-}
-
-export function DemoCard({ entry, badge }: { entry: RegistryEntry; badge?: string }) {
-  const Demo = entry.Demo;
-  return (
-    <Card title={entry.title} description={entry.description} href={href(entry)} badge={badge} seenIn={entry.seenIn}>
-      <div className="flex min-h-[260px] items-center justify-center p-4 sm:p-10">
-        <Demo />
-      </div>
-    </Card>
   );
 }
