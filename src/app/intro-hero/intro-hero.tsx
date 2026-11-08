@@ -166,7 +166,16 @@ function score(entry: HeroEntry, q: string) {
 
 /* ------------------------------------------------------------------ */
 
-export function IntroHero({ entries, latest }: { entries: HeroEntry[]; latest?: HeroEntry }) {
+export function IntroHero({ entries, newEntries }: { entries: HeroEntry[]; newEntries: HeroEntry[] }) {
+  // The "New" pill links to a random pattern from the newest ones. The page is
+  // a static export, so pick after mount — the pill stays hidden until then
+  // rather than flashing one title and swapping it for another.
+  const [latest, setLatest] = useState<HeroEntry | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- random pick must run on the client
+    if (newEntries.length > 0) setLatest(newEntries[Math.floor(Math.random() * newEntries.length)]);
+  }, [newEntries]);
+
   const router = useRouter();
   const sectionRef = useRef<HTMLElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
