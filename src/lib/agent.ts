@@ -1,6 +1,19 @@
 import { TEAMS } from "@/lib/teams";
 import { MCP_JSON_CONFIG } from "@/lib/mcp-install";
-import { RESEARCH_QUESTION, RESEARCH_STATEMENT } from "@/lib/research";
+import {
+  AUTHOR,
+  LIMITATIONS,
+  METHOD,
+  NEXT_STEPS,
+  RESEARCH_QUESTION,
+  RESEARCH_STATEMENT,
+  RESEARCH_TITLE,
+  SCOPE,
+  SUB_QUESTIONS,
+  getCitation,
+  getCorpus,
+  getHypotheses,
+} from "@/lib/research";
 import { getCategories, getEntryHref, getRegistryEntry, registry, type RegistryEntry } from "@/registry";
 import { getJob, JOBS } from "@/registry/jobs";
 import { componentSources } from "@/registry/sources.generated";
@@ -172,6 +185,7 @@ ${sections}
 ## Optional
 
 - [Home](${abs("/index.md")}): what the catalogue is.
+- [Research brief](${abs("/research.md")}): the research question, method, corpus statistics, working hypotheses and limitations.
 - [Claude Code skill](${abs("/skill.md")}): install and use the skill.
 - [Source on GitHub](${REPO_URL}): the registry lives in \`src/registry/<category>/<slug>/\` (MIT).
 `;
@@ -263,7 +277,7 @@ export function buildHomeMarkdown() {
 
 ${RESEARCH_STATEMENT}
 
-Method: **observe** a pattern in products people already use, **specify** it as a portable UX contract, **test** it by giving the spec to agents. ${registry.length} patterns across ${getCategories().length} categories so far. Findings are provisional and get rewritten as products change.
+Method: **observe** a pattern in products people already use, **specify** it as a portable UX contract, **test** it by giving the spec to agents. ${registry.length} patterns across ${getCategories().length} categories so far. Findings are provisional and get rewritten as products change. Led and maintained by [${AUTHOR.name}](${AUTHOR.url}); the full [research brief](${abs("/research.md")}) covers method, corpus and hypotheses.
 
 ### Open questions
 
@@ -274,6 +288,75 @@ ${JOBS.map((j) => `- "${j.question}" — ${j.description} ([${j.label}](${abs(`/
 - [Source on GitHub](${REPO_URL})
 
 ${AGENT_ACCESS}
+`;
+}
+
+export function buildResearchMarkdown() {
+  const c = getCorpus();
+  const list = (items: string[]) => items.map((i) => `- ${i}`).join("\n");
+  return `# ${RESEARCH_TITLE}
+
+> An open research project led and maintained by [${AUTHOR.name}](${AUTHOR.url}), exploring how user experience evolves as artificial intelligence moves from answering to acting. More in [${AUTHOR.name}'s writing on AI](${AUTHOR.writingUrl}).
+
+Status: ongoing · Started: ${c.started} · Last addition: ${c.updated} · Corpus: ${c.total} patterns, ${c.categories} categories · Licence: MIT
+
+HTML: ${abs("/research")}
+
+## Abstract
+
+${RESEARCH_STATEMENT}
+
+## 1. Research question
+
+**${RESEARCH_QUESTION}**
+
+${SUB_QUESTIONS.map((q) => `- **${q.id}.** ${q.text}`).join("\n")}
+
+## 2. Scope
+
+In scope:
+
+${list(SCOPE.in)}
+
+Out of scope:
+
+${list(SCOPE.out)}
+
+## 3. Method
+
+${METHOD.map((m) => `### ${m.id} ${m.title}\n\n${m.body}`).join("\n\n")}
+
+## 4. Corpus
+
+${c.total} patterns across ${c.categories} categories, crediting ${c.teams} product teams. ${c.observed} patterns (${c.coverage}%) cite at least one public source showing the pattern in a shipping product.
+
+| job | question | n | share |
+| --- | --- | ---: | ---: |
+${c.jobs.map((j) => `| ${j.label} | ${j.question} | ${j.count} | ${j.share}% |`).join("\n")}
+
+| month | added | total |
+| --- | ---: | ---: |
+${c.growth.map((g) => `| ${g.month} | ${g.added} | ${g.total} |`).join("\n")}
+
+## 5. Working hypotheses
+
+${getHypotheses(c).map((h) => `- **${h.id}. ${h.claim}** ${h.evidence}`).join("\n")}
+
+## 6. Limitations
+
+${LIMITATIONS.map((l) => `- **${l.title}.** ${l.body}`).join("\n")}
+
+## 7. Next steps
+
+${list(NEXT_STEPS)}
+
+## 8. Cite
+
+\`\`\`bibtex
+${getCitation(c)}
+\`\`\`
+
+Propose a pattern: ${REPO_URL}/issues/new
 `;
 }
 

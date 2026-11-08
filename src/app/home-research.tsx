@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { registry } from "@/registry";
 import { JOBS } from "@/registry/jobs";
-import { RESEARCH_QUESTION, RESEARCH_STATEMENT } from "@/lib/research";
+import { AUTHOR, RESEARCH_QUESTION, RESEARCH_STATEMENT } from "@/lib/research";
 
 // The home page's framing block: the catalogue as an open research project.
 // The method's numbers and the open questions come from the registry, so the
@@ -69,10 +69,22 @@ export function HomeResearch() {
         </ul>
       </div>
 
-      <p className="mt-6 max-w-2xl text-xs leading-relaxed text-muted-foreground">
-        Findings are provisional. Patterns get rewritten as products change, and each one is dated by when it joined —
-        a snapshot of a field still in motion.
-      </p>
+      <div className="mt-8 flex flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <p className="max-w-xl text-xs leading-relaxed text-muted-foreground">
+          Led and maintained by{" "}
+          <a href={AUTHOR.url} target="_blank" rel="noreferrer" className="text-foreground hover:underline">
+            {AUTHOR.name}
+          </a>
+          . Findings are provisional: patterns get rewritten as products change, and each one is dated by when it
+          joined — a snapshot of a field still in motion.
+        </p>
+        <Link
+          href="/research"
+          className="inline-flex shrink-0 items-center justify-center rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+        >
+          Read the research brief
+        </Link>
+      </div>
     </section>
   );
 }

@@ -2,6 +2,7 @@ import {
   buildHomeMarkdown,
   buildPatternMarkdown,
   buildPatternsIndexMarkdown,
+  buildResearchMarkdown,
   buildSkillMarkdown,
   markdownResponse,
 } from "@/lib/agent";
@@ -21,6 +22,7 @@ export function generateStaticParams() {
     { path: ["index.md"] },
     { path: ["patterns.md"] },
     { path: ["skill.md"] },
+    { path: ["research.md"] },
     ...registry.map(({ category, slug }) => ({ path: ["patterns", category, `${slug}.md`] })),
   ];
 }
@@ -31,6 +33,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/md/[...p
 
   if (key === "index.md") return markdownResponse(buildHomeMarkdown());
   if (key === "patterns.md") return markdownResponse(buildPatternsIndexMarkdown());
+  if (key === "research.md") return markdownResponse(buildResearchMarkdown());
   if (key === "skill.md") return markdownResponse(buildSkillMarkdown());
 
   if (path.length === 3 && path[0] === "patterns") {
