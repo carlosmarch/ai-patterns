@@ -83,7 +83,7 @@ React — it works from `/api/mcp-data.json` and the exported `.md` files.
 - `npm run scout` — the research scout (`scripts/scout.mjs`): searches the
   products in `research/sources.json` with Claude, codes findings against the
   registry and writes `research/scout/<date>.md` (needs `ANTHROPIC_API_KEY`;
-  `-- --dry-run` prints instead). Runs weekly in `.github/workflows/scout.yml`,
+  `-- --dry-run` prints instead). Runs on demand (manual dispatch only) in `.github/workflows/scout.yml`,
   which opens a PR with the report
 - `npm run skill:build` — regenerate `plugins/ai-patterns/skills/ai-patterns/reference/` from `src/registry/`
 

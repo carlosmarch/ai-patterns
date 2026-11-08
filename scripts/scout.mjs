@@ -17,7 +17,7 @@
 // specification (3.3) where they are.
 //
 // Usage: ANTHROPIC_API_KEY=… npm run scout [-- --days 30] [-- --dry-run]
-// Runs weekly in .github/workflows/scout.yml, which opens a PR with the report.
+// Run on demand from .github/workflows/scout.yml, which opens a PR with the report.
 
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
