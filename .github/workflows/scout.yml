@@ -4,6 +4,8 @@
 #
 # Needs the ANTHROPIC_API_KEY repository secret, and "Allow GitHub Actions to
 # create and approve pull requests" under Settings → Actions → General.
+# Without the secret every step is skipped and the run passes: the weekly
+# Claude Code scheduled task does the scouting instead.
 name: Research scout
 
 on:
@@ -27,24 +29,34 @@ jobs:
   scout:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      HAS_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
     steps:
+      - name: Skip without an API key
+        if: env.HAS_KEY != 'true'
+        run: echo "ANTHROPIC_API_KEY is not set; skipping (the scheduled Claude Code task scouts instead)."
+
       - uses: actions/checkout@v4
+        if: env.HAS_KEY == 'true'
 
       - uses: actions/setup-node@v4
+        if: env.HAS_KEY == 'true'
         with:
           node-version: 22
           cache: npm
 
-      - run: npm ci
+      - if: env.HAS_KEY == 'true'
+        run: npm ci
 
       - name: Search and analyse
         id: scout
+        if: env.HAS_KEY == 'true'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: node scripts/scout.mjs ${{ inputs.days && format('--days {0}', inputs.days) || '' }}
 
       - name: Open a PR with the report
-        if: steps.scout.outputs.found != '0'
+        if: env.HAS_KEY == 'true' && steps.scout.outputs.found != '0'
         env:
           GH_TOKEN: ${{ github.token }}
           REPORT: ${{ steps.scout.outputs.report }}
