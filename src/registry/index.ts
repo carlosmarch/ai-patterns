@@ -241,6 +241,15 @@ import { pattern as contextChipsPattern } from "./composer/context-chips/pattern
 import CheckpointRestoreDemo from "./agents/checkpoint-restore/demo";
 import CheckpointRestoreThumbnail from "./agents/checkpoint-restore/thumbnail";
 import { pattern as checkpointRestorePattern } from "./agents/checkpoint-restore/pattern";
+import VoiceAgentRelayDemo from "./voice/voice-agent-relay/demo";
+import VoiceAgentRelayThumbnail from "./voice/voice-agent-relay/thumbnail";
+import { pattern as voiceAgentRelayPattern } from "./voice/voice-agent-relay/pattern";
+import PublishGateDemo from "./agents/publish-gate/demo";
+import PublishGateThumbnail from "./agents/publish-gate/thumbnail";
+import { pattern as publishGatePattern } from "./agents/publish-gate/pattern";
+import RejectedPromptRestoreDemo from "./errors/rejected-prompt-restore/demo";
+import RejectedPromptRestoreThumbnail from "./errors/rejected-prompt-restore/thumbnail";
+import { pattern as rejectedPromptRestorePattern } from "./errors/rejected-prompt-restore/pattern";
 import AutonomyModeDemo from "./composer/autonomy-mode/demo";
 import AutonomyModeThumbnail from "./composer/autonomy-mode/thumbnail";
 import { pattern as autonomyModePattern } from "./composer/autonomy-mode/pattern";
@@ -1463,6 +1472,52 @@ export const registry: RegistryEntry[] = [
     uxDoc: accessRequestPattern,
     seenIn: [
       { team: "claude", source: "https://code.claude.com/docs/en/claude-code-on-the-web" },
+    ],
+  },
+  {
+    slug: "voice-agent-relay",
+    category: "voice",
+    added: "2026-11-08T16:23Z",
+    job: "oversee",
+    title: "Voice Agent Relay",
+    description:
+      "A realtime voice call with a voice agent that hands work to a working agent, answers questions about its progress and speaks short updates and a summary while it runs.",
+    Demo: VoiceAgentRelayDemo,
+    Thumbnail: VoiceAgentRelayThumbnail,
+    uxDoc: voiceAgentRelayPattern,
+    seenIn: [
+      { team: "cursor", source: "https://cursor.com/changelog/voice-chat" },
+    ],
+  },
+  {
+    slug: "publish-gate",
+    category: "agents",
+    added: "2026-11-08T16:24Z",
+    job: "trust",
+    title: "Publish Gate",
+    description:
+      "Automated rules and an agent review run before an agent's work goes live; failures explain themselves and go back to the agent to fix, and nothing is published until the person clicks Publish.",
+    Demo: PublishGateDemo,
+    Thumbnail: PublishGateThumbnail,
+    uxDoc: publishGatePattern,
+    seenIn: [
+      { team: "cursor", source: "https://cursor.com/changelog/build-live-apps" },
+      { team: "copilot", source: "https://github.blog/changelog/2026-11-06-github-copilot-weekly-releases-november-2/" },
+    ],
+  },
+  {
+    slug: "rejected-prompt-restore",
+    category: "errors",
+    added: "2026-11-08T16:25Z",
+    job: "recover",
+    title: "Rejected Prompt Restore",
+    description:
+      "When an agent declines the first prompt of a session, the text goes back into the composer with the agent's reason above it, ready to edit and resend.",
+    Demo: RejectedPromptRestoreDemo,
+    Thumbnail: RejectedPromptRestoreThumbnail,
+    uxDoc: rejectedPromptRestorePattern,
+    seenIn: [
+      { team: "windsurf", source: "https://docs.devin.ai/desktop/changelog" },
     ],
   },
 ];

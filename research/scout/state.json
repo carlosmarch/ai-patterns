@@ -24,7 +24,7 @@
           "quote": "Describe a change out loud, ask what an agent is working on, and hear updates as the work moves forward."
         }
       ],
-      "status": "open",
+      "status": "added",
       "firstSeen": "2026-11-08"
     },
     {
@@ -56,7 +56,7 @@
           "quote": "Set up Agent Merge directly from a pull request to have Copilot merge it when it\u2019s ready. It now stays enabled while required checks or rules are pending."
         }
       ],
-      "status": "open",
+      "status": "added",
       "firstSeen": "2026-11-08"
     },
     {
@@ -82,7 +82,7 @@
           "quote": "If a local agent rejects the first prompt, Desktop puts the text back in the composer and shows the reason. You can correct it and resend without retyping."
         }
       ],
-      "status": "open",
+      "status": "added",
       "firstSeen": "2026-11-08"
     }
   ]
