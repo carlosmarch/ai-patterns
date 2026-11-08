@@ -3,8 +3,20 @@ import type { ComponentType } from "react";
 import type { SeenIn } from "@/lib/teams";
 import type { PatternJob } from "./jobs";
 
+import PromptAutocompleteDemo from "./composer/prompt-autocomplete/demo";
+import PromptAutocompleteThumbnail from "./composer/prompt-autocomplete/thumbnail";
+import PromptQualityDemo from "./composer/prompt-quality/demo";
+import PromptQualityThumbnail from "./composer/prompt-quality/thumbnail";
+import PromptWizardDemo from "./composer/prompt-wizard/demo";
+import PromptWizardThumbnail from "./composer/prompt-wizard/thumbnail";
+import ResponseActionsDemo from "./messages/response-actions/demo";
+import ResponseActionsThumbnail from "./messages/response-actions/thumbnail";
 import PromptEnhancerDemo from "./composer/prompt-enhancer/demo";
 import PromptEnhancerThumbnail from "./composer/prompt-enhancer/thumbnail";
+import { pattern as promptAutocompletePattern } from "./composer/prompt-autocomplete/pattern";
+import { pattern as promptQualityPattern } from "./composer/prompt-quality/pattern";
+import { pattern as promptWizardPattern } from "./composer/prompt-wizard/pattern";
+import { pattern as responseActionsPattern } from "./messages/response-actions/pattern";
 import { pattern as promptEnhancerPattern } from "./composer/prompt-enhancer/pattern";
 import PromptTemplateDemo from "./composer/prompt-template/demo";
 import PromptTemplateThumbnail from "./composer/prompt-template/thumbnail";
@@ -581,6 +593,58 @@ export const registry: RegistryEntry[] = [
       { team: "gemini", source: "https://blog.google/products-and-platforms/products/gemini/temporary-chats-privacy-controls/" },
       { team: "perplexity", source: "https://www.perplexity.ai/help-center/en/articles/12639758-incognito-mode-troubleshooting" },
     ],
+  },
+  {
+    slug: "prompt-autocomplete",
+    category: "composer",
+    added: "2026-11-08T13:31Z",
+    job: "ask",
+    title: "Prompt Autocomplete",
+    description:
+      "Ghost text that finishes the prompt as you type — Tab takes it all, Right Arrow takes a word, and typing on replaces it.",
+    Demo: PromptAutocompleteDemo,
+    Thumbnail: PromptAutocompleteThumbnail,
+    uxDoc: promptAutocompletePattern,
+    seenIn: [],
+  },
+  {
+    slug: "prompt-quality",
+    category: "composer",
+    added: "2026-11-08T13:31Z",
+    job: "steer",
+    title: "Prompt Quality Meter",
+    description:
+      "A meter under the prompt that fills as it gets more specific, with a chip per missing detail that inserts a fill-in phrase, and one tip for what to add next.",
+    Demo: PromptQualityDemo,
+    Thumbnail: PromptQualityThumbnail,
+    uxDoc: promptQualityPattern,
+    seenIn: [],
+  },
+  {
+    slug: "prompt-wizard",
+    category: "composer",
+    added: "2026-11-08T13:31Z",
+    job: "start",
+    title: "Prompt Wizard",
+    description:
+      "A prompt built one question at a time — choices or short answers, with a live preview — ending on an editable review of the finished prompt.",
+    Demo: PromptWizardDemo,
+    Thumbnail: PromptWizardThumbnail,
+    uxDoc: promptWizardPattern,
+    seenIn: [],
+  },
+  {
+    slug: "response-actions",
+    category: "messages",
+    added: "2026-11-08T13:31Z",
+    job: "steer",
+    title: "Response Actions",
+    description:
+      "A toolbar under a finished answer — copy, rate, share and a Regenerate menu with named alternatives — where a thumbs-down asks what went wrong.",
+    Demo: ResponseActionsDemo,
+    Thumbnail: ResponseActionsThumbnail,
+    uxDoc: responseActionsPattern,
+    seenIn: [],
   },
   {
     slug: "prompt-enhancer",
