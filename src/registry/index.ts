@@ -109,6 +109,9 @@ import { pattern as toolApprovalPattern } from "./permissions/tool-approval/patt
 import ConnectorPanelDemo from "./permissions/connector-panel/demo";
 import ConnectorPanelThumbnail from "./permissions/connector-panel/thumbnail";
 import { pattern as connectorPanelPattern } from "./permissions/connector-panel/pattern";
+import AccessRequestDemo from "./permissions/access-request/demo";
+import AccessRequestThumbnail from "./permissions/access-request/thumbnail";
+import { pattern as accessRequestPattern } from "./permissions/access-request/pattern";
 import ToolCallChipDemo from "./loaders/tool-call-chip/demo";
 import ToolCallChipThumbnail from "./loaders/tool-call-chip/thumbnail";
 import { pattern as toolCallChipPattern } from "./loaders/tool-call-chip/pattern";
@@ -1445,6 +1448,21 @@ export const registry: RegistryEntry[] = [
       { team: "copilot", source: "https://github.blog/ai-and-ml/github-copilot/copilot-ask-edit-and-agent-modes-what-they-do-and-when-to-use-them/" },
       { team: "claude", source: "https://code.claude.com/docs/en/permission-modes" },
       { team: "windsurf", source: "https://docs.windsurf.com/windsurf/cascade/modes" },
+    ],
+  },
+  {
+    slug: "access-request",
+    category: "permissions",
+    added: "2026-11-08T15:32Z",
+    job: "oversee",
+    title: "Access Request",
+    description:
+      "A prompt for the agent to widen its own access — network, credentials, folders — showing the agent's reason beside a system-rendered before → after of each setting, who else it affects, and Approve or Deny.",
+    Demo: AccessRequestDemo,
+    Thumbnail: AccessRequestThumbnail,
+    uxDoc: accessRequestPattern,
+    seenIn: [
+      { team: "claude", source: "https://code.claude.com/docs/en/claude-code-on-the-web" },
     ],
   },
 ];
