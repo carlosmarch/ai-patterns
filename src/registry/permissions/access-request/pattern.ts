@@ -15,12 +15,10 @@ A prompt the agent raises when it needs more access than it has — a wider netw
 - Collecting the secret itself. Send the person to a secure form; the card never holds a token or password.
 
 ## Anatomy
-- Header: a lock tile and the request as a question ("Update environment?").
-- Target: the name of what changes, with an ownership badge (Personal, Team, Organization).
+- Header: a lock tile, the request as a question ("Update environment?"), and under it the target's name with an ownership badge (Personal, Team, Organization).
 - Reason: the agent's own sentence in a muted block, captioned with the agent's name ("Claude's reason"), so it reads as a quote, not as a system fact.
-- Changes: one row per setting — label, old value struck through, arrow, new value. A "Widens access" tag marks any row that lets the agent reach more than before.
-- Impact line: who and what the change applies to beyond this moment ("this session and every session that uses this environment").
-- Actions: a full-width primary button named for the effect ("Update environment") and a secondary Deny below it.
+- Changes: a compact table, one row per setting — label, old value struck through, arrow, new value — so values line up for scanning. A "Widens access" tag marks any row that lets the agent reach more than before.
+- Footer: the impact line — who and what the change applies to beyond this moment ("this session and every session that uses this environment") — on the leading side, and the actions on the trailing side: a quiet Deny, then the primary button named for the effect ("Update environment"). On narrow screens the actions can stack full width below the impact line.
 - Resolved state: a single row — "Access updated" with the new values, or "Request denied" and that the agent continues without it.
 
 ## Behavior
@@ -37,8 +35,8 @@ A prompt the agent raises when it needs more access than it has — a wider netw
 - Ask for the narrowest change the task needs; when the agent requests the widest option, the "Widens access" tag and the impact line have to make that plain.
 
 ## Accessibility
-- The card is an \`alertdialog\` labelled by its title, and both actions are real buttons reachable by keyboard in the order shown.
-- Struck-through old values carry screen-reader text ("from … to …"); the strike and arrow are decoration.
+- The card is an \`alertdialog\` labelled by its title; the changes are a real table with row headers, and both actions are real buttons reachable by keyboard in the order shown.
+- Column headers (Setting, Now, After approval) are visually hidden but read out; the strike and arrow are decoration.
 - The "Widens access" tag pairs its colour with an icon and text, so it doesn't depend on colour alone.
 - The resolved row is a status region, so the outcome is announced when the card collapses.
 

@@ -10,7 +10,7 @@ export default function AccessRequestDemo() {
   const [decided, setDecided] = React.useState(false);
 
   return (
-    <div className="flex w-full max-w-sm flex-col items-center gap-3">
+    <div className="flex w-full max-w-xl flex-col items-center gap-3">
       <AccessRequest
         key={run}
         title="Update environment?"

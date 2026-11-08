@@ -19,12 +19,10 @@ A prompt the agent raises when it needs more access than it has — a wider netw
 - Collecting the secret itself. Send the person to a secure form; the card never holds a token or password.
 
 ## Anatomy
-- Header: a lock tile and the request as a question ("Update environment?").
-- Target: the name of what changes, with an ownership badge (Personal, Team, Organization).
+- Header: a lock tile, the request as a question ("Update environment?"), and under it the target's name with an ownership badge (Personal, Team, Organization).
 - Reason: the agent's own sentence in a muted block, captioned with the agent's name ("Claude's reason"), so it reads as a quote, not as a system fact.
-- Changes: one row per setting — label, old value struck through, arrow, new value. A "Widens access" tag marks any row that lets the agent reach more than before.
-- Impact line: who and what the change applies to beyond this moment ("this session and every session that uses this environment").
-- Actions: a full-width primary button named for the effect ("Update environment") and a secondary Deny below it.
+- Changes: a compact table, one row per setting — label, old value struck through, arrow, new value — so values line up for scanning. A "Widens access" tag marks any row that lets the agent reach more than before.
+- Footer: the impact line — who and what the change applies to beyond this moment ("this session and every session that uses this environment") — on the leading side, and the actions on the trailing side: a quiet Deny, then the primary button named for the effect ("Update environment"). On narrow screens the actions can stack full width below the impact line.
 - Resolved state: a single row — "Access updated" with the new values, or "Request denied" and that the agent continues without it.
 
 ## Behavior
@@ -41,8 +39,8 @@ A prompt the agent raises when it needs more access than it has — a wider netw
 - Ask for the narrowest change the task needs; when the agent requests the widest option, the "Widens access" tag and the impact line have to make that plain.
 
 ## Accessibility
-- The card is an `alertdialog` labelled by its title, and both actions are real buttons reachable by keyboard in the order shown.
-- Struck-through old values carry screen-reader text ("from … to …"); the strike and arrow are decoration.
+- The card is an `alertdialog` labelled by its title; the changes are a real table with row headers, and both actions are real buttons reachable by keyboard in the order shown.
+- Column headers (Setting, Now, After approval) are visually hidden but read out; the strike and arrow are decoration.
 - The "Widens access" tag pairs its colour with an icon and text, so it doesn't depend on colour alone.
 - The resolved row is a status region, so the outcome is announced when the card collapses.
 
@@ -170,83 +168,94 @@ export function AccessRequest({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={transition}
-            className="overflow-hidden rounded-3xl border bg-card p-5"
+            className="overflow-hidden rounded-2xl border bg-card"
           >
-            <div className="flex flex-col items-center gap-3 text-center">
-              <span className="flex size-11 items-center justify-center rounded-xl bg-foreground text-background">
-                <LockKeyhole className="size-5" />
+            <header className="flex items-center gap-3 px-5 pt-5">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background">
+                <LockKeyhole className="size-4.5" />
               </span>
-              <h3 id={titleId} className="text-base font-semibold">
-                {title}
-              </h3>
-            </div>
+              <div className="min-w-0 flex-1">
+                <h3 id={titleId} className="text-sm font-semibold">
+                  {title}
+                </h3>
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="truncate">{target.name}</span>
+                  {target.scope && (
+                    <span className="shrink-0 rounded-full bg-muted px-1.5 py-px text-[10px] font-medium">
+                      {target.scope}
+                    </span>
+                  )}
+                </p>
+              </div>
+            </header>
 
-            <div className="mt-4 flex items-center gap-2">
-              <p className="truncate text-sm font-semibold">{target.name}</p>
-              {target.scope && (
-                <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                  {target.scope}
-                </span>
-              )}
-            </div>
-
-            <figure className="mt-3 rounded-xl bg-muted px-3.5 py-2.5">
+            <figure className="mx-5 mt-4 rounded-lg bg-muted px-3.5 py-2.5">
               <figcaption className="text-[11px] text-muted-foreground">{requester}&rsquo;s reason</figcaption>
               <blockquote className="mt-0.5 text-sm">{reason}</blockquote>
             </figure>
 
-            <div className="mt-4">
+            <div className="mx-5 mt-4">
               <p className="text-xs font-medium text-muted-foreground">What changes</p>
-              <ul className="mt-1.5 divide-y overflow-hidden rounded-xl border">
-                {changes.map((change) => (
-                  <li key={change.id} className="px-3.5 py-2.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs text-muted-foreground">{change.label}</span>
-                      {change.widens && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
-                          <TriangleAlert className="size-3" aria-hidden />
-                          Widens access
+              <table className="mt-1.5 w-full border-collapse text-sm">
+                <thead className="sr-only">
+                  <tr>
+                    <th scope="col">Setting</th>
+                    <th scope="col">Now</th>
+                    <th scope="col">After approval</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {changes.map((change) => (
+                    <tr key={change.id} className="border-t first:border-t-0">
+                      <th scope="row" className="py-2 pr-4 text-left text-xs font-normal whitespace-nowrap text-muted-foreground">
+                        {change.label}
+                      </th>
+                      <td className="py-2 pr-2 whitespace-nowrap text-muted-foreground">
+                        {change.from ? (
+                          <span className="line-through decoration-muted-foreground/50">{change.from}</span>
+                        ) : (
+                          <span aria-label="Not set">—</span>
+                        )}
+                      </td>
+                      <td className="w-px py-2 pr-2" aria-hidden>
+                        <ArrowRight className="size-3.5 text-muted-foreground" />
+                      </td>
+                      <td className="py-2">
+                        <span className="inline-flex flex-wrap items-center gap-2">
+                          <span className="font-medium">{change.to}</span>
+                          {change.widens && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+                              <TriangleAlert className="size-3" aria-hidden />
+                              Widens access
+                            </span>
+                          )}
                         </span>
-                      )}
-                    </div>
-                    <p className="mt-1 flex flex-wrap items-center gap-1.5 text-sm">
-                      {change.from && (
-                        <>
-                          <span className="text-muted-foreground line-through decoration-muted-foreground/50">
-                            <span className="sr-only">from </span>
-                            {change.from}
-                          </span>
-                          <ArrowRight className="size-3.5 text-muted-foreground" aria-hidden />
-                        </>
-                      )}
-                      <span className="font-medium">
-                        <span className="sr-only">{change.from ? "to " : "add "}</span>
-                        {change.to}
-                      </span>
-                    </p>
-                  </li>
-                ))}
-              </ul>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
 
-            <p className="mt-3 text-xs text-muted-foreground">{impact}</p>
-
-            <div className="mt-4 flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={() => decide("approve")}
-                className="w-full rounded-full bg-foreground px-4 py-2.5 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
-              >
-                {approveLabel}
-              </button>
-              <button
-                type="button"
-                onClick={() => decide("deny")}
-                className="w-full rounded-full border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
-              >
-                {denyLabel}
-              </button>
-            </div>
+            <footer className="mt-4 flex items-center gap-4 border-t bg-muted/40 px-5 py-3">
+              <p className="min-w-0 flex-1 text-xs text-muted-foreground">{impact}</p>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => decide("deny")}
+                  className="rounded-full px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  {denyLabel}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => decide("approve")}
+                  className="rounded-full bg-foreground px-4 py-1.5 text-xs font-medium text-background transition-colors hover:bg-foreground/90"
+                >
+                  {approveLabel}
+                </button>
+              </div>
+            </footer>
           </motion.section>
         )}
       </AnimatePresence>
