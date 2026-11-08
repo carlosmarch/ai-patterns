@@ -1,16 +1,16 @@
-# Weekly research scout (method 3.1 on /research): searches shipping products'
+# Research scout (method 3.1 on /research): searches shipping products'
 # changelogs, help centres and docs for new AI interface patterns, codes them
 # against the registry, and opens a PR with the report in research/scout/.
 #
 # Needs the ANTHROPIC_API_KEY repository secret, and "Allow GitHub Actions to
 # create and approve pull requests" under Settings → Actions → General.
-# Without the secret every step is skipped and the run passes: the weekly
-# Claude Code scheduled task does the scouting instead.
+# Without the secret every step is skipped and the run passes.
+#
+# Manual only: the weekly schedule is off. Run it from the Actions tab
+# ("Run workflow"), or add back `schedule: - cron: "17 6 * * 1"` under `on:`.
 name: Research scout
 
 on:
-  schedule:
-    - cron: "17 6 * * 1" # Mondays 06:17 UTC
   workflow_dispatch:
     inputs:
       days:
@@ -34,7 +34,7 @@ jobs:
     steps:
       - name: Skip without an API key
         if: env.HAS_KEY != 'true'
-        run: echo "ANTHROPIC_API_KEY is not set; skipping (the scheduled Claude Code task scouts instead)."
+        run: echo "ANTHROPIC_API_KEY is not set; skipping."
 
       - uses: actions/checkout@v4
         if: env.HAS_KEY == 'true'

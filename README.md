@@ -150,7 +150,7 @@ Open [http://localhost:3000](http://localhost:3000).
 2. **Analyse** — a second call codes every finding against the inclusion criteria and the current registry: a **new candidate** (with category, job, nearest entry and evidence), a **new source** for an existing pattern's `seenIn`, or **rejected** with the failing criterion.
 3. **Report** — `research/scout/<date>.md`, with `research/scout/state.json` remembering open candidates so later runs add evidence instead of re-proposing them.
 
-It never edits the registry. `.github/workflows/scout.yml` runs it every Monday (or on demand, with an optional lookback) and opens a PR with the report. It needs an `ANTHROPIC_API_KEY` repository secret and "Allow GitHub Actions to create and approve pull requests" enabled.
+It never edits the registry. `.github/workflows/scout.yml` runs it on demand (with an optional lookback; the weekly schedule is off) and opens a PR with the report. It needs an `ANTHROPIC_API_KEY` repository secret and "Allow GitHub Actions to create and approve pull requests" enabled.
 
 ```bash
 ANTHROPIC_API_KEY=… npm run scout -- --days 30 --dry-run
