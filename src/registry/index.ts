@@ -187,6 +187,12 @@ import { pattern as collaborativePresencePattern } from "./collaboration/collabo
 import InviteMembersDemo from "./access/invite-members/demo";
 import InviteMembersThumbnail from "./access/invite-members/thumbnail";
 import { pattern as inviteMembersPattern } from "./access/invite-members/pattern";
+import ArchivedSessionDemo from "./agents/archived-session/demo";
+import ArchivedSessionThumbnail from "./agents/archived-session/thumbnail";
+import { pattern as archivedSessionPattern } from "./agents/archived-session/pattern";
+import ShareSessionDemo from "./access/share-session/demo";
+import ShareSessionThumbnail from "./access/share-session/thumbnail";
+import { pattern as shareSessionPattern } from "./access/share-session/pattern";
 import AnalysisListDemo from "./loaders/analysis-list/demo";
 import AnalysisListThumbnail from "./loaders/analysis-list/thumbnail";
 import { pattern as analysisListPattern } from "./loaders/analysis-list/pattern";
@@ -1518,6 +1524,35 @@ export const registry: RegistryEntry[] = [
     uxDoc: rejectedPromptRestorePattern,
     seenIn: [
       { team: "windsurf", source: "https://docs.devin.ai/desktop/changelog" },
+    ],
+  },  {
+    slug: "archived-session",
+    category: "agents",
+    added: "2026-11-08T17:40Z",
+    job: "recover",
+    title: "Archived Session",
+    description:
+      "A muted banner takes the composer's place in an archived agent session; the transcript stays readable and one Unarchive button makes it writable again in place.",
+    Demo: ArchivedSessionDemo,
+    Thumbnail: ArchivedSessionThumbnail,
+    uxDoc: archivedSessionPattern,
+    seenIn: [
+      { team: "claude", source: "https://code.claude.com/docs/en/claude-code-on-the-web" },
+    ],
+  },
+  {
+    slug: "share-session",
+    category: "access",
+    added: "2026-11-08T17:41Z",
+    job: "trust",
+    title: "Share Session",
+    description:
+      "A dialog for making an agent session Private or Public via link, with a warning about what it would expose (like code from a private repository) shown before the choice.",
+    Demo: ShareSessionDemo,
+    Thumbnail: ShareSessionThumbnail,
+    uxDoc: shareSessionPattern,
+    seenIn: [
+      { team: "claude", source: "https://code.claude.com/docs/en/claude-code-on-the-web" },
     ],
   },
 ];

@@ -1,0 +1,263 @@
+"use client";
+
+import * as React from "react";
+import { createPortal } from "react-dom";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { Check, ExternalLink, Link2, ShieldCheck, TriangleAlert, X } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+
+export type ShareVisibility = "private" | "public";
+
+export interface ShareSessionDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  visibility: ShareVisibility;
+  /** Called when the person picks an option. Resolve when it has been saved. */
+  onVisibilityChange: (visibility: ShareVisibility) => Promise<void> | void;
+  /** The link to copy once the session is public. */
+  shareUrl: string;
+  /**
+   * A warning about what going public exposes, in one or two sentences
+   * ("This session comes from a private repository. Sharing it can expose the
+   * code to anyone with the link."). Shown whenever it is set.
+   */
+  exposureWarning?: string;
+  title?: string;
+  description?: string;
+  /** Usage-policy line under the options; pass a node to include a link. */
+  policyNote?: React.ReactNode;
+}
+
+const OPTIONS: {
+  value: ShareVisibility;
+  label: string;
+  description: string;
+  Icon: typeof ShieldCheck;
+}[] = [
+  { value: "private", label: "Private", description: "Only you have access", Icon: ShieldCheck },
+  { value: "public", label: "Public", description: "Anyone with the link can view", Icon: ExternalLink },
+];
+
+function useMounted() {
+  return React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
+
+/**
+ * A small dialog for choosing who can see an agent session: Private or
+ * Public via link. A warning about what the session would expose stays in
+ * view before the choice is made, and the link appears only once it works.
+ */
+export function ShareSessionDialog({
+  open,
+  onOpenChange,
+  visibility,
+  onVisibilityChange,
+  shareUrl,
+  exposureWarning,
+  title = "Share session",
+  description = "Show your work and how you build with the agent.",
+  policyNote,
+}: ShareSessionDialogProps) {
+  const mounted = useMounted();
+  const reduce = useReducedMotion();
+  const titleId = React.useId();
+  const descId = React.useId();
+  const warningId = React.useId();
+  const dialogRef = React.useRef<HTMLDivElement>(null);
+  const [saving, setSaving] = React.useState<ShareVisibility | null>(null);
+  const [copied, setCopied] = React.useState(false);
+
+  // Focus the selected option on open; restore focus to the trigger on close.
+  React.useEffect(() => {
+    if (!open) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const id = window.requestAnimationFrame(() => {
+      dialogRef.current?.querySelector<HTMLElement>("[role='radio'][aria-checked='true']")?.focus();
+    });
+    return () => {
+      window.cancelAnimationFrame(id);
+      previous?.focus();
+    };
+  }, [open]);
+
+  React.useEffect(() => {
+    if (!copied) return;
+    const t = window.setTimeout(() => setCopied(false), 1600);
+    return () => window.clearTimeout(t);
+  }, [copied]);
+
+  async function choose(next: ShareVisibility) {
+    if (next === visibility || saving) return;
+    setSaving(next);
+    try {
+      await onVisibilityChange(next);
+    } finally {
+      setSaving(null);
+    }
+  }
+
+  function onKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      onOpenChange(false);
+      return;
+    }
+    if (e.key === "Tab") {
+      // Keep focus inside the dialog.
+      const items = Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>("button:not([disabled]), a[href], [tabindex='0']") ?? [],
+      );
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }
+
+  function onRadioKey(e: React.KeyboardEvent, index: number) {
+    if (!["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
+    e.preventDefault();
+    const step = e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : -1;
+    const next = OPTIONS[(index + step + OPTIONS.length) % OPTIONS.length];
+    choose(next.value);
+    dialogRef.current?.querySelector<HTMLElement>(`[data-value='${next.value}']`)?.focus();
+  }
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="share-session"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+        >
+          <div className="absolute inset-0 bg-black/40" aria-hidden onClick={() => onOpenChange(false)} />
+          <motion.div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            aria-describedby={descId}
+            onKeyDown={onKeyDown}
+            initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 8 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="relative w-full max-w-md rounded-2xl border bg-popover p-5 text-popover-foreground shadow-xl"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <h2 id={titleId} className="text-base font-semibold">
+                {title}
+              </h2>
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="-m-1 rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              >
+                <X className="size-4" aria-hidden />
+                <span className="sr-only">Close</span>
+              </button>
+            </div>
+            <p id={descId} className="mt-1.5 text-sm text-muted-foreground">
+              {description}
+            </p>
+
+            <div role="radiogroup" aria-label="Who can see this session" className="mt-4 flex flex-col gap-1">
+              {OPTIONS.map(({ value, label, description: optionDescription, Icon }, index) => {
+                const selected = visibility === value;
+                const isSaving = saving === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    data-value={value}
+                    aria-checked={selected}
+                    aria-describedby={value === "public" && exposureWarning ? warningId : undefined}
+                    tabIndex={selected ? 0 : -1}
+                    onClick={() => choose(value)}
+                    onKeyDown={(e) => onRadioKey(e, index)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors",
+                      selected ? "bg-muted" : "hover:bg-muted/50",
+                    )}
+                  >
+                    <Icon className="size-4 shrink-0" aria-hidden />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm">{label}</span>
+                      <span className="block text-xs text-muted-foreground">{optionDescription}</span>
+                    </span>
+                    <span className="flex size-4 shrink-0 items-center justify-center">
+                      {isSaving ? (
+                        <span className="size-3 animate-spin rounded-full border-[1.5px] border-current border-t-transparent text-muted-foreground motion-reduce:animate-none" />
+                      ) : (
+                        selected && !saving && <Check className="size-4 text-sky-600 dark:text-sky-400" aria-hidden />
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <AnimatePresence initial={false}>
+              {visibility === "public" && !saving && (
+                <motion.div
+                  key="link"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: reduce ? 0 : 0.18 }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-3 flex items-center gap-2 rounded-xl border px-3 py-2">
+                    <Link2 className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+                    <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground">{shareUrl}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard?.writeText(shareUrl).catch(() => {});
+                        setCopied(true);
+                      }}
+                      className="shrink-0 rounded-md px-2 py-1 text-xs font-medium transition-colors hover:bg-accent"
+                    >
+                      {copied ? "Copied" : "Copy link"}
+                    </button>
+                  </div>
+                  <span className="sr-only" aria-live="polite">
+                    {copied ? "Link copied" : ""}
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {policyNote && <p className="mt-4 text-xs text-muted-foreground">{policyNote}</p>}
+
+            {exposureWarning && (
+              <div id={warningId} className="mt-4 flex items-start gap-2.5 rounded-xl border px-3 py-3">
+                <TriangleAlert className="mt-0.5 size-4 shrink-0 text-amber-500" aria-hidden />
+                <p className="text-sm">{exposureWarning}</p>
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body,
+  );
+}
