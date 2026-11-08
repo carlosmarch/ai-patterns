@@ -425,6 +425,49 @@ function fakeEnhance(prompt: string) {
   );
 }
 
+/**
+ * The phone-sized frame every Playground tab tests in: optional controls and
+ * a hint above, then the agent header, a body, and a footer bar — so Chat,
+ * Voice and Relay read as the same device in three modes.
+ */
+function PlaygroundFrame({
+  controls,
+  hint,
+  subtitle = "Testing with unpublished changes",
+  children,
+  footer,
+  bodyClassName,
+}: {
+  controls?: React.ReactNode;
+  hint: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+  bodyClassName?: string;
+}) {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col items-center gap-3 bg-muted/30 p-4 sm:p-8">
+      <div className="flex w-full max-w-md flex-col gap-1.5">
+        {controls}
+        <p className="px-1 text-xs text-muted-foreground">{hint}</p>
+      </div>
+      <div className="flex min-h-0 w-full max-w-md flex-1 flex-col overflow-hidden rounded-3xl border bg-background shadow-sm">
+        <div className="flex items-center gap-2 border-b px-4 py-3">
+          <span className="flex size-7 items-center justify-center rounded-full bg-foreground text-background">
+            <AGENT_ICON className="size-4" />
+          </span>
+          <div className="leading-tight">
+            <p className="text-sm font-medium">{AGENT_NAME}</p>
+            <p className="text-xs tabular-nums text-muted-foreground">{subtitle}</p>
+          </div>
+        </div>
+        <div className={cn("min-h-0 flex-1 overflow-y-auto", bodyClassName)}>{children}</div>
+        {footer && <div className="border-t p-3">{footer}</div>}
+      </div>
+    </div>
+  );
+}
+
 const DICTATION = "Which pattern should I use when a tool call takes thirty seconds?";
 
 /** Voice input for the chat: Listening State while the mic opens, then a dotted waveform as words land in the field. */
@@ -635,8 +678,9 @@ function ChatPlayground() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col items-center gap-3 bg-muted/30 p-4 sm:p-8">
-      <div className="flex w-full max-w-md flex-col gap-1.5">
+    <PlaygroundFrame
+      hint={active.hint}
+      controls={
         <div role="radiogroup" aria-label="Composer" className="flex flex-wrap gap-1.5">
           {COMPOSERS.map((c) => (
             <button
@@ -658,52 +702,42 @@ function ChatPlayground() {
             </button>
           ))}
         </div>
-        <p className="px-1 text-xs text-muted-foreground">{active.hint}</p>
-      </div>
-      <div className="flex min-h-0 w-full max-w-md flex-1 flex-col overflow-hidden rounded-3xl border bg-background shadow-sm">
-        <div className="flex items-center gap-2 border-b px-4 py-3">
-          <span className="flex size-7 items-center justify-center rounded-full bg-foreground text-background">
-            <AGENT_ICON className="size-4" />
-          </span>
-          <div className="leading-tight">
-            <p className="text-sm font-medium">{AGENT_NAME}</p>
-            <p className="text-xs text-muted-foreground">Testing with unpublished changes</p>
-          </div>
-        </div>
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-          {messages.map((m) => (
-            <ChatBubble key={m.id} role={m.role} content={m.text} />
-          ))}
-          {generating && <ThinkingLoader className="w-full" />}
-          <div ref={bottom} />
-        </div>
-        {composer !== "basic" ? (
-          <div className="border-t p-3">{input}</div>
+      }
+      bodyClassName="space-y-4 p-4"
+      footer={
+        composer !== "basic" ? (
+          input
         ) : (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            send();
-          }}
-          className="flex items-center gap-2 border-t p-3"
-        >
-          <input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Ask as a user would…"
-            aria-label="Message"
-            className="min-w-0 flex-1 bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground"
-          />
-          <StopGenerationButton
-            state={generating ? "generating" : "idle"}
-            disabled={!generating && !draft.trim()}
-            onSubmit={() => send()}
-            onStop={stop}
-          />
-        </form>
-        )}
-      </div>
-    </div>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              send();
+            }}
+            className="flex items-center gap-2"
+          >
+            <input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Ask as a user would…"
+              aria-label="Message"
+              className="min-w-0 flex-1 bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground"
+            />
+            <StopGenerationButton
+              state={generating ? "generating" : "idle"}
+              disabled={!generating && !draft.trim()}
+              onSubmit={() => send()}
+              onStop={stop}
+            />
+          </form>
+        )
+      }
+    >
+      {messages.map((m) => (
+        <ChatBubble key={m.id} role={m.role} content={m.text} />
+      ))}
+      {generating && <ThinkingLoader className="w-full" />}
+      <div ref={bottom} />
+    </PlaygroundFrame>
   );
 }
 
@@ -783,59 +817,65 @@ function VoicePlayground() {
   }
 
   const orbState = call === "off" || muted ? "idle" : call;
+  const [seconds, setSeconds] = React.useState(0);
+  React.useEffect(() => {
+    if (call === "off") return;
+    const id = window.setInterval(() => setSeconds((n) => n + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [call === "off"]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <Scroll className="bg-muted/30 p-4 sm:p-8">
-      <div className="mx-auto w-full max-w-md overflow-hidden rounded-3xl border bg-background">
-        <div className="flex flex-col items-center gap-4 p-6">
-          <VoiceOrb state={orbState} className="h-56 w-full text-foreground dark:text-orange-50" />
-          <p aria-live="polite" className="h-5 text-sm text-muted-foreground">
-            {call === "off" ? `Talk to ${AGENT_NAME} the way your users would` : muted ? "Muted" : `${CALL_LABEL[call]}…`}
-          </p>
-          {call === "off" ? (
+    <PlaygroundFrame
+      hint="A scripted test call. The orb shows whether Origami is listening, thinking or speaking."
+      subtitle={call === "off" ? "Testing with unpublished changes" : `Voice call · ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`}
+      bodyClassName="flex flex-col"
+      footer={
+        call === "off" ? (
+          <button
+            type="button"
+            onClick={() => {
+              setSeconds(0);
+              start();
+            }}
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+          >
+            <Mic className="size-4" />
+            {segments.length ? "Call again" : CALL_LABEL.off}
+          </button>
+        ) : (
+          <div className="flex items-center justify-center gap-2">
             <button
               type="button"
-              onClick={start}
-              className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+              onClick={toggleMute}
+              aria-pressed={muted}
+              className={cn("flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm transition-colors hover:bg-accent", muted && "bg-accent")}
             >
-              <Mic className="size-4" />
-              {segments.length ? "Call again" : CALL_LABEL.off}
+              {muted ? <MicOff className="size-4" /> : <Mic className="size-4" />}
+              {muted ? "Unmute" : "Mute"}
             </button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={toggleMute}
-                aria-pressed={muted}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm transition-colors hover:bg-accent",
-                  muted && "bg-accent"
-                )}
-              >
-                {muted ? <MicOff className="size-4" /> : <Mic className="size-4" />}
-                {muted ? "Unmute" : "Mute"}
-              </button>
-              <button
-                type="button"
-                onClick={end}
-                className="flex items-center gap-1.5 rounded-full bg-red-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
-              >
-                <PhoneOff className="size-4" />
-                End
-              </button>
-            </div>
-          )}
-        </div>
-        {/* The transcript is the record of this call, so it lives on the same surface as the orb. */}
-        {segments.length > 0 && (
-          <LiveTranscript
-            segments={segments}
-            active={call === "listening" && !muted}
-            className="rounded-none border-0 border-t bg-transparent"
-          />
-        )}
+            <button
+              type="button"
+              onClick={end}
+              className="flex items-center gap-1.5 rounded-full bg-red-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+            >
+              <PhoneOff className="size-4" />
+              End
+            </button>
+          </div>
+        )
+      }
+    >
+      <div className={cn("flex shrink-0 flex-col items-center gap-2 px-4 pt-4", segments.length === 0 && "flex-1 justify-center")}>
+        <VoiceOrb state={orbState} className="h-52 w-full text-foreground dark:text-orange-50" />
+        <p aria-live="polite" className="h-5 pb-3 text-sm text-muted-foreground">
+          {call === "off" ? `Talk to ${AGENT_NAME} the way your users would` : muted ? "Muted" : `${CALL_LABEL[call]}…`}
+        </p>
       </div>
-    </Scroll>
+      {/* The transcript is the record of this call, so it shares the frame with the orb. */}
+      {segments.length > 0 && (
+        <LiveTranscript segments={segments} active={call === "listening" && !muted} className="rounded-none border-0 border-t bg-transparent" />
+      )}
+    </PlaygroundFrame>
   );
 }
 
@@ -872,50 +912,51 @@ function RelayPlayground() {
     setOnCall(true);
   }
 
+  const elapsed = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+
   return (
-    <Scroll className="bg-muted/30 p-4 sm:p-8">
-      <div className="mx-auto flex w-full max-w-md flex-col gap-3">
-        <div>
-          <h3 className="font-semibold tracking-tight">Talk while {AGENT_NAME} works</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            A voice agent takes the request, hands it to {AGENT_NAME}, and reads progress back — without making you watch the thread.
+    <PlaygroundFrame
+      hint={`Talk while ${AGENT_NAME} works: a voice agent hands your request over and reads progress back.`}
+      subtitle={onCall ? `Voice relay · ${elapsed}` : "Testing with unpublished changes"}
+      bodyClassName="flex flex-col"
+      footer={
+        onCall ? undefined : (
+          <button
+            type="button"
+            onClick={start}
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+          >
+            <AudioLines className="size-4" />
+            {run ? "Call again" : "Start a scripted call"}
+          </button>
+        )
+      }
+    >
+      {onCall ? (
+        // On a call the relay's own bar (state, waveform, mute, end) is the frame's footer.
+        <VoiceAgentRelay
+          state={state}
+          items={items}
+          run={run}
+          elapsed={elapsed}
+          onToggleMute={() => {
+            muted.current = !muted.current;
+            setState(muted.current ? "muted" : "listening");
+          }}
+          onEnd={() => setOnCall(false)}
+          className="flex-1 rounded-none border-0 bg-transparent [&>*:last-child]:mt-auto"
+        />
+      ) : (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+          <span className="flex size-12 items-center justify-center rounded-full bg-muted">
+            <AudioLines className="size-5" />
+          </span>
+          <p className="max-w-64 text-sm text-muted-foreground">
+            {run?.status === "done" ? `Call ended · ${AGENT_NAME}'s full reply and diff are in Operator.` : "Ask for a change out loud and keep talking while it runs."}
           </p>
         </div>
-        <div className="overflow-hidden rounded-2xl border bg-card">
-        {onCall ? (
-          <VoiceAgentRelay
-            state={state}
-            items={items}
-            run={run}
-            elapsed={`${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`}
-            onToggleMute={() => {
-              muted.current = !muted.current;
-              setState(muted.current ? "muted" : "listening");
-            }}
-            onEnd={() => setOnCall(false)}
-            className="rounded-none border-0 bg-transparent"
-          />
-        ) : (
-          <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
-            <span className="flex size-12 items-center justify-center rounded-full bg-muted">
-              <AudioLines className="size-5" />
-            </span>
-            <p className="text-sm text-muted-foreground">
-              {run?.status === "done" ? `Call ended · ${AGENT_NAME}'s full reply and diff are in Operator.` : "No call yet."}
-            </p>
-            <button
-              type="button"
-              onClick={start}
-              className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-            >
-              <AudioLines className="size-4" />
-              {run ? "Call again" : "Start a scripted call"}
-            </button>
-          </div>
-        )}
-        </div>
-      </div>
-    </Scroll>
+      )}
+    </PlaygroundFrame>
   );
 }
 
