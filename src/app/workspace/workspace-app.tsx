@@ -59,6 +59,7 @@ import {
   AUTONOMY_CAPABILITIES,
   AUTONOMY_MODES,
   COMPOSER_COMMANDS,
+  COMPOSER_CONTEXTS,
   COMPOSER_SOURCES,
   CONTEXT_LIMIT,
   EXPLORE_FOLLOW_UPS,
@@ -175,6 +176,13 @@ type Flow =
 function flowFor(prompt: string): Flow {
   const p = prompt.toLowerCase();
   // The guided journey's three steps come first, so "Ship it" is never read as something else.
+  // The composer's / commands, the same three ways in as Home.
+  if (p.startsWith("/audit")) return { kind: "audit" };
+  if (p.startsWith("/investigate")) return { kind: "spike" };
+  if (p.startsWith("/spec")) {
+    const topic = prompt.trim().slice(5).trim() || "New Pattern";
+    return { kind: "spec", topic: topic.replace(/\b\w/g, (c) => c.toUpperCase()) };
+  }
   if (p === JOURNEY.audit.toLowerCase() || /\baudit\b.*\bscreen\b/.test(p)) return { kind: "audit" };
   if (p === JOURNEY.fix.toLowerCase()) return { kind: "fix" };
   if (p === JOURNEY.ship.toLowerCase()) return { kind: "ship" };
@@ -215,7 +223,7 @@ export function WorkspaceApp() {
   const [tasksOpen, setTasksOpen] = React.useState(false);
   const [tasks, setTasks] = React.useState<BackgroundTask[]>([]);
   const [mobileNav, setMobileNav] = React.useState(false);
-  const [trainTab, setTrainTab] = React.useState<TrainTab>("procedures");
+  const [trainTab, setTrainTab] = React.useState<TrainTab>("guidelines");
   const [playgroundTab, setPlaygroundTab] = React.useState<PlaygroundTab>("chat");
   const [connectors, setConnectors] = React.useState<ConnectorDef[]>(CONNECTORS);
   const [skillDone, setSkillDone] = React.useState(false);
@@ -1385,14 +1393,9 @@ const COMPOSER_PROPS = {
   suggestions: [],
   sources: COMPOSER_SOURCES,
   commands: COMPOSER_COMMANDS,
-  environments: [
-    { id: "repo", label: "carlosmarch/ai-patterns" },
-    { id: "figma", label: "Figma · Chat screen v2" },
-  ],
-  orchestrators: [
-    { id: "origami", label: AGENT_NAME },
-    { id: "reviewer", label: "Spec reviewer" },
-  ],
+  environments: COMPOSER_CONTEXTS,
+  // The agent is always Origami; model and autonomy sit under the thread composer instead.
+  orchestrators: [],
 };
 
 /**
@@ -1697,7 +1700,7 @@ function ThreadPane({
           <div ref={bottomRef} />
         </div>
       </div>
-      <div className="shrink-0 border-t bg-background/80 px-6 pb-4 pt-4 backdrop-blur">
+      <div className="shrink-0 bg-background px-6 pb-4 pt-2">
         {composer}
       </div>
     </div>

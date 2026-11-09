@@ -3,6 +3,7 @@
 import * as React from "react";
 import {
   AudioLines,
+  ArrowLeft,
   ArrowRight,
   ArrowUp,
   Bot,
@@ -10,6 +11,7 @@ import {
   ChartColumn,
   Check,
   ChevronDown,
+  ChevronRight,
   Copy,
   CircleCheck,
   CircleDashed,
@@ -44,7 +46,6 @@ import { CreateAgent } from "@/registry/agents/create-agent/component";
 import { Flowchart, type FlowchartNode } from "@/registry/flowcharts/trigger-condition/component";
 import { InviteMembers } from "@/registry/access/invite-members/component";
 import { InstructionTools } from "@/registry/agents/instruction-tools/component";
-import { ListeningState } from "@/registry/voice/listening-state/component";
 import { LiveTranscript, type TranscriptSegment } from "@/registry/voice/live-transcript/component";
 import { ProcedureBuilder } from "@/registry/agents/procedure-builder/component";
 import { ShinyButton } from "@/registry/buttons/shiny-button/component";
@@ -205,13 +206,12 @@ function Modal({
 export type TrainTab = "procedures" | "guidelines" | "memory";
 export type PlaygroundTab = "chat" | "voice" | "relay";
 
+/**
+ * Train teaches the agent in three plain lists: house rules, step-by-step
+ * procedures and what it remembers. Procedures open their editor only once
+ * you pick one, so the IF/ELSE builder never greets you on arrival.
+ */
 export function TrainView({ tab, onTabChange: setTab }: { tab: TrainTab; onTabChange: (tab: TrainTab) => void }) {
-  const [selected, setSelected] = React.useState(PROCEDURES[0].id);
-  const [saved, setSaved] = React.useState(true);
-  // The builder reports its initial steps on mount; only later edits count as unsaved.
-  const mountedChange = React.useRef(false);
-  const procedure = PROCEDURES.find((p) => p.id === selected)!;
-
   return (
     <>
       <ViewHeader title="Train">
@@ -219,93 +219,118 @@ export function TrainView({ tab, onTabChange: setTab }: { tab: TrainTab; onTabCh
           value={tab}
           onChange={setTab}
           items={[
-            { id: "procedures", label: "Procedures" },
             { id: "guidelines", label: "Guidelines" },
+            { id: "procedures", label: "Procedures" },
             { id: "memory", label: "Memory" },
           ]}
         />
       </ViewHeader>
-      {tab === "memory" ? (
-        <MemoryTab />
-      ) : tab === "procedures" ? (
-        <div className="flex min-h-0 flex-1">
-          <aside className="hidden w-64 shrink-0 flex-col gap-1 overflow-y-auto border-r p-3 xl:flex">
+      {tab === "memory" ? <MemoryTab /> : tab === "procedures" ? <ProceduresTab /> : <GuidelinesTab />}
+    </>
+  );
+}
+
+function GuidelinesTab() {
+  return (
+    <Scroll className="px-6 py-8">
+      <div className="mx-auto max-w-2xl space-y-4 pb-56">
+        <div>
+          <h3 className="text-xl font-semibold tracking-tight">House rules</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {AGENT_NAME} applies these to every audit and spec. Type <span className="font-mono">/</span> to reference a tool.
+          </p>
+        </div>
+        <InstructionTools
+          tools={GUIDELINE_TOOLS}
+          defaultSteps={[
+            "Before suggesting a new component, search the registry for an existing pattern that fits. ",
+            "Every loading state must resolve into a result — never leave a spinner on screen after the work ends.",
+            "Respect reduced motion: shimmer and sweep effects turn into a static label.",
+          ]}
+          className="rounded-2xl border bg-card p-4"
+        />
+      </div>
+    </Scroll>
+  );
+}
+
+function ProceduresTab() {
+  const [selected, setSelected] = React.useState<string | null>(null);
+  const [saved, setSaved] = React.useState(true);
+  // The builder reports its initial steps on mount; only later edits count as unsaved.
+  const mountedChange = React.useRef(false);
+  const procedure = PROCEDURES.find((p) => p.id === selected);
+
+  if (!procedure) {
+    return (
+      <Scroll className="px-6 py-8">
+        <div className="mx-auto max-w-2xl">
+          <h3 className="text-xl font-semibold tracking-tight">Procedures</h3>
+          <p className="mt-1 text-sm text-muted-foreground">Step-by-step playbooks {AGENT_NAME} follows when a thread matches one.</p>
+          <ul className="mt-5 divide-y rounded-2xl border bg-card">
             {PROCEDURES.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => {
-                  mountedChange.current = false;
-                  setSaved(true);
-                  setSelected(p.id);
-                }}
-                className={cn(
-                  "rounded-lg px-3 py-2 text-left transition-colors",
-                  selected === p.id ? "bg-accent" : "hover:bg-accent/60"
-                )}
-              >
-                <span className="flex items-center gap-2 text-sm font-medium">
-                  <span className={cn("size-1.5 rounded-full", p.live ? "bg-emerald-500" : "bg-muted-foreground/40")} />
-                  {p.title}
-                </span>
-                <span className="mt-0.5 block pl-3.5 text-xs text-muted-foreground">{p.usage}</span>
-              </button>
-            ))}
-          </aside>
-          <Scroll className="px-6 py-6">
-            <div className="mx-auto max-w-2xl">
-              <div className="mb-6 flex items-start justify-between gap-4">
-                <div>
-                  <h3 className="text-xl font-semibold tracking-tight">{procedure.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {AGENT_NAME} follows these steps whenever a thread matches this procedure.
-                  </p>
-                </div>
+              <li key={p.id}>
                 <button
                   type="button"
-                  disabled={saved}
-                  onClick={() => setSaved(true)}
-                  className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-opacity disabled:opacity-40"
+                  onClick={() => {
+                    mountedChange.current = false;
+                    setSaved(true);
+                    setSelected(p.id);
+                  }}
+                  className="group flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-accent/40"
                 >
-                  {saved ? "Saved" : "Save"}
+                  <span className={cn("size-1.5 shrink-0 rounded-full", p.live ? "bg-emerald-500" : "bg-muted-foreground/40")} aria-hidden />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium">{p.title}</span>
+                    <span className="block text-xs text-muted-foreground">{p.live ? p.usage : "Draft"}</span>
+                  </span>
+                  <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
                 </button>
-              </div>
-              <ProcedureBuilder
-                key={selected}
-                agentName={AGENT_NAME}
-                initialSteps={selected === "review" ? PROCEDURE_STEPS : []}
-                targets={PROCEDURE_TARGETS}
-                onChange={() => {
-                  if (mountedChange.current) setSaved(false);
-                  mountedChange.current = true;
-                }}
-              />
-            </div>
-          </Scroll>
+              </li>
+            ))}
+          </ul>
         </div>
-      ) : (
-        <Scroll className="px-6 py-6">
-          <div className="mx-auto max-w-2xl space-y-4 pb-56">
-            <div>
-              <h3 className="text-xl font-semibold tracking-tight">Design guidelines</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                House rules {AGENT_NAME} applies to every audit and spec. Type <span className="font-mono">/</span> to
-                reference a tool.
-              </p>
-            </div>
-            <InstructionTools
-              tools={GUIDELINE_TOOLS}
-              defaultSteps={[
-                "Before suggesting a new component, search the registry for an existing pattern that fits. ",
-                "Every loading state must resolve into a result — never leave a spinner on screen after the work ends.",
-                "Respect reduced motion: shimmer and sweep effects turn into a static label.",
-              ]}
-              className="rounded-2xl border bg-card p-4"
-            />
+      </Scroll>
+    );
+  }
+
+  return (
+    <Scroll className="px-6 py-6">
+      <div className="mx-auto max-w-2xl">
+        <button
+          type="button"
+          onClick={() => setSelected(null)}
+          className="-ml-2 flex items-center gap-1 rounded-full px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        >
+          <ArrowLeft className="size-3.5" />
+          All procedures
+        </button>
+        <div className="mb-6 mt-3 flex items-start justify-between gap-4">
+          <div>
+            <h3 className="text-xl font-semibold tracking-tight">{procedure.title}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{procedure.usage}</p>
           </div>
-        </Scroll>
-      )}
-    </>
+          <button
+            type="button"
+            disabled={saved}
+            onClick={() => setSaved(true)}
+            className="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-opacity disabled:opacity-40"
+          >
+            {saved ? "Saved" : "Save"}
+          </button>
+        </div>
+        <ProcedureBuilder
+          key={procedure.id}
+          agentName={AGENT_NAME}
+          initialSteps={procedure.id === "review" ? PROCEDURE_STEPS : []}
+          targets={PROCEDURE_TARGETS}
+          onChange={() => {
+            if (mountedChange.current) setSaved(false);
+            mountedChange.current = true;
+          }}
+        />
+      </div>
+    </Scroll>
   );
 }
 
@@ -464,7 +489,7 @@ function PlaygroundFrame({
 
 const DICTATION = "Which pattern should I use when a tool call takes thirty seconds?";
 
-/** Voice input for the chat: Listening State while the mic opens, then a dotted waveform as words land in the field. */
+/** Voice input for the chat: the field becomes a voice line while you talk, and the words land in it when you stop. */
 function DictationComposer({
   value,
   onChange,
@@ -476,7 +501,7 @@ function DictationComposer({
   onSubmit: (value: string) => void;
   disabled?: boolean;
 }) {
-  const [phase, setPhase] = React.useState<"idle" | "opening" | "capturing">("idle");
+  const [phase, setPhase] = React.useState<"idle" | "capturing">("idle");
   const timers = React.useRef<number[]>([]);
   const clear = () => {
     timers.current.forEach(window.clearTimeout);
@@ -487,11 +512,10 @@ function DictationComposer({
   function startDictation() {
     clear();
     onChange("");
-    setPhase("opening");
+    setPhase("capturing");
     const words = DICTATION.split(" ");
-    timers.current.push(window.setTimeout(() => setPhase("capturing"), 1200));
-    words.forEach((_, i) => timers.current.push(window.setTimeout(() => onChange(words.slice(0, i + 1).join(" ")), 1500 + i * 180)));
-    timers.current.push(window.setTimeout(() => setPhase("idle"), 1500 + words.length * 180 + 300));
+    words.forEach((_, i) => timers.current.push(window.setTimeout(() => onChange(words.slice(0, i + 1).join(" ")), 400 + i * 180)));
+    timers.current.push(window.setTimeout(() => setPhase("idle"), 400 + words.length * 180 + 300));
   }
 
   function stop() {
@@ -501,52 +525,46 @@ function DictationComposer({
 
   return (
     <div className="flex flex-col gap-2">
-      {phase === "opening" ? (
-        <div className="flex min-h-12 items-center justify-center rounded-2xl border px-3 py-2">
-          <ListeningState label="Listening…" showTimer onStop={stop} />
-        </div>
-      ) : (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (value.trim() && !disabled) onSubmit(value);
-          }}
-          className="flex items-center gap-2 rounded-2xl border px-3 py-2"
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (value.trim() && !disabled) onSubmit(value);
+        }}
+        className="flex items-center gap-2 rounded-2xl border px-3 py-2"
+      >
+        {phase === "capturing" ? (
+          <VoiceWaveform state="listening" variant="dots" className="h-8 min-w-0 flex-1" />
+        ) : (
+          <input
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Type, or press the mic and talk…"
+            aria-label="Message"
+            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          />
+        )}
+        <button
+          type="button"
+          onClick={phase === "capturing" ? stop : startDictation}
+          aria-label={phase === "capturing" ? "Stop dictation" : "Dictate"}
+          className={cn(
+            "flex size-8 shrink-0 items-center justify-center rounded-full transition-colors",
+            phase === "capturing" ? "bg-foreground text-background" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+          )}
         >
-          {phase === "capturing" ? (
-            <VoiceWaveform state="listening" variant="dots" className="h-8 min-w-0 flex-1" />
-          ) : (
-            <input
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              placeholder="Type, or press the mic and talk…"
-              aria-label="Message"
-              className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-            />
-          )}
+          {phase === "capturing" ? <Check className="size-4" /> : <Mic className="size-4" />}
+        </button>
+        {phase === "idle" && (
           <button
-            type="button"
-            onClick={phase === "capturing" ? stop : startDictation}
-            aria-label={phase === "capturing" ? "Stop dictation" : "Dictate"}
-            className={cn(
-              "flex size-8 shrink-0 items-center justify-center rounded-full transition-colors",
-              phase === "capturing" ? "bg-foreground text-background" : "text-muted-foreground hover:bg-accent hover:text-foreground"
-            )}
+            type="submit"
+            disabled={!value.trim() || disabled}
+            aria-label="Send"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition-opacity disabled:opacity-40"
           >
-            {phase === "capturing" ? <Check className="size-4" /> : <Mic className="size-4" />}
+            <ArrowUp className="size-4" />
           </button>
-          {phase === "idle" && (
-            <button
-              type="submit"
-              disabled={!value.trim() || disabled}
-              aria-label="Send"
-              className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-background transition-opacity disabled:opacity-40"
-            >
-              <ArrowUp className="size-4" />
-            </button>
-          )}
-        </form>
-      )}
+        )}
+      </form>
       {phase === "capturing" && <p className="truncate px-1 text-xs text-muted-foreground">{value}</p>}
     </div>
   );

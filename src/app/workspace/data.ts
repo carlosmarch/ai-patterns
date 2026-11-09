@@ -90,17 +90,26 @@ export const ROLES = [
 // Composer
 // ---------------------------------------------------------------------------
 
+// What @ can pull in: the screen being worked on first, then the evidence around it.
 export const COMPOSER_SOURCES: PromptBarItem[] = [
-  { id: "registry", label: "Registry" },
-  { id: "figma", label: "Figma" },
-  { id: "github", label: "GitHub" },
-  { id: "analytics", label: "Analytics" },
+  { id: "chat-screen", label: "Chat screen v2" },
+  { id: "catalogue", label: "Pattern catalogue" },
+  { id: "github", label: "GitHub repo" },
+  { id: "analytics", label: "Product analytics" },
 ];
 
+// One command per way in, the same three as the starter cards on Home.
 export const COMPOSER_COMMANDS: PromptBarItem[] = [
   { id: "audit", label: "/audit", description: "Audit a screen against the catalogue" },
-  { id: "spec", label: "/spec", description: "Draft a pattern's UX spec" },
-  { id: "schedule", label: "/schedule", description: "Run this every week" },
+  { id: "spec", label: "/spec", description: "Draft a pattern spec" },
+  { id: "investigate", label: "/investigate", description: "Find out why users drop off" },
+];
+
+/** What Origami is looking at — the screen from the journey, the codebase, or everything. */
+export const COMPOSER_CONTEXTS = [
+  { id: "chat-screen", label: "Chat screen v2" },
+  { id: "repo", label: "ai-patterns repo" },
+  { id: "workspace", label: "Whole workspace" },
 ];
 
 export interface StarterCard {
