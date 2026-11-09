@@ -587,7 +587,7 @@ export function TabsVariant({ thumbnails }: { thumbnails: ReactNode }) {
           id="features-panel"
           role="tabpanel"
           aria-labelledby={`tab-${tab.id}`}
-          className="relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-xl border bg-muted/40"
+          className="relative flex min-h-[320px] items-center justify-center overflow-hidden"
         >
           {/* Dot grid behind the vignettes, fading out toward the edges. */}
           <div
