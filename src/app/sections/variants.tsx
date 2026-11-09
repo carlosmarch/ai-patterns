@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, animate, motion, useInView, useReducedMotion } from "motion/react";
-import { Check, Search } from "lucide-react";
+import { Check, Search, Sparkles } from "lucide-react";
+
+import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
 
 import { cn } from "@/lib/utils";
 import {
@@ -215,7 +217,7 @@ function AskPanel({ items }: { items: SectionItem[] }) {
   const shown: AskPhase = reduce ? "found" : phase;
 
   return (
-    <div aria-hidden className="relative min-h-[380px] overflow-hidden rounded-2xl border bg-muted/40 p-5">
+    <div aria-hidden className="relative min-h-[380px] overflow-hidden py-5">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.p
           key={ask.prompt}
@@ -229,51 +231,51 @@ function AskPanel({ items }: { items: SectionItem[] }) {
         </motion.p>
       </AnimatePresence>
 
-      <div className="mt-8 h-5 text-sm font-medium">
+      {/* The registry's own patterns narrate the answer: the Thinking loader
+          while the agent reads the specs, then an Expandable trace step that
+          carries the count and the one-line reasoning. */}
+      <div className="mt-8 min-h-16">
         <AnimatePresence mode="wait" initial={false}>
           {shown === "searching" && (
-            <motion.span
+            <motion.div
               key="searching"
-              className="block bg-[linear-gradient(90deg,var(--muted-foreground)_0%,var(--foreground)_50%,var(--muted-foreground)_100%)] bg-[length:200%_100%] bg-clip-text text-transparent [animation:hero-shimmer_1.4s_linear_infinite]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
             >
-              Reading the specs…
-            </motion.span>
+              <ThinkingLoader words={["Reading the specs"]} className="max-w-md px-0 py-0" />
+            </motion.div>
           )}
           {shown === "found" && (
-            <motion.span
+            <motion.div
               key={`found-${ask.prompt}`}
-              className="block"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
             >
-              Found {found.length} patterns
-            </motion.span>
+              <p className="flex items-center gap-2 text-xs font-medium">
+                <Sparkles className="size-3.5 text-muted-foreground" />
+                Found {found.length} patterns
+              </p>
+              <motion.div
+                className="mt-2 flex max-w-md gap-3"
+                initial={reduce ? { opacity: 0 } : { opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: reduce ? 0 : 0.15 }}
+              >
+                <span className="mt-px flex size-4 shrink-0 items-center justify-center rounded-full bg-muted">
+                  <Check className="size-2.5 text-muted-foreground" />
+                </span>
+                <p className="text-sm leading-snug text-muted-foreground">{ask.why}</p>
+              </motion.div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      <div className="mt-1 min-h-10 text-sm leading-snug text-muted-foreground">
-        <AnimatePresence mode="wait" initial={false}>
-          {shown === "found" && (
-            <motion.p
-              key={`why-${ask.prompt}`}
-              className="max-w-md"
-              initial={reduce ? { opacity: 0 } : { opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, delay: reduce ? 0 : 0.15 }}
-            >
-              {ask.why}
-            </motion.p>
-          )}
-        </AnimatePresence>
-      </div>
-
-      <div className="-mr-5 mt-2 flex gap-3 [mask-image:linear-gradient(to_right,black_70%,transparent)]">
+      <div className="mt-4 flex gap-3 [mask-image:linear-gradient(to_right,black_70%,transparent)]">
         <AnimatePresence mode="popLayout">
           {shown === "found" &&
             found.map((item, i) => (
