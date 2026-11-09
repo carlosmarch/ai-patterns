@@ -9,6 +9,10 @@ import { JOBS } from "@/registry/jobs";
 export const AUTHOR = {
   name: "Carlos March",
   url: "https://carlosmarch.es/",
+  /** Shown in the hover card on the author link (mirrors the site's own meta). */
+  siteTitle: "Carlos March — Portfolio",
+  siteDescription:
+    "Senior product designer. 12+ years designing AI features, design systems and data-heavy tools across B2B SaaS, health and travel.",
   /** Where Carlos's writing on AI lives. */
   writingUrl: "https://carlosmarch.es/",
 } as const;

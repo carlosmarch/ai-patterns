@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { ArrowUpRight } from "lucide-react";
 
 import { CodeBlock } from "@/components/code-block";
+import { AuthorLink } from "./author-link";
 import { BackdropOrb } from "./backdrop-orb";
 import { formatAdded } from "@/components/new-badge";
 import { getEntryHref } from "@/registry";
@@ -52,7 +53,7 @@ export default function ResearchPage() {
   const maxGrowth = Math.max(...c.growth.map((g) => g.added));
 
   const facts = [
-    { label: "Lead & maintainer", value: <External href={AUTHOR.url}>{AUTHOR.name}</External> },
+    { label: "Lead & maintainer", value: <AuthorLink /> },
     { label: "Status", value: "Ongoing · open" },
     { label: "Started", value: c.started },
     { label: "Last addition", value: c.updated },
@@ -69,9 +70,7 @@ export default function ResearchPage() {
           <h1 className="mt-3 text-3xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl">{RESEARCH_TITLE}</h1>
           <p className="mt-5 text-lg text-muted-foreground">
             An open research project led and maintained by{" "}
-            <External href={AUTHOR.url} className="text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground">
-              {AUTHOR.name}
-            </External>
+            <AuthorLink className="text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground" />
             , exploring how user experience evolves as artificial intelligence moves from answering to acting.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -300,7 +299,7 @@ export default function ResearchPage() {
 
             <footer className="border-t pt-8 text-sm">
               <p>
-                Led and maintained by <External href={AUTHOR.url} className="font-medium text-foreground hover:underline">{AUTHOR.name}</External>.
+                Led and maintained by <AuthorLink className="font-medium text-foreground hover:underline" />.
                 More on AI and interfaces in{" "}
                 <External href={AUTHOR.writingUrl} className="font-medium text-foreground hover:underline">
                   Carlos&apos;s writing on AI
