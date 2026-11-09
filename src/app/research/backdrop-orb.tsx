@@ -8,6 +8,24 @@ import { VoiceOrb } from "@/registry/voice/voice-orb/component";
 /** How far (px) the orb drifts toward the pointer. */
 const DRIFT = 48;
 const SPRING = { stiffness: 40, damping: 18, mass: 1.2 };
+/** How much faster than the orb its reflection slides, the other way. */
+const SHEEN_PARALLAX = -3;
+
+/**
+ * Banded steel, diagonal, as an SVG image the filter can sample. Darker on
+ * the light theme and brighter on the dark one, so the bands read on either
+ * background.
+ */
+const STEEL = {
+  light: ["#0b0f14", "#6b7280", "#1f2937", "#a3a9b3", "#111827", "#4b5563", "#d1d5db", "#1f2937", "#6b7280"],
+  dark: ["#ffffff", "#6b7280", "#f3f4f6", "#374151", "#e5e7eb", "#9ca3af", "#ffffff", "#4b5563", "#d1d5db"],
+};
+
+function steelImage(stops: string[]) {
+  const s = stops.map((c, i) => `<stop offset='${i / (stops.length - 1)}' stop-color='${c}'/>`).join("");
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1' preserveAspectRatio='none'><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>${s}</linearGradient><rect width='1' height='1' fill='url(#g)'/></svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
 
 /**
  * Decorative Voice Orb bleeding off the top-right corner, behind the brief.
@@ -17,11 +35,12 @@ const SPRING = { stiffness: 40, damping: 18, mass: 1.2 };
  * gets — fed in through the orb's `level` ref, as live audio would be. With
  * nothing happening it keeps a slow breath, so it never sits dead still.
  *
- * The radial mask makes the wrapper its own compositing group, so the
- * gradient layer blends (`mix-blend-color`) only with the orb: it tints the
- * grey particles and, where there are none, shows as a soft glow that the
- * mask fades into the page. Smaller and fainter on phones, where it sits
- * behind the title.
+ * It reads as polished steel: an SVG filter fills every particle with a
+ * banded grey gradient, keeping the particle's own alpha (`feComposite in`),
+ * so the bands land on the dots only and the page stays clean. The bands
+ * slide against the orb's drift, so the reflection moves as the pointer
+ * does, and a soft off-centre glow behind it adds the shine. A radial mask fades the sphere into the page. Smaller and fainter
+ * on phones, where it sits behind the title.
  */
 export function BackdropOrb() {
   const ref = React.useRef<HTMLDivElement>(null);
@@ -29,6 +48,22 @@ export function BackdropOrb() {
   const reduced = useReducedMotion();
   const x = useSpring(0, SPRING);
   const y = useSpring(0, SPRING);
+  const sheens = React.useRef<SVGFEImageElement[]>([]);
+
+  // The reflection slides the other way, faster, like light on a curved surface.
+  React.useEffect(() => {
+    const move = (axis: "x" | "y") => (v: number) => {
+      const size = ref.current?.offsetWidth || 1;
+      const at = String(-0.25 + (v * SHEEN_PARALLAX) / size);
+      for (const el of sheens.current) el?.setAttribute(axis, at);
+    };
+    const offX = x.on("change", move("x"));
+    const offY = y.on("change", move("y"));
+    return () => {
+      offX();
+      offY();
+    };
+  }, [x, y]);
 
   React.useEffect(() => {
     if (reduced) {
@@ -95,10 +130,44 @@ export function BackdropOrb() {
       ref={ref}
       aria-hidden
       style={{ x, y }}
-      className="pointer-events-none absolute -top-40 -right-64 -z-10 size-[36rem] opacity-50 [mask-image:radial-gradient(closest-side,black_50%,transparent)] sm:-top-80 sm:-right-64 sm:size-[64rem] sm:opacity-100"
+      className="pointer-events-none absolute -top-40 -right-64 -z-10 size-[36rem] opacity-40 [mask-image:radial-gradient(closest-side,black_55%,transparent)] sm:-top-80 sm:-right-64 sm:size-[64rem] sm:opacity-100"
     >
-      <VoiceOrb state="speaking" level={level} particles={3200} className="size-full text-foreground/45" />
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,#7dd3fc_0%,#a78bfa_35%,#f472b6_65%,#fb923c_100%)] opacity-80 mix-blend-color" />
+      <svg className="absolute size-0">
+        {(["light", "dark"] as const).map((theme, i) => (
+          <filter
+            key={theme}
+            id={`research-orb-steel-${theme}`}
+            x="0"
+            y="0"
+            width="1"
+            height="1"
+            primitiveUnits="objectBoundingBox"
+            colorInterpolationFilters="sRGB"
+          >
+            <feImage
+              ref={(el) => {
+                if (el) sheens.current[i] = el;
+              }}
+              href={steelImage(STEEL[theme])}
+              x="-0.25"
+              y="-0.25"
+              width="1.5"
+              height="1.5"
+              preserveAspectRatio="none"
+              result="steel"
+            />
+            <feComposite in="steel" in2="SourceGraphic" operator="in" />
+          </filter>
+        ))}
+      </svg>
+      {/* A soft specular glow, off-centre toward the light, so the sphere reads as polished. */}
+      <div className="absolute inset-[18%] rounded-full bg-[radial-gradient(circle_at_35%_30%,rgb(148_163_184/0.45),rgb(203_213_225/0.18)_40%,transparent_70%)] dark:bg-[radial-gradient(circle_at_35%_30%,rgb(255_255_255/0.16),rgb(148_163_184/0.06)_40%,transparent_70%)]" />
+      <VoiceOrb
+        state="speaking"
+        level={level}
+        particles={3200}
+        className="size-full text-foreground [filter:url(#research-orb-steel-light)] dark:[filter:url(#research-orb-steel-dark)]"
+      />
     </motion.div>
   );
 }
