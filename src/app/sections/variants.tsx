@@ -96,11 +96,19 @@ const pickItems = (items: SectionItem[], slugs: string[]) =>
 
 // Each ask cycles through the panel: the question, the patterns the agent
 // lands on, and one line of reasoning for why those fit — the "reasoning too".
-const ASKS: { prompt: string; why: string; slugs: string[] }[] = [
+// `mode` is the skill command the ask runs as (`apply` unless set).
+type SkillMode = "list" | "review" | "apply";
+const ASKS: { prompt: string; why: string; slugs: string[]; mode?: SkillMode }[] = [
   {
     prompt: "Show me patterns that let people approve what the agent does",
     why: "Gate risky actions before they run, and let people choose how much runs unasked.",
     slugs: ["tool-approval", "human-in-the-loop", "autonomy-mode", "plan-review", "access-request"],
+  },
+  {
+    mode: "review",
+    prompt: "Audit our chat screen for hand-rolled AI UI",
+    why: "Swap the spinner, the error toast and the bare input — each cites its spec's When to use.",
+    slugs: ["thinking-loader", "generation-error", "prompt-bar", "streaming-text"],
   },
   {
     prompt: "How should an answer prove where it came from?",
@@ -111,6 +119,12 @@ const ASKS: { prompt: string; why: string; slugs: string[] }[] = [
     prompt: "Something for when the model fails halfway through",
     why: "Keep what already streamed, say what broke, and offer the next step.",
     slugs: ["partial-response", "generation-error", "rate-limit", "connectivity-error", "console-error-card"],
+  },
+  {
+    mode: "list",
+    prompt: "What's in the catalogue for errors and limits?",
+    why: "Everything under errors, numbered — each with the job it does for the user.",
+    slugs: ["generation-error", "rate-limit", "connectivity-error", "console-error-card", "partial-response"],
   },
   {
     prompt: "Let people talk to it instead of typing",
@@ -210,9 +224,16 @@ export function AskVariant({ items }: { items: SectionItem[] }) {
 
 type AskPhase = "asking" | "searching" | "found";
 
+/** The first trace step: what the command read before it answered. */
+function readStep(mode: SkillMode, specs: number) {
+  if (mode === "list") return "Read reference/index.md";
+  if (mode === "review") return `Scanned the project against ${specs} specs · nothing edited`;
+  return `Read reference/index.md, then ${specs} specs`;
+}
+
 function AskPanel({ items }: { items: SectionItem[] }) {
   const reduce = useReducedMotion();
-  const tick = useTick(6500);
+  const tick = useTick(8000);
   const ask = ASKS[tick % ASKS.length];
   const found = pickItems(items, ask.slugs);
   const [phase, setPhase] = useState<AskPhase>("asking");
@@ -224,7 +245,7 @@ function AskPanel({ items }: { items: SectionItem[] }) {
     const timers = [
       setTimeout(() => setPhase("asking"), 0),
       setTimeout(() => setPhase("searching"), 700),
-      setTimeout(() => setPhase("found"), 1700),
+      setTimeout(() => setPhase("found"), 3600),
     ];
     return () => timers.forEach(clearTimeout);
   }, [tick, reduce]);
@@ -242,6 +263,9 @@ function AskPanel({ items }: { items: SectionItem[] }) {
           exit={{ opacity: 0, y: -8 }}
           transition={{ type: "spring", stiffness: 320, damping: 30 }}
         >
+          <span className="mr-1.5 rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
+            /ai-patterns {ask.mode ?? "apply"}
+          </span>
           {ask.prompt}
         </motion.p>
       </AnimatePresence>
@@ -249,7 +273,7 @@ function AskPanel({ items }: { items: SectionItem[] }) {
       {/* The registry's own patterns narrate the answer: the Thinking loader
           while the agent reads the specs, then an Expandable trace step that
           carries the count and the one-line reasoning. */}
-      <div className="mt-8 min-h-16">
+      <div className="mt-8 min-h-24">
         <AnimatePresence mode="wait" initial={false}>
           {shown === "searching" && (
             <motion.div
@@ -272,19 +296,40 @@ function AskPanel({ items }: { items: SectionItem[] }) {
             >
               <p className="flex items-center gap-2 text-xs font-medium">
                 <Sparkles className="size-3.5 text-muted-foreground" />
-                Found {found.length} patterns
+                {ask.mode === "review"
+                  ? `Found ${found.length} swaps`
+                  : ask.mode === "list"
+                    ? `Listed ${found.length} patterns`
+                    : `Found ${found.length} patterns`}
               </p>
-              <motion.div
-                className="mt-2 flex max-w-md gap-3"
-                initial={reduce ? { opacity: 0 } : { opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: reduce ? 0 : 0.15 }}
-              >
-                <span className="mt-px flex size-4 shrink-0 items-center justify-center rounded-full bg-muted">
-                  <Check className="size-2.5 text-muted-foreground" />
-                </span>
-                <p className="text-sm leading-snug text-muted-foreground">{ask.why}</p>
-              </motion.div>
+              <ol className="mt-2 max-w-md">
+                {[readStep(ask.mode ?? "apply", found.length), ask.why].map((text, i, all) => (
+                  <motion.li
+                    key={i}
+                    className="flex gap-3"
+                    initial={reduce ? { opacity: 0 } : { opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: reduce ? 0 : 0.1 + i * 0.15 }}
+                  >
+                    <span className="flex flex-col items-center">
+                      <span className="mt-px flex size-4 shrink-0 items-center justify-center rounded-full bg-muted">
+                        <Check className="size-2.5 text-muted-foreground" />
+                      </span>
+                      {i < all.length - 1 && <span className="my-1 w-px flex-1 bg-border" />}
+                    </span>
+                    <p
+                      className={cn(
+                        "leading-snug",
+                        i < all.length - 1
+                          ? "pb-2.5 font-mono text-xs text-muted-foreground/80"
+                          : "text-sm text-muted-foreground"
+                      )}
+                    >
+                      {text}
+                    </p>
+                  </motion.li>
+                ))}
+              </ol>
             </motion.div>
           )}
         </AnimatePresence>
@@ -622,27 +667,62 @@ function SpecDoc() {
 
 type TermLine = { kind: "prompt" | "read" | "note" | "write" | "done"; text: string };
 
-const TERM: TermLine[] = [
-  { kind: "prompt", text: "add an approval step before the agent sends email" },
-  { kind: "read", text: "Read ai-patterns/reference/permissions/tool-approval.md" },
-  { kind: "note", text: "When not to use: low-risk, reversible actions" },
-  { kind: "note", text: "Behavior: approve, edit, or deny — never auto-continue" },
-  { kind: "write", text: "Write src/components/tool-approval.tsx" },
-  { kind: "done", text: "Focus moves to Approve · live region announces the request" },
+// The skill's three real commands, each with the steps it actually takes —
+// the terminal plays them in turn.
+const SCRIPTS: { mode: "list" | "review" | "apply"; lines: TermLine[] }[] = [
+  {
+    mode: "list",
+    lines: [
+      { kind: "prompt", text: "/ai-patterns list all patterns" },
+      { kind: "read", text: "Read ai-patterns/reference/index.md" },
+      { kind: "note", text: "access — Invite Members, Share Session" },
+      { kind: "note", text: "loaders — Thinking Loader, …" },
+      { kind: "note", text: "permissions — Tool Approval, …" },
+      { kind: "done", text: "Numbered, grouped by category" },
+    ],
+  },
+  {
+    mode: "review",
+    lines: [
+      { kind: "prompt", text: "/ai-patterns review my project" },
+      { kind: "read", text: "Read ai-patterns/reference/index.md" },
+      { kind: "note", text: "app/chat/spinner.tsx → Thinking Loader" },
+      { kind: "note", text: "app/chat/error.tsx → Generation Error" },
+      { kind: "note", text: "Each swap cites the spec's When to use" },
+      { kind: "done", text: "Read-only · nothing edited" },
+    ],
+  },
+  {
+    mode: "apply",
+    lines: [
+      { kind: "prompt", text: "/ai-patterns apply tool-approval before outbound tool calls" },
+      { kind: "read", text: "Read ai-patterns/reference/permissions/tool-approval.md" },
+      { kind: "note", text: "When not to use: low-risk, reversible actions" },
+      { kind: "note", text: "Behavior: approve, edit, or deny — never auto-continue" },
+      { kind: "write", text: "Write src/components/tool-approval.tsx" },
+      { kind: "done", text: "Focus moves to Approve · live region announces it" },
+    ],
+  },
 ];
 
-function useTermLines(step = 650, hold = 2600) {
+/** Plays each script line by line, holds the finished one, then moves on. */
+function useTermScript(step = 650, hold = 2600) {
   const reduce = useReducedMotion();
-  const [count, setCount] = useState(0);
+  const [state, setState] = useState({ script: 0, count: 0 });
+  const { lines } = SCRIPTS[state.script];
   useEffect(() => {
     if (reduce) return;
+    const done = state.count >= lines.length;
     const id = setTimeout(
-      () => setCount((c) => (c >= TERM.length ? 0 : c + 1)),
-      count >= TERM.length ? hold : count === 0 ? 400 : step
+      () =>
+        setState((s) =>
+          done ? { script: (s.script + 1) % SCRIPTS.length, count: 0 } : { ...s, count: s.count + 1 }
+        ),
+      done ? hold : state.count === 0 ? 400 : step
     );
     return () => clearTimeout(id);
-  }, [count, reduce, step, hold]);
-  return reduce ? TERM.length : count;
+  }, [state, lines.length, reduce, step, hold]);
+  return { script: state.script, count: reduce ? lines.length : state.count };
 }
 
 function TermRow({ line }: { line: TermLine }) {
@@ -665,7 +745,8 @@ function TermRow({ line }: { line: TermLine }) {
 }
 
 function Terminal({ className, compact }: { className?: string; compact?: boolean }) {
-  const count = useTermLines();
+  const { script, count } = useTermScript();
+  const lines = SCRIPTS[script].lines;
   return (
     <div
       aria-hidden
@@ -679,6 +760,19 @@ function Terminal({ className, compact }: { className?: string; compact?: boolea
           <span key={i} className="size-2 rounded-full bg-neutral-700" />
         ))}
         <span className="ml-2 font-mono text-[10px] text-neutral-500">claude — my-app</span>
+        <span className="ml-auto flex gap-1 font-mono text-[10px]">
+          {SCRIPTS.map((s, i) => (
+            <span
+              key={s.mode}
+              className={cn(
+                "rounded px-1.5 py-0.5 transition-colors duration-300",
+                i === script ? "bg-neutral-800 text-neutral-100" : "text-neutral-600"
+              )}
+            >
+              {s.mode}
+            </span>
+          ))}
+        </span>
       </div>
       <div
         className={cn(
@@ -686,9 +780,9 @@ function Terminal({ className, compact }: { className?: string; compact?: boolea
           compact ? "min-h-[180px] text-[10px]" : "min-h-[230px] text-[11px] sm:text-xs"
         )}
       >
-        {TERM.slice(0, count).map((line, i) => (
+        {lines.slice(0, count).map((line, i) => (
           <motion.div
-            key={i}
+            key={`${script}-${i}`}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
@@ -696,7 +790,7 @@ function Terminal({ className, compact }: { className?: string; compact?: boolea
             <TermRow line={line} />
           </motion.div>
         ))}
-        {count < TERM.length && (
+        {count < lines.length && (
           <span className="inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-neutral-400" />
         )}
       </div>
