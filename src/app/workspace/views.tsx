@@ -5,15 +5,15 @@ import {
   AudioLines,
   ArrowRight,
   ArrowUp,
-  ArrowUpRight,
   Bot,
   CalendarClock,
   ChartColumn,
   Check,
+  ChevronDown,
+  Copy,
   CircleCheck,
   CircleDashed,
   CircleX,
-  Code2,
   FileText,
   GitBranch,
   Globe,
@@ -24,20 +24,19 @@ import {
   MessageSquare,
   Mic,
   MicOff,
-  MousePointer2,
   PhoneOff,
   Play,
   Plus,
   RotateCcw,
   Search,
   SquareTerminal,
-  Terminal,
   Unplug,
   X,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { cn } from "@/lib/utils";
+import { registry } from "@/registry";
 import { AgentTriggers, DEFAULT_TRIGGERS } from "@/registry/agents/agent-triggers/component";
 import { ChatBubble } from "@/registry/messages/chat-bubble/component";
 import { ConnectorPanel, type ConnectorLink, type ConnectorToolGroup, type ToolPermission } from "@/registry/permissions/connector-panel/component";
@@ -48,8 +47,6 @@ import { InstructionTools } from "@/registry/agents/instruction-tools/component"
 import { ListeningState } from "@/registry/voice/listening-state/component";
 import { LiveTranscript, type TranscriptSegment } from "@/registry/voice/live-transcript/component";
 import { ProcedureBuilder } from "@/registry/agents/procedure-builder/component";
-import { PromptOnboarding, type CodingTool } from "@/registry/onboarding/prompt-onboarding/component";
-import { SetupChecklist, type SetupStep } from "@/registry/navigation/setup-checklist/component";
 import { ShinyButton } from "@/registry/buttons/shiny-button/component";
 import { StopGenerationButton } from "@/registry/buttons/stop-generation-button/component";
 import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
@@ -83,10 +80,7 @@ import {
   PROCEDURE_STEPS,
   PROCEDURE_TARGETS,
   ROLES,
-  SETUP_STEPS,
   SKILL_PROMPT,
-  SKILL_SNIPPET,
-  TEAM,
   favicon,
 } from "./data";
 
@@ -1969,53 +1963,23 @@ export function ConnectorsView({
 }
 
 // ---------------------------------------------------------------------------
-// Changelog
-// ---------------------------------------------------------------------------
-
-const CHANGES = [
-  { date: "Oct 17", title: "Procedure Builder added", body: "Doc-style procedures with IF / ELSE branches. Origami uses it for “Review a pattern”." },
-  { date: "Oct 16", title: "Instruction Tool Insert added", body: "Type / in any guideline to reference a tool inline." },
-  { date: "Oct 15", title: "Refinement Controls added", body: "One-tap Shorten, Rephrase, and More formal on any AI output, with versions." },
-  { date: "Oct 12", title: "Prompt-Driven Onboarding", body: "Setup now hands you a prompt for your coding agent instead of a wall of docs." },
-];
-
-export function ChangelogView() {
-  return (
-    <>
-      <ViewHeader title="What's new" />
-      <Scroll className="px-6 py-6">
-        <ol className="mx-auto max-w-xl space-y-6 border-l pl-6">
-          {CHANGES.map((c) => (
-            <li key={c.title} className="relative">
-              <span className="absolute -left-[29px] top-1.5 size-2.5 rounded-full border-2 border-background bg-foreground" />
-              <p className="text-xs text-muted-foreground">{c.date}</p>
-              <p className="mt-0.5 font-medium">{c.title}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{c.body}</p>
-            </li>
-          ))}
-        </ol>
-      </Scroll>
-    </>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Setup
 // ---------------------------------------------------------------------------
 
-const CODING_TOOLS: CodingTool[] = [
-  { id: "claude-code", label: "Claude Code", icon: SquareTerminal },
-  { id: "cursor", label: "Cursor", icon: MousePointer2 },
-  { id: "vscode", label: "VS Code", icon: Code2 },
-];
+type SetupStepId = "connect" | "registry" | "skill" | "team";
 
+/**
+ * Setup is one checklist with one step open at a time. Done steps collapse to
+ * a single line with what was set up; the next pending step opens on its own,
+ * and finishing the last one turns the page into a way back to work.
+ */
 export function SetupView({
   skillDone,
   teamDone,
   onSkillDone,
   onTeamDone,
+  onReset,
   onOpenConnectors,
-  onOpenPattern,
   onExit,
   onToast,
   connectors,
@@ -2025,34 +1989,34 @@ export function SetupView({
   teamDone: boolean;
   onSkillDone: (done: boolean) => void;
   onTeamDone: () => void;
+  onReset: () => void;
   onOpenConnectors: () => void;
-  /** Opens a pattern ("category/slug") in the workspace's Patterns view, or the whole catalogue for null. */
-  onOpenPattern: (path: string | null) => void;
   onExit: () => void;
   onToast: (message: string) => void;
 }) {
   const [waiting, setWaiting] = React.useState(false);
   const timer = React.useRef<number>(undefined);
-  const skillRef = React.useRef<HTMLDivElement>(null);
-  const teamRef = React.useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
   React.useEffect(() => () => window.clearTimeout(timer.current), []);
 
-  function focus(ref: React.RefObject<HTMLDivElement | null>) {
-    const el = ref.current;
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-    el.animate([{ boxShadow: "0 0 0 0 transparent" }, { boxShadow: "0 0 0 4px var(--color-ring)" }, { boxShadow: "0 0 0 0 transparent" }], {
-      duration: 900,
-      easing: "ease-out",
-    });
-  }
+  const connected = connectors.filter((c) => c.connected).map((c) => c.name);
+  const steps: { id: SetupStepId; label: string; done: boolean; summary: string; time?: string }[] = [
+    { id: "connect", label: "Connect your tools", done: true, summary: listNames(connected) },
+    { id: "registry", label: "Index the pattern registry", done: true, summary: `${registry.length} patterns` },
+    { id: "skill", label: "Add the skill to your coding agent", done: skillDone, summary: "Claude Code", time: "1 min" },
+    { id: "team", label: "Invite your team", done: teamDone, summary: "Invites sent", time: "30 s" },
+  ];
+  const doneCount = steps.filter((s) => s.done).length;
+  const left = steps.length - doneCount;
+  const nextPending = steps.find((s) => !s.done)?.id ?? null;
 
-  const steps: SetupStep[] = SETUP_STEPS.map((s) => {
-    if (s.id === "connect") return { ...s, onClick: onOpenConnectors };
-    if (s.id === "skill") return { ...s, status: skillDone ? "done" : "pending", onClick: () => focus(skillRef) };
-    if (s.id === "team") return { ...s, status: teamDone ? "done" : "pending", onClick: () => focus(teamRef) };
-    return s;
-  });
+  // The next pending step opens by itself whenever one is finished.
+  const [open, setOpen] = React.useState<SetupStepId | null>(nextPending);
+  const [lastPending, setLastPending] = React.useState(nextPending);
+  if (nextPending !== lastPending) {
+    setLastPending(nextPending);
+    setOpen(nextPending);
+  }
 
   // Copying the prompt or opening it in a coding tool stands in for the agent
   // adding its first pattern a few seconds later.
@@ -2066,160 +2030,207 @@ export function SetupView({
     }, 3000);
   }
 
+  function body(id: SetupStepId) {
+    if (id === "skill") {
+      return (
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Paste this into Claude Code, Cursor or Copilot. It picks a pattern and builds it in your design system.
+          </p>
+          <div className="relative max-h-20 overflow-hidden rounded-xl bg-muted/60 px-3 py-2.5 font-mono text-xs leading-relaxed text-muted-foreground">
+            {SKILL_PROMPT}
+            <span aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-card to-transparent" />
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard?.writeText(SKILL_PROMPT).catch(() => {});
+                onToast("Prompt copied — paste it into your coding agent.");
+                simulate();
+              }}
+              className="flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+            >
+              <Copy className="size-3.5" />
+              Copy prompt
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                simulate();
+                onToast("Opening the prompt in Claude Code…");
+              }}
+              className="flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors hover:bg-accent"
+            >
+              <SquareTerminal className="size-3.5" />
+              Open in Claude Code
+            </button>
+            {/* Ticks itself off when the agent reports its first pattern. */}
+            <span className="ml-auto flex items-center gap-2 text-xs text-muted-foreground" aria-live="polite">
+              <span className={cn("size-1.5 rounded-full", waiting ? "animate-pulse bg-emerald-500" : "bg-muted-foreground/40")} />
+              {waiting ? "Listening for your first pattern…" : "Waiting for your first pattern"}
+            </span>
+          </div>
+        </div>
+      );
+    }
+    if (id === "team") {
+      return (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            Ana is already here. Invite the rest so they see shared threads and specs.
+          </p>
+          <InviteMembers
+            trigger="share"
+            triggerLabel="Invite"
+            roles={ROLES}
+            orgMembers={ORG_MEMBERS}
+            initialAssignees={[
+              { id: "carlos", name: "Carlos March", email: "carlos@ai-patterns.app", status: "confirmed", roleId: "admin" },
+              { id: "ana", name: "Ana López", email: "ana@ai-patterns.app", status: "confirmed", roleId: "editor" },
+            ]}
+            defaultMessage={`Join me in the ${AGENT_NAME} workspace — we're auditing our AI screens against the pattern catalogue.`}
+            onSend={(chips) => {
+              if (chips.length === 0) return;
+              onTeamDone();
+              onToast(`Invited ${chips.length} ${chips.length === 1 ? "person" : "people"}.`);
+            }}
+          />
+        </div>
+      );
+    }
+    return null;
+  }
+
   return (
     <>
-      <ViewHeader title="Setup">
-        <span className="text-sm text-muted-foreground">
-          {steps.filter((s) => s.status === "done").length} of {steps.length} done
-        </span>
-      </ViewHeader>
-      <Scroll className="p-4 sm:p-6">
-        <div className="grid w-full items-start gap-6 lg:grid-cols-[20rem_minmax(0,1fr)] 2xl:grid-cols-[20rem_minmax(0,1fr)_20rem]">
-          <div className="space-y-4">
-            <SetupChecklist title={`Get ${AGENT_NAME} ready`} steps={steps} className="w-full" />
-            <div ref={teamRef} className="rounded-2xl border bg-card p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-medium">Your team</p>
-                  <p className="text-xs text-muted-foreground">
-                    {TEAM.length} members · {TEAM.filter((m) => m.isOnline).length} online
-                  </p>
-                </div>
-                <InviteMembers
-                  trigger="share"
-                  roles={ROLES}
-                  orgMembers={ORG_MEMBERS}
-                  initialAssignees={[
-                    { id: "carlos", name: "Carlos March", email: "carlos@ai-patterns.app", status: "confirmed", roleId: "admin" },
-                    { id: "ana", name: "Ana López", email: "ana@ai-patterns.app", status: "confirmed", roleId: "editor" },
-                  ]}
-                  defaultMessage={`Join me in the ${AGENT_NAME} workspace — we're auditing our AI screens against the pattern catalogue.`}
-                  onSend={(chips) => {
-                    if (chips.length === 0) return;
-                    onTeamDone();
-                    onToast(`Invited ${chips.length} ${chips.length === 1 ? "person" : "people"}.`);
-                  }}
+      <ViewHeader title="Setup" />
+      <Scroll className="px-4 sm:px-6">
+        <div className="mx-auto w-full max-w-2xl py-10 sm:py-14">
+          <AnimatePresence mode="wait" initial={false}>
+            {left === 0 ? (
+              <motion.div
+                key="done"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center text-center"
+              >
+                <motion.span
+                  initial={reduce ? false : { scale: 0.6, rotate: -10 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className="flex size-12 items-center justify-center rounded-2xl bg-foreground text-background"
+                >
+                  <Check className="size-6" />
+                </motion.span>
+                <h3 className="mt-5 font-serif text-3xl tracking-tight">You&apos;re all set</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {AGENT_NAME} can reach your tools, knows the catalogue, and your team is in.
+                </p>
+              </motion.div>
+            ) : (
+              <motion.div key="todo" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <h3 className="font-serif text-3xl tracking-tight">Finish setting up {AGENT_NAME}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {left === 1 ? "One step left." : `${left} steps left.`} About {left === 1 ? "a minute" : "two minutes"}.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="mt-6 flex gap-1" aria-hidden>
+            {steps.map((s) => (
+              <span key={s.id} className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
+                <motion.span
+                  className="block h-full rounded-full bg-foreground"
+                  initial={false}
+                  animate={{ width: s.done ? "100%" : "0%" }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
                 />
-              </div>
-              <ul className="mt-3 space-y-2">
-                {TEAM.map((m) => (
-                  <li key={m.id} className="flex items-center gap-2.5 text-sm">
-                    <span className={cn("relative flex size-7 items-center justify-center rounded-full text-[10px] font-semibold text-white", m.color)}>
-                      {m.initials}
-                      {m.isOnline && <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-card bg-emerald-500" />}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate">{m.name}</span>
-                    <span className="text-xs text-muted-foreground">{m.role}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+              </span>
+            ))}
           </div>
 
-          <div ref={skillRef} className="min-w-0 space-y-3 rounded-2xl">
-            <PromptOnboarding
-              title="Install the skill in your coding agent"
-              prompt={SKILL_PROMPT}
-              snippet={SKILL_SNIPPET}
-              hints={{
-                prompt: "Paste this prompt into Claude Code or Cursor — it picks a pattern and builds it in your design system.",
-                snippet: "Using Claude Code? Install the ai-patterns skill and ask for screens in plain language.",
-              }}
-              tools={CODING_TOOLS}
-              status={skillDone ? "received" : "waiting"}
-              statusLabels={{ waiting: waiting ? "Listening for your first pattern…" : "Waiting for your first pattern…", received: "First pattern added" }}
-              alternatives={[
-                { id: "browse", title: "Browse the catalogue", description: "Preview every pattern live", icon: LayoutGrid, onClick: () => onOpenPattern(null) },
-                {
-                  id: "copy",
-                  title: "Copy a component",
-                  description: "Grab the code from any pattern's Code tab",
-                  icon: Terminal,
-                  onClick: () => onOpenPattern("buttons/shiny-button"),
-                },
-              ]}
-              onCopy={simulate}
-              onOpenIn={(tool) => {
-                simulate();
-                onToast(`Opening the prompt in ${tool.label}…`);
-              }}
-              onSkip={() => {
-                onToast("Skipped for now — finish it any time from Setup.");
-                onExit();
-              }}
-              onFinish={() => {
-                onToast(teamDone ? `You're all set — ${AGENT_NAME} is ready.` : "Skill installed. Invite your team when you're ready.");
-                onExit();
-              }}
-            />
-            {skillDone && (
+          <ol className="mt-6 divide-y rounded-2xl border bg-card">
+            {steps.map((s, i) => {
+              const isOpen = open === s.id && !s.done;
+              return (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    disabled={s.done}
+                    onClick={() => setOpen(isOpen ? null : s.id)}
+                    aria-expanded={s.done ? undefined : isOpen}
+                    className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors enabled:hover:bg-accent/40"
+                  >
+                    <span
+                      className={cn(
+                        "flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums transition-colors",
+                        s.done ? "bg-foreground text-background" : isOpen ? "border-2 border-foreground" : "border text-muted-foreground"
+                      )}
+                    >
+                      {s.done ? <Check className="size-3.5" /> : i + 1}
+                    </span>
+                    <span className={cn("flex-1 text-sm", s.done ? "text-muted-foreground" : "font-medium")}>{s.label}</span>
+                    <span className="text-xs text-muted-foreground">{s.done ? s.summary : s.time}</span>
+                    {!s.done && <ChevronDown className={cn("size-4 text-muted-foreground transition-transform", isOpen && "rotate-180")} />}
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
+                        animate={reduce ? { opacity: 1 } : { height: "auto", opacity: 1 }}
+                        exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: "easeOut" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-4 pb-4 pl-[3.25rem]">{body(s.id)}</div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </li>
+              );
+            })}
+          </ol>
+
+          <div className="mt-6 flex items-center justify-between gap-3">
+            {left === 0 ? (
               <button
                 type="button"
-                onClick={() => onSkillDone(false)}
+                onClick={onReset}
                 className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
               >
                 <RotateCcw className="size-3" />
                 Reset setup
               </button>
-            )}
-          </div>
-
-          <div className="space-y-4 lg:col-span-2 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 2xl:col-span-1 2xl:block 2xl:space-y-4">
-            <div className="rounded-2xl border bg-card p-4">
-              <p className="text-sm font-medium">What {AGENT_NAME} can reach</p>
-              <ul className="mt-3 space-y-2.5">
-                {connectors.map((c) => (
-                  <li key={c.id} className="flex items-center gap-2.5 text-sm">
-                    <span className="flex size-7 items-center justify-center rounded-lg border bg-background">
-                      <ConnectorIcon connector={c} className="size-3.5" />
-                    </span>
-                    <span className="flex-1">{c.name}</span>
-                    <span className={cn("text-xs", c.connected ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>
-                      {c.connected ? "Connected" : "Not connected"}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <button type="button" onClick={onOpenConnectors} className="mt-3 text-xs font-medium text-primary hover:underline">
+            ) : (
+              <button type="button" onClick={onOpenConnectors} className="text-xs text-muted-foreground transition-colors hover:text-foreground">
                 Manage connectors
               </button>
-            </div>
-            <div className="rounded-2xl border bg-card p-4">
-              <p className="text-sm font-medium">Learn the basics</p>
-              <ul className="mt-2 space-y-1">
-                {[
-                  { label: "Browse all patterns", pattern: null },
-                  { label: "Read a UX spec", pattern: "loaders/thinking-loader" },
-                ].map((l) => (
-                  <li key={l.label}>
-                    <button
-                      type="button"
-                      onClick={() => onOpenPattern(l.pattern)}
-                      className="-mx-2 flex w-[calc(100%+1rem)] items-center justify-between rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-accent"
-                    >
-                      {l.label}
-                      <ArrowRight className="size-3.5 text-muted-foreground" />
-                    </button>
-                  </li>
-                ))}
-                {[{ label: "The skill on GitHub", href: "https://github.com/carlosmarch/ai-patterns/tree/main/plugins/ai-patterns" }].map((l) => (
-                  <li key={l.href}>
-                    <a
-                      href={l.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="-mx-2 flex items-center justify-between rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-accent"
-                    >
-                      {l.label}
-                      <ArrowUpRight className="size-3.5 text-muted-foreground" />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                if (left > 0) onToast("Skipped for now — finish it any time from the sidebar.");
+                onExit();
+              }}
+              className={cn(
+                "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                left === 0 ? "bg-foreground text-background hover:bg-foreground/90" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              )}
+            >
+              {left === 0 ? "Start a thread" : "Skip for now"}
+              {left === 0 && <ArrowRight className="size-4" />}
+            </button>
           </div>
         </div>
       </Scroll>
     </>
   );
+}
+
+function listNames(names: string[]) {
+  if (names.length <= 1) return names.join("");
+  return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 }

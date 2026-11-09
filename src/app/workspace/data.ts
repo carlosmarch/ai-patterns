@@ -30,7 +30,6 @@ import type { InstructionTool } from "@/registry/agents/instruction-tools/compon
 import type { LogLine } from "@/registry/code/terminal-stream/component";
 import type { ProcedureStep } from "@/registry/agents/procedure-builder/component";
 import type { PromptBarItem } from "@/registry/composer/prompt-bar-pro/component";
-import type { SetupStep } from "@/registry/navigation/setup-checklist/component";
 import type { Source } from "@/registry/text/sources-stack/component";
 import type { TraceStep } from "@/registry/traces/expandable-trace/component";
 import type { AutonomyMode, Capability } from "@/registry/composer/autonomy-mode/component";
@@ -561,21 +560,6 @@ export const GUIDELINE_TOOLS: InstructionTool[] = [
 // Setup
 // ---------------------------------------------------------------------------
 
-export const SETUP_STEPS: SetupStep[] = [
-  {
-    id: "connect",
-    label: "Connect your tools",
-    status: "done",
-    icons: [
-      { label: "GitHub", color: "#181717", initial: "G" },
-      { label: "Figma", color: "#A259FF", initial: "F" },
-    ],
-  },
-  { id: "registry", label: "Index the pattern registry", status: "done" },
-  { id: "skill", label: "Install the skill in your coding agent", status: "pending" },
-  { id: "team", label: "Invite your team", status: "pending" },
-];
-
 const REFERENCE_URL =
   "https://github.com/carlosmarch/ai-patterns/tree/main/plugins/ai-patterns/skills/ai-patterns/reference";
 
@@ -586,13 +570,6 @@ export const SKILL_PROMPT = `Add one pattern from the ai-patterns catalogue to t
 3. Pick one pattern, open its spec and follow it: Anatomy, Behavior, Content guidelines, Accessibility.
 4. Build it into the existing components folder, using the app's own components and tokens.
 5. Render it on a real route, run the app, and summarize the files you changed.`;
-
-export const SKILL_SNIPPET = `# In Claude Code, install the skill:
-/plugin marketplace add carlosmarch/ai-patterns
-/plugin install ai-patterns@ai-patterns
-
-# Then ask for a screen, e.g.
-"Add a prompt bar with a model picker to the chat page"`;
 
 // ---------------------------------------------------------------------------
 // Composer controls — model, autonomy, context window

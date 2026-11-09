@@ -12,12 +12,10 @@ import {
   Clock,
   FlaskConical,
   Globe,
-  History,
   LayoutGrid,
   ListChecks,
   Lock,
   MessagesSquare,
-  Package,
   PanelLeftClose,
   PanelLeftOpen,
   Plug,
@@ -30,7 +28,6 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { cn } from "@/lib/utils";
 import { registry, type RegistryEntry } from "@/registry";
-import type { SkillExample } from "@/app/skill/skill-examples";
 import { BackgroundTasksDrawer, type BackgroundTask } from "@/registry/agents/background-tasks/component";
 import { CollaborativePresence } from "@/registry/collaboration/collaborative-presence/component";
 import { CommandPalette, type CommandPaletteGroup, type CommandPaletteItem } from "@/registry/navigation/command-palette/component";
@@ -97,13 +94,12 @@ import {
   specThoughts,
   tickSpikeAgents,
 } from "./data";
-import { entryPath, findEntry, firstBullet, loadSource, matchEntry, relatedEntries, specSection } from "./catalogue";
-import { PatternsView, SkillView } from "./library";
+import { entryPath, firstBullet, loadSource, matchEntry, relatedEntries, specSection } from "./catalogue";
+import { PatternsView } from "./library";
 import { InsightsView, type InsightsTab } from "./insights";
 import { BlockView, nextId, segmentsText, toArtifact, type Block, type BlockBody, type BlockHandlers, type Thread } from "./thread";
 import {
   CONNECTORS,
-  ChangelogView,
   ConnectorsView,
   AgentsView,
   MobileMenuButton,
@@ -123,9 +119,7 @@ type View =
   | "train"
   | "playground"
   | "agents"
-  | "changelog"
   | "patterns"
-  | "skill"
   | "connectors"
   | "workflows"
   | "setup";
@@ -150,8 +144,6 @@ const MORE_NAV: NavItem[] = [
   { id: "workflows", label: "Workflows", icon: Workflow },
   { id: "connectors", label: "Connectors", icon: Plug },
   { id: "insights", label: "Insights", icon: ChartColumn },
-  { id: "skill", label: "Skill", icon: Package },
-  { id: "changelog", label: "What's new", icon: History },
 ];
 
 const NAV_SETUP: NavItem = { id: "setup", label: "Setup", icon: ListChecks };
@@ -173,7 +165,7 @@ type Flow =
   | { kind: "audit" | "fix" | "ship" }
   | { kind: "spike" | "guidance" | "bulk" | "summary" | "explore" | "list" | "review" | "research" | "default" }
   | { kind: "spec"; topic: string }
-  | { kind: "pattern" | "scaffold"; entry: RegistryEntry; viaSkill?: boolean };
+  | { kind: "pattern" | "scaffold"; entry: RegistryEntry };
 
 // Which scripted flow a prompt should run. Prompts that name a pattern are
 // answered from its real spec, ahead of the keyword flows, so "scaffold the
@@ -201,13 +193,6 @@ function flowFor(prompt: string): Flow {
   return { kind: "default" };
 }
 
-/** The flow a skill example runs when it's handed to Origami from the Skill view. */
-function flowForExample(example: SkillExample): Flow {
-  const entry = findEntry(example.pattern);
-  if (entry) return { kind: "pattern", entry, viaSkill: true };
-  return { kind: example.mode === "review" ? "review" : "list" };
-}
-
 interface Runner {
   add: (block: BlockBody) => string;
   update: (id: string, patch: Partial<Block>) => void;
@@ -221,7 +206,7 @@ interface Runner {
   lastText: () => string;
 }
 
-export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
+export function WorkspaceApp() {
   const [view, setView] = React.useState<View>("operator");
   const [threads, setThreads] = React.useState<Thread[]>([]);
   const [activeId, setActiveId] = React.useState<string | null>(null);
@@ -417,23 +402,11 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
         return;
 
       case "pattern": {
-        const { entry, viaSkill } = flow;
+        const { entry } = flow;
         await r.think(700);
-        if (viaSkill) {
-          await r.tool({ toolKind: "file", verb: "Reading", target: "reference/index.md", result: `Read ${registry.length} pattern summaries` });
-          const runnerUp = relatedEntries(entry)[0];
-          await r.tool({
-            toolKind: "search",
-            verb: "Shortlisting",
-            target: "candidates",
-            result: runnerUp ? `Shortlisted ${entry.title} over ${runnerUp.title}` : `Shortlisted ${entry.title}`,
-          });
-        } else {
-          await r.tool({ toolKind: "search", verb: "Searching", target: "the registry", result: `Found ${entry.title} in ${entry.category}` });
-        }
+        await r.tool({ toolKind: "search", verb: "Searching", target: "the registry", result: `Found ${entry.title} in ${entry.category}` });
         const sections = entry.uxDoc.split("\n").filter((l) => l.startsWith("## ")).length;
         await r.tool({ toolKind: "file", verb: "Reading", target: `${entry.slug}.pattern.md`, result: `Read ${sections} sections` });
-        if (viaSkill) await r.say(text(`I'd use ${entry.title} here. From its spec:`));
         await explainPattern(r, entry);
         return;
       }
@@ -974,8 +947,6 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
               <InsightsView tab={insightsTab} onTabChange={setInsightsTab} onToast={setToast} />
             ) : view === "agents" ? (
               <AgentsView onToast={setToast} />
-            ) : view === "changelog" ? (
-              <ChangelogView />
             ) : view === "patterns" ? (
               <PatternsView
                 selected={patternPath}
@@ -983,12 +954,6 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
                 category={patternCategory}
                 onCategory={setPatternCategory}
                 onAsk={(entry) => submitPrompt(`Tell me about ${entry.title}`, { kind: "pattern", entry })}
-              />
-            ) : view === "skill" ? (
-              <SkillView
-                version={skillVersion}
-                onOpenPatterns={openPatterns}
-                onTry={(example) => submitPrompt(example.prompt, flowForExample(example))}
               />
             ) : view === "connectors" ? (
               <ConnectorsView connectors={connectors} setConnectors={setConnectors} onToast={setToast} />
@@ -1001,8 +966,11 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
                 teamDone={teamDone}
                 onSkillDone={setSkillDone}
                 onTeamDone={() => setTeamDone(true)}
+                onReset={() => {
+                  setSkillDone(false);
+                  setTeamDone(false);
+                }}
                 onOpenConnectors={() => navigate("connectors")}
-                onOpenPattern={openPattern}
                 onExit={() => openThread(null)}
                 onToast={setToast}
               />
@@ -1243,7 +1211,7 @@ function NavSidebar({
 
   return (
     <aside className="flex w-60 shrink-0 flex-col overflow-y-auto rounded-2xl border bg-background p-3 shadow-sm">
-      <div className="flex items-center gap-2 px-1 pb-4 pt-1">
+      <div className="flex shrink-0 items-center gap-2 px-1 pb-4 pt-1">
         <span className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background">
           <AGENT_ICON className="size-4" />
         </span>
@@ -1259,7 +1227,7 @@ function NavSidebar({
         </button>
       </div>
 
-      <nav aria-label="Agent" className="flex flex-col gap-0.5">
+      <nav aria-label="Agent" className="flex shrink-0 flex-col gap-0.5">
         <button
           type="button"
           onClick={onNewThread}
@@ -1307,7 +1275,7 @@ function NavSidebar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="mt-5 flex min-h-0 flex-col"
+            className="mt-5 flex shrink-0 flex-col"
           >
             <p className="px-3 pb-1.5 text-xs text-muted-foreground">Recents</p>
             <ul className="flex flex-col gap-0.5">
@@ -1345,7 +1313,7 @@ function NavSidebar({
         )}
       </AnimatePresence>
 
-      <div className="mt-auto flex flex-col gap-0.5 pt-5">
+      <div className="mt-auto flex shrink-0 flex-col gap-0.5 pt-5">
         {setupDone < 4 && (
           <button
             type="button"
