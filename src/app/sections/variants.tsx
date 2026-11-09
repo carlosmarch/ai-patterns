@@ -275,7 +275,7 @@ function AskPanel({ items }: { items: SectionItem[] }) {
           (thinking) and the Thinking loader while the agent reads the specs,
           then an Expandable trace step that carries the count and the
           one-line reasoning. */}
-      <div className="mt-8 min-h-44">
+      <div className="mt-8 min-h-28">
         <AnimatePresence mode="wait" initial={false}>
           {shown === "searching" && (
             <motion.div
@@ -285,10 +285,12 @@ function AskPanel({ items }: { items: SectionItem[] }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <div className="flex items-center gap-2">
-                <VoiceOrb state="thinking" particles={600} className="-mx-6 size-44 shrink-0 text-foreground dark:text-orange-50" />
-                <ThinkingLoader words={["Reading the specs"]} className="max-w-md px-0 py-0" />
-              </div>
+              <ThinkingLoader words={["Reading the specs"]} className="max-w-md px-0 py-0" />
+              <VoiceOrb
+                state="thinking"
+                particles={1100}
+                className="mx-auto mt-2 size-72 max-w-full text-foreground dark:text-orange-50"
+              />
             </motion.div>
           )}
           {shown === "found" && (
