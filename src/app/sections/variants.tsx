@@ -96,11 +96,19 @@ const pickItems = (items: SectionItem[], slugs: string[]) =>
 
 // Each ask cycles through the panel: the question, the patterns the agent
 // lands on, and one line of reasoning for why those fit — the "reasoning too".
-const ASKS: { prompt: string; why: string; slugs: string[] }[] = [
+// `mode` is the skill command the ask runs as (`apply` unless set).
+type SkillMode = "list" | "review" | "apply";
+const ASKS: { prompt: string; why: string; slugs: string[]; mode?: SkillMode }[] = [
   {
     prompt: "Show me patterns that let people approve what the agent does",
     why: "Gate risky actions before they run, and let people choose how much runs unasked.",
     slugs: ["tool-approval", "human-in-the-loop", "autonomy-mode", "plan-review", "access-request"],
+  },
+  {
+    mode: "review",
+    prompt: "Audit our chat screen for hand-rolled AI UI",
+    why: "Swap the spinner, the error toast and the bare input — each cites its spec's When to use.",
+    slugs: ["thinking-loader", "generation-error", "prompt-bar", "streaming-text"],
   },
   {
     prompt: "How should an answer prove where it came from?",
@@ -111,6 +119,12 @@ const ASKS: { prompt: string; why: string; slugs: string[] }[] = [
     prompt: "Something for when the model fails halfway through",
     why: "Keep what already streamed, say what broke, and offer the next step.",
     slugs: ["partial-response", "generation-error", "rate-limit", "connectivity-error", "console-error-card"],
+  },
+  {
+    mode: "list",
+    prompt: "What's in the catalogue for errors and limits?",
+    why: "Everything under errors, numbered — each with the job it does for the user.",
+    slugs: ["generation-error", "rate-limit", "connectivity-error", "console-error-card", "partial-response"],
   },
   {
     prompt: "Let people talk to it instead of typing",
@@ -210,6 +224,13 @@ export function AskVariant({ items }: { items: SectionItem[] }) {
 
 type AskPhase = "asking" | "searching" | "found";
 
+/** The first trace step: what the command read before it answered. */
+function readStep(mode: SkillMode, specs: number) {
+  if (mode === "list") return "Read reference/index.md";
+  if (mode === "review") return `Scanned the project against ${specs} specs · nothing edited`;
+  return `Read reference/index.md, then ${specs} specs`;
+}
+
 function AskPanel({ items }: { items: SectionItem[] }) {
   const reduce = useReducedMotion();
   const tick = useTick(8000);
@@ -242,6 +263,9 @@ function AskPanel({ items }: { items: SectionItem[] }) {
           exit={{ opacity: 0, y: -8 }}
           transition={{ type: "spring", stiffness: 320, damping: 30 }}
         >
+          <span className="mr-1.5 rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
+            /ai-patterns {ask.mode ?? "apply"}
+          </span>
           {ask.prompt}
         </motion.p>
       </AnimatePresence>
@@ -249,7 +273,7 @@ function AskPanel({ items }: { items: SectionItem[] }) {
       {/* The registry's own patterns narrate the answer: the Thinking loader
           while the agent reads the specs, then an Expandable trace step that
           carries the count and the one-line reasoning. */}
-      <div className="mt-8 min-h-16">
+      <div className="mt-8 min-h-24">
         <AnimatePresence mode="wait" initial={false}>
           {shown === "searching" && (
             <motion.div
@@ -272,19 +296,40 @@ function AskPanel({ items }: { items: SectionItem[] }) {
             >
               <p className="flex items-center gap-2 text-xs font-medium">
                 <Sparkles className="size-3.5 text-muted-foreground" />
-                Found {found.length} patterns
+                {ask.mode === "review"
+                  ? `Found ${found.length} swaps`
+                  : ask.mode === "list"
+                    ? `Listed ${found.length} patterns`
+                    : `Found ${found.length} patterns`}
               </p>
-              <motion.div
-                className="mt-2 flex max-w-md gap-3"
-                initial={reduce ? { opacity: 0 } : { opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: reduce ? 0 : 0.15 }}
-              >
-                <span className="mt-px flex size-4 shrink-0 items-center justify-center rounded-full bg-muted">
-                  <Check className="size-2.5 text-muted-foreground" />
-                </span>
-                <p className="text-sm leading-snug text-muted-foreground">{ask.why}</p>
-              </motion.div>
+              <ol className="mt-2 max-w-md">
+                {[readStep(ask.mode ?? "apply", found.length), ask.why].map((text, i, all) => (
+                  <motion.li
+                    key={i}
+                    className="flex gap-3"
+                    initial={reduce ? { opacity: 0 } : { opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: reduce ? 0 : 0.1 + i * 0.15 }}
+                  >
+                    <span className="flex flex-col items-center">
+                      <span className="mt-px flex size-4 shrink-0 items-center justify-center rounded-full bg-muted">
+                        <Check className="size-2.5 text-muted-foreground" />
+                      </span>
+                      {i < all.length - 1 && <span className="my-1 w-px flex-1 bg-border" />}
+                    </span>
+                    <p
+                      className={cn(
+                        "leading-snug",
+                        i < all.length - 1
+                          ? "pb-2.5 font-mono text-xs text-muted-foreground/80"
+                          : "text-sm text-muted-foreground"
+                      )}
+                    >
+                      {text}
+                    </p>
+                  </motion.li>
+                ))}
+              </ol>
             </motion.div>
           )}
         </AnimatePresence>
