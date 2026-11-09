@@ -212,7 +212,7 @@ type AskPhase = "asking" | "searching" | "found";
 
 function AskPanel({ items }: { items: SectionItem[] }) {
   const reduce = useReducedMotion();
-  const tick = useTick(6500);
+  const tick = useTick(8000);
   const ask = ASKS[tick % ASKS.length];
   const found = pickItems(items, ask.slugs);
   const [phase, setPhase] = useState<AskPhase>("asking");
@@ -224,7 +224,7 @@ function AskPanel({ items }: { items: SectionItem[] }) {
     const timers = [
       setTimeout(() => setPhase("asking"), 0),
       setTimeout(() => setPhase("searching"), 700),
-      setTimeout(() => setPhase("found"), 1700),
+      setTimeout(() => setPhase("found"), 3600),
     ];
     return () => timers.forEach(clearTimeout);
   }, [tick, reduce]);
