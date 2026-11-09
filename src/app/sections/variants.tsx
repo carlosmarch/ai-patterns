@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
+import { VoiceOrb } from "@/registry/voice/voice-orb/component";
 
 import { cn } from "@/lib/utils";
 import {
@@ -253,7 +254,7 @@ function AskPanel({ items }: { items: SectionItem[] }) {
   const shown: AskPhase = reduce ? "found" : phase;
 
   return (
-    <div aria-hidden className="relative min-h-[380px] overflow-hidden py-5">
+    <div aria-hidden className="relative min-h-[500px] overflow-hidden py-5">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.p
           key={ask.prompt}
@@ -270,10 +271,11 @@ function AskPanel({ items }: { items: SectionItem[] }) {
         </motion.p>
       </AnimatePresence>
 
-      {/* The registry's own patterns narrate the answer: the Thinking loader
-          while the agent reads the specs, then an Expandable trace step that
-          carries the count and the one-line reasoning. */}
-      <div className="mt-8 min-h-24">
+      {/* The registry's own patterns narrate the answer: the Voice orb
+          (thinking) and the Thinking loader while the agent reads the specs,
+          then an Expandable trace step that carries the count and the
+          one-line reasoning. */}
+      <div className="mt-8 min-h-44">
         <AnimatePresence mode="wait" initial={false}>
           {shown === "searching" && (
             <motion.div
@@ -283,7 +285,10 @@ function AskPanel({ items }: { items: SectionItem[] }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <ThinkingLoader words={["Reading the specs"]} className="max-w-md px-0 py-0" />
+              <div className="flex items-center gap-2">
+                <VoiceOrb state="thinking" particles={600} className="-mx-6 size-44 shrink-0 text-foreground dark:text-orange-50" />
+                <ThinkingLoader words={["Reading the specs"]} className="max-w-md px-0 py-0" />
+              </div>
             </motion.div>
           )}
           {shown === "found" && (
