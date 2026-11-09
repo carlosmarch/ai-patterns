@@ -205,10 +205,10 @@ export function AutonomyModePicker({
           }
         }}
         className={cn(
-          "flex h-8 items-center gap-1.5 rounded-lg border px-2 text-xs font-medium transition-colors",
+          "flex h-8 items-center gap-1.5 rounded-lg px-2 text-xs font-medium transition-colors",
           // The most autonomous mode stays visibly different, so it's never on by accident.
           highest
-            ? "border-foreground bg-foreground text-background hover:bg-foreground/90"
+            ? "bg-foreground text-background hover:bg-foreground/90"
             : "text-muted-foreground hover:bg-accent hover:text-foreground aria-expanded:bg-accent aria-expanded:text-foreground"
         )}
       >

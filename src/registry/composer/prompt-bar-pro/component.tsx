@@ -62,7 +62,9 @@ export interface PromptBarItem {
 export interface PromptBarProProps {
   suggestions: SessionSuggestion[];
   visibleCount?: number;
+  /** Where the agent works; an empty list hides the picker. */
   environments?: SessionOption[];
+  /** Who runs the session; an empty list hides the picker. */
   orchestrators?: SessionOption[];
   sources?: PromptBarItem[];
   commands?: PromptBarItem[];
@@ -696,85 +698,89 @@ export function PromptBarPro({
               </AnimatePresence>
             </div>
 
-            <div ref={environmentRef} className="relative hidden shrink-0 sm:block">
-              <button
-                type="button"
-                onClick={() => setEnvironmentOpen((v) => !v)}
-                className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors hover:bg-accent"
-              >
-                <Monitor className="size-3.5 text-muted-foreground" />
-                {environment}
-                <ChevronDown className={cn("size-3.5 transition-transform", environmentOpen && "rotate-180")} />
-              </button>
-              <AnimatePresence>
-                {environmentOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 4 }}
-                    transition={{ duration: 0.12 }}
-                    className="absolute bottom-full left-0 z-10 mb-2 w-36 overflow-hidden rounded-xl border bg-popover shadow-md"
-                  >
-                    {environments.map((e) => (
-                      <button
-                        key={e.id}
-                        type="button"
-                        onClick={() => {
-                          setEnvironment(e.label);
-                          setEnvironmentOpen(false);
-                        }}
-                        className={cn(
-                          "block w-full px-3 py-2 text-left text-sm hover:bg-accent",
-                          e.label === environment && "font-medium"
-                        )}
-                      >
-                        {e.label}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <div className="ml-auto flex items-center gap-1">
-              <div ref={orchestratorRef} className="relative shrink-0">
+            {environments.length > 0 && (
+              <div ref={environmentRef} className="relative hidden shrink-0 sm:block">
                 <button
                   type="button"
-                  onClick={() => setOrchestratorOpen((v) => !v)}
-                  className="flex items-center gap-1 rounded-full px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  onClick={() => setEnvironmentOpen((v) => !v)}
+                  className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors hover:bg-accent"
                 >
-                  {orchestrator}
-                  <ChevronDown className={cn("size-3.5 transition-transform", orchestratorOpen && "rotate-180")} />
+                  <Monitor className="size-3.5 text-muted-foreground" />
+                  {environment}
+                  <ChevronDown className={cn("size-3.5 transition-transform", environmentOpen && "rotate-180")} />
                 </button>
                 <AnimatePresence>
-                  {orchestratorOpen && (
+                  {environmentOpen && (
                     <motion.div
                       initial={{ opacity: 0, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 4 }}
                       transition={{ duration: 0.12 }}
-                      className="absolute bottom-full right-0 z-10 mb-2 w-36 overflow-hidden rounded-xl border bg-popover shadow-md"
+                      className="absolute bottom-full left-0 z-10 mb-2 w-36 overflow-hidden rounded-xl border bg-popover shadow-md"
                     >
-                      {orchestrators.map((o) => (
+                      {environments.map((e) => (
                         <button
-                          key={o.id}
+                          key={e.id}
                           type="button"
                           onClick={() => {
-                            setOrchestrator(o.label);
-                            setOrchestratorOpen(false);
+                            setEnvironment(e.label);
+                            setEnvironmentOpen(false);
                           }}
                           className={cn(
                             "block w-full px-3 py-2 text-left text-sm hover:bg-accent",
-                            o.label === orchestrator && "font-medium"
+                            e.label === environment && "font-medium"
                           )}
                         >
-                          {o.label}
+                          {e.label}
                         </button>
                       ))}
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
+            )}
+
+            <div className="ml-auto flex items-center gap-1">
+              {orchestrators.length > 0 && (
+                <div ref={orchestratorRef} className="relative shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setOrchestratorOpen((v) => !v)}
+                    className="flex items-center gap-1 rounded-full px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  >
+                    {orchestrator}
+                    <ChevronDown className={cn("size-3.5 transition-transform", orchestratorOpen && "rotate-180")} />
+                  </button>
+                  <AnimatePresence>
+                    {orchestratorOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 4 }}
+                        transition={{ duration: 0.12 }}
+                        className="absolute bottom-full right-0 z-10 mb-2 w-36 overflow-hidden rounded-xl border bg-popover shadow-md"
+                      >
+                        {orchestrators.map((o) => (
+                          <button
+                            key={o.id}
+                            type="button"
+                            onClick={() => {
+                              setOrchestrator(o.label);
+                              setOrchestratorOpen(false);
+                            }}
+                            className={cn(
+                              "block w-full px-3 py-2 text-left text-sm hover:bg-accent",
+                              o.label === orchestrator && "font-medium"
+                            )}
+                          >
+                            {o.label}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
 
               <button
                 type="button"
