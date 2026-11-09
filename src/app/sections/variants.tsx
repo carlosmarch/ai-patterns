@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, animate, motion, useInView, useReducedMotion } from "motion/react";
 import {
   Accessibility,
@@ -22,7 +22,12 @@ import {
 
 import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
 import { VoiceOrb } from "@/registry/voice/voice-orb/component";
-import { PromptBarPro, type PromptBarItem, type SessionSuggestion } from "@/registry/composer/prompt-bar-pro/component";
+import {
+  PromptBarPro,
+  type PromptBarItem,
+  type SessionOption,
+  type SessionSuggestion,
+} from "@/registry/composer/prompt-bar-pro/component";
 
 import { cn } from "@/lib/utils";
 import {
@@ -233,22 +238,33 @@ function readStep(mode: SkillMode, specs: number) {
   return `Read reference/index.md, then ${specs} specs`;
 }
 
+// The composer's menus, tailored to the skill: which coding agent runs it,
+// which skill command to use, `/` for the commands and `@` for a category.
+const ASK_AGENTS: SessionOption[] = AGENTS.map((a) => ({
+  id: a.name,
+  label: a.name === "Claude" ? "Claude Code" : a.name,
+}));
+const ASK_MODES: SessionOption[] = [
+  { id: "apply", label: "Apply" },
+  { id: "review", label: "Review" },
+  { id: "list", label: "List" },
+];
 const ASK_COMMANDS: PromptBarItem[] = [
-  {
-    id: "apply",
-    label: "/ai-patterns apply",
-    description: "Find the patterns and write the UI",
-  },
-  {
-    id: "review",
-    label: "/ai-patterns review",
-    description: "Audit a screen for hand-rolled AI UI",
-  },
-  { id: "list", label: "/ai-patterns list", description: "List the catalogue" },
+  { id: "apply", label: "/apply", description: "Find the patterns and write the UI" },
+  { id: "review", label: "/review", description: "Audit a screen for hand-rolled AI UI" },
+  { id: "list", label: "/list", description: "List what's in the catalogue" },
 ];
 
+/** Pulls a typed `/apply`, `/review` or `/list` (chip or text) out of the ask. */
+function parseCommand(text: string): { mode?: SkillMode; prompt: string } {
+  const match = text.match(/@?\/(?:ai-patterns\s+)?(apply|review|list)\b/i);
+  if (!match) return { prompt: text };
+  const prompt = text.replace(match[0], "").replace(/\s+/g, " ").trim();
+  return { mode: match[1].toLowerCase() as SkillMode, prompt };
+}
+
 /** One turn of the chat: which canned answer runs, and the words it answers. */
-type AskTurn = { ask: number; prompt: string; run: number; user: boolean };
+type AskTurn = { ask: number; prompt: string; run: number; user: boolean; mode?: SkillMode };
 
 const ASK_SUGGESTIONS: SessionSuggestion[] = [5, 9, 11, 3, 2, 0].map((i) => ({
   id: `ask-${i}`,
@@ -295,8 +311,19 @@ function AskPanel({ items }: { items: SectionItem[] }) {
   // Once someone reaches for the prompt bar, the demo stops cycling on its own
   // and only answers what they send.
   const [engaged, setEngaged] = useState(false);
+  // The composer's mode menu: what a typed ask runs as unless it names one.
+  const [pickedMode, setPickedMode] = useState<SkillMode>("apply");
   const ask = ASKS[turn.ask];
+  const mode: SkillMode = turn.mode ?? ask.mode ?? "apply";
   const found = pickItems(items, ask.slugs);
+  const sources = useMemo<PromptBarItem[]>(
+    () =>
+      [...new Set(items.map((i) => i.category))].map((c) => ({
+        id: c,
+        label: c.charAt(0).toUpperCase() + c.slice(1),
+      })),
+    [items]
+  );
 
   // Walk each question through asking → searching → found, then (unless the
   // visitor has taken over) move on to the next canned ask. Resetting happens
@@ -334,24 +361,30 @@ function AskPanel({ items }: { items: SectionItem[] }) {
   const shown: AskPhase = reduce ? "found" : phase;
 
   function send(value: string) {
-    const prompt = value.trim();
-    if (!prompt) return;
+    const parsed = parseCommand(value.trim());
+    const prompt = parsed.prompt;
+    const mode = parsed.mode ?? pickedMode;
+    if (!prompt && !parsed.mode) return;
     setEngaged(true);
     setTurn((t) => ({
-      ask: matchAsk(prompt, (t.ask + 1) % ASKS.length),
-      prompt,
+      ask: mode === "list" && !prompt ? 4 : matchAsk(prompt, (t.ask + 1) % ASKS.length),
+      prompt: prompt || "What's in the catalogue?",
       run: t.run + 1,
       user: true,
+      mode,
     }));
   }
 
   return (
     <div
-      className="relative flex min-h-[680px] min-w-0 flex-col py-5"
+      className="relative flex h-[800px] min-w-0 flex-col py-5 sm:h-[740px]"
       onPointerDownCapture={() => setEngaged(true)}
       onFocusCapture={() => setEngaged(true)}
     >
-      <div aria-hidden className="flex-1 overflow-hidden">
+      {/* Fixed heights all the way down: the conversation takes whatever the
+          composer leaves, so a new step, a longer ask or the orb never moves
+          the block or the page around it. */}
+      <div aria-hidden className="min-h-0 flex-1 overflow-hidden">
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.p
             key={turn.run}
@@ -362,7 +395,7 @@ function AskPanel({ items }: { items: SectionItem[] }) {
             transition={{ type: "spring", stiffness: 320, damping: 30 }}
           >
             <span className="mr-1.5 rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
-              /ai-patterns {ask.mode ?? "apply"}
+              /ai-patterns {mode}
             </span>
             {turn.prompt}
           </motion.p>
@@ -400,14 +433,14 @@ function AskPanel({ items }: { items: SectionItem[] }) {
               >
                 <p className="flex items-center gap-2 text-xs font-medium">
                   <Sparkles className="size-3.5 text-muted-foreground" />
-                  {ask.mode === "review"
+                  {mode === "review"
                     ? `Found ${found.length} swaps`
-                    : ask.mode === "list"
+                    : mode === "list"
                       ? `Listed ${found.length} patterns`
                       : `Found ${found.length} patterns`}
                 </p>
                 <ol className="mt-2 max-w-md">
-                  {[readStep(ask.mode ?? "apply", found.length), ask.why].map((text, i, all) => (
+                  {[readStep(mode, found.length), ask.why].map((text, i, all) => (
                     <motion.li
                       key={i}
                       className="flex gap-3"
@@ -469,6 +502,10 @@ function AskPanel({ items }: { items: SectionItem[] }) {
       <PromptBarPro
         suggestions={ASK_SUGGESTIONS}
         visibleCount={2}
+        environments={ASK_AGENTS}
+        orchestrators={ASK_MODES}
+        onOrchestratorChange={(o) => setPickedMode(o.id as SkillMode)}
+        sources={sources}
         commands={ASK_COMMANDS}
         placeholder="Ask for a pattern"
         generating={!reduce && shown !== "found" && (turn.user || !engaged)}

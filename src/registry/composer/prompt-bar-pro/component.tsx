@@ -64,6 +64,8 @@ export interface PromptBarProProps {
   visibleCount?: number;
   environments?: SessionOption[];
   orchestrators?: SessionOption[];
+  /** Called when a different orchestrator is picked from its menu. */
+  onOrchestratorChange?: (option: SessionOption) => void;
   sources?: PromptBarItem[];
   commands?: PromptBarItem[];
   placeholder?: string;
@@ -128,6 +130,7 @@ export function PromptBarPro({
   visibleCount = 3,
   environments = defaultEnvironments,
   orchestrators = defaultOrchestrators,
+  onOrchestratorChange,
   sources = defaultSources,
   commands = defaultCommands,
   placeholder = "Start a session",
@@ -278,7 +281,7 @@ export function PromptBarPro({
       if (node.nodeType === Node.TEXT_NODE) {
         text += node.textContent ?? "";
       } else if (node instanceof HTMLElement && node.dataset.chip === "true") {
-        text += `@${node.dataset.label}`;
+        text += node.dataset.text ?? "";
       }
     });
     return text;
@@ -292,10 +295,11 @@ export function PromptBarPro({
       if (node.nodeType === Node.TEXT_NODE) {
         text += node.textContent ?? "";
       } else if (node instanceof HTMLElement && node.dataset.chip === "true") {
-        text += `@${node.dataset.label}`;
+        // Pad chips so "/plan" never fuses with the word typed after it.
+        text += ` ${node.dataset.text ?? ""} `;
       }
     });
-    return text.trim();
+    return text.replace(/[ \u00a0]{2,}/g, " ").trim();
   }
 
   function updateEditorState() {
@@ -317,16 +321,18 @@ export function PromptBarPro({
     const sel = window.getSelection();
     const el = editorRef.current;
     if (!sel?.rangeCount || !el) return;
+    const isCommand = trigger?.type === "command";
+    const symbol = isCommand ? "/" : "@";
 
     const range = sel.getRangeAt(0);
     const container = range.startContainer;
     const offset = range.startOffset;
 
-    // Delete the @query text from the current text node
+    // Delete the @query (or /command) text from the current text node
     if (container.nodeType === Node.TEXT_NODE) {
       const text = container.textContent ?? "";
       const textBefore = text.slice(0, offset);
-      const atIndex = textBefore.lastIndexOf("@");
+      const atIndex = textBefore.lastIndexOf(symbol);
       if (atIndex !== -1) {
         container.textContent = text.slice(0, atIndex) + text.slice(offset);
         const newRange = document.createRange();
@@ -340,8 +346,11 @@ export function PromptBarPro({
     const chip = document.createElement("span");
     chip.contentEditable = "false";
     chip.dataset.chip = "true";
+    // Sources read as "@Drive"; commands already carry their slash ("/plan").
+    const chipText = isCommand ? item.label : `@${item.label}`;
     chip.dataset.label = item.label;
-    chip.textContent = `@${item.label}`;
+    chip.dataset.text = chipText;
+    chip.textContent = chipText;
     chip.className = CHIP_CLASS;
 
     const insertRange = sel.getRangeAt(0);
@@ -760,6 +769,7 @@ export function PromptBarPro({
                           onClick={() => {
                             setOrchestrator(o.label);
                             setOrchestratorOpen(false);
+                            onOrchestratorChange?.(o);
                           }}
                           className={cn(
                             "block w-full px-3 py-2 text-left text-sm hover:bg-accent",
