@@ -22,6 +22,7 @@ import {
 
 import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
 import { VoiceOrb } from "@/registry/voice/voice-orb/component";
+import { PromptBarPro, type PromptBarItem, type SessionSuggestion } from "@/registry/composer/prompt-bar-pro/component";
 
 import { cn } from "@/lib/utils";
 import {
@@ -206,7 +207,7 @@ const ASKS: { prompt: string; why: string; slugs: string[]; mode?: SkillMode }[]
 
 export function AskVariant({ items }: { items: SectionItem[] }) {
   return (
-    <section className="grid items-center gap-10 py-6 md:grid-cols-[0.9fr_1.1fr]">
+    <section className="grid items-center gap-10 py-6 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
       <div>
         <h2 className="text-4xl leading-[1.05] font-semibold tracking-tight sm:text-5xl">
           Ask for a pattern.
@@ -232,133 +233,249 @@ function readStep(mode: SkillMode, specs: number) {
   return `Read reference/index.md, then ${specs} specs`;
 }
 
+const ASK_COMMANDS: PromptBarItem[] = [
+  {
+    id: "apply",
+    label: "/ai-patterns apply",
+    description: "Find the patterns and write the UI",
+  },
+  {
+    id: "review",
+    label: "/ai-patterns review",
+    description: "Audit a screen for hand-rolled AI UI",
+  },
+  { id: "list", label: "/ai-patterns list", description: "List the catalogue" },
+];
+
+/** One turn of the chat: which canned answer runs, and the words it answers. */
+type AskTurn = { ask: number; prompt: string; run: number; user: boolean };
+
+const ASK_SUGGESTIONS: SessionSuggestion[] = [5, 9, 11, 3, 2, 0].map((i) => ({
+  id: `ask-${i}`,
+  label: ASKS[i].prompt,
+  icon: Sparkles,
+}));
+
+const STOP_WORDS = new Set([
+  "need", "want", "with", "that", "this", "what", "some", "make", "mode", "have",
+  "from", "into", "show", "like", "when", "should", "them", "they", "people", "pattern", "patterns",
+]);
+
+/** Picks the canned answer that shares the most words with what was typed. */
+function matchAsk(text: string, fallback: number) {
+  const words = (text.toLowerCase().match(/[a-z]{4,}/g) ?? []).filter((w) => !STOP_WORDS.has(w));
+  let best = fallback;
+  let bestScore = 0;
+  ASKS.forEach((ask, i) => {
+    // A word that names a pattern ("voice", "citation") counts more than one
+    // that only shows up in the canned question or its reasoning.
+    const slugs = ask.slugs.join(" ");
+    const text = `${ask.prompt} ${ask.why}`.toLowerCase();
+    const score = words.reduce((sum, w) => {
+      const stem = w.slice(0, 5);
+      return sum + (slugs.includes(stem) ? 3 : text.includes(stem) ? 1 : 0);
+    }, 0);
+    if (score > bestScore) {
+      best = i;
+      bestScore = score;
+    }
+  });
+  return best;
+}
+
 function AskPanel({ items }: { items: SectionItem[] }) {
   const reduce = useReducedMotion();
-  const tick = useTick(8000);
-  const ask = ASKS[tick % ASKS.length];
-  const found = pickItems(items, ask.slugs);
+  const [turn, setTurn] = useState<AskTurn>({
+    ask: 0,
+    prompt: ASKS[0].prompt,
+    run: 0,
+    user: false,
+  });
   const [phase, setPhase] = useState<AskPhase>("asking");
+  // Once someone reaches for the prompt bar, the demo stops cycling on its own
+  // and only answers what they send.
+  const [engaged, setEngaged] = useState(false);
+  const ask = ASKS[turn.ask];
+  const found = pickItems(items, ask.slugs);
 
-  // Walk each question through asking → searching → found. Resetting happens
+  // Walk each question through asking → searching → found, then (unless the
+  // visitor has taken over) move on to the next canned ask. Resetting happens
   // in the timers (not synchronously in the effect) to avoid a cascading render.
   useEffect(() => {
-    if (reduce) return;
+    if (reduce) {
+      const id = setTimeout(() => setPhase("found"), 0);
+      return () => clearTimeout(id);
+    }
     const timers = [
       setTimeout(() => setPhase("asking"), 0),
       setTimeout(() => setPhase("searching"), 700),
       setTimeout(() => setPhase("found"), 3600),
     ];
+    if (!engaged) {
+      timers.push(
+        setTimeout(
+          () =>
+            setTurn((t) => {
+              const next = (t.ask + 1) % ASKS.length;
+              return {
+                ask: next,
+                prompt: ASKS[next].prompt,
+                run: t.run + 1,
+                user: false,
+              };
+            }),
+          8000,
+        ),
+      );
+    }
     return () => timers.forEach(clearTimeout);
-  }, [tick, reduce]);
+  }, [turn.run, engaged, reduce]);
 
   const shown: AskPhase = reduce ? "found" : phase;
 
+  function send(value: string) {
+    const prompt = value.trim();
+    if (!prompt) return;
+    setEngaged(true);
+    setTurn((t) => ({
+      ask: matchAsk(prompt, (t.ask + 1) % ASKS.length),
+      prompt,
+      run: t.run + 1,
+      user: true,
+    }));
+  }
+
   return (
-    <div aria-hidden className="relative min-h-[500px] overflow-hidden py-5">
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.p
-          key={ask.prompt}
-          className="ml-auto w-fit max-w-[80%] rounded-2xl border bg-card px-4 py-3 text-sm leading-snug shadow-sm dark:bg-background"
-          initial={reduce ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ type: "spring", stiffness: 320, damping: 30 }}
-        >
-          <span className="mr-1.5 rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
-            /ai-patterns {ask.mode ?? "apply"}
-          </span>
-          {ask.prompt}
-        </motion.p>
-      </AnimatePresence>
-
-      {/* The registry's own patterns narrate the answer: the Voice orb
-          (thinking) and the Thinking loader while the agent reads the specs,
-          then an Expandable trace step that carries the count and the
-          one-line reasoning. */}
-      <div className="mt-8 min-h-28">
-        <AnimatePresence mode="wait" initial={false}>
-          {shown === "searching" && (
-            <motion.div
-              key="searching"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <ThinkingLoader words={["Reading the specs"]} className="max-w-md px-0 py-0" />
-              <VoiceOrb
-                state="thinking"
-                particles={1100}
-                className="mx-auto mt-2 size-72 max-w-full text-foreground dark:text-orange-50"
-              />
-            </motion.div>
-          )}
-          {shown === "found" && (
-            <motion.div
-              key={`found-${ask.prompt}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <p className="flex items-center gap-2 text-xs font-medium">
-                <Sparkles className="size-3.5 text-muted-foreground" />
-                {ask.mode === "review"
-                  ? `Found ${found.length} swaps`
-                  : ask.mode === "list"
-                    ? `Listed ${found.length} patterns`
-                    : `Found ${found.length} patterns`}
-              </p>
-              <ol className="mt-2 max-w-md">
-                {[readStep(ask.mode ?? "apply", found.length), ask.why].map((text, i, all) => (
-                  <motion.li
-                    key={i}
-                    className="flex gap-3"
-                    initial={reduce ? { opacity: 0 } : { opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: reduce ? 0 : 0.1 + i * 0.15 }}
-                  >
-                    <span className="flex flex-col items-center">
-                      <span className="mt-px flex size-4 shrink-0 items-center justify-center rounded-full bg-muted">
-                        <Check className="size-2.5 text-muted-foreground" />
-                      </span>
-                      {i < all.length - 1 && <span className="my-1 w-px flex-1 bg-border" />}
-                    </span>
-                    <p
-                      className={cn(
-                        "leading-snug",
-                        i < all.length - 1
-                          ? "pb-2.5 font-mono text-xs text-muted-foreground/80"
-                          : "text-sm text-muted-foreground"
-                      )}
-                    >
-                      {text}
-                    </p>
-                  </motion.li>
-                ))}
-              </ol>
-            </motion.div>
-          )}
+    <div
+      className="relative flex min-h-[680px] min-w-0 flex-col py-5"
+      onPointerDownCapture={() => setEngaged(true)}
+      onFocusCapture={() => setEngaged(true)}
+    >
+      <div aria-hidden className="flex-1 overflow-hidden">
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.p
+            key={turn.run}
+            className="ml-auto w-fit max-w-[80%] rounded-2xl border bg-card px-4 py-3 text-sm leading-snug shadow-sm dark:bg-background"
+            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ type: "spring", stiffness: 320, damping: 30 }}
+          >
+            <span className="mr-1.5 rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
+              /ai-patterns {ask.mode ?? "apply"}
+            </span>
+            {turn.prompt}
+          </motion.p>
         </AnimatePresence>
-      </div>
 
-      <div className="mt-4 flex gap-3 [mask-image:linear-gradient(to_right,black_70%,transparent)]">
-        <AnimatePresence mode="popLayout">
-          {shown === "found" &&
-            found.map((item, i) => (
+        {/* The registry's own patterns narrate the answer: the Voice orb
+            (thinking) and the Thinking loader while the agent reads the specs,
+            then an Expandable trace step that carries the count and the
+            one-line reasoning. */}
+        <div className="mt-8 min-h-28">
+          <AnimatePresence mode="wait" initial={false}>
+            {shown === "searching" && (
               <motion.div
-                key={`${ask.prompt}-${item.slug}`}
-                className="w-40 shrink-0"
-                initial={reduce ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, transition: { duration: 0.15 } }}
-                transition={{ type: "spring", stiffness: 300, damping: 28, delay: reduce ? 0 : i * 0.07 }}
+                key="searching"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
               >
-                <ThumbCard item={item} className="bg-card dark:bg-background" />
+                <ThinkingLoader words={["Reading the specs"]} className="max-w-md px-0 py-0" />
+                <VoiceOrb
+                  state="thinking"
+                  particles={1100}
+                  className="mx-auto mt-2 size-72 max-w-full text-foreground dark:text-orange-50"
+                />
               </motion.div>
-            ))}
-        </AnimatePresence>
+            )}
+            {shown === "found" && (
+              <motion.div
+                key={`found-${turn.run}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <p className="flex items-center gap-2 text-xs font-medium">
+                  <Sparkles className="size-3.5 text-muted-foreground" />
+                  {ask.mode === "review"
+                    ? `Found ${found.length} swaps`
+                    : ask.mode === "list"
+                      ? `Listed ${found.length} patterns`
+                      : `Found ${found.length} patterns`}
+                </p>
+                <ol className="mt-2 max-w-md">
+                  {[readStep(ask.mode ?? "apply", found.length), ask.why].map((text, i, all) => (
+                    <motion.li
+                      key={i}
+                      className="flex gap-3"
+                      initial={reduce ? { opacity: 0 } : { opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: reduce ? 0 : 0.1 + i * 0.15 }}
+                    >
+                      <span className="flex flex-col items-center">
+                        <span className="mt-px flex size-4 shrink-0 items-center justify-center rounded-full bg-muted">
+                          <Check className="size-2.5 text-muted-foreground" />
+                        </span>
+                        {i < all.length - 1 && <span className="my-1 w-px flex-1 bg-border" />}
+                      </span>
+                      <p
+                        className={cn(
+                          "leading-snug",
+                          i < all.length - 1
+                            ? "pb-2.5 font-mono text-xs text-muted-foreground/80"
+                            : "text-sm text-muted-foreground"
+                        )}
+                      >
+                        {text}
+                      </p>
+                    </motion.li>
+                  ))}
+                </ol>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="mt-4 flex gap-3 [mask-image:linear-gradient(to_right,black_70%,transparent)]">
+          <AnimatePresence mode="popLayout">
+            {shown === "found" &&
+              found.map((item, i) => (
+                <motion.div
+                  key={`${turn.run}-${item.slug}`}
+                  className="w-40 shrink-0"
+                  initial={reduce ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                  transition={{ type: "spring", stiffness: 300, damping: 28, delay: reduce ? 0 : i * 0.07 }}
+                >
+                  <ThumbCard item={item} className="bg-card dark:bg-background" />
+                </motion.div>
+              ))}
+          </AnimatePresence>
+        </div>
       </div>
+
+      <p role="status" className="sr-only">
+        {shown === "found" && turn.user
+          ? `Found ${found.length} patterns: ${found.map((f) => f.title).join(", ")}. ${ask.why}`
+          : ""}
+      </p>
+
+      {/* The composer is the registry's Prompt bar pro: suggestions send a
+          canned ask, typing sends your own, and Stop ends the search early. */}
+      <PromptBarPro
+        suggestions={ASK_SUGGESTIONS}
+        visibleCount={2}
+        commands={ASK_COMMANDS}
+        placeholder="Ask for a pattern"
+        generating={!reduce && shown !== "found" && (turn.user || !engaged)}
+        onStop={() => setPhase("found")}
+        onSubmit={send}
+        className="mt-4 [&_button]:max-w-full"
+      />
     </div>
   );
 }
