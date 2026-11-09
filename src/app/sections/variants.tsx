@@ -622,27 +622,62 @@ function SpecDoc() {
 
 type TermLine = { kind: "prompt" | "read" | "note" | "write" | "done"; text: string };
 
-const TERM: TermLine[] = [
-  { kind: "prompt", text: "add an approval step before the agent sends email" },
-  { kind: "read", text: "Read ai-patterns/reference/permissions/tool-approval.md" },
-  { kind: "note", text: "When not to use: low-risk, reversible actions" },
-  { kind: "note", text: "Behavior: approve, edit, or deny — never auto-continue" },
-  { kind: "write", text: "Write src/components/tool-approval.tsx" },
-  { kind: "done", text: "Focus moves to Approve · live region announces the request" },
+// The skill's three real commands, each with the steps it actually takes —
+// the terminal plays them in turn.
+const SCRIPTS: { mode: "list" | "review" | "apply"; lines: TermLine[] }[] = [
+  {
+    mode: "list",
+    lines: [
+      { kind: "prompt", text: "/ai-patterns list all patterns" },
+      { kind: "read", text: "Read ai-patterns/reference/index.md" },
+      { kind: "note", text: "access — Invite Members, Share Session" },
+      { kind: "note", text: "loaders — Thinking Loader, …" },
+      { kind: "note", text: "permissions — Tool Approval, …" },
+      { kind: "done", text: "Numbered, grouped by category" },
+    ],
+  },
+  {
+    mode: "review",
+    lines: [
+      { kind: "prompt", text: "/ai-patterns review my project" },
+      { kind: "read", text: "Read ai-patterns/reference/index.md" },
+      { kind: "note", text: "app/chat/spinner.tsx → Thinking Loader" },
+      { kind: "note", text: "app/chat/error.tsx → Generation Error" },
+      { kind: "note", text: "Each swap cites the spec's When to use" },
+      { kind: "done", text: "Read-only · nothing edited" },
+    ],
+  },
+  {
+    mode: "apply",
+    lines: [
+      { kind: "prompt", text: "/ai-patterns apply tool-approval before outbound tool calls" },
+      { kind: "read", text: "Read ai-patterns/reference/permissions/tool-approval.md" },
+      { kind: "note", text: "When not to use: low-risk, reversible actions" },
+      { kind: "note", text: "Behavior: approve, edit, or deny — never auto-continue" },
+      { kind: "write", text: "Write src/components/tool-approval.tsx" },
+      { kind: "done", text: "Focus moves to Approve · live region announces it" },
+    ],
+  },
 ];
 
-function useTermLines(step = 650, hold = 2600) {
+/** Plays each script line by line, holds the finished one, then moves on. */
+function useTermScript(step = 650, hold = 2600) {
   const reduce = useReducedMotion();
-  const [count, setCount] = useState(0);
+  const [state, setState] = useState({ script: 0, count: 0 });
+  const { lines } = SCRIPTS[state.script];
   useEffect(() => {
     if (reduce) return;
+    const done = state.count >= lines.length;
     const id = setTimeout(
-      () => setCount((c) => (c >= TERM.length ? 0 : c + 1)),
-      count >= TERM.length ? hold : count === 0 ? 400 : step
+      () =>
+        setState((s) =>
+          done ? { script: (s.script + 1) % SCRIPTS.length, count: 0 } : { ...s, count: s.count + 1 }
+        ),
+      done ? hold : state.count === 0 ? 400 : step
     );
     return () => clearTimeout(id);
-  }, [count, reduce, step, hold]);
-  return reduce ? TERM.length : count;
+  }, [state, lines.length, reduce, step, hold]);
+  return { script: state.script, count: reduce ? lines.length : state.count };
 }
 
 function TermRow({ line }: { line: TermLine }) {
@@ -665,7 +700,8 @@ function TermRow({ line }: { line: TermLine }) {
 }
 
 function Terminal({ className, compact }: { className?: string; compact?: boolean }) {
-  const count = useTermLines();
+  const { script, count } = useTermScript();
+  const lines = SCRIPTS[script].lines;
   return (
     <div
       aria-hidden
@@ -679,6 +715,19 @@ function Terminal({ className, compact }: { className?: string; compact?: boolea
           <span key={i} className="size-2 rounded-full bg-neutral-700" />
         ))}
         <span className="ml-2 font-mono text-[10px] text-neutral-500">claude — my-app</span>
+        <span className="ml-auto flex gap-1 font-mono text-[10px]">
+          {SCRIPTS.map((s, i) => (
+            <span
+              key={s.mode}
+              className={cn(
+                "rounded px-1.5 py-0.5 transition-colors duration-300",
+                i === script ? "bg-neutral-800 text-neutral-100" : "text-neutral-600"
+              )}
+            >
+              {s.mode}
+            </span>
+          ))}
+        </span>
       </div>
       <div
         className={cn(
@@ -686,9 +735,9 @@ function Terminal({ className, compact }: { className?: string; compact?: boolea
           compact ? "min-h-[180px] text-[10px]" : "min-h-[230px] text-[11px] sm:text-xs"
         )}
       >
-        {TERM.slice(0, count).map((line, i) => (
+        {lines.slice(0, count).map((line, i) => (
           <motion.div
-            key={i}
+            key={`${script}-${i}`}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2 }}
@@ -696,7 +745,7 @@ function Terminal({ className, compact }: { className?: string; compact?: boolea
             <TermRow line={line} />
           </motion.div>
         ))}
-        {count < TERM.length && (
+        {count < lines.length && (
           <span className="inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-neutral-400" />
         )}
       </div>
