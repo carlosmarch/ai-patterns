@@ -1243,7 +1243,7 @@ function NavSidebar({
 
   return (
     <aside className="flex w-60 shrink-0 flex-col overflow-y-auto rounded-2xl border bg-background p-3 shadow-sm">
-      <div className="flex items-center gap-2 px-1 pb-4 pt-1">
+      <div className="flex shrink-0 items-center gap-2 px-1 pb-4 pt-1">
         <span className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background">
           <AGENT_ICON className="size-4" />
         </span>
@@ -1259,7 +1259,7 @@ function NavSidebar({
         </button>
       </div>
 
-      <nav aria-label="Agent" className="flex flex-col gap-0.5">
+      <nav aria-label="Agent" className="flex shrink-0 flex-col gap-0.5">
         <button
           type="button"
           onClick={onNewThread}
@@ -1307,7 +1307,7 @@ function NavSidebar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="mt-5 flex min-h-0 flex-col"
+            className="mt-5 flex shrink-0 flex-col"
           >
             <p className="px-3 pb-1.5 text-xs text-muted-foreground">Recents</p>
             <ul className="flex flex-col gap-0.5">
@@ -1345,7 +1345,7 @@ function NavSidebar({
         )}
       </AnimatePresence>
 
-      <div className="mt-auto flex flex-col gap-0.5 pt-5">
+      <div className="mt-auto flex shrink-0 flex-col gap-0.5 pt-5">
         {setupDone < 4 && (
           <button
             type="button"
