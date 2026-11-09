@@ -3,7 +3,24 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, animate, motion, useInView, useReducedMotion } from "motion/react";
-import { Check, Search } from "lucide-react";
+import {
+  Accessibility,
+  Bot,
+  Check,
+  CircleCheck,
+  CircleX,
+  Copy,
+  FileText,
+  Link2,
+  MousePointerClick,
+  PenLine,
+  Search,
+  Shapes,
+  Sparkles,
+  type LucideIcon,
+} from "lucide-react";
+
+import { ThinkingLoader } from "@/registry/loaders/thinking-loader/component";
 
 import { cn } from "@/lib/utils";
 import {
@@ -215,7 +232,7 @@ function AskPanel({ items }: { items: SectionItem[] }) {
   const shown: AskPhase = reduce ? "found" : phase;
 
   return (
-    <div aria-hidden className="relative min-h-[380px] overflow-hidden rounded-2xl border bg-muted/40 p-5">
+    <div aria-hidden className="relative min-h-[380px] overflow-hidden py-5">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.p
           key={ask.prompt}
@@ -229,51 +246,51 @@ function AskPanel({ items }: { items: SectionItem[] }) {
         </motion.p>
       </AnimatePresence>
 
-      <div className="mt-8 h-5 text-sm font-medium">
+      {/* The registry's own patterns narrate the answer: the Thinking loader
+          while the agent reads the specs, then an Expandable trace step that
+          carries the count and the one-line reasoning. */}
+      <div className="mt-8 min-h-16">
         <AnimatePresence mode="wait" initial={false}>
           {shown === "searching" && (
-            <motion.span
+            <motion.div
               key="searching"
-              className="block bg-[linear-gradient(90deg,var(--muted-foreground)_0%,var(--foreground)_50%,var(--muted-foreground)_100%)] bg-[length:200%_100%] bg-clip-text text-transparent [animation:hero-shimmer_1.4s_linear_infinite]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
             >
-              Reading the specs…
-            </motion.span>
+              <ThinkingLoader words={["Reading the specs"]} className="max-w-md px-0 py-0" />
+            </motion.div>
           )}
           {shown === "found" && (
-            <motion.span
+            <motion.div
               key={`found-${ask.prompt}`}
-              className="block"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
             >
-              Found {found.length} patterns
-            </motion.span>
+              <p className="flex items-center gap-2 text-xs font-medium">
+                <Sparkles className="size-3.5 text-muted-foreground" />
+                Found {found.length} patterns
+              </p>
+              <motion.div
+                className="mt-2 flex max-w-md gap-3"
+                initial={reduce ? { opacity: 0 } : { opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: reduce ? 0 : 0.15 }}
+              >
+                <span className="mt-px flex size-4 shrink-0 items-center justify-center rounded-full bg-muted">
+                  <Check className="size-2.5 text-muted-foreground" />
+                </span>
+                <p className="text-sm leading-snug text-muted-foreground">{ask.why}</p>
+              </motion.div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      <div className="mt-1 min-h-10 text-sm leading-snug text-muted-foreground">
-        <AnimatePresence mode="wait" initial={false}>
-          {shown === "found" && (
-            <motion.p
-              key={`why-${ask.prompt}`}
-              className="max-w-md"
-              initial={reduce ? { opacity: 0 } : { opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, delay: reduce ? 0 : 0.15 }}
-            >
-              {ask.why}
-            </motion.p>
-          )}
-        </AnimatePresence>
-      </div>
-
-      <div className="-mr-5 mt-2 flex gap-3 [mask-image:linear-gradient(to_right,black_70%,transparent)]">
+      <div className="mt-4 flex gap-3 [mask-image:linear-gradient(to_right,black_70%,transparent)]">
         <AnimatePresence mode="popLayout">
           {shown === "found" &&
             found.map((item, i) => (
@@ -418,10 +435,10 @@ function StepShip({ on }: { on: boolean }) {
 /* ------------------------------------------------------------------------ */
 
 const TABS = [
-  { id: "find", title: "Find by behavior", body: "Type what it does — approve, stream, cite, interrupt." },
-  { id: "copy", title: "Copy it, don't install it", body: "Source in your repo, with its demo and spec beside it." },
-  { id: "spec", title: "A spec per pattern", body: "When to use, when not, anatomy, behavior, a11y — same order, every time." },
-  { id: "agent", title: "Read by your agent", body: "The skill makes Claude Code read the spec before it writes the UI." },
+  { id: "find", icon: Search, title: "Find by behavior", body: "Type what it does — approve, stream, cite, interrupt." },
+  { id: "copy", icon: Copy, title: "Copy it, don't install it", body: "Source in your repo, with its demo and spec beside it." },
+  { id: "spec", icon: FileText, title: "A spec per pattern", body: "When to use, when not, anatomy, behavior, a11y — same order, every time." },
+  { id: "agent", icon: Bot, title: "Read by your agent", body: "The skill makes Claude Code read the spec before it writes the UI." },
 ] as const;
 
 const TAB_MS = 5000;
@@ -473,10 +490,22 @@ export function TabsVariant({ thumbnails }: { thumbnails: ReactNode }) {
                   document.getElementById(`tab-${TABS[next].id}`)?.focus();
                 }}
                 className={cn(
-                  "relative overflow-hidden rounded-xl px-4 py-3.5 text-left transition-colors",
+                  "relative flex gap-3.5 overflow-hidden rounded-xl px-4 py-3.5 text-left transition-colors",
                   selected ? "bg-muted/60" : "hover:bg-muted/40"
                 )}
               >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "grid size-9 shrink-0 place-items-center rounded-lg border transition-colors duration-300",
+                    selected
+                      ? "border-transparent bg-foreground text-background shadow-sm"
+                      : "bg-card text-muted-foreground dark:bg-background"
+                  )}
+                >
+                  <t.icon className="size-4" />
+                </span>
+                <span className="min-w-0 self-center">
                 <span className={cn("block text-sm font-medium", !selected && "text-muted-foreground")}>
                   {t.title}
                 </span>
@@ -493,6 +522,7 @@ export function TabsVariant({ thumbnails }: { thumbnails: ReactNode }) {
                     </motion.span>
                   )}
                 </AnimatePresence>
+                </span>
                 {selected && auto && (
                   <motion.span
                     key={`bar-${index}`}
@@ -514,6 +544,11 @@ export function TabsVariant({ thumbnails }: { thumbnails: ReactNode }) {
           aria-labelledby={`tab-${tab.id}`}
           className="relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-xl border bg-muted/40"
         >
+          {/* Dot grid behind the vignettes, fading out toward the edges. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(var(--border)_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_at_center,black_35%,transparent_80%)]"
+          />
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={tab.id}
@@ -535,15 +570,15 @@ export function TabsVariant({ thumbnails }: { thumbnails: ReactNode }) {
   );
 }
 
-const SPEC_SECTIONS = [
-  "Summary",
-  "When to use",
-  "When not to use",
-  "Anatomy",
-  "Behavior",
-  "Content guidelines",
-  "Accessibility",
-  "Related patterns",
+const SPEC_SECTIONS: { label: string; icon: LucideIcon }[] = [
+  { label: "Summary", icon: FileText },
+  { label: "When to use", icon: CircleCheck },
+  { label: "When not to use", icon: CircleX },
+  { label: "Anatomy", icon: Shapes },
+  { label: "Behavior", icon: MousePointerClick },
+  { label: "Content guidelines", icon: PenLine },
+  { label: "Accessibility", icon: Accessibility },
+  { label: "Related patterns", icon: Link2 },
 ];
 
 function SpecDoc() {
@@ -552,20 +587,30 @@ function SpecDoc() {
   return (
     <div aria-hidden className="w-[72%] max-w-[280px] rounded-xl border bg-card p-4 shadow-lg dark:bg-background">
       <p className="font-mono text-[11px] text-muted-foreground">tool-approval/pattern.ts</p>
-      <ul className="mt-3 space-y-1.5">
-        {SPEC_SECTIONS.map((s, i) => (
-          <li key={s} className="flex items-center gap-2">
-            <span
+      <ul className="mt-3 space-y-0.5">
+        {SPEC_SECTIONS.map(({ label, icon: Icon }, i) => {
+          const on = i === active;
+          return (
+            <li
+              key={label}
               className={cn(
-                "h-1.5 rounded-full transition-all duration-300",
-                i === active ? "w-3 bg-foreground" : "w-1.5 bg-muted-foreground/30"
+                "flex items-center gap-2 rounded-md px-1.5 py-1 transition-colors duration-300",
+                on && "bg-muted"
               )}
-            />
-            <span className={cn("text-xs transition-colors duration-300", i !== active && "text-muted-foreground")}>
-              {s}
-            </span>
-          </li>
-        ))}
+            >
+              <Icon
+                className={cn(
+                  "size-3.5 shrink-0 transition-colors duration-300",
+                  on ? "text-foreground" : "text-muted-foreground/50"
+                )}
+              />
+              <span className={cn("text-xs transition-colors duration-300", !on && "text-muted-foreground")}>
+                {label}
+              </span>
+              {i < active && <Check className="ml-auto size-3 text-muted-foreground/60" />}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
