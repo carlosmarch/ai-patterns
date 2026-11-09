@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { ArrowUpRight } from "lucide-react";
 
 import { CodeBlock } from "@/components/code-block";
-import { VoiceOrb } from "@/registry/voice/voice-orb/component";
+import { BackdropOrb } from "./backdrop-orb";
 import { formatAdded } from "@/components/new-badge";
 import { getEntryHref } from "@/registry";
 import { SITE_SHARE_IMAGE } from "@/lib/share";
@@ -311,26 +311,6 @@ export default function ResearchPage() {
           </article>
         </div>
       </main>
-    </div>
-  );
-}
-
-/**
- * Decorative Voice Orb bleeding off the top-right corner, behind the brief.
- * The radial mask makes the wrapper its own compositing group, so the
- * gradient layer blends (`mix-blend-color`) only with the orb: it tints the
- * grey particles and, where there are none, shows as a soft glow that the
- * mask fades into the page. Smaller and fainter on phones, where it sits
- * behind the title.
- */
-function BackdropOrb() {
-  return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute -top-32 -right-56 -z-10 size-[30rem] opacity-50 [mask-image:radial-gradient(closest-side,black_50%,transparent)] sm:-top-64 sm:-right-48 sm:size-[52rem] sm:opacity-100"
-    >
-      <VoiceOrb state="idle" particles={2600} className="size-full text-foreground/45" />
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,#7dd3fc_0%,#a78bfa_35%,#f472b6_65%,#fb923c_100%)] opacity-80 mix-blend-color" />
     </div>
   );
 }
