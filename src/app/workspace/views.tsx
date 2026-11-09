@@ -1963,37 +1963,6 @@ export function ConnectorsView({
 }
 
 // ---------------------------------------------------------------------------
-// Changelog
-// ---------------------------------------------------------------------------
-
-const CHANGES = [
-  { date: "Oct 17", title: "Procedure Builder added", body: "Doc-style procedures with IF / ELSE branches. Origami uses it for “Review a pattern”." },
-  { date: "Oct 16", title: "Instruction Tool Insert added", body: "Type / in any guideline to reference a tool inline." },
-  { date: "Oct 15", title: "Refinement Controls added", body: "One-tap Shorten, Rephrase, and More formal on any AI output, with versions." },
-  { date: "Oct 12", title: "Prompt-Driven Onboarding", body: "Setup now hands you a prompt for your coding agent instead of a wall of docs." },
-];
-
-export function ChangelogView() {
-  return (
-    <>
-      <ViewHeader title="What's new" />
-      <Scroll className="px-6 py-6">
-        <ol className="mx-auto max-w-xl space-y-6 border-l pl-6">
-          {CHANGES.map((c) => (
-            <li key={c.title} className="relative">
-              <span className="absolute -left-[29px] top-1.5 size-2.5 rounded-full border-2 border-background bg-foreground" />
-              <p className="text-xs text-muted-foreground">{c.date}</p>
-              <p className="mt-0.5 font-medium">{c.title}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{c.body}</p>
-            </li>
-          ))}
-        </ol>
-      </Scroll>
-    </>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Setup
 // ---------------------------------------------------------------------------
 

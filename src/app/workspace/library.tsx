@@ -5,7 +5,6 @@ import { ArrowUpRight, Search } from "lucide-react";
 
 import { CopyButton } from "@/components/copy-button";
 import { DownloadButton } from "@/components/download-button";
-import { GithubMark } from "@/components/github-mark";
 import { cn } from "@/lib/utils";
 import { ConnectivityError } from "@/registry/errors/connectivity-error/component";
 import {
@@ -15,14 +14,12 @@ import {
 } from "@/registry/tables/describe-filters/component";
 import { JOBS } from "@/registry/jobs";
 import { getCategories, registry, type RegistryEntry } from "@/registry";
-import { INSTALL_COMMAND, SKILL_MODES, SKILL_PILLARS, SKILL_STATS_BODY, SKILL_STEPS, SKILL_TAGLINE, SkillPitch } from "@/app/skill/content";
-import { SkillExamples, type SkillExample } from "@/app/skill/skill-examples";
 
 import { AGENT_ICON, AGENT_NAME } from "./data";
 import { entryPath, findEntry, loadSource, specSection, type PatternSource } from "./catalogue";
 import { Scroll, Tabs, ViewHeader } from "./views";
 
-// The same catalogue and skill docs as /patterns and /skill, as views inside
+// The same catalogue as /patterns, as a view inside
 // the workspace — so Origami's product shows the patterns it's built from.
 
 const CATEGORIES = getCategories();
@@ -460,122 +457,5 @@ function Highlighted({ html, text, wrap }: { html?: string | null; text?: string
         <div className="h-64 animate-pulse rounded-lg border bg-muted/50" aria-label="Loading" />
       )}
     </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Skill
-// ---------------------------------------------------------------------------
-
-export function SkillView({
-  version,
-  onOpenPatterns,
-  onTry,
-}: {
-  version: string;
-  onOpenPatterns: (category?: string) => void;
-  onTry: (example: SkillExample) => void;
-}) {
-  return (
-    <>
-      <ViewHeader title="Skill" badge={`v${version}`}>
-        <a
-          href="https://github.com/carlosmarch/ai-patterns/tree/main/plugins/ai-patterns"
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent"
-        >
-          <GithubMark className="size-3.5" />
-          Source
-        </a>
-      </ViewHeader>
-      <Scroll className="px-4 py-6 sm:px-6">
-        <div className="mx-auto max-w-3xl space-y-14 pb-10">
-          <section className="space-y-3">
-            <p className="text-sm font-medium text-muted-foreground">Claude Code skill · v{version}</p>
-            <h3 className="text-3xl font-semibold tracking-tight">ai-patterns</h3>
-            <p className="max-w-xl text-lg text-muted-foreground">{SKILL_TAGLINE}</p>
-            <p className="max-w-xl text-muted-foreground">
-              <SkillPitch />
-            </p>
-            <div className="relative pt-3">
-              <CopyButton text={INSTALL_COMMAND} className="absolute right-3 top-6" trackAs="install_command" />
-              <pre className="overflow-x-auto rounded-lg border bg-[#24292e] p-4 text-sm text-[#e1e4e8]">{INSTALL_COMMAND}</pre>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Then invoke <span className="font-mono text-foreground">/ai-patterns</span> in any project — or just describe what you need and it routes itself.
-            </p>
-          </section>
-
-          <section className="grid gap-3 sm:grid-cols-3">
-            {SKILL_PILLARS.map((pillar) => (
-              <div key={pillar.title} className="rounded-2xl border bg-card p-5">
-                <h4 className="font-medium">{pillar.title}</h4>
-                <p className="mt-1.5 text-sm text-muted-foreground">{pillar.body}</p>
-              </div>
-            ))}
-          </section>
-
-          <section>
-            <h4 className="text-lg font-semibold tracking-tight">Three modes, one command</h4>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Everything runs through <span className="font-mono text-foreground">/ai-patterns</span> — describe what you need and it routes itself, or name a mode directly.
-            </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              {SKILL_MODES.map((command) => (
-                <div key={command.mode} className="rounded-2xl border bg-card p-5">
-                  <p className="font-mono text-sm font-medium">{command.mode}</p>
-                  <p className="mt-1.5 text-sm text-muted-foreground">{command.body}</p>
-                  <p className="mt-3 font-mono text-xs text-muted-foreground">{command.trigger}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <h4 className="text-lg font-semibold tracking-tight">Try it on a real request</h4>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Copy a prompt into your own agent, or run it with {AGENT_NAME} here to watch the skill pick a pattern.
-            </p>
-            <SkillExamples onBrowse={() => onOpenPatterns()} onTry={onTry} />
-          </section>
-
-          <section>
-            <h4 className="text-lg font-semibold tracking-tight">How &ldquo;patterns apply&rdquo; works</h4>
-            <ol className="mt-4 space-y-5">
-              {SKILL_STEPS.map((step, i) => (
-                <li key={step.title} className="flex gap-4">
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-medium text-muted-foreground">{i + 1}</span>
-                  <div>
-                    <p className="font-medium">{step.title}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{step.body}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </section>
-
-          <section>
-            <h4 className="text-lg font-semibold tracking-tight">
-              {registry.length} patterns, {CATEGORIES.length} categories — and growing
-            </h4>
-            <p className="mt-1 text-sm text-muted-foreground">{SKILL_STATS_BODY}</p>
-            <ul className="mt-4 flex flex-wrap gap-2">
-              {CATEGORIES.map((c) => (
-                <li key={c}>
-                  <button
-                    type="button"
-                    onClick={() => onOpenPatterns(c)}
-                    className="rounded-full border px-3 py-1 text-sm capitalize text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                  >
-                    {c}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
-      </Scroll>
-    </>
   );
 }
