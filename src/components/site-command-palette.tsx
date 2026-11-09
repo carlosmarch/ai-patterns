@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, FileCode2, LayoutGrid, Origami, Search, Sparkles, SquareDashedMousePointer } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileCode2, LayoutGrid, Origami, Search, Sparkles } from "lucide-react";
 
 import { getAdjacentEntries, getEntryHref, registry } from "@/registry";
 import { CommandPalette, type CommandPaletteGroup } from "@/registry/navigation/command-palette/component";
@@ -10,7 +10,6 @@ import { CommandPalette, type CommandPaletteGroup } from "@/registry/navigation/
 const navItems = [
   { id: "/", label: "Home", icon: Origami },
   { id: "/patterns", label: "Patterns", icon: LayoutGrid },
-  { id: "/demo", label: "Demo", icon: SquareDashedMousePointer },
   { id: "/skill", label: "Skill", icon: Sparkles },
 ];
 
