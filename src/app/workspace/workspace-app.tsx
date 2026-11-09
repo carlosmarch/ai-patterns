@@ -3,22 +3,19 @@
 import * as React from "react";
 import Link from "next/link";
 import {
-  Archive,
   ArrowLeft,
   ArrowRight,
   BookOpen,
   Bot,
   ChartColumn,
-  Globe,
-  Lock,
-  Share,
-  Check,
-  ChevronDown,
+  ChevronRight,
   Clock,
   FlaskConical,
+  Globe,
   History,
   LayoutGrid,
   ListChecks,
+  Lock,
   MessagesSquare,
   Package,
   PanelLeftClose,
@@ -26,9 +23,10 @@ import {
   Plug,
   Plus,
   Search,
+  Share,
   Workflow,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { cn } from "@/lib/utils";
 import { registry, type RegistryEntry } from "@/registry";
@@ -36,9 +34,6 @@ import type { SkillExample } from "@/app/skill/skill-examples";
 import { BackgroundTasksDrawer, type BackgroundTask } from "@/registry/agents/background-tasks/component";
 import { CollaborativePresence } from "@/registry/collaboration/collaborative-presence/component";
 import { CommandPalette, type CommandPaletteGroup, type CommandPaletteItem } from "@/registry/navigation/command-palette/component";
-import { siClaude, siCursor, siGithubcopilot, siWindsurf, type SimpleIcon } from "simple-icons";
-import { AgentSetupPill, type SetupAgent } from "@/registry/onboarding/agent-setup-pill/component";
-import { ArchivedSessionBanner } from "@/registry/agents/archived-session/component";
 import { ArtifactPanel, ArtifactSplit } from "@/registry/messages/artifact-panel/component";
 import { AutonomyModePicker } from "@/registry/composer/autonomy-mode/component";
 import { ContextUsage } from "@/registry/indicators/context-usage/component";
@@ -46,7 +41,6 @@ import { DrawingIcon } from "@/registry/loaders/drawing-icon/component";
 import { IncognitoToggle, TemporaryChatBanner } from "@/registry/composer/incognito-toggle/component";
 import { ModelPicker } from "@/registry/composer/model-picker/component";
 import { PromptBarPro } from "@/registry/composer/prompt-bar-pro/component";
-import { PromptTemplate } from "@/registry/composer/prompt-template/component";
 import { PromptWizard } from "@/registry/composer/prompt-wizard/component";
 import { QuickChatDock } from "@/registry/composer/quick-chat-dock/component";
 import { ShareSessionDialog } from "@/registry/access/share-session/component";
@@ -63,32 +57,32 @@ import type { StreamSegment } from "@/registry/text/streaming-text/component";
 import {
   AGENT_ICON,
   AGENT_NAME,
+  AUDIT_ATTACHMENT,
+  AUDIT_ITEMS,
   AUTONOMY_CAPABILITIES,
   AUTONOMY_MODES,
+  COMPOSER_COMMANDS,
+  COMPOSER_SOURCES,
   CONTEXT_LIMIT,
+  EXPLORE_FOLLOW_UPS,
+  FIX_PLAN,
+  FIX_PLAN_ALT,
+  FIX_SOURCE,
+  GUIDANCE_DIFF,
+  GUIDANCE_ITEMS,
   GUIDANCE_MEMORY,
+  GUIDANCE_QUESTIONS,
+  JOURNEY,
+  JOURNEY_PATTERNS,
   MODELS,
-  PROMPT_TEMPLATES,
   RESEARCH_SOURCES,
   RESEARCH_THOUGHTS,
-  SKILL_PROMPT,
+  SHIP_RUN,
+  SKILL_BUILD_DIFF,
+  SKILL_BUILD_SCRIPT,
   SPEC_PLAN,
   SPEC_QUESTIONS,
   SPEC_WIZARD_STEPS,
-  buildSpecPrompt,
-  contextSegments,
-  specSource,
-  specThoughts,
-  COMPOSER_COMMANDS,
-  COMPOSER_SOURCES,
-  COMPOSER_SUGGESTIONS,
-  EXPLORE_FOLLOW_UPS,
-  GUIDANCE_DIFF,
-  GUIDANCE_ITEMS,
-  GUIDANCE_QUESTIONS,
-  INITIAL_TASKS,
-  SKILL_BUILD_DIFF,
-  SKILL_BUILD_SCRIPT,
   SPIKE_LIVE_AGENTS,
   SPIKE_SOURCES,
   STARTER_CARDS,
@@ -96,14 +90,17 @@ import {
   USER_NAME,
   WEEKLY_SOURCES,
   WEEKLY_TRACE,
-  AUDIT_ITEMS,
+  buildSpecPrompt,
+  contextSegments,
   favicon,
+  specSource,
+  specThoughts,
   tickSpikeAgents,
 } from "./data";
 import { entryPath, findEntry, firstBullet, loadSource, matchEntry, relatedEntries, specSection } from "./catalogue";
 import { PatternsView, SkillView } from "./library";
 import { InsightsView, type InsightsTab } from "./insights";
-import { BlockView, nextId, segmentsText, seedThreads, toArtifact, type Block, type BlockBody, type BlockHandlers, type Thread } from "./thread";
+import { BlockView, nextId, segmentsText, toArtifact, type Block, type BlockBody, type BlockHandlers, type Thread } from "./thread";
 import {
   CONNECTORS,
   ChangelogView,
@@ -113,7 +110,6 @@ import {
   MobileMenuContext,
   PlaygroundView,
   SetupView,
-  Tabs,
   TrainView,
   WorkflowsView,
   type ConnectorDef,
@@ -140,52 +136,27 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
 }
 
-interface NavGroup {
-  /** Shown above the group in the sidebar; the first group has none. */
-  label?: string;
-  items: NavItem[];
-}
+// Progressive disclosure, starting with the navigation: a new thread, search
+// and the pattern Library are always one click away. Everything that
+// configures the agent or reports on it is real, but it isn't what you need
+// on day one — it waits behind More, which opens on its own when you land on
+// one of those views (from ⌘K, Setup or a link).
+const PRIMARY_NAV: NavItem[] = [{ id: "patterns", label: "Patterns", icon: LayoutGrid }];
 
-// One list drives both the sidebar and its collapsed icon rail. Sub-pages
-// (Train, Playground, Insights) are tabs in each view's header, not menu items.
-const NAV_GROUPS: NavGroup[] = [
-  {
-    items: [
-      { id: "operator", label: "Threads", icon: MessagesSquare },
-      { id: "playground", label: "Playground", icon: FlaskConical },
-    ],
-  },
-  {
-    // How the agent behaves and what it can reach.
-    label: "Configure",
-    items: [
-      { id: "train", label: "Train", icon: BookOpen },
-      { id: "agents", label: "Agents", icon: Bot },
-      { id: "workflows", label: "Workflows", icon: Workflow },
-      { id: "connectors", label: "Connectors", icon: Plug },
-    ],
-  },
-  {
-    // The catalogue the agent works from, and how it's used — same as /patterns and /skill.
-    label: "Library",
-    items: [
-      { id: "patterns", label: "Patterns", icon: LayoutGrid },
-      { id: "insights", label: "Insights", icon: ChartColumn },
-      { id: "skill", label: "Skill", icon: Package },
-      { id: "changelog", label: "What's new", icon: History },
-    ],
-  },
+const MORE_NAV: NavItem[] = [
+  { id: "playground", label: "Playground", icon: FlaskConical },
+  { id: "train", label: "Train", icon: BookOpen },
+  { id: "agents", label: "Agents", icon: Bot },
+  { id: "workflows", label: "Workflows", icon: Workflow },
+  { id: "connectors", label: "Connectors", icon: Plug },
+  { id: "insights", label: "Insights", icon: ChartColumn },
+  { id: "skill", label: "Skill", icon: Package },
+  { id: "changelog", label: "What's new", icon: History },
 ];
 
 const NAV_SETUP: NavItem = { id: "setup", label: "Setup", icon: ListChecks };
 
-const NAV_ALL = [...NAV_GROUPS.flatMap((g) => g.items), NAV_SETUP];
-
-const WORKSPACES = [
-  { id: "ai-patterns", name: "ai-patterns", color: "bg-violet-500" },
-  { id: "origami-labs", name: "Origami Labs", color: "bg-sky-500" },
-  { id: "personal", name: "Personal", color: "bg-emerald-500" },
-];
+const NAV_ALL: NavItem[] = [{ id: "operator", label: "Threads", icon: MessagesSquare }, ...PRIMARY_NAV, ...MORE_NAV, NAV_SETUP];
 
 const CANCELLED = Symbol("cancelled");
 
@@ -199,6 +170,7 @@ function titleFrom(prompt: string) {
 }
 
 type Flow =
+  | { kind: "audit" | "fix" | "ship" }
   | { kind: "spike" | "guidance" | "bulk" | "summary" | "explore" | "list" | "review" | "research" | "default" }
   | { kind: "spec"; topic: string }
   | { kind: "pattern" | "scaffold"; entry: RegistryEntry; viaSkill?: boolean };
@@ -210,6 +182,10 @@ type Flow =
 // feel answered.
 function flowFor(prompt: string): Flow {
   const p = prompt.toLowerCase();
+  // The guided journey's three steps come first, so "Ship it" is never read as something else.
+  if (p === JOURNEY.audit.toLowerCase() || /\baudit\b.*\bscreen\b/.test(p)) return { kind: "audit" };
+  if (p === JOURNEY.fix.toLowerCase()) return { kind: "fix" };
+  if (p === JOURNEY.ship.toLowerCase()) return { kind: "ship" };
   const entry = matchEntry(p);
   const spec = prompt.match(/\b(?:draft|write)\b.*?\bspec\b(?:\s+for)?\s+(?:an?\s+|the\s+)?(.+?)(?:\s+pattern)?(?:[,.:—]|$)/i);
   if (spec && !entry) return { kind: "spec", topic: spec[1].replace(/^(?:pattern|a pattern)\s+/i, "").replace(/\b\w/g, (c) => c.toUpperCase()) };
@@ -247,13 +223,12 @@ interface Runner {
 
 export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
   const [view, setView] = React.useState<View>("operator");
-  const [threads, setThreads] = React.useState<Thread[]>(seedThreads);
+  const [threads, setThreads] = React.useState<Thread[]>([]);
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [running, setRunning] = React.useState<Record<string, boolean>>({});
-  const [query, setQuery] = React.useState("");
   const [paletteOpen, setPaletteOpen] = React.useState(false);
   const [tasksOpen, setTasksOpen] = React.useState(false);
-  const [tasks, setTasks] = React.useState<BackgroundTask[]>(INITIAL_TASKS);
+  const [tasks, setTasks] = React.useState<BackgroundTask[]>([]);
   const [mobileNav, setMobileNav] = React.useState(false);
   const [trainTab, setTrainTab] = React.useState<TrainTab>("procedures");
   const [playgroundTab, setPlaygroundTab] = React.useState<PlaygroundTab>("chat");
@@ -382,6 +357,65 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
 
   async function runFlow(r: Runner, flow: Flow) {
     switch (flow.kind) {
+      // ---- The guided journey: each step ends on exactly one obvious next step.
+      case "audit": {
+        await r.think(900);
+        await r.tool({ toolKind: "file", verb: "Reading", target: "chat-screen-v2.png", result: "Found 4 AI components on screen" });
+        await r.tool({ toolKind: "search", verb: "Matching", target: "them to the catalogue", result: `Compared against ${registry.length} pattern specs` });
+        const { id, value } = await r.until<AnalysisItem[]>((done) => ({
+          kind: "analysis",
+          items: AUDIT_ITEMS.map((item, i) => ({ ...item, status: i === 0 ? "loading" : "pending" })),
+          live: { onDone: done },
+        }));
+        r.update(id, { items: value, live: undefined } as Partial<Block>);
+        await r.say(text("Three of the four drift from their spec, and each has a pattern that fixes it. The chat bubble is already up to spec."));
+        r.add({ kind: "catalogue", paths: ["buttons/stop-generation-button", "loaders/tool-call-chip", "loaders/thinking-loader"] });
+        r.add({ kind: "followups", items: [JOURNEY.fix] });
+        return;
+      }
+
+      case "fix": {
+        await r.think(700);
+        await r.say(text("Here's my plan. Edit or reorder any step before I touch the code:"));
+        const plan = await r.until<PlanStep[]>((done) => ({
+          kind: "plan",
+          title: "Plan for the fixes",
+          steps: FIX_PLAN,
+          alternative: FIX_PLAN_ALT,
+          estimate: "~30 s · 3 files",
+          approveLabel: "Approve and fix",
+          onDone: done,
+        }));
+        await r.wait(500);
+        r.remove(plan.id);
+        const tasks = await r.until<Task[]>((done) => ({
+          kind: "tasks",
+          tasks: plan.value.map((step, i) => ({ id: step.id, label: step.text, status: i === 0 ? "in_progress" : "pending" })),
+          live: { onDone: done },
+        }));
+        r.update(tasks.id, { tasks: tasks.value, live: undefined } as Partial<Block>);
+        // The artifact panel slides open on its own while the changes are written.
+        const artifact = { id: "chat-fixes", title: "Chat screen fixes", kind: "3 files changed", view: "diff" as const, versions: [{ id: "v1", note: "3 files · +6 −3", source: FIX_SOURCE }] };
+        const artifactId = r.add({ kind: "artifact", artifact, generating: true });
+        await r.wait(1800);
+        r.update(artifactId, { generating: false } as Partial<Block>);
+        await r.say(text("Done. Flip through the three files in the panel. Nothing ships until you say so."));
+        r.add({ kind: "followups", items: [JOURNEY.ship] });
+        return;
+      }
+
+      case "ship":
+        await r.think(500);
+        await r.say(text("Shipping builds the app and pushes a branch, so I need your OK first:"));
+        r.add({
+          kind: "approval",
+          action: "ship",
+          toolName: "Bash",
+          summary: "Build, check and push the fixes",
+          detail: "npm run build && git push origin fix/chat-screen-patterns",
+        });
+        return;
+
       case "pattern": {
         const { entry, viaSkill } = flow;
         await r.think(700);
@@ -598,6 +632,8 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
       await runFlow(r, flow);
       const said = r.lastText();
       if (!said) return;
+      // A turn that ends waiting on your permission isn't an answer yet, so nothing to copy or rate.
+      if (flow.kind === "ship" || flow.kind === "bulk") return;
       // Actions belong to the answer, so they go above any follow-up suggestions, not after them.
       const actions: Block = { id: nextId("actions"), kind: "actions", text: said, prompt };
       patchThread(threadId, (t) => {
@@ -616,14 +652,8 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
 
     if (!threadId || view !== "operator") {
       threadId = nextId("thread");
-      const thread: Thread = {
-        id: threadId,
-        title: titleFrom(raw),
-        group: "Today",
-        blocks: [],
-        temporary: temporary || undefined,
-        badge: temporary ? "Temporary" : undefined,
-      };
+      const title = flow.kind === "audit" ? "Chat screen audit" : titleFrom(raw);
+      const thread: Thread = { id: threadId, title, blocks: [], temporary: temporary || undefined };
       setThreads((prev) => [thread, ...prev.filter((t) => !t.temporary)]);
       setActiveId(threadId);
       setView("operator");
@@ -633,7 +663,13 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
     }
 
     const id = threadId;
-    patchThread(id, (t) => ({ ...t, blocks: [...t.blocks, { id: nextId("u"), kind: "user", text: raw }] }));
+    // The audit is about a screen, so the screenshot rides along with the prompt.
+    const attachment = flow.kind === "audit" ? AUDIT_ATTACHMENT : undefined;
+    // Suggestions are spent once you reply, so they leave instead of piling up in the history.
+    patchThread(id, (t) => ({
+      ...t,
+      blocks: [...t.blocks.filter((b) => b.kind !== "followups"), { id: nextId("u"), kind: "user", text: raw, attachment }],
+    }));
     answer(id, raw, flow);
   }
 
@@ -667,12 +703,12 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
       answer(threadId, prompt, flowFor(prompt));
     },
     onUpgrade: () => setToast("Team plans unlock longer generations — ask your workspace admin."),
+    onOpenLibrary: () => openPatterns(),
     onApproval(blockId, action, decision) {
       if (!activeThread) return;
       const threadId = activeThread.id;
       patchThread(threadId, (t) => ({
         ...t,
-        badge: undefined,
         blocks: t.blocks.map((b) => (b.id === blockId ? ({ ...b, decided: decision } as Block) : b)),
       }));
 
@@ -684,16 +720,18 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
       }
 
       const isSkill = action === "skill-build";
+      const command = isSkill ? "npm run skill:build" : "npm run build && git push";
       const taskId = nextId("task");
+      // The first background job is what brings the Tasks button into the header.
       upsertTask({
         id: taskId,
-        title: isSkill ? "Rebuild skill reference docs" : "Build and push contrast fix",
+        title: isSkill ? "Rebuild skill reference docs" : "Ship chat screen fixes",
         kind: "shell",
         kindLabel: "Bash",
         status: "running",
         elapsedSeconds: 0,
         activity: "Running",
-        command: isSkill ? "npm run skill:build" : "npm run build && git push",
+        command,
       });
 
       startRun(threadId, async (r) => {
@@ -701,7 +739,7 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
         if (isSkill) {
           const { id, value } = await r.until<LogLine[]>((done) => ({
             kind: "terminal",
-            command: "npm run skill:build",
+            command,
             lines: [],
             live: { script: SKILL_BUILD_SCRIPT, onDone: done },
           }));
@@ -711,8 +749,9 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
           // A multi-step run reads better as a run card than as raw logs.
           const { id, value } = await r.until<{ steps: RunStep[]; elapsed: number }>((done) => ({
             kind: "run",
-            title: "Ship the contrast fix",
-            doneLabel: "Pushed the contrast fix",
+            title: "Ship the chat screen fixes",
+            doneLabel: "Shipped the chat screen fixes",
+            script: SHIP_RUN,
             live: { onDone: (steps, elapsed) => done({ steps, elapsed }) },
           }));
           r.update(id, { steps: value.steps, elapsed: value.elapsed, live: undefined } as Partial<Block>);
@@ -723,28 +762,12 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
           r.add({ kind: "diff", files: SKILL_BUILD_DIFF, timestamp: "just now" });
           await r.wait(300);
           await r.say(text("Rebuilt — 47 specs are in the skill now, including the three new agent patterns. I bumped the plugin version too."));
-        } else {
-          await r.say(text("Pushed fix/tool-approval-contrast. Both contrast checks pass now — I'll comment on the PR when CI is green."));
+          return;
         }
-      });
-    },
-    onRetry(blockId) {
-      if (!activeThread) return;
-      const threadId = activeThread.id;
-      patchThread(threadId, (t) => ({
-        ...t,
-        badge: undefined,
-        blocks: t.blocks.map((b) => (b.id === blockId ? ({ ...b, retrying: true } as Block) : b)),
-      }));
-      startRun(threadId, async (r) => {
-        await r.wait(1200);
-        r.remove(blockId);
-        await r.say(
-          text(
-            "Agent Handoff — Summary: a card that shows an agent passing a thread to a person, with why, what it already tried, and who picks it up next. When to use: the agent hits a limit it can't resolve, like a refund over policy. Related: Human in the Loop, Background Tasks Drawer."
-          )
-        );
-        r.add({ kind: "followups", items: ["Write the Anatomy section", "Scaffold the component"] });
+        await r.say(text("Shipped. PR #128 is open with all three fixes, and I'll tell you when CI is green."));
+        await r.wait(500);
+        r.add({ kind: "recap", paths: JOURNEY_PATTERNS });
+        r.add({ kind: "followups", items: ["Draft a spec for Step Stop Control", "Why are users stopping long answers?"] });
       });
     },
   };
@@ -787,14 +810,15 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
       label: "Actions",
       items: [
         { id: "action:new", label: "New thread", icon: Plus },
-        { id: "action:tasks", label: "Show background tasks", icon: Clock, meta: runningTasks ? `${runningTasks} running` : undefined },
+        ...(tasks.length
+          ? [{ id: "action:tasks", label: "Show background tasks", icon: Clock, meta: runningTasks ? `${runningTasks} running` : undefined }]
+          : []),
         { id: "action:registry", label: "Browse the pattern registry", icon: LayoutGrid },
       ],
     },
-    {
-      label: "Threads",
-      items: threads.slice(0, 6).map((t) => ({ id: `thread:${t.id}`, label: t.title, icon: MessagesSquare, meta: t.group })),
-    },
+    ...(threads.length
+      ? [{ label: "Threads", items: threads.slice(0, 6).map((t) => ({ id: `thread:${t.id}`, label: t.title, icon: MessagesSquare })) }]
+      : []),
     {
       label: "Go to",
       items: NAV_ALL.map((n) => ({ id: `view:${n.id}`, label: n.label, icon: n.icon })),
@@ -844,27 +868,21 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
     setMobileNav(false);
   }
 
-  const visibleThreads = threads.filter((t) => t.title.toLowerCase().includes(query.trim().toLowerCase()));
+  const hasAnswer = !!activeThread?.blocks.some((b) => b.kind === "actions" || b.kind === "recap");
+  const shared = activeThread?.visibility === "public";
 
   const navSidebar = (
     <NavSidebar
       view={view}
       onNavigate={(v) => navigate(v)}
-      setupDone={setupDone}
-      onToast={setToast}
-      onCollapse={() => setCollapsed(true)}
-    />
-  );
-  const threadList = (
-    <ThreadList
-      threads={visibleThreads}
-      activeId={activeId}
+      onNewThread={() => openThread(null)}
+      onSearch={() => setPaletteOpen(true)}
+      threads={threads}
+      activeId={view === "operator" ? activeId : null}
       running={running}
-      query={query}
-      onQuery={setQuery}
-      onOpen={openThread}
-      onScheduled={() => setTasksOpen(true)}
-      scheduledCount={runningTasks}
+      onOpenThread={openThread}
+      setupDone={setupDone}
+      onCollapse={() => setCollapsed(true)}
     />
   );
 
@@ -885,52 +903,67 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
         {!collapsed && <div className="hidden md:flex">{navSidebar}</div>}
 
         <div className="relative flex min-w-0 flex-1 overflow-hidden rounded-2xl border bg-background shadow-sm">
-          {view === "operator" && <div className="hidden lg:flex">{threadList}</div>}
-
           <section className="flex min-w-0 flex-1 flex-col">
             {view === "operator" ? (
               <>
-                <div className="flex h-16 shrink-0 items-center justify-between gap-3 border-b px-4 sm:px-6">
+                <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b px-4 sm:px-6">
                   <MobileMenuButton />
-                  <h2 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight">{activeThread?.title ?? "New thread"}</h2>
-                  <div className="flex shrink-0 items-center gap-3">
-                    {/* Fixed-size slot so the presence panel floats over the thread
-                        instead of stretching the 64px header. */}
-                    <div className="relative hidden h-8 w-[7.5rem] xl:block">
-                      <CollaborativePresence
-                        collaborators={TEAM}
-                        visibleCap={3}
-                        className="absolute right-0 top-0 z-30"
-                      />
-                    </div>
-                    {activeThread && !activeThread.temporary && (
-                      <ShareThreadButton
-                        thread={activeThread}
-                        onVisibility={(visibility) => patchThread(activeThread.id, (t) => ({ ...t, visibility }))}
-                      />
-                    )}
-                    <TasksButton count={runningTasks} onClick={() => setTasksOpen((o) => !o)} />
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.h2
+                      key={activeThread?.id ?? "new"}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.18 }}
+                      className="min-w-0 flex-1 truncate text-base font-semibold tracking-tight"
+                    >
+                      {activeThread?.title ?? "New thread"}
+                    </motion.h2>
+                  </AnimatePresence>
+                  {/* Header controls appear the first time they have something to act on. */}
+                  <div className="flex shrink-0 items-center gap-2">
+                    <AnimatePresence initial={false}>
+                      {shared && (
+                        // Fixed-size slot so the presence panel floats over the thread instead of stretching the header.
+                        <Reveal key="presence" className="relative hidden h-8 w-[7.5rem] xl:block">
+                          <CollaborativePresence collaborators={TEAM} visibleCap={3} className="absolute right-0 top-0 z-30" />
+                        </Reveal>
+                      )}
+                      {!activeThread && (
+                        <Reveal key="temporary">
+                          <IncognitoToggle active={temporary} onActiveChange={setTemporary} label="Temporary" />
+                        </Reveal>
+                      )}
+                      {activeThread && hasAnswer && !activeThread.temporary && (
+                        <Reveal key="share">
+                          <ShareThreadButton
+                            thread={activeThread}
+                            onVisibility={(visibility) => {
+                              patchThread(activeThread.id, (t) => ({ ...t, visibility }));
+                              if (visibility === "public") setToast("Link copied — Ana and James can follow along now.");
+                            }}
+                          />
+                        </Reveal>
+                      )}
+                      {tasks.length > 0 && (
+                        <Reveal key="tasks">
+                          <TasksButton count={runningTasks} onClick={() => setTasksOpen((o) => !o)} />
+                        </Reveal>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
                 {activeThread ? (
                   <ThreadPane
                     key={activeThread.id}
                     thread={activeThread}
-                    onUnarchive={() => patchThread(activeThread.id, (t) => ({ ...t, archived: false }))}
                     generating={!!running[activeThread.id]}
                     handlers={handlers}
                     onSubmit={submitPrompt}
                     onStop={() => stopRun(activeThread.id)}
                   />
                 ) : (
-                  <NewThread
-                    threads={threads}
-                    onSubmit={submitPrompt}
-                    onOpenThread={openThread}
-                    temporary={temporary}
-                    onTemporary={setTemporary}
-                    onToast={setToast}
-                  />
+                  <NewThread onSubmit={submitPrompt} temporary={temporary} onTemporary={setTemporary} />
                 )}
               </>
             ) : view === "train" ? (
@@ -976,7 +1009,7 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
             )}
           </section>
 
-          {/* Ask Origami from any other view; a question opens a new Operator thread. */}
+          {/* Ask Origami from any other view; a question opens a new thread. */}
           {view !== "operator" && view !== "playground" && (
             <QuickChatDock
               placeholder={`Ask ${AGENT_NAME} about this page…`}
@@ -1038,7 +1071,6 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
                 className="flex h-full max-w-[85vw] flex-col gap-2 overflow-y-auto bg-muted p-2"
               >
                 {navSidebar}
-                {view === "operator" && <div className="flex rounded-2xl border bg-background">{threadList}</div>}
               </motion.div>
             </motion.div>
           )}
@@ -1080,6 +1112,22 @@ function RailButton({
   );
 }
 
+/** Header controls fade and scale in the first time they're needed, so new chrome is noticed, not sprung. */
+function Reveal({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.85 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.85 }}
+      transition={{ type: "spring", stiffness: 420, damping: 28 }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 function IconRail({
   view,
   onNavigate,
@@ -1108,22 +1156,17 @@ function IconRail({
       >
         <AGENT_ICON className="size-5" />
       </button>
-      {NAV_GROUPS.map((group, i) => (
-        <React.Fragment key={group.label ?? i}>
-          {i > 0 && <div className="my-1.5 h-px w-6 shrink-0 bg-border" />}
-          {group.items.map((n) => (
-            <RailButton key={n.id} label={n.label} active={view === n.id} onClick={() => onNavigate(n.id)}>
-              <n.icon className="size-5" />
-            </RailButton>
-          ))}
-        </React.Fragment>
+      <RailButton label="Search (⌘K)" onClick={onSearch}>
+        <Search className="size-5" />
+      </RailButton>
+      {PRIMARY_NAV.map((n) => (
+        <RailButton key={n.id} label={n.label} active={view === n.id} onClick={() => onNavigate(n.id)}>
+          <n.icon className="size-5" />
+        </RailButton>
       ))}
       <div className="mt-auto flex flex-col items-center gap-1 pt-3">
         <RailButton label={setupDone < 4 ? `Setup (${setupDone}/4)` : "Setup"} active={view === "setup"} onClick={() => onNavigate("setup")}>
           <ListChecks className="size-5" />
-        </RailButton>
-        <RailButton label="Search (⌘K)" onClick={onSearch}>
-          <Search className="size-5" />
         </RailButton>
         <Link
           href="/"
@@ -1146,16 +1189,36 @@ function IconRail({
 function NavSidebar({
   view,
   onNavigate,
+  onNewThread,
+  onSearch,
+  threads,
+  activeId,
+  running,
+  onOpenThread,
   setupDone,
-  onToast,
   onCollapse,
 }: {
   view: View;
   onNavigate: (v: View) => void;
+  onNewThread: () => void;
+  onSearch: () => void;
+  threads: Thread[];
+  activeId: string | null;
+  running: Record<string, boolean>;
+  onOpenThread: (id: string) => void;
   setupDone: number;
-  onToast: (message: string) => void;
   onCollapse: () => void;
 }) {
+  const inMore = MORE_NAV.some((n) => n.id === view);
+  const [moreOpen, setMoreOpen] = React.useState(inMore);
+  // Landing on a view behind More (from ⌘K or a link) opens it, so you can see where you are.
+  const [lastInMore, setLastInMore] = React.useState(inMore);
+  if (inMore !== lastInMore) {
+    setLastInMore(inMore);
+    if (inMore) setMoreOpen(true);
+  }
+  const reduce = useReducedMotion();
+
   function item(n: NavItem, extra?: React.ReactNode) {
     const active = view === n.id;
     return (
@@ -1176,6 +1239,8 @@ function NavSidebar({
     );
   }
 
+  const rowClass = "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground";
+
   return (
     <aside className="flex w-60 shrink-0 flex-col overflow-y-auto rounded-2xl border bg-background p-3 shadow-sm">
       <div className="flex items-center gap-2 px-1 pb-4 pt-1">
@@ -1193,218 +1258,119 @@ function NavSidebar({
           <PanelLeftClose className="size-4" />
         </button>
       </div>
-      <WorkspaceSwitcher onToast={onToast} />
-      {NAV_GROUPS.map((group, i) => (
-        <nav key={group.label ?? i} aria-label={group.label ?? "Agent"} className={cn("flex flex-col gap-0.5", i > 0 && "mt-5")}>
-          {group.label && <p className="px-3 pb-1.5 text-xs text-muted-foreground">{group.label}</p>}
-          {group.items.map((n) =>
-            item(n, n.id === "patterns" ? <span className="text-xs tabular-nums text-muted-foreground">{registry.length}</span> : undefined)
-          )}
-        </nav>
-      ))}
-      <div className="mt-auto pt-5">
-        <p className="mb-3 px-3 text-xs text-muted-foreground [@media(max-height:760px)]:hidden">
-          A demo built from ai-patterns — every screen uses the {registry.length} patterns in the Library.
-        </p>
-        <div className="flex flex-col gap-0.5 border-t pt-3">
-          <Link
-            href="/"
-            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
-          >
-            <ArrowLeft className="size-4" />
-            Back to AI Patterns
-          </Link>
-          {item(
-            NAV_SETUP,
-            setupDone < 4 ? <span className="rounded-full bg-muted px-1.5 text-[10px] tabular-nums text-muted-foreground">{setupDone}/4</span> : undefined
-          )}
-        </div>
-      </div>
-    </aside>
-  );
-}
 
-function WorkspaceSwitcher({ onToast }: { onToast: (message: string) => void }) {
-  const [open, setOpen] = React.useState(false);
-  const [current, setCurrent] = React.useState(WORKSPACES[0].id);
-  const ref = React.useRef<HTMLDivElement>(null);
-  const workspace = WORKSPACES.find((w) => w.id === current)!;
-
-  React.useEffect(() => {
-    if (!open) return;
-    function onDown(e: PointerEvent) {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("pointerdown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("pointerdown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  return (
-    <div ref={ref} className="relative mb-4">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        className="flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm font-medium shadow-sm transition-colors hover:bg-accent"
-      >
-        <span className={cn("flex size-6 items-center justify-center rounded-md text-white", workspace.color)}>
-          <LayoutGrid className="size-3.5" />
-        </span>
-        <span className="flex-1 truncate text-left">{workspace.name}</span>
-        <ChevronDown className={cn("size-4 text-muted-foreground transition-transform", open && "rotate-180")} />
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            role="menu"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.12 }}
-            className="absolute inset-x-0 top-full z-50 mt-1 rounded-xl border bg-popover p-1 text-popover-foreground shadow-lg"
-          >
-            <p className="px-2.5 py-1.5 text-xs text-muted-foreground">Workspaces</p>
-            {WORKSPACES.map((w) => (
-              <button
-                key={w.id}
-                type="button"
-                role="menuitemradio"
-                aria-checked={w.id === current}
-                onClick={() => {
-                  setOpen(false);
-                  if (w.id === current) return;
-                  setCurrent(w.id);
-                  onToast(`Switched to ${w.name}.`);
-                }}
-                className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-accent"
-              >
-                <span className={cn("flex size-5 items-center justify-center rounded text-white", w.color)}>
-                  <LayoutGrid className="size-3" />
-                </span>
-                <span className="flex-1 text-left">{w.name}</span>
-                {w.id === current && <Check className="size-4 text-muted-foreground" />}
-              </button>
-            ))}
-            <div className="my-1 border-t" />
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setOpen(false);
-                onToast("New workspaces need an admin — we sent a request to Carlos March.");
-              }}
-              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <Plus className="size-4" />
-              Create workspace
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function ThreadList({
-  threads,
-  activeId,
-  running,
-  query,
-  onQuery,
-  onOpen,
-  onScheduled,
-  scheduledCount,
-}: {
-  threads: Thread[];
-  activeId: string | null;
-  running: Record<string, boolean>;
-  query: string;
-  onQuery: (q: string) => void;
-  onOpen: (id: string | null) => void;
-  onScheduled: () => void;
-  scheduledCount: number;
-}) {
-  const groups = (["Today", "Yesterday", "Earlier"] as const)
-    .map((g) => ({ group: g, items: threads.filter((t) => t.group === g) }))
-    .filter((g) => g.items.length);
-
-  return (
-    <aside className="flex w-72 shrink-0 flex-col border-r">
-      <div className="flex h-16 shrink-0 items-center gap-2 px-5">
-        <h2 className="text-lg font-semibold tracking-tight">Threads</h2>
-      </div>
-      <div className="px-3">
-        <label className="flex items-center gap-2 rounded-full border px-3 py-2 text-sm focus-within:ring-2 focus-within:ring-ring/40">
-          <Search className="size-4 text-muted-foreground" />
-          <input
-            value={query}
-            onChange={(e) => onQuery(e.target.value)}
-            placeholder="Search"
-            aria-label="Search threads"
-            className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
-          />
-        </label>
+      <nav aria-label="Agent" className="flex flex-col gap-0.5">
         <button
           type="button"
-          onClick={() => onOpen(null)}
-          className={cn("mt-3 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent", activeId === null && "bg-accent font-medium")}
+          onClick={onNewThread}
+          aria-current={view === "operator" && activeId === null ? "page" : undefined}
+          className={cn(
+            "mb-1 flex w-full items-center gap-2.5 rounded-lg border px-3 py-2 text-sm font-medium shadow-xs transition-colors hover:bg-accent",
+            view === "operator" && activeId === null && "bg-accent"
+          )}
         >
           <Plus className="size-4" />
           New thread
         </button>
-        <button type="button" onClick={onScheduled} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent">
-          <Clock className="size-4" />
-          <span className="flex-1 text-left">Scheduled</span>
-          {scheduledCount > 0 && <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />}
+        <button type="button" onClick={onSearch} className={rowClass}>
+          <Search className="size-4" />
+          <span className="flex-1 text-left">Search</span>
+          <kbd className="font-sans text-[11px] text-muted-foreground/70">⌘K</kbd>
         </button>
-      </div>
-      <div className="mt-3 min-h-0 flex-1 overflow-y-auto px-3 pb-4">
-        {groups.map(({ group, items }) => (
-          <div key={group} className="mb-3">
-            <p className="px-3 py-2 text-xs text-muted-foreground">{group}</p>
-            {items.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => onOpen(t.id)}
-                aria-current={activeId === t.id ? "true" : undefined}
-                className={cn(
-                  "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-accent",
-                  activeId === t.id && "bg-accent font-medium"
-                )}
-              >
-                <span className="min-w-0 flex-1 truncate">{t.title}</span>
-                {running[t.id] ? (
-                  <DrawingIcon icon="origami" size={14} label="Working" className="shrink-0 text-muted-foreground" />
-                ) : t.archived ? (
-                  <Archive className="size-3.5 shrink-0 text-muted-foreground" aria-label="Archived" />
-                ) : t.badge ? (
-                  <span
-                    className={cn(
-                      "shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium",
-                      t.badge === "Temporary"
-                        ? "border border-dashed text-muted-foreground"
-                        : t.badge === "Failed"
-                        ? "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300"
-                        : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
-                    )}
+        {PRIMARY_NAV.map((n) =>
+          item(n, n.id === "patterns" ? <span className="text-xs tabular-nums text-muted-foreground">{registry.length}</span> : undefined)
+        )}
+        <button type="button" onClick={() => setMoreOpen((o) => !o)} aria-expanded={moreOpen} className={rowClass}>
+          <ChevronRight className={cn("size-4 transition-transform", moreOpen && "rotate-90")} />
+          <span className="flex-1 text-left">More</span>
+        </button>
+        <AnimatePresence initial={false}>
+          {moreOpen && (
+            <motion.div
+              initial={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
+              animate={reduce ? { opacity: 1 } : { height: "auto", opacity: 1 }}
+              exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="overflow-hidden"
+            >
+              <div className="ml-[1.375rem] flex flex-col gap-0.5 border-l pl-2">{MORE_NAV.map((n) => item(n))}</div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
+
+      {/* Recents doesn't exist until there's something to come back to. */}
+      <AnimatePresence initial={false}>
+        {threads.length > 0 && (
+          <motion.section
+            aria-label="Recent threads"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="mt-5 flex min-h-0 flex-col"
+          >
+            <p className="px-3 pb-1.5 text-xs text-muted-foreground">Recents</p>
+            <ul className="flex flex-col gap-0.5">
+              <AnimatePresence initial={false}>
+                {threads.map((t) => (
+                  <motion.li
+                    key={t.id}
+                    layout
+                    initial={reduce ? { opacity: 0 } : { opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   >
-                    {t.badge}
-                  </span>
-                ) : null}
-              </button>
-            ))}
-          </div>
-        ))}
-        {groups.length === 0 && <p className="px-3 py-2 text-sm text-muted-foreground">No threads match “{query}”.</p>}
+                    <button
+                      type="button"
+                      onClick={() => onOpenThread(t.id)}
+                      aria-current={activeId === t.id ? "true" : undefined}
+                      className={cn(
+                        "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-accent/60",
+                        activeId === t.id ? "bg-accent font-medium" : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <span className="min-w-0 flex-1 truncate">{t.title}</span>
+                      {running[t.id] ? (
+                        <DrawingIcon icon="origami" size={14} label="Working" className="shrink-0 text-muted-foreground" />
+                      ) : t.temporary ? (
+                        <span className="shrink-0 rounded-full border border-dashed px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">Temporary</span>
+                      ) : null}
+                    </button>
+                  </motion.li>
+                ))}
+              </AnimatePresence>
+            </ul>
+          </motion.section>
+        )}
+      </AnimatePresence>
+
+      <div className="mt-auto flex flex-col gap-0.5 pt-5">
+        {setupDone < 4 && (
+          <button
+            type="button"
+            onClick={() => onNavigate("setup")}
+            aria-current={view === "setup" ? "page" : undefined}
+            className={cn("mb-2 rounded-xl border p-3 text-left transition-colors hover:bg-accent/60", view === "setup" && "bg-accent")}
+          >
+            <span className="flex items-center justify-between text-sm font-medium">
+              Finish setting up
+              <span className="text-xs tabular-nums text-muted-foreground">{setupDone}/4</span>
+            </span>
+            <span className="mt-2 block h-1 overflow-hidden rounded-full bg-muted">
+              <motion.span
+                className="block h-full rounded-full bg-foreground"
+                initial={false}
+                animate={{ width: `${(setupDone / 4) * 100}%` }}
+                transition={{ type: "spring", stiffness: 200, damping: 30 }}
+              />
+            </span>
+          </button>
+        )}
+        <Link href="/" className={rowClass}>
+          <ArrowLeft className="size-4" />
+          Back to AI Patterns
+        </Link>
       </div>
     </aside>
   );
@@ -1446,30 +1412,9 @@ function useGreeting() {
   );
 }
 
-function firstPrompt(thread: Thread) {
-  const user = thread.blocks.find((b) => b.kind === "user");
-  return user && user.kind === "user" ? user.text : "No messages yet";
-}
-
-function brandMark(icon: SimpleIcon, color?: string) {
-  return (
-    <svg viewBox="0 0 24 24" role="img" aria-label={icon.title} fill={color ?? "currentColor"}>
-      <path d={icon.path} />
-    </svg>
-  );
-}
-
-const SETUP_AGENTS: SetupAgent[] = [
-  { id: "claude", label: "Claude Code", icon: brandMark(siClaude, `#${siClaude.hex}`) },
-  { id: "cursor", label: "Cursor", icon: brandMark(siCursor) },
-  { id: "copilot", label: "GitHub Copilot", icon: brandMark(siGithubcopilot) },
-  { id: "windsurf", label: "Windsurf", icon: brandMark(siWindsurf) },
-];
-
-type ComposeMode = "ask" | "template" | "guided";
-
 const COMPOSER_PROPS = {
-  suggestions: COMPOSER_SUGGESTIONS,
+  // Suggestions live in the starter cards on Home and in each answer's follow-ups, not above the composer.
+  suggestions: [],
   sources: COMPOSER_SOURCES,
   commands: COMPOSER_COMMANDS,
   environments: [
@@ -1482,173 +1427,126 @@ const COMPOSER_PROPS = {
   ],
 };
 
+/**
+ * Home asks one question and offers three ways in. The first card is the
+ * guided journey, so it says "Start here"; the spec card swaps the composer
+ * for the guided wizard in place rather than starting a thread with no input.
+ */
 function NewThread({
-  threads,
   onSubmit,
-  onOpenThread,
   temporary,
   onTemporary,
-  onToast,
 }: {
-  threads: Thread[];
   onSubmit: (prompt: string) => void;
-  onOpenThread: (id: string) => void;
   temporary: boolean;
   onTemporary: (temporary: boolean) => void;
-  onToast: (message: string) => void;
 }) {
   const greeting = useGreeting();
-  const recent = threads.filter((t) => !t.badge && !t.archived && t.blocks.length > 0).slice(0, 6);
-  const [mode, setMode] = React.useState<ComposeMode>("ask");
-  const [template, setTemplate] = React.useState(0);
-  const [pill, setPill] = React.useState(true);
+  const [wizard, setWizard] = React.useState(false);
+  const reduce = useReducedMotion();
 
   return (
     <div className="relative min-h-0 flex-1 overflow-y-auto">
-      <div className="absolute right-4 top-4 z-10 sm:right-6">
-        <IncognitoToggle active={temporary} onActiveChange={onTemporary} label="Temporary" />
-      </div>
-      <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col px-4 pb-12 pt-14 sm:px-8 lg:pt-[8vh]">
+      <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col justify-center px-4 py-10 sm:px-8">
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="mx-auto flex w-full max-w-3xl flex-col items-center text-center"
+          className="flex flex-col items-center text-center"
         >
           <motion.span
-            initial={{ rotate: -12, scale: 0.9 }}
+            initial={reduce ? false : { rotate: -12, scale: 0.9 }}
             animate={{ rotate: 0, scale: 1 }}
             transition={{ type: "spring", stiffness: 260, damping: 16 }}
-            className="flex size-14 items-center justify-center rounded-2xl bg-foreground text-background shadow-sm"
+            className="flex size-12 items-center justify-center rounded-2xl bg-foreground text-background shadow-sm"
           >
-            <AGENT_ICON className="size-7" />
+            <AGENT_ICON className="size-6" />
           </motion.span>
           <p className="mt-5 h-5 text-sm text-muted-foreground">{greeting}</p>
-          <h3 className="mt-1 text-balance font-serif text-3xl tracking-tight sm:text-5xl">Hey {USER_NAME}, what&apos;s on your mind?</h3>
-
-          <div className="mt-8 flex w-full flex-col gap-3 text-left">
-            <div className="flex justify-center">
-              <Tabs
-                value={mode}
-                onChange={setMode}
-                items={[
-                  { id: "ask", label: "Ask" },
-                  { id: "template", label: "Template" },
-                  { id: "guided", label: "New spec" },
-                ]}
-              />
-            </div>
-            <TemporaryChatBanner
-              active={temporary}
-              description="This thread won't appear in your history or train Origami's memory, and it's gone when you leave it."
-              onExit={() => onTemporary(false)}
-            />
-            {mode === "ask" ? (
-              <PromptBarPro
-                {...COMPOSER_PROPS}
-                visibleCount={COMPOSER_SUGGESTIONS.length}
-                placeholder="Ask anything — / for commands, @ for sources"
-                onSubmit={onSubmit}
-                className="w-full"
-              />
-            ) : mode === "template" ? (
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-wrap justify-center gap-2">
-                  {PROMPT_TEMPLATES.map((t, i) => (
-                    <button
-                      key={t.name}
-                      type="button"
-                      onClick={() => setTemplate(i)}
-                      className={cn(
-                        "rounded-full px-3 py-1 text-xs font-medium transition-colors",
-                        template === i ? "bg-foreground text-background" : "bg-muted text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      {t.name}
-                    </button>
-                  ))}
-                </div>
-                <PromptTemplate
-                  key={template}
-                  title={PROMPT_TEMPLATES[template].name}
-                  parts={PROMPT_TEMPLATES[template].parts}
-                  onSubmit={(prompt) => onSubmit(prompt)}
-                  submitLabel={`Ask ${AGENT_NAME}`}
-                />
-              </div>
-            ) : (
-              <PromptWizard title="New pattern spec" steps={SPEC_WIZARD_STEPS} build={buildSpecPrompt} onSubmit={(prompt) => onSubmit(prompt)} submitLabel="Draft the spec" />
-            )}
-          </div>
+          <h3 className="mt-1 text-balance font-serif text-3xl tracking-tight sm:text-4xl">
+            {wizard ? "Let's draft a pattern spec" : <>Hey {USER_NAME}, what are we designing?</>}
+          </h3>
         </motion.div>
 
-        <section aria-labelledby="start-with" className="mt-12">
-          <h4 id="start-with" className="mb-3 text-sm font-medium text-muted-foreground">
-            Start with
-          </h4>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {STARTER_CARDS.map((card, i) => (
-              <motion.button
-                key={card.id}
-                type="button"
+        <div className="mt-8 flex w-full flex-col gap-3">
+          <TemporaryChatBanner
+            active={temporary}
+            description="This thread won't appear in your history or train Origami's memory, and it's gone when you leave it."
+            onExit={() => onTemporary(false)}
+          />
+          <AnimatePresence mode="wait" initial={false}>
+            {wizard ? (
+              <motion.div
+                key="wizard"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.08 + i * 0.05, duration: 0.3 }}
-                onClick={() => onSubmit(card.prompt)}
-                className="group flex h-full flex-col items-start gap-3 rounded-2xl border bg-card p-5 text-left transition-colors hover:bg-accent/60"
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col gap-2"
               >
-                <span className="flex size-9 items-center justify-center rounded-xl bg-muted">
-                  <card.icon className="size-4.5" />
-                </span>
-                <span className="flex-1">
-                  <span className="block font-medium">{card.title}</span>
-                  <span className="mt-1 block text-sm text-muted-foreground">{card.description}</span>
-                </span>
-                <span className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground">
-                  Ask {AGENT_NAME}
-                  <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-                </span>
-              </motion.button>
-            ))}
-          </div>
-        </section>
-
-        {recent.length > 0 && (
-          <section aria-labelledby="recent" className="mt-10">
-            <h4 id="recent" className="mb-3 text-sm font-medium text-muted-foreground">
-              Pick up where you left off
-            </h4>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {recent.map((t) => (
+                <PromptWizard title="New pattern spec" steps={SPEC_WIZARD_STEPS} build={buildSpecPrompt} onSubmit={(prompt) => onSubmit(prompt)} submitLabel="Draft the spec" />
                 <button
-                  key={t.id}
                   type="button"
-                  onClick={() => onOpenThread(t.id)}
-                  className="flex items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors hover:bg-accent/60"
+                  onClick={() => setWizard(false)}
+                  className="mx-auto flex items-center gap-1 rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 >
-                  <MessagesSquare className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium">{t.title}</span>
-                    <span className="mt-0.5 block truncate text-xs text-muted-foreground">{firstPrompt(t)}</span>
-                  </span>
-                  <span className="shrink-0 text-xs text-muted-foreground">{t.group}</span>
+                  <ArrowLeft className="size-3.5" />
+                  Back to ask anything
                 </button>
-              ))}
-            </div>
-          </section>
-        )}
+              </motion.div>
+            ) : (
+              <motion.div key="ask" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
+                <PromptBarPro {...COMPOSER_PROPS} placeholder="Ask anything — / for commands, @ for sources" onSubmit={onSubmit} className="w-full" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-        <AnimatePresence>
-          {pill && (
-            <motion.div key="pill" exit={{ opacity: 0 }} className="mt-10 flex justify-center">
-              <AgentSetupPill
-                label={`Use ${AGENT_NAME}'s patterns in your coding agent`}
-                prompt={SKILL_PROMPT}
-                agents={SETUP_AGENTS}
-                onCopy={() => onToast("Prompt copied — paste it into your coding agent.")}
-                onDismiss={() => setPill(false)}
-              />
-            </motion.div>
+        <AnimatePresence initial={false}>
+          {!wizard && (
+            <motion.section
+              aria-labelledby="start-with"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="mt-10"
+            >
+              <h4 id="start-with" className="sr-only">
+                Start with
+              </h4>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {STARTER_CARDS.map((card, i) => {
+                  const lead = i === 0;
+                  return (
+                    <motion.button
+                      key={card.id}
+                      type="button"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 + i * 0.06, duration: 0.3 }}
+                      onClick={() => (card.prompt ? onSubmit(card.prompt) : setWizard(true))}
+                      className={cn(
+                        "group relative flex h-full flex-col items-start gap-3 rounded-2xl border bg-card p-4 text-left transition-[background-color,box-shadow,transform] hover:-translate-y-0.5 hover:bg-accent/40 hover:shadow-sm",
+                        lead && "border-foreground/20 shadow-sm"
+                      )}
+                    >
+                      <span className="flex w-full items-center justify-between">
+                        <span className={cn("flex size-8 items-center justify-center rounded-lg", lead ? "bg-foreground text-background" : "bg-muted")}>
+                          <card.icon className="size-4" />
+                        </span>
+                        {lead && <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">Start here</span>}
+                      </span>
+                      <span className="flex-1">
+                        <span className="block text-sm font-medium">{card.title}</span>
+                        <span className="mt-1 block text-sm text-muted-foreground">{card.description}</span>
+                      </span>
+                      <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.section>
           )}
         </AnimatePresence>
       </div>
@@ -1682,6 +1580,10 @@ function ShareThreadButton({ thread, onVisibility }: { thread: Thread; onVisibil
       />
     </>
   );
+}
+
+function contextShare(blocks: number) {
+  return contextSegments(blocks).reduce((n, seg) => n + seg.tokens, 0) / CONTEXT_LIMIT;
 }
 
 function ContextButton({ blocks }: { blocks: number }) {
@@ -1744,14 +1646,12 @@ function ThreadPane({
   handlers,
   onSubmit,
   onStop,
-  onUnarchive,
 }: {
   thread: Thread;
   generating: boolean;
   handlers: BlockHandlers;
   onSubmit: (prompt: string) => void;
   onStop: () => void;
-  onUnarchive: () => void;
 }) {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const bottomRef = React.useRef<HTMLDivElement>(null);
@@ -1795,7 +1695,6 @@ function ThreadPane({
     <div className="mx-auto w-full max-w-2xl">
       <PromptBarPro
         {...COMPOSER_PROPS}
-        visibleCount={2}
         placeholder={`Reply to ${AGENT_NAME}…`}
         onSubmit={onSubmit}
         generating={generating}
@@ -1814,7 +1713,8 @@ function ThreadPane({
           />
           <AutonomyModePicker modes={AUTONOMY_MODES} capabilities={AUTONOMY_CAPABILITIES} value={autonomy} onChange={setAutonomy} />
         </div>
-        <ContextButton blocks={thread.blocks.length} />
+        {/* The context meter only shows up once the thread is long enough for it to matter. */}
+        <AnimatePresence>{contextShare(thread.blocks.length) >= 0.5 && <Reveal key="context"><ContextButton blocks={thread.blocks.length} /></Reveal>}</AnimatePresence>
       </div>
     </div>
   );
@@ -1830,19 +1730,7 @@ function ThreadPane({
         </div>
       </div>
       <div className="shrink-0 border-t bg-background/80 px-6 pb-4 pt-4 backdrop-blur">
-        {thread.archived ? (
-          <ArchivedSessionBanner
-            archived
-            message="This thread is archived. Unarchive it to keep working in it."
-            detail="Archived after 30 days without activity."
-            onUnarchive={() => new Promise<void>((resolve) => window.setTimeout(() => (onUnarchive(), resolve()), 800))}
-            className="mx-auto w-full max-w-2xl"
-          >
-            {composer}
-          </ArchivedSessionBanner>
-        ) : (
-          composer
-        )}
+        {composer}
       </div>
     </div>
   );

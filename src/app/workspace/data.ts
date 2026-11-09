@@ -2,7 +2,6 @@ import {
   ArrowUp,
   BookOpenCheck,
   Braces,
-  Compass,
   Eye,
   PenTool,
   FileCode2,
@@ -22,26 +21,19 @@ import type { ComponentType } from "react";
 import type { Agent } from "@/registry/traces/multi-agent-trace/component";
 import type { AnalysisItem } from "@/registry/loaders/analysis-list/component";
 import type { Attachment } from "@/registry/uploads/attachment-chip/component";
-import type { BackgroundTask } from "@/registry/agents/background-tasks/component";
 import type { CitationSource } from "@/registry/text/inline-citation/component";
 import type { Collaborator } from "@/registry/collaboration/collaborative-presence/component";
-import type { CompareResponse } from "@/registry/compare/response-compare/component";
 import type { DiffFile } from "@/registry/code/diff-summary/component";
 import type { DiffTabFile } from "@/registry/code/diff-tabs/component";
 import type { HitlQuestion } from "@/registry/agents/human-in-the-loop/component";
 import type { InstructionTool } from "@/registry/agents/instruction-tools/component";
 import type { LogLine } from "@/registry/code/terminal-stream/component";
-import type { PeekImage } from "@/registry/media/image-peek/component";
 import type { ProcedureStep } from "@/registry/agents/procedure-builder/component";
-import type { PromptBarItem, SessionSuggestion } from "@/registry/composer/prompt-bar-pro/component";
+import type { PromptBarItem } from "@/registry/composer/prompt-bar-pro/component";
 import type { SetupStep } from "@/registry/navigation/setup-checklist/component";
 import type { Source } from "@/registry/text/sources-stack/component";
-import type { StackFrame, CodeFrame } from "@/registry/errors/console-error-card/component";
 import type { TraceStep } from "@/registry/traces/expandable-trace/component";
-import type { TrustedSource } from "@/registry/text/source-trust-card/component";
 import type { AutonomyMode, Capability } from "@/registry/composer/autonomy-mode/component";
-import type { Branch } from "@/registry/messages/conversation-branches/component";
-import type { CheckpointTurn } from "@/registry/agents/checkpoint-restore/component";
 import type { ClarifyingQuestion } from "@/registry/messages/clarifying-questions/component";
 import type { ContextSegment } from "@/registry/indicators/context-usage/component";
 import type { ContextSource } from "@/registry/composer/context-chips/component";
@@ -54,7 +46,6 @@ import type { QualityCriterion } from "@/registry/composer/prompt-quality/compon
 import type { RelayCallState, RelayItem, RelayRun } from "@/registry/voice/voice-agent-relay/component";
 import type { ReviewField } from "@/registry/review/ai-review-panel/component";
 import type { RunStep } from "@/registry/agents/agent-run-card/component";
-import type { TemplatePart } from "@/registry/composer/prompt-template/component";
 import type { Thought } from "@/registry/traces/stream-of-thought/component";
 import type { WizardAnswers, WizardStep } from "@/registry/composer/prompt-wizard/component";
 
@@ -100,13 +91,6 @@ export const ROLES = [
 // Composer
 // ---------------------------------------------------------------------------
 
-export const COMPOSER_SUGGESTIONS: SessionSuggestion[] = [
-  { id: "spike", label: "Why are users stopping long answers?", icon: TrendingDown },
-  { id: "guidance", label: "Review my guidelines", icon: BookOpenCheck },
-  { id: "bulk", label: "Rebuild the skill reference docs", icon: TerminalSquare },
-  { id: "summary", label: "Summarize pattern usage this week", icon: Sparkles },
-];
-
 export const COMPOSER_SOURCES: PromptBarItem[] = [
   { id: "registry", label: "Registry" },
   { id: "figma", label: "Figma" },
@@ -128,32 +112,97 @@ export interface StarterCard {
   prompt: string;
 }
 
+// Three ways in, each a complete journey. The first is the guided one —
+// Audit → Fix → Ship — so it leads, and says so.
 export const STARTER_CARDS: StarterCard[] = [
   {
-    id: "explore",
-    title: "Explore capabilities",
-    description: "See what I can help you with across audits, specs, components, and reporting",
-    icon: Compass,
-    prompt: "What can you help me with?",
+    id: "audit",
+    title: "Audit a screen",
+    description: "I'll match your chat screen against the catalogue, fix what drifts, and ship it.",
+    icon: Eye,
+    prompt: "Audit my chat screen against the catalogue",
   },
   {
-    id: "guidance",
-    title: "Review my guidelines",
-    description: "Check the design guidelines I follow for conflicts or gaps",
-    icon: BookOpenCheck,
-    prompt: "Review my guidelines",
+    id: "spec",
+    title: "Draft a pattern spec",
+    description: "Answer three questions and I'll write the spec in the catalogue's template.",
+    icon: PenTool,
+    prompt: "",
   },
   {
     id: "spike",
-    title: "Investigate a UX drop-off",
-    description: "Find out why people hit Stop on long answers, and which pattern fixes it",
+    title: "Investigate a drop-off",
+    description: "Find out why people hit Stop on long answers, and which pattern fixes it.",
     icon: TrendingDown,
     prompt: "Why are users stopping long answers?",
   },
 ];
 
 // ---------------------------------------------------------------------------
-// Threads — seeded history
+// The guided journey — Audit → Fix → Ship, one thread, one next step at a time
+// ---------------------------------------------------------------------------
+
+export const JOURNEY = {
+  audit: "Audit my chat screen against the catalogue",
+  fix: "Fix all three",
+  ship: "Ship it",
+} as const;
+
+export type RunScript = (Omit<RunStep, "status" | "durationSeconds"> & { duration: number })[];
+
+export const FIX_PLAN: PlanStep[] = [
+  { id: "stop", text: "Make Stop morph back to Send when the answer ends" },
+  { id: "tool", text: "Resolve the tool badge into its result" },
+  { id: "spinner", text: "Swap the bare spinner for a Thinking Loader" },
+  { id: "a11y", text: "Check each fix against its Accessibility section" },
+];
+
+export const FIX_PLAN_ALT: PlanStep[] = [
+  { id: "spinner-first", text: "Start with the spinner — it drives most Stop clicks" },
+  { id: "rest", text: "Then fix the Stop button and the tool badge" },
+  { id: "review", text: "Leave the accessibility pass for your review" },
+];
+
+export const FIX_SOURCE = `// components/StopButton.tsx
+- return <button onClick={onStop}>Stop</button>;
++ return state === "generating"
++   ? <button aria-label="Stop generating" onClick={onStop}>…</button>
++   : <button aria-label="Send" onClick={onSubmit}>…</button>;
+
+// components/ToolBadge.tsx
+- {verb} {target}…
++ {status === "running" ? \`\${verb} \${target}\` : result}
++ {status === "success" && <Check aria-hidden />}
+
+// components/Spinner.tsx
+- <Spinner />
++ <ThinkingLoader words={["Thinking", "Reading", "Drafting"]} />`;
+
+export const SHIP_RUN: RunScript = [
+  { id: "build", kind: "command", label: "Built the app", activeLabel: "Building the app", detail: "0 errors", duration: 5 },
+  { id: "a11y", kind: "test", label: "Ran accessibility checks", activeLabel: "Running accessibility checks", detail: "12 passed", duration: 5 },
+  { id: "push", kind: "push", label: "Pushed fix/chat-screen-patterns", activeLabel: "Pushing fix/chat-screen-patterns", detail: "8d2f41c", duration: 4 },
+];
+
+/** Every catalogue pattern the journey put on screen, in the order you met them. */
+export const JOURNEY_PATTERNS = [
+  "uploads/attachment-chip",
+  "loaders/thinking-loader",
+  "loaders/tool-call-chip",
+  "loaders/analysis-list",
+  "text/streaming-text",
+  "text/follow-up-list",
+  "agents/plan-review",
+  "agents/task-list",
+  "messages/artifact-panel",
+  "code/diff-tabs",
+  "permissions/tool-approval",
+  "agents/background-tasks",
+  "agents/agent-run-card",
+];
+
+// ---------------------------------------------------------------------------
+// Reports, audits and investigations
 // ---------------------------------------------------------------------------
 
 export const WEEKLY_TRACE: TraceStep[] = [
@@ -200,24 +249,6 @@ export const AUDIT_ITEMS: AnalysisItem[] = [
   { id: "a4", title: "components/Spinner.tsx", info: "Replace with Thinking Loader — no elapsed time", status: "done" },
 ];
 
-export const AUDIT_TRUST_SOURCES: TrustedSource[] = [
-  {
-    title: "Stop Generation Button — UX spec",
-    domain: "ai-patterns.app",
-    description: "“The control morphs back into Send the moment the stream ends — never leave a dead Stop button behind.”",
-    url: "/patterns/buttons/stop-generation-button",
-    faviconUrl: favicon("github.com"),
-    trustReason: "is the source of truth — it's the registry's own spec, versioned with the component.",
-  },
-  {
-    title: "WCAG 2.2 · 4.1.3 Status Messages",
-    domain: "w3.org",
-    description: "Status changes like “Generating…” must be announced without moving focus.",
-    url: "https://www.w3.org/WAI/WCAG22/Understanding/status-messages",
-    faviconUrl: favicon("w3.org"),
-  },
-];
-
 export const AUDIT_DIFF_TABS: DiffTabFile[] = [
   {
     id: "stop",
@@ -255,18 +286,6 @@ export const AUDIT_DIFF_TABS: DiffTabFile[] = [
     ],
   },
 ];
-
-export const AUDIT_DIFF_FILES: DiffFile[] = [
-  { id: "1", name: "components/StopButton.tsx", additions: 3, deletions: 1 },
-  { id: "2", name: "components/ToolBadge.tsx", additions: 2, deletions: 1 },
-  { id: "3", name: "components/Spinner.tsx", additions: 1, deletions: 1 },
-];
-
-export const AUDIT_MICROCOPY =
-  "Something went wrong while generating your response. Please try again later or contact support if the problem persists.";
-
-export const AUDIT_SELECTION =
-  "Your chat screen covers the happy path well, but three of its loading states never resolve: the tool badge stays on “Searching…” after the call returns, and the stop button doesn't turn back into Send.";
 
 export const SPIKE_AGENTS: Agent[] = [
   {
@@ -327,63 +346,6 @@ export const SPIKE_SOURCES: Source[] = [
   { title: "Expandable Trace spec", domain: "ai-patterns.app", url: "/patterns/traces/expandable-trace", faviconUrl: favicon("github.com") },
   { title: "Nielsen Norman — Response times", domain: "nngroup.com", url: "https://www.nngroup.com/articles/response-times-3-important-limits/", faviconUrl: favicon("nngroup.com") },
 ];
-
-function shot(bg: string, fg: string) {
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 200'><rect width='320' height='200' fill='${bg}'/><rect x='24' y='24' width='272' height='22' rx='6' fill='${fg}' opacity='.5'/><rect x='24' y='60' width='180' height='12' rx='6' fill='${fg}' opacity='.35'/><rect x='24' y='82' width='220' height='12' rx='6' fill='${fg}' opacity='.35'/><rect x='184' y='140' width='112' height='36' rx='18' fill='${fg}' opacity='.6'/></svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
-}
-
-export const CONTRAST_SCREENSHOTS: PeekImage[] = [
-  { id: "1", alt: "Tool Approval card in light mode", label: "Light", src: shot("#f5f5f5", "#171717") },
-  { id: "2", alt: "Tool Approval card in dark mode with low-contrast buttons", label: "Dark", src: shot("#262626", "#525252") },
-  { id: "3", alt: "Contrast checker failing at 2.9:1", label: "Contrast 2.9:1", src: shot("#fee2e2", "#b91c1c") },
-];
-
-export const CONTRAST_ERROR: { message: string; frame: CodeFrame; stack: StackFrame[] } = {
-  message:
-    "Hydration failed because the server rendered text didn't match the client. The deny button's label is computed from `matchMedia` during render.",
-  frame: {
-    file: "src/registry/permissions/tool-approval/component.tsx (61:9) @ ToolApproval",
-    lines: [
-      { number: 59, content: "  const isDark = window.matchMedia(\"(prefers-color-scheme: dark)\").matches;" },
-      { number: 60, content: "  return (" },
-      { number: 61, content: "    <button className={isDark ? \"text-neutral-500\" : \"text-neutral-700\"}>", isError: true },
-      { number: 62, content: "      Deny" },
-    ],
-  },
-  stack: [
-    { name: "ToolApproval", file: "src/registry/permissions/tool-approval/component.tsx (61:9)" },
-    { name: "ToolApprovalDemo", file: "src/registry/permissions/tool-approval/demo.tsx (12:5)" },
-  ],
-};
-
-export const CONTRAST_TERMINAL: LogLine[] = [
-  { id: "1", text: "$ npx axe http://localhost:3000/patterns/permissions/tool-approval --tags wcag2aa", level: "default" },
-  { id: "2", text: "Running axe-core 4.10 in dark mode …", level: "info" },
-  { id: "3", text: "✗ color-contrast: “Deny” 2.9:1 (needs 4.5:1)", level: "error" },
-  { id: "4", text: "✗ color-contrast: “Always allow” 3.6:1 (needs 4.5:1)", level: "error" },
-  { id: "5", text: "2 violations on 1 page", level: "warn" },
-];
-
-export const CONTRAST_PATCH: DiffFile[] = [
-  { id: "1", name: "src/registry/permissions/tool-approval/component.tsx", additions: 4, deletions: 3 },
-];
-
-export const COPY_RESPONSES: [CompareResponse, CompareResponse] = [
-  {
-    id: "invite",
-    label: "Inviting",
-    content: "Ask about a pattern, or describe the screen you're designing — I'll shortlist what fits.",
-  },
-  {
-    id: "direct",
-    label: "Direct",
-    content: "Describe a screen. I'll pick the patterns and scaffold it.",
-  },
-];
-
-export const TRANSLATE_PARTIAL =
-  "Here are the first specs in Spanish:\n\n1. Thinking Loader — “Un indicador con una etiqueta brillante y un contador de tiempo transcurrido, para que una espera larga se lea como progreso.”\n2. Tool Call Chip — “Una píldora en línea que nombra la herramienta en curso y se resuelve en un resumen del resultado.”\n3. Tool Approval — “Una solicitud pendiente con las acciones permitir, permitir siempre y";
 
 // ---------------------------------------------------------------------------
 // Live flows
@@ -483,29 +445,6 @@ export const EXPLORE_FOLLOW_UPS = [
 // ---------------------------------------------------------------------------
 // Background tasks
 // ---------------------------------------------------------------------------
-
-export const INITIAL_TASKS: BackgroundTask[] = [
-  {
-    id: "weekly",
-    title: "Weekly pattern usage report · scheduled",
-    kind: "agent",
-    kindLabel: "Agent",
-    status: "running",
-    elapsedSeconds: 74,
-    activity: "Reading copy events",
-    stats: ["47 patterns", "6 tool uses"],
-  },
-  {
-    id: "lint",
-    title: "Lint the registry",
-    kind: "shell",
-    kindLabel: "Bash",
-    status: "done",
-    elapsedSeconds: 9,
-    command: "npm run lint",
-    output: "> eslint\n\n✓ No problems found",
-  },
-];
 
 // ---------------------------------------------------------------------------
 // Train
@@ -693,33 +632,6 @@ export function contextSegments(blocks: number): ContextSegment[] {
 // New thread — templates, guided spec, setup pill
 // ---------------------------------------------------------------------------
 
-export const PROMPT_TEMPLATES: { name: string; parts: TemplatePart[] }[] = [
-  {
-    name: "Audit a screen",
-    parts: [
-      "Audit our ",
-      { id: "screen", placeholder: "screen", options: ["chat screen", "settings page", "onboarding flow"], value: "chat screen" },
-      " against the catalogue, focusing on ",
-      { id: "focus", placeholder: "focus", options: ["loading states", "errors", "permissions"], value: "loading states" },
-      ", and flag anything ",
-      { id: "bar", placeholder: "bar", options: ["off-spec", "inaccessible", "missing"], value: "off-spec" },
-      ".",
-    ],
-  },
-  {
-    name: "Compare two patterns",
-    parts: [
-      "Tell me about ",
-      { id: "a", placeholder: "pattern", options: ["Thinking Loader", "Stream of Thought", "Expandable Trace"], value: "Stream of Thought" },
-      " and when I'd use it instead of ",
-      { id: "b", placeholder: "pattern", options: ["Thinking Loader", "Expandable Trace", "Analysis List"], value: "Thinking Loader" },
-      " for ",
-      { id: "case", placeholder: "use case" },
-      ".",
-    ],
-  },
-];
-
 export const SPEC_WIZARD_STEPS: WizardStep[] = [
   { id: "name", question: "What's the pattern called?", hint: "A short noun phrase, the way it'll appear in the catalogue.", placeholder: "e.g. Agent Handoff" },
   { id: "job", question: "What does it do for the user?", options: ["Start", "Ask", "Steer", "Oversee", "Trust", "Recover"] },
@@ -752,12 +664,6 @@ export const SPEC_PLAN: PlanStep[] = [
   { id: "b", text: "Find three products that ship this pattern" },
   { id: "c", text: "Draft every section, Summary to Related patterns" },
   { id: "d", text: "Self-review against the template and tighten" },
-];
-
-export const SPEC_PLAN_ALT: PlanStep[] = [
-  { id: "e", text: "Start from Human in the Loop's spec as the closest neighbour" },
-  { id: "f", text: "Draft Summary, Anatomy and Behavior first" },
-  { id: "g", text: "Leave Content guidelines for your review" },
 ];
 
 export function specThoughts(topic: string): Thought[] {
@@ -839,75 +745,6 @@ export const MEMORIES: Memory[] = [
   { id: "m3", text: "Prefers verb-first microcopy (“Ask your agent…”, not “Agent tasks”).", source: "From “Setup checklist microcopy”" },
   { id: "m4", text: "Ships to Cloudflare Workers — everything must be static.", source: "From CLAUDE.md" },
 ];
-
-export const CONTRAST_RUN: (Omit<RunStep, "status" | "durationSeconds"> & { duration: number })[] = [
-  { id: "build", kind: "command", label: "Built the site", activeLabel: "Building the site", detail: "58 pages", duration: 6 },
-  { id: "axe", kind: "test", label: "Ran contrast checks", activeLabel: "Running contrast checks", detail: "2 passed", duration: 5 },
-  { id: "push", kind: "push", label: "Pushed fix/tool-approval-contrast", activeLabel: "Pushing fix/tool-approval-contrast", detail: "4c1e9ab", duration: 4 },
-];
-
-// ---------------------------------------------------------------------------
-// Seeded threads — branches, checkpoints, code preview
-// ---------------------------------------------------------------------------
-
-export const NAME_BRANCHES: Branch[] = [
-  { id: "n1", prompt: "Suggest a name for the pattern where an agent passes work to a person", response: "“Agent Handoff” — it names both sides and matches how support tools already describe it." },
-  { id: "n2", prompt: "Suggest a shorter, verb-first name for it", response: "“Hand off” works as a button label, but as a catalogue title “Agent Handoff” is clearer next to Human in the Loop." },
-];
-
-export const LOADER_CHECKPOINTS: CheckpointTurn[] = [
-  {
-    id: "c1",
-    time: "16:02",
-    prompt: "Add an elapsed-time counter to Thinking Loader.",
-    reply: "Added a counter that appears after 3 seconds, in tabular figures so it doesn't jitter.",
-    changes: [{ path: "thinking-loader/component.tsx", kind: "edit" }],
-  },
-  {
-    id: "c2",
-    time: "16:09",
-    prompt: "Rotate the status words every 2 seconds.",
-    reply: "Status words now cycle every 2s and pause on hover.",
-    changes: [
-      { path: "thinking-loader/component.tsx", kind: "edit" },
-      { path: "thinking-loader/demo.tsx", kind: "edit" },
-    ],
-  },
-  {
-    id: "c3",
-    time: "16:14",
-    prompt: "Make the shimmer sweep faster and brighter.",
-    reply: "Doubled the sweep speed and raised the highlight to 60% opacity.",
-    changes: [{ path: "thinking-loader/shimmer.css", kind: "create" }],
-  },
-];
-
-export const ORIGAMI_SVG = `<svg xmlns="http://www.w3.org/2000/svg"
-     width="24" height="24" viewBox="0 0 24 24"
-     fill="none" stroke="currentColor" stroke-width="2"
-     stroke-linecap="round" stroke-linejoin="round"
-     class="origami">
-  <style>
-    .origami path {
-      stroke-dasharray: 1;
-      stroke-dashoffset: 1;
-      animation: fold 3.6s ease-in-out infinite;
-    }
-    .origami path:nth-child(2) { animation-delay: 0.3s; }
-    .origami path:nth-child(3) { animation-delay: 0.6s; }
-    @keyframes fold {
-      0% { stroke-dashoffset: 1; }
-      45%, 65% { stroke-dashoffset: 0; }
-      100% { stroke-dashoffset: -1; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .origami path { animation: none; stroke-dashoffset: 0; }
-    }
-  </style>
-  <path pathLength="1" d="M12 12V4a1 1 0 0 1 1-1h6.297a1 1 0 0 1 .651 1.759l-4.696 4.025" />
-  <path pathLength="1" d="m12 21-7.414-7.414A2 2 0 0 1 4 12.172V6.415a1.002 1.002 0 0 1 1.707-.707L20 20.009" />
-  <path pathLength="1" d="m12.214 3.381 8.414 14.966a1 1 0 0 1-.167 1.199l-1.168 1.163a1 1 0 0 1-.706.291H6.351a1 1 0 0 1-.625-.219L3.25 18.8a1 1 0 0 1 .631-1.781l4.165.027" />
-</svg>`;
 
 // ---------------------------------------------------------------------------
 // Agents — publish gate

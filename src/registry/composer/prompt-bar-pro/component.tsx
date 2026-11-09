@@ -410,28 +410,30 @@ export function PromptBarPro({
 
   return (
     <div className={cn("w-full space-y-3", className)}>
-      <div className="flex flex-wrap items-center gap-2">
-        {visible.map((s) => (
+      {visible.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          {visible.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => handleSubmit(s.label)}
+              disabled={isDisabled}
+              className="flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
+            >
+              <s.icon className="size-4 text-muted-foreground" />
+              {s.label}
+            </button>
+          ))}
           <button
-            key={s.id}
             type="button"
-            onClick={() => handleSubmit(s.label)}
-            disabled={isDisabled}
-            className="flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
+            onClick={() => setVisible(pickRandom(suggestions, visibleCount))}
+            aria-label="Shuffle suggestions"
+            className="ml-auto flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
-            <s.icon className="size-4 text-muted-foreground" />
-            {s.label}
+            <Shuffle className="size-4" />
           </button>
-        ))}
-        <button
-          type="button"
-          onClick={() => setVisible(pickRandom(suggestions, visibleCount))}
-          aria-label="Shuffle suggestions"
-          className="ml-auto flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-        >
-          <Shuffle className="size-4" />
-        </button>
-      </div>
+        </div>
+      )}
 
       <div className="relative">
         <AnimatePresence>
