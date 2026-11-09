@@ -58,6 +58,8 @@ export interface InviteMembersProps {
   /** "avatars" shows the member stack; "share" shows a compact Share button,
    *  for surfaces that already display presence elsewhere. Default "avatars". */
   trigger?: "avatars" | "share";
+  /** Label for the "share" trigger, e.g. "Invite". Default "Share". */
+  triggerLabel?: string;
   onSend?: (chips: PendingChip[], message: string) => void;
   onAssigneesChange?: (assignees: Assignee[]) => void;
   onGeneralAccessChange?: (level: GeneralAccessLevel) => void;
@@ -833,7 +835,7 @@ function InviteModal({
 
 // ─── Entry point trigger ──────────────────────────────────────────────────────
 
-function ShareTrigger({ onClick }: { onClick: () => void }) {
+function ShareTrigger({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
       type="button"
@@ -841,7 +843,7 @@ function ShareTrigger({ onClick }: { onClick: () => void }) {
       className="inline-flex h-8 items-center gap-1.5 rounded-md border bg-background px-3 text-sm font-medium transition-colors hover:bg-muted"
     >
       <Share2 className="size-3.5" aria-hidden />
-      Share
+      {label}
     </button>
   );
 }
@@ -891,6 +893,7 @@ export function InviteMembers({
   defaultMessage = "I'd like to invite you to collaborate on this project.",
   initialGeneralAccess = "restricted",
   trigger: triggerVariant = "avatars",
+  triggerLabel = "Share",
   onSend,
   onAssigneesChange,
   onGeneralAccessChange,
@@ -934,7 +937,7 @@ export function InviteMembers({
 
   const trigger =
     triggerVariant === "share" ? (
-      <ShareTrigger onClick={() => setOpen(true)} />
+      <ShareTrigger label={triggerLabel} onClick={() => setOpen(true)} />
     ) : (
       <Trigger assignees={assignees} onClick={() => setOpen(true)} />
     );

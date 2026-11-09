@@ -1001,8 +1001,11 @@ export function WorkspaceApp({ skillVersion }: { skillVersion: string }) {
                 teamDone={teamDone}
                 onSkillDone={setSkillDone}
                 onTeamDone={() => setTeamDone(true)}
+                onReset={() => {
+                  setSkillDone(false);
+                  setTeamDone(false);
+                }}
                 onOpenConnectors={() => navigate("connectors")}
-                onOpenPattern={openPattern}
                 onExit={() => openThread(null)}
                 onToast={setToast}
               />
