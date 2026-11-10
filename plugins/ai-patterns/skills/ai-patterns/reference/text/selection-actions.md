@@ -383,7 +383,7 @@ const FloatingToolbar = React.forwardRef<
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="mt-1.5 overflow-hidden rounded-xl border bg-popover shadow-md"
+            className="mt-1.5 overflow-hidden rounded-2xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
           >
             {QUICK_EDITS.map((q) => (
               <button
@@ -407,7 +407,7 @@ const FloatingToolbar = React.forwardRef<
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="mt-1.5 rounded-xl border bg-popover p-3 text-xs text-foreground/90 shadow-md"
+            className="mt-1.5 rounded-2xl bg-popover p-3 text-xs text-foreground/90 shadow-md ring-1 ring-black/5 dark:ring-white/10"
           >
             {explanation}
           </motion.div>

@@ -388,7 +388,7 @@ function FlowchartNodeItem({
 function TriggerCard({ node }: { node: FlowchartTriggerNode }) {
   const Icon = node.icon;
   return (
-    <div className="flex w-full items-center gap-2.5 rounded-2xl border bg-card p-3">
+    <div className="flex w-full items-center gap-2.5 rounded-2xl bg-card p-3 ring-1 ring-black/5 dark:ring-white/10">
       <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300">
         <Icon className="size-4" />
       </span>
@@ -410,7 +410,7 @@ function ConditionCard({
   onClauseTokenChange: (clauseId: string, key: ClauseTokenKey, token: FlowchartToken) => void;
 }) {
   return (
-    <div className="w-full rounded-2xl border bg-card p-3">
+    <div className="w-full rounded-2xl bg-card p-3 ring-1 ring-black/5 dark:ring-white/10">
       <Reorder.Group
         as="div"
         axis="y"
@@ -528,7 +528,7 @@ function TokenChip({
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.12 }}
             role="listbox"
-            className="absolute left-0 top-full z-10 mt-2 min-w-40 overflow-hidden rounded-xl border bg-popover"
+            className="absolute left-0 top-full z-10 mt-2 min-w-40 overflow-hidden rounded-2xl bg-popover ring-1 ring-black/5 dark:ring-white/10"
           >
             {options!.map((option) => (
               <button

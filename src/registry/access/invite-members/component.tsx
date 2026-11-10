@@ -178,7 +178,7 @@ function RolePicker({
           "inline-flex items-center gap-0.5 rounded font-medium transition-colors",
           compact
             ? "px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-accent hover:text-foreground"
-            : "gap-1 rounded-md border px-2.5 py-1.5 text-sm hover:bg-accent",
+            : "gap-1 rounded-full px-2.5 py-1.5 text-sm hover:bg-foreground/10 bg-muted",
         )}
       >
         {current?.label ?? ""}
@@ -196,7 +196,7 @@ function RolePicker({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -4, scale: 0.97 }}
                 transition={{ duration: 0.1 }}
-                className="min-w-[120px] overflow-hidden rounded-lg border bg-popover shadow-md"
+                className="min-w-[120px] overflow-hidden rounded-xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
               >
                 {roles.map((role) => (
                   <li key={role.id}>
@@ -230,7 +230,7 @@ function RolePicker({
 
 function Chip({ chip, onRemove }: { chip: PendingChip; onRemove: () => void }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border bg-muted/60 py-0.5 pl-0.5 pr-1 text-xs">
+    <span className="inline-flex items-center gap-1 rounded-full py-0.5 pl-0.5 pr-1 text-xs bg-muted">
       <Avatar
         id={chip.id ?? chip.email}
         name={chip.name}
@@ -299,7 +299,7 @@ function AssigneeRow({
       <RolePicker roles={roles} value={assignee.roleId} onChange={onRoleChange} compact />
       <span
         className={cn(
-          "shrink-0 rounded-full border px-2 py-0.5 text-[10px]",
+          "shrink-0 rounded-full px-2 py-0.5 text-[10px] bg-muted",
           STATUS_CLASS[assignee.status],
         )}
       >
@@ -414,7 +414,7 @@ function GeneralAccessSection({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -4, scale: 0.97 }}
                 transition={{ duration: 0.1 }}
-                className="min-w-[200px] overflow-hidden rounded-lg border bg-popover shadow-md"
+                className="min-w-[200px] overflow-hidden rounded-xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
               >
                 {GENERAL_ACCESS_OPTIONS.map((opt) => (
                   <li key={opt.level}>
@@ -567,7 +567,7 @@ function InviteModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.97, y: 8 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
-        className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border bg-background shadow-xl"
+        className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-background shadow-xl ring-1 ring-black/5 dark:ring-white/10"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -605,7 +605,7 @@ function InviteModal({
           <div className="flex items-start gap-2">
             {/* Chip + search field */}
             <div
-              className="relative flex min-h-[38px] flex-1 cursor-text flex-wrap items-center gap-1 rounded-lg border bg-background px-2 py-1.5 focus-within:ring-2 focus-within:ring-ring"
+              className="relative flex min-h-[38px] flex-1 cursor-text flex-wrap items-center gap-1 rounded-lg px-2 py-1.5 focus-within:ring-2 focus-within:ring-ring bg-muted"
               onClick={() => inputRef.current?.focus()}
             >
               {chips.map((chip) => (
@@ -638,7 +638,7 @@ function InviteModal({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.1 }}
-                    className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-xl border bg-popover shadow-lg"
+                    className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-2xl bg-popover shadow-lg ring-1 ring-black/5 dark:ring-white/10"
                   >
                     <button
                       type="button"
@@ -646,7 +646,7 @@ function InviteModal({
                       disabled={!query.trim()}
                       className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-40"
                     >
-                      <span className="flex size-7 shrink-0 items-center justify-center rounded-full border bg-muted">
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted">
                         <PlusCircle className="size-3.5 text-muted-foreground" aria-hidden />
                       </span>
                       <span className="min-w-0">
@@ -715,7 +715,7 @@ function InviteModal({
                   onChange={(e) => setMessage(e.target.value)}
                   rows={3}
                   aria-label="Invite message"
-                  className="mt-3 w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="mt-3 w-full resize-none rounded-xl px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring bg-muted focus:bg-background"
                 />
               </motion.div>
             )}
@@ -801,7 +801,7 @@ function InviteModal({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.15 }}
-                className="absolute inset-x-6 top-1/2 z-20 -translate-y-1/2 rounded-xl border bg-background p-4 shadow-lg"
+                className="absolute inset-x-6 top-1/2 z-20 -translate-y-1/2 rounded-2xl bg-background p-4 shadow-lg ring-1 ring-black/5 dark:ring-white/10"
               >
                 <p className="text-sm font-semibold">Remove member?</p>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
@@ -840,7 +840,7 @@ function ShareTrigger({ label, onClick }: { label: string; onClick: () => void }
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex h-8 items-center gap-1.5 rounded-md border bg-background px-3 text-sm font-medium transition-colors hover:bg-muted"
+      className="inline-flex h-8 items-center gap-1.5 rounded-full bg-background px-3 text-sm font-medium transition-colors hover:bg-muted ring-1 ring-black/5 dark:ring-white/10"
     >
       <Share2 className="size-3.5" aria-hidden />
       {label}

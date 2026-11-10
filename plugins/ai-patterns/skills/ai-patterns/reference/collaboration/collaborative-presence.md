@@ -188,7 +188,7 @@ export function CollaborativePresence({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="mt-2 w-64 overflow-hidden rounded-xl border bg-popover shadow-md"
+            className="mt-2 w-64 overflow-hidden rounded-2xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
           >
             <p className="px-3 py-2 text-xs text-muted-foreground">
               {onlineCount > 0

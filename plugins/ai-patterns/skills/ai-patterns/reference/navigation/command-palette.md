@@ -242,7 +242,7 @@ export function CommandPaletteWindow({
       aria-label="Command palette"
       onKeyDown={handleKeyDown}
       className={cn(
-        "flex h-fit max-h-[70vh] w-full flex-col overflow-hidden rounded-2xl border bg-popover shadow-2xl",
+        "flex h-fit max-h-[70vh] w-full flex-col overflow-hidden rounded-2xl bg-popover shadow-2xl ring-1 ring-black/5 dark:ring-white/10",
         className
       )}
     >
@@ -334,7 +334,7 @@ export function CommandPaletteWindow({
 
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="flex h-5 min-w-5 items-center justify-center rounded border bg-muted px-1 font-sans text-[10px] font-medium text-muted-foreground">
+    <kbd className="flex h-5 min-w-5 items-center justify-center rounded-lg px-1 font-sans text-[10px] font-medium text-muted-foreground bg-muted">
       {children}
     </kbd>
   );

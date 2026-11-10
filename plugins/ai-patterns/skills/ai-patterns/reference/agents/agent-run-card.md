@@ -160,7 +160,7 @@ export function AgentRunCard({
   return (
     <section
       aria-label={`Agent run: ${title}`}
-      className={cn("w-full overflow-hidden rounded-2xl border bg-card text-card-foreground", className)}
+      className={cn("w-full overflow-hidden rounded-2xl bg-card text-card-foreground ring-1 ring-black/5 dark:ring-white/10", className)}
     >
       <div className="px-4 pb-3 pt-3.5">
         {/* Title + timer */}

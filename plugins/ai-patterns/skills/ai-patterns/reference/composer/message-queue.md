@@ -215,7 +215,7 @@ export function MessageQueueComposer({
           e.preventDefault();
           submit(false);
         }}
-        className="flex items-end gap-2 rounded-2xl border bg-card p-2 pl-3.5 shadow-sm focus-within:ring-2 focus-within:ring-ring/30"
+        className="flex items-end gap-2 rounded-2xl bg-card p-2 pl-3.5 focus-within:ring-2 focus-within:ring-ring/30 shadow-sm ring-1 ring-black/5 dark:ring-white/10"
       >
         <textarea
           ref={inputRef}
@@ -232,7 +232,7 @@ export function MessageQueueComposer({
           <button
             type="button"
             onClick={() => submit(true)}
-            className="flex h-8 shrink-0 items-center gap-1 rounded-full border px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="flex h-8 shrink-0 items-center gap-1 rounded-full px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground bg-muted"
           >
             Queue
             <kbd className="font-sans text-[10px]">{mod}↵</kbd>

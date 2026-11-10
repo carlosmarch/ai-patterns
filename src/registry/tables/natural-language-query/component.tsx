@@ -124,14 +124,14 @@ export function NaturalLanguageQuery<Row extends { id: string }>({
   const mode = phase === "translating" ? "translating" : isSql ? "sql" : "ask";
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card text-sm shadow-sm", className)}>
+    <div className={cn("w-full overflow-hidden rounded-2xl bg-card text-sm shadow-sm ring-1 ring-black/5 dark:ring-white/10", className)}>
       <div className="border-b p-3">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             submit();
           }}
-          className="flex h-10 items-center gap-2 rounded-xl border bg-background pl-1.5 pr-1.5 focus-within:ring-2 focus-within:ring-ring/40"
+          className="flex h-10 items-center gap-2 rounded-2xl bg-background pl-1.5 pr-1.5 focus-within:ring-2 focus-within:ring-ring/40 ring-1 ring-black/5 dark:ring-white/10"
         >
           <ModeBadge mode={mode} />
 
@@ -167,7 +167,7 @@ export function NaturalLanguageQuery<Row extends { id: string }>({
           <button
             type="submit"
             disabled={busy}
-            className="flex h-7 shrink-0 items-center gap-1.5 rounded-lg border px-2 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
+            className="flex h-7 shrink-0 items-center gap-1.5 rounded-full px-2 text-xs text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground disabled:opacity-50 bg-muted"
           >
             <span className="sr-only sm:not-sr-only">{mode === "ask" ? "Translate" : "Run"}</span>
             <CornerDownLeft className="size-3" aria-hidden />
@@ -208,7 +208,7 @@ export function NaturalLanguageQuery<Row extends { id: string }>({
                   key={ex}
                   type="button"
                   onClick={() => submit(ex)}
-                  className="rounded-full border px-2 py-0.5 text-foreground transition-colors hover:bg-accent"
+                  className="rounded-full px-2 py-0.5 text-foreground transition-colors hover:bg-foreground/10 bg-muted"
                 >
                   {ex}
                 </button>

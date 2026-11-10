@@ -324,7 +324,7 @@ function RegenerateButton({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
             transition={{ duration: 0.12 }}
-            className="absolute top-full left-0 z-20 mt-1 w-56 origin-top-left rounded-xl border bg-popover p-1 text-popover-foreground shadow-lg"
+            className="absolute top-full left-0 z-20 mt-1 w-56 origin-top-left rounded-2xl bg-popover p-1 text-popover-foreground shadow-lg ring-1 ring-black/5 dark:ring-white/10"
           >
             <MenuItem ref={(el) => { itemsRef.current[0] = el; }} label="Try again" hint="Same prompt, new answer" onSelect={() => pick()} />
             <div role="separator" className="my-1 h-px bg-border" />
@@ -396,7 +396,7 @@ function FeedbackPanel({
         if (e.key === "Escape") onClose();
       }}
     >
-      <div className="flex flex-col gap-3 rounded-xl border bg-card p-3">
+      <div className="flex flex-col gap-3 rounded-2xl bg-card p-3 ring-1 ring-black/5 dark:ring-white/10">
         <div className="flex items-center justify-between gap-2">
           <h3 id={headingId} className="text-sm font-medium">
             What went wrong?
@@ -421,8 +421,8 @@ function FeedbackPanel({
                 aria-pressed={on}
                 onClick={() => setPicked((p) => (on ? p.filter((r) => r !== reason) : [...p, reason]))}
                 className={cn(
-                  "rounded-full border px-2.5 py-1 text-xs transition-colors",
-                  on ? "border-foreground bg-foreground text-background" : "hover:bg-accent"
+                  "rounded-full px-2.5 py-1 text-xs transition-colors bg-muted",
+                  on ? "bg-foreground text-background" : "hover:bg-foreground/10"
                 )}
               >
                 {reason}
@@ -437,7 +437,7 @@ function FeedbackPanel({
           rows={2}
           aria-label="Anything else? (optional)"
           placeholder="Anything else? (optional)"
-          className="resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground/30"
+          className="resize-none rounded-xl px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-foreground/30 bg-muted focus:bg-background"
         />
 
         <div className="flex items-center justify-between gap-2">

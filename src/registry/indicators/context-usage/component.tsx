@@ -72,7 +72,7 @@ export function ContextUsage({
   }
 
   return (
-    <div className={cn("flex w-full flex-col gap-4 rounded-3xl border bg-card p-5", className)}>
+    <div className={cn("flex w-full flex-col gap-4 rounded-3xl bg-card p-5 ring-1 ring-black/5 dark:ring-white/10", className)}>
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-base font-medium">{title}</h3>
         {onCompact && (

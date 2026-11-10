@@ -87,7 +87,7 @@ export function IncognitoToggle({
       title={iconOnly ? label : undefined}
       onClick={() => onActiveChange(!active)}
       className={cn(
-        "relative inline-flex h-8 items-center gap-1.5 rounded-full border text-xs font-medium transition-colors",
+        "relative inline-flex h-8 items-center gap-1.5 rounded-full text-xs font-medium transition-colors bg-muted",
         iconOnly ? "w-8 justify-center" : "px-3",
         active
           ? "border-foreground bg-foreground text-background"
@@ -156,7 +156,7 @@ export function TemporaryChatBanner({
               <button
                 type="button"
                 onClick={onExit}
-                className="shrink-0 rounded-lg border bg-background px-2.5 py-1 text-xs font-medium transition-colors hover:bg-accent"
+                className="shrink-0 rounded-full bg-background px-2.5 py-1 text-xs font-medium transition-colors hover:bg-accent ring-1 ring-black/5 dark:ring-white/10"
               >
                 {exitLabel}
               </button>

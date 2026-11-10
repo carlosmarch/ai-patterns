@@ -119,7 +119,7 @@ export function SourcesStack({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="mt-1.5 overflow-hidden rounded-xl border bg-popover"
+            className="mt-1.5 overflow-hidden rounded-2xl bg-popover ring-1 ring-black/5 dark:ring-white/10"
           >
             {sources.map((source) => (
               <li key={source.url} className="border-b last:border-b-0">

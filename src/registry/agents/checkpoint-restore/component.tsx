@@ -185,7 +185,7 @@ function CheckpointMarker({
               }
             }}
           >
-            <div className="mt-2 rounded-xl border bg-card p-3">
+            <div className="mt-2 rounded-2xl bg-card p-3 ring-1 ring-black/5 dark:ring-white/10">
               <p id={`${id}-title`} className="text-sm font-medium">
                 Restore to before this message?
               </p>
@@ -285,7 +285,7 @@ function TurnBody({ turn, reverted }: { turn: CheckpointTurn; reverted?: boolean
               <li
                 key={c.path}
                 className={cn(
-                  "flex items-center gap-1 rounded-md border px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground",
+                  "flex items-center gap-1 rounded-lg px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground bg-muted",
                   reverted && "line-through"
                 )}
               >
@@ -342,7 +342,7 @@ function RestoredBanner({
       <button
         type="button"
         onClick={onRedo}
-        className="flex h-7 shrink-0 items-center gap-1 rounded-lg border px-2 text-xs font-medium hover:bg-accent"
+        className="flex h-7 shrink-0 items-center gap-1 rounded-full px-2 text-xs font-medium hover:bg-foreground/10 bg-muted"
       >
         <RotateCw className="size-3" aria-hidden />
         Redo

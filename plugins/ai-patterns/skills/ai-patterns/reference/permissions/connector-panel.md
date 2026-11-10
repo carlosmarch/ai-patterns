@@ -173,7 +173,7 @@ function ToolRow({
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-xs font-semibold">{tool.name}</span>
           {tool.badge && (
-            <span className="rounded-full border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+            <span className="rounded-full px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground bg-muted">
               {tool.badge}
             </span>
           )}
@@ -295,7 +295,7 @@ function FilterBar({
           onClick={() => setDropOpen((o) => !o)}
           aria-haspopup="listbox"
           aria-expanded={dropOpen}
-          className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-accent"
+          className="inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-foreground/10 bg-muted"
         >
           {currentLabel}
           <ChevronDown
@@ -315,7 +315,7 @@ function FilterBar({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 4 }}
               transition={{ duration: 0.1 }}
-              className="absolute left-0 top-full z-10 mt-1 min-w-[140px] overflow-hidden rounded-xl border bg-popover shadow-lg"
+              className="absolute left-0 top-full z-10 mt-1 min-w-[140px] overflow-hidden rounded-2xl bg-popover shadow-lg ring-1 ring-black/5 dark:ring-white/10"
             >
               <li>
                 <button
@@ -369,7 +369,7 @@ function FilterBar({
           onChange={(e) => onQueryChange(e.target.value)}
           placeholder="Search tools"
           aria-label="Search tools"
-          className="w-full rounded-md border bg-background py-1.5 pl-8 pr-3 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full rounded-lg py-1.5 pl-8 pr-3 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring bg-muted"
         />
       </div>
     </div>
@@ -441,7 +441,7 @@ export function ConnectorPanel({
   return (
     <div
       className={cn(
-        "flex w-full flex-col overflow-hidden rounded-2xl border bg-background shadow-xl",
+        "flex w-full flex-col overflow-hidden rounded-2xl bg-background shadow-xl ring-1 ring-black/5 dark:ring-white/10",
         className,
       )}
     >

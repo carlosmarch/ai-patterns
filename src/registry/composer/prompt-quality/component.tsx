@@ -96,7 +96,7 @@ export function PromptQuality({
 
   return (
     <div className={cn("flex w-full flex-col gap-2.5", className)}>
-      <div className="relative rounded-2xl border bg-card shadow-sm focus-within:border-foreground/30">
+      <div className="relative rounded-2xl bg-card focus-within:ring-foreground/30 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
         <textarea
           ref={textareaRef}
           value={value}

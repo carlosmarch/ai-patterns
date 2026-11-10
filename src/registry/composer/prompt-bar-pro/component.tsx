@@ -420,7 +420,7 @@ export function PromptBarPro({
               type="button"
               onClick={() => handleSubmit(s.label)}
               disabled={isDisabled}
-              className="flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-50"
+              className="flex items-center gap-2 rounded-full px-3.5 py-2 text-sm transition-colors hover:bg-foreground/10 disabled:pointer-events-none disabled:opacity-50 bg-muted"
             >
               <s.icon className="size-4 text-muted-foreground" />
               {s.label}
@@ -445,7 +445,7 @@ export function PromptBarPro({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 4 }}
               transition={{ duration: 0.12 }}
-              className="absolute bottom-full left-0 z-10 mb-2 w-full max-w-xs overflow-hidden rounded-xl border bg-popover shadow-md"
+              className="absolute bottom-full left-0 z-10 mb-2 w-full max-w-xs overflow-hidden rounded-2xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
             >
               {autocompleteSuggestions.map((item, i) => (
                 <button
@@ -481,7 +481,7 @@ export function PromptBarPro({
           onClick={(e) => { (e.target as HTMLInputElement).value = ""; }}
         />
 
-        <div className="flex flex-col gap-3 rounded-2xl border bg-card p-3 shadow-sm">
+        <div className="flex flex-col gap-3 rounded-2xl bg-card p-3 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
           <div className="w-full">
             <AnimatePresence initial={false}>
               {attachments.length > 0 && (
@@ -556,7 +556,7 @@ export function PromptBarPro({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 4 }}
                     transition={{ duration: 0.12 }}
-                    className="absolute bottom-full left-0 z-20 mb-1.5 w-64 overflow-hidden rounded-xl border bg-popover shadow-md"
+                    className="absolute bottom-full left-0 z-20 mb-1.5 w-64 overflow-hidden rounded-2xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
                   >
                     <AnimatePresence mode="wait" initial={false}>
                       {attachPanel === "main" && (
@@ -614,7 +614,7 @@ export function PromptBarPro({
                             <span className="text-sm font-medium">Connectors</span>
                           </div>
                           <div className="border-b px-2 py-2">
-                            <div className="flex items-center gap-1.5 rounded-lg border px-2 py-1.5">
+                            <div className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 bg-muted">
                               <Search className="size-3.5 shrink-0 text-muted-foreground" />
                               <input
                                 type="text"
@@ -703,7 +703,7 @@ export function PromptBarPro({
                 <button
                   type="button"
                   onClick={() => setEnvironmentOpen((v) => !v)}
-                  className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition-colors hover:bg-foreground/10 bg-muted"
                 >
                   <Monitor className="size-3.5 text-muted-foreground" />
                   {environment}
@@ -716,7 +716,7 @@ export function PromptBarPro({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 4 }}
                       transition={{ duration: 0.12 }}
-                      className="absolute bottom-full left-0 z-10 mb-2 w-36 overflow-hidden rounded-xl border bg-popover shadow-md"
+                      className="absolute bottom-full left-0 z-10 mb-2 w-36 overflow-hidden rounded-2xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
                     >
                       {environments.map((e) => (
                         <button
@@ -758,7 +758,7 @@ export function PromptBarPro({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 4 }}
                         transition={{ duration: 0.12 }}
-                        className="absolute bottom-full right-0 z-10 mb-2 w-36 overflow-hidden rounded-xl border bg-popover shadow-md"
+                        className="absolute bottom-full right-0 z-10 mb-2 w-36 overflow-hidden rounded-2xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
                       >
                         {orchestrators.map((o) => (
                           <button

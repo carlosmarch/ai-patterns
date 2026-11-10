@@ -139,7 +139,7 @@ export function SourceTrustCard({ sources, defaultIndex = 0, className }: Source
   }
 
   return (
-    <div className={cn("w-full max-w-sm overflow-hidden rounded-2xl border bg-card shadow-sm", className)}>
+    <div className={cn("w-full max-w-sm overflow-hidden rounded-2xl bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10", className)}>
       <div className="flex items-center justify-between border-b px-3 py-2">
         <div className="flex items-center gap-1">
           <button
@@ -217,10 +217,10 @@ export function SourceTrustCard({ sources, defaultIndex = 0, className }: Source
               onClick={() => goTo(i)}
               aria-current={i === index}
               className={cn(
-                "rounded-full border px-2 py-0.5 text-xs transition-colors",
+                "rounded-full px-2 py-0.5 text-xs transition-colors bg-muted",
                 i === index
-                  ? "border-primary/30 bg-primary/10 text-foreground"
-                  : "border-transparent bg-muted text-muted-foreground hover:bg-accent"
+                  ? "bg-primary/10 text-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-foreground/10"
               )}
             >
               {s.domain}
@@ -237,7 +237,7 @@ function Favicon({ source }: { source: TrustedSource }) {
   const showImage = source.faviconUrl && !errored;
 
   return (
-    <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted">
+    <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
       {showImage ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={source.faviconUrl} alt="" className="size-full object-cover" onError={() => setErrored(true)} />
@@ -343,7 +343,7 @@ function TrustBadge({ domain, reason, url }: { domain: string; reason: string; u
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: position.placement === "top" ? 4 : -4 }}
                   transition={{ duration: 0.12 }}
-                  className="rounded-xl border bg-popover p-3 text-left shadow-md"
+                  className="rounded-2xl bg-popover p-3 text-left shadow-md ring-1 ring-black/5 dark:ring-white/10"
                 >
                   <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
                     <ShieldCheck className="size-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden />

@@ -179,7 +179,7 @@ export function HumanInTheLoop({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.18 }}
-      className={cn("w-full max-w-xs overflow-visible rounded-2xl border bg-card", className)}
+      className={cn("w-full max-w-xs overflow-visible rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10", className)}
     >
       {/* Header */}
       <div className="flex items-start gap-2 px-4 pt-4 pb-3">

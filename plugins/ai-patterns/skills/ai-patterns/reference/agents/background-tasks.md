@@ -307,7 +307,7 @@ function RunningCard({
             type="button"
             onClick={() => onStop(task.id)}
             aria-label={`Stop ${task.title}`}
-            className="flex size-6 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground transition-colors hover:text-foreground"
+            className="flex size-6 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground bg-muted"
           >
             <Square className="size-2.5 fill-current" />
           </button>

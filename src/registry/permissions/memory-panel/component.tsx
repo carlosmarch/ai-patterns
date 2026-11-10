@@ -89,7 +89,7 @@ export function MemoryPanel({
   return (
     <section
       aria-labelledby={titleId}
-      className={cn("flex w-full flex-col overflow-hidden rounded-2xl border bg-card", className)}
+      className={cn("flex w-full flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10", className)}
     >
       <header className="flex items-start gap-3 border-b px-4 py-3">
         <div className="min-w-0 flex-1">
@@ -154,7 +154,7 @@ export function MemoryPanel({
                     }}
                     aria-label="Edit memory"
                     rows={2}
-                    className="w-full resize-none rounded-lg border bg-background px-2.5 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="w-full resize-none rounded-xl px-2.5 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring bg-muted focus:bg-background"
                   />
                   <div className="flex justify-end gap-1.5">
                     <IconButton label="Cancel" onClick={() => setEditingId(null)}>
@@ -266,7 +266,7 @@ export function MemoryUpdatedNotice({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       role="status"
-      className={cn("inline-flex max-w-full items-center gap-2 rounded-full border bg-muted/50 py-1 pr-1 pl-2.5 text-xs", className)}
+      className={cn("inline-flex max-w-full items-center gap-2 rounded-full py-1 pr-1 pl-2.5 text-xs bg-muted", className)}
     >
       <Brain className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
       <span className="min-w-0 truncate">

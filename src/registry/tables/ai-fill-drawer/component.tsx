@@ -159,7 +159,7 @@ export function AiFillDrawer({
               <button
                 type="button"
                 onClick={stop}
-                className="flex h-8 items-center gap-1.5 rounded-full border px-3 font-medium transition-colors hover:bg-accent"
+                className="flex h-8 items-center gap-1.5 rounded-full px-3 font-medium transition-colors hover:bg-foreground/10 bg-muted"
               >
                 <Square className="size-3 fill-current" aria-hidden />
                 Stop
@@ -169,7 +169,7 @@ export function AiFillDrawer({
                 type="button"
                 onClick={() => fill(fillableEmpty.map((f) => f.key))}
                 disabled={fillableEmpty.length === 0}
-                className="flex h-8 items-center gap-1.5 rounded-full border px-3 font-medium transition-colors hover:bg-accent disabled:opacity-40 disabled:hover:bg-transparent"
+                className="flex h-8 items-center gap-1.5 rounded-full px-3 font-medium transition-colors hover:bg-foreground/10 disabled:opacity-40 disabled:hover:bg-transparent bg-muted"
               >
                 <Sparkles className="size-3.5" aria-hidden />
                 Fill with AI
@@ -296,7 +296,7 @@ function FieldRow({
                 exit(undefined);
               }
             }}
-            className="h-8 w-full rounded-md border bg-background px-2 outline-none focus:ring-2 focus:ring-ring/40"
+            className="h-8 w-full rounded-lg px-2 outline-none focus:ring-2 focus:ring-ring/40 bg-muted focus:bg-background"
           />
         ) : (
           <AnimatePresence mode="wait" initial={false}>

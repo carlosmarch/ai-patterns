@@ -103,7 +103,7 @@ export function AttachmentTray({
         setDragging(false);
         if (e.dataTransfer.files.length) onDropFiles?.(e.dataTransfer.files);
       }}
-      className={cn("relative rounded-2xl border p-3", className)}
+      className={cn("relative rounded-2xl p-3 bg-muted/60", className)}
     >
       {dragging && (
         <div className="pointer-events-none absolute inset-1 z-10 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-foreground/30 bg-background/90 text-sm text-muted-foreground">
@@ -148,8 +148,8 @@ export function AttachmentChip({
   return (
     <li
       className={cn(
-        "relative flex w-40 shrink-0 items-center gap-2 rounded-xl border bg-card p-2",
-        status === "error" && "border-destructive/40 bg-destructive/5"
+        "relative flex w-40 shrink-0 items-center gap-2 rounded-2xl bg-card p-2 ring-1 ring-black/5 dark:ring-white/10",
+        status === "error" && "ring-destructive/40 bg-destructive/5"
       )}
     >
       <div

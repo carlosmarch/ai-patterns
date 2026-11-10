@@ -158,7 +158,7 @@ export function RateLimit({
                 <button
                   type="button"
                   onClick={onUpgrade}
-                  className="shrink-0 rounded-lg border border-border bg-background px-3 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                  className="shrink-0 rounded-full bg-background px-3 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent ring-1 ring-black/5 dark:ring-white/10"
                 >
                   {upgradeLabel}
                 </button>

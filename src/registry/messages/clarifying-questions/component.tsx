@@ -56,7 +56,7 @@ export function ClarifyingQuestions({
   }
 
   return (
-    <div className={cn("w-full rounded-2xl border bg-card", className)}>
+    <div className={cn("w-full rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10", className)}>
       <AnimatePresence mode="wait" initial={false}>
         {submitted ? (
           <motion.div
@@ -75,7 +75,7 @@ export function ClarifyingQuestions({
                 <p className="text-sm font-medium">Got it — starting with these details</p>
                 <ul className="mt-1.5 flex flex-wrap gap-1.5">
                   {questions.map((q) => (
-                    <li key={q.id} className="rounded-full border bg-muted/50 px-2 py-0.5 text-xs">
+                    <li key={q.id} className="rounded-full px-2 py-0.5 text-xs bg-muted">
                       <span className="text-muted-foreground">{q.label}: </span>
                       {resolved(q)}
                     </li>
@@ -128,10 +128,10 @@ export function ClarifyingQuestions({
                         />
                         <span
                           className={cn(
-                            "inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring",
+                            "inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring bg-muted",
                             checked
                               ? "border-foreground bg-foreground text-background"
-                              : "bg-background text-foreground hover:bg-accent"
+                              : "text-foreground hover:bg-foreground/10"
                           )}
                         >
                           {option === OTHER ? "Other…" : option}
@@ -156,7 +156,7 @@ export function ClarifyingQuestions({
                       onChange={(e) => setOther((o) => ({ ...o, [q.id]: e.target.value }))}
                       aria-label={`${q.label}, other`}
                       placeholder="Type your answer"
-                      className="w-full rounded-lg border bg-background px-3 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="w-full rounded-xl px-3 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring bg-muted focus:bg-background"
                     />
                   )}
                 </AnimatePresence>
