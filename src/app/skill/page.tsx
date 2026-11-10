@@ -10,7 +10,7 @@ import pluginJson from "../../../plugins/ai-patterns/.claude-plugin/plugin.json"
 import { INSTALL_COMMAND, SKILL_MODES, SKILL_PILLARS, SKILL_STATS_BODY, SKILL_STEPS, SKILL_TAGLINE, SkillPitch } from "./content";
 import { SkillCta } from "./skill-cta";
 import { Showcase, ShowcaseLogo } from "@/components/showcase";
-import { getShowcaseTiles } from "../showcase-tiles";
+import { getShowcaseTiles } from "./showcase-tiles";
 import { SkillExamples } from "./skill-examples";
 
 export const metadata: Metadata = {
@@ -25,8 +25,8 @@ export default function SkillPage() {
 
   return (
     <>
-      <Showcase tiles={getShowcaseTiles()} background moving>
-        <ShowcaseLogo className="size-16 rounded-[20px] border-0 bg-muted" />
+      <Showcase tiles={getShowcaseTiles()}>
+        <ShowcaseLogo />
         <p className="mt-6 text-sm font-medium text-muted-foreground">Claude Code skill · v{pluginJson.version}</p>
         <h1 className="mt-2 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
           {registry.length} patterns, in your agent

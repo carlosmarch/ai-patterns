@@ -1,7 +1,7 @@
 import type { ShowcaseTile } from "@/components/showcase";
 import { registry } from "@/registry";
 
-// The live demos glimpsed in the showcase blocks (home and /skill). Two per
+// The live demos drifting behind the /skill header. Two per
 // column, column by column; the first of each pair is the top row, which stays
 // clear of the fade.
 const SHOWCASE = [
