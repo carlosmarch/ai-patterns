@@ -247,7 +247,7 @@ function GalleryCard({ item, height, onOpen }: { item: GalleryItem; height: numb
         </div>
 
         {item.isNew && (
-          <span className="pointer-events-none absolute top-4 left-4 rounded-full bg-background">
+          <span className="pointer-events-none absolute top-4 left-4 flex rounded-full bg-background">
             <NewBadge />
           </span>
         )}
