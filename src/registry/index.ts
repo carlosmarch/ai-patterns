@@ -259,6 +259,9 @@ import { pattern as rejectedPromptRestorePattern } from "./errors/rejected-promp
 import AutonomyModeDemo from "./composer/autonomy-mode/demo";
 import AutonomyModeThumbnail from "./composer/autonomy-mode/thumbnail";
 import { pattern as autonomyModePattern } from "./composer/autonomy-mode/pattern";
+import BorderBeamDemo from "./effects/border-beam/demo";
+import BorderBeamThumbnail from "./effects/border-beam/thumbnail";
+import { pattern as borderBeamPattern } from "./effects/border-beam/pattern";
 
 export interface RegistryEntry {
   slug: string;
@@ -1554,6 +1557,19 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "claude", source: "https://code.claude.com/docs/en/claude-code-on-the-web" },
     ],
+  },
+  {
+    slug: "border-beam",
+    category: "effects",
+    added: "2026-11-10T20:47Z",
+    job: "ask",
+    title: "Border Beam",
+    description:
+      "A soft multicolor glow that rides the border of an AI composer or search field, lapping faster and brighter while the AI works.",
+    Demo: BorderBeamDemo,
+    Thumbnail: BorderBeamThumbnail,
+    uxDoc: borderBeamPattern,
+    seenIn: [],
   },
 ];
 
