@@ -1,12 +1,23 @@
 "use client";
 
 import * as React from "react";
-import { ArrowUp, AtSign, ChevronDown, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
+import { PromptBarPro, type PromptBarItem } from "../../composer/prompt-bar-pro/component";
 import { BorderBeam } from "./component";
 
+const sources: PromptBarItem[] = [
+  { id: "figma", label: "Figma" },
+  { id: "registry", label: "Registry" },
+  { id: "docs", label: "Docs" },
+];
+
+const commands: PromptBarItem[] = [
+  { id: "build", label: "/build", description: "Build a pattern from a spec" },
+  { id: "review", label: "/review", description: "Review a component's motion" },
+];
+
 export default function BorderBeamDemo() {
-  const [value, setValue] = React.useState("");
   const [working, setWorking] = React.useState(false);
 
   React.useEffect(() => {
@@ -15,52 +26,18 @@ export default function BorderBeamDemo() {
     return () => clearTimeout(t);
   }, [working]);
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!value.trim() || working) return;
-    setValue("");
-    setWorking(true);
-  };
-
   return (
-    <div className="flex w-full max-w-md flex-col items-center gap-6">
-      <BorderBeam active={working} radius={18} className="w-full">
-        <form onSubmit={submit} className="flex flex-col gap-3 rounded-[18px] border bg-card p-3">
-          <button
-            type="button"
-            aria-label="Mention a pattern"
-            className="flex size-7 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground"
-          >
-            <AtSign className="size-4" />
-          </button>
-          <input
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder={working ? "Building the Thinking Loader…" : "Build anything…"}
-            aria-label="Prompt"
-            disabled={working}
-            className="bg-transparent px-1 text-sm outline-none placeholder:text-muted-foreground"
-          />
-          <div className="flex items-center gap-2">
-            {["Agent", "Auto"].map((label) => (
-              <span
-                key={label}
-                className="inline-flex items-center gap-1 rounded-full border bg-muted/50 px-2.5 py-1 text-xs text-muted-foreground"
-              >
-                {label}
-                <ChevronDown className="size-3" />
-              </span>
-            ))}
-            <button
-              type="submit"
-              aria-label="Send"
-              disabled={!value.trim() || working}
-              className="ml-auto flex size-8 items-center justify-center rounded-full border bg-muted text-muted-foreground enabled:hover:text-foreground disabled:opacity-50"
-            >
-              <ArrowUp className="size-4" />
-            </button>
-          </div>
-        </form>
+    <div className="flex w-full max-w-lg flex-col items-center gap-6">
+      <BorderBeam active={working} radius={16} className="w-full">
+        <PromptBarPro
+          suggestions={[]}
+          sources={sources}
+          commands={commands}
+          placeholder="Build anything…"
+          generating={working}
+          onSubmit={() => setWorking(true)}
+          onStop={() => setWorking(false)}
+        />
       </BorderBeam>
 
       <BorderBeam radius={999} duration={10} className="w-4/5 self-end">

@@ -5,8 +5,7 @@ export default function BorderBeamThumbnail() {
     <Frame>
       {/* Composer */}
       <Box x={30} y={22} w={140} h={52} r={10} />
-      <Dot cx={42} cy={33} r={4} className={tone.faint} />
-      <Line x={38} y={45} w={60} />
+      <Line x={38} y={36} w={60} />
       <Button x={38} y={58} w={22} h={9} outline />
       <Button x={64} y={58} w={22} h={9} outline />
       <Dot cx={159} cy={62} r={5} className={tone.faint} />
