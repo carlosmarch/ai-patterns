@@ -7,7 +7,7 @@ export function NewBadge({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border border-blue-500/25 bg-blue-500/10 px-1.5 py-0.5 text-[10px] leading-none font-medium text-blue-600 dark:text-blue-400",
+        "inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-1.5 py-0.5 text-[10px] leading-none font-medium text-blue-600 dark:text-blue-400",
         className,
       )}
     >
