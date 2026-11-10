@@ -1210,7 +1210,7 @@ export const registry: RegistryEntry[] = [
     added: "2026-09-12T21:05Z",
     job: "ask",
     title: "Listening State",
-    description: "A pulsing mic indicator showing the AI is actively listening.",
+    description: "A pulsing, clickable mic with an elapsed timer showing the AI is actively listening.",
     Demo: ListeningStateDemo,
     Thumbnail: ListeningStateThumbnail,
     uxDoc: listeningStatePattern,
