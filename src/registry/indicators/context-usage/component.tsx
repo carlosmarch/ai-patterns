@@ -10,7 +10,7 @@ export interface ContextSegment {
   id: string;
   label: string;
   tokens: number;
-  /** Tailwind background class for the segment and its legend dot. */
+  /** Tailwind background class for the segment and its row swatch. */
   color: string;
 }
 
@@ -19,10 +19,14 @@ export interface ContextUsageProps {
   segments: ContextSegment[];
   /** Size of the context window, in tokens. */
   limit: number;
-  /** Share of the window (0–1) at which the meter warns that it's nearly full. */
+  /** Tokens held back so the product can auto-compact before the window overflows. */
+  reserved?: number;
+  /** Share of the usable window (limit − reserved, 0–1) at which the meter warns. */
   warnAt?: number;
   title?: string;
   compactLabel?: string;
+  reservedLabel?: string;
+  freeLabel?: string;
   /** Summarise older content to free space. Return a promise to show a pending state. */
   onCompact?: () => void | Promise<void>;
   className?: string;
@@ -38,14 +42,21 @@ function trim(v: number) {
   return v.toFixed(1).replace(/\.0$/, "");
 }
 
+function formatShare(tokens: number, limit: number) {
+  return `${((tokens / Math.max(limit, 1)) * 100).toFixed(1)}%`;
+}
+
 const spring = { type: "spring", stiffness: 200, damping: 28 } as const;
 
 export function ContextUsage({
   segments,
   limit,
+  reserved = 0,
   warnAt = 0.9,
   title = "Context",
   compactLabel = "Compact",
+  reservedLabel = "Autocompact buffer",
+  freeLabel = "Free space",
   onCompact,
   className,
 }: ContextUsageProps) {
@@ -55,9 +66,9 @@ export function ContextUsage({
   const [compacting, setCompacting] = React.useState(false);
 
   const used = segments.reduce((sum, s) => sum + s.tokens, 0);
-  const share = Math.min(1, used / Math.max(limit, 1));
-  const free = Math.max(0, limit - used);
-  const warn = share >= warnAt;
+  const usable = Math.max(1, limit - reserved);
+  const free = Math.max(0, usable - used);
+  const warn = used / usable >= warnAt;
   const focused = segments.find((s) => s.id === active);
   const transition = reduceMotion ? { duration: 0 } : spring;
 
@@ -92,17 +103,24 @@ export function ContextUsage({
       </div>
 
       <div id={`${id}-status`} aria-live="polite" className="flex flex-col gap-1">
-        <p className="flex flex-wrap items-baseline gap-x-2">
-          <span className="text-4xl font-medium tracking-tight tabular-nums">
-            <AnimatedTokens value={focused ? focused.tokens : used} instant={reduceMotion} />
+        <p className="flex flex-wrap items-baseline justify-between gap-x-3">
+          <span className="flex items-baseline gap-2">
+            <span className="text-4xl font-medium tracking-tight tabular-nums">
+              <AnimatedTokens value={focused ? focused.tokens : used} instant={reduceMotion} />
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {focused ? focused.label.toLowerCase() : `of ${formatTokens(limit)}`}
+            </span>
           </span>
-          <span className="text-sm text-muted-foreground">
-            {focused ? `${focused.label.toLowerCase()} · ${Math.round((focused.tokens / limit) * 100)}%` : `of ${formatTokens(limit)}`}
+          <span className="text-sm text-muted-foreground tabular-nums">
+            {Math.round(((focused ? focused.tokens : used) / Math.max(limit, 1)) * 100)}% used
           </span>
         </p>
         {warn && !focused && (
           <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
-            {formatTokens(free)} left — compact to keep earlier details from being dropped.
+            {free > 0
+              ? `${formatTokens(free)} left before auto-compact — compact now to choose what's kept.`
+              : "Auto-compacting on the next message."}
           </p>
         )}
       </div>
@@ -114,7 +132,7 @@ export function ContextUsage({
         aria-valuemax={limit}
         aria-valuenow={Math.min(used, limit)}
         aria-valuetext={`${formatTokens(used)} of ${formatTokens(limit)} tokens used`}
-        className="flex h-11 w-full gap-1"
+        className="flex h-2.5 w-full gap-0.5"
         onMouseLeave={() => setActive(null)}
       >
         {segments.map((s) => (
@@ -122,23 +140,33 @@ export function ContextUsage({
             key={s.id}
             title={`${s.label}: ${formatTokens(s.tokens)}`}
             onMouseEnter={() => setActive(s.id)}
-            className={cn("h-full min-w-0 rounded-md transition-opacity", s.color, active && active !== s.id && "opacity-30")}
+            className={cn("h-full min-w-0 rounded-full transition-opacity", s.color, active && active !== s.id && "opacity-25")}
             initial={false}
             animate={{ flexGrow: s.tokens, flexBasis: 0 }}
-            style={{ flexShrink: 1, minWidth: s.tokens > 0 ? 4 : 0 }}
+            style={{ flexShrink: 1, minWidth: s.tokens > 0 ? 3 : 0 }}
             transition={transition}
           />
         ))}
         <motion.div
           aria-hidden
-          className="h-full rounded-md bg-muted"
+          className="h-full rounded-full bg-muted"
           initial={false}
           animate={{ flexGrow: free, flexBasis: 0 }}
           transition={transition}
         />
+        {reserved > 0 && (
+          <motion.div
+            aria-hidden
+            title={`${reservedLabel}: ${formatTokens(reserved)}`}
+            className={cn("h-full rounded-full bg-muted-foreground/35 transition-opacity", active && "opacity-25")}
+            initial={false}
+            animate={{ flexGrow: reserved, flexBasis: 0 }}
+            transition={transition}
+          />
+        )}
       </div>
 
-      <ul className="flex flex-wrap gap-2" aria-label="What's in context">
+      <ul className="-mx-2 flex flex-col text-sm" aria-label="What's in context">
         {segments.map((s) => (
           <li key={s.id}>
             <button
@@ -150,19 +178,39 @@ export function ContextUsage({
               onBlur={() => setActive(null)}
               onClick={() => setActive((a) => (a === s.id ? null : s.id))}
               className={cn(
-                "flex items-center gap-2 rounded-full bg-muted px-3 py-1.5 text-sm transition-colors outline-none",
-                "hover:bg-muted-foreground/15 focus-visible:ring-2 focus-visible:ring-ring",
-                active === s.id && "bg-muted-foreground/15"
+                "flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors outline-none",
+                "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+                active === s.id && "bg-muted"
               )}
             >
-              <span className={cn("size-2.5 rounded-[3px]", s.color)} aria-hidden />
-              {s.label}
-              <span className="sr-only">: {formatTokens(s.tokens)} tokens</span>
+              <Row swatch={s.color} label={s.label} tokens={s.tokens} limit={limit} />
             </button>
           </li>
         ))}
+        {reserved > 0 && (
+          <li className="flex items-center gap-2.5 px-2 py-1.5 text-muted-foreground">
+            <Row swatch="bg-muted-foreground/35" label={reservedLabel} tokens={reserved} limit={limit} />
+          </li>
+        )}
+        <li className="flex items-center gap-2.5 px-2 py-1.5 text-muted-foreground">
+          <Row swatch="bg-muted ring-1 ring-inset ring-border" label={freeLabel} tokens={free} limit={limit} />
+        </li>
       </ul>
     </div>
+  );
+}
+
+function Row({ swatch, label, tokens, limit }: { swatch: string; label: string; tokens: number; limit: number }) {
+  return (
+    <>
+      <span className={cn("size-2.5 shrink-0 rounded-[3px]", swatch)} aria-hidden />
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      <span className="tabular-nums">
+        {formatTokens(tokens)}
+        <span className="sr-only"> tokens,</span>
+      </span>
+      <span className="w-14 text-right text-muted-foreground tabular-nums">{formatShare(tokens, limit)}</span>
+    </>
   );
 }
 

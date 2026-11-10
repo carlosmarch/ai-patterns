@@ -5,7 +5,7 @@
 # Context Usage
 
 ## Summary
-A card that shows how full the model's context window is: a token count against the limit, a segmented bar of what's taking the space (chat, files, tools, system prompt, memory), a legend that picks out each part, and a Compact action that summarises older content to free room before the window runs out.
+A card that shows how full the model's context window is: a token count and percentage against the limit, a thin segmented bar of what's taking the space (chat, files, tools, system prompt, memory), a breakdown with each source's tokens and share, the buffer held back for auto-compaction, the free space left, and a Compact action that summarises older content to free room before the window runs out.
 
 ## When to use
 - Long-running chats, coding agents and research sessions where the context fills up and the model starts forgetting or the product starts truncating.
@@ -19,29 +19,31 @@ A card that shows how full the model's context window is: a token count against 
 
 ## Anatomy
 - Header: a title ("Context") and the Compact action.
-- Total: the tokens used in large type ("175.6K"), with the limit beside it ("of 200K").
-- Segmented bar: one block per source, sized by its share of the window, followed by a neutral block for free space. The whole bar is the window.
-- Legend: one chip per source with its colour swatch and name.
-- Low-space note: appears near the limit, saying how much is left and what compacting will do.
+- Total: the tokens used in large type ("140.6K"), with the limit beside it ("of 200K") and the share used on the right ("70% used").
+- Segmented bar: a thin bar with one block per source, sized by its share of the window, then a neutral block for free space and a darker grey block for the autocompact buffer. The whole bar is the window.
+- Breakdown: one row per source — colour swatch, name, tokens ("96.4K") and share of the window ("48.2%") — followed by muted, non-interactive rows for the autocompact buffer and free space, so the rows add up to the limit.
+- Low-space note: appears near the limit, saying how much is left before auto-compact and what compacting now changes.
 
 ## Behavior
 - Segments resize as content is added or removed, and the total animates to its new value.
-- Hovering or focusing a legend chip (or hovering a segment) dims the other segments and swaps the total for that source's tokens and share ("39.2K · files · 20%").
-- Past a threshold (90% by default) the low-space note appears and Compact becomes the primary action.
+- Hovering or focusing a breakdown row (or hovering a segment) dims the other segments and swaps the total for that source's tokens and share ("26.2K files · 13% used").
+- The autocompact buffer is reserved, not free: it's drawn apart from free space, and the product compacts on its own once the sources reach it.
+- Past a threshold (90% of the usable window — the limit minus the buffer — by default) the low-space note appears and Compact becomes the primary action.
 - Compact shows a pending state ("Compacting…"), then the bar shrinks as older turns are replaced by a summary and stale tool output is dropped. System prompt and memory are kept.
 - Always offer compaction before the product does it on its own; when it does auto-compact, say so in the note.
 
 ## Content guidelines
-- Format token counts compactly with one decimal ("175.6K", "1.2M"); never show raw counts like 175,612.
+- Format token counts compactly with one decimal ("140.6K", "1.2M"); never show raw counts like 140,612. Shares in the breakdown take one decimal ("5.3%") so small sources don't all read as 0% or 1%.
 - Name sources in the user's terms (Chat, Files, Tools), not internal ones (messages array, tool_results).
 - Keep the source list short — five or so. Fold rare sources into "Other".
-- The low-space note says what's at stake, not just a number: "24.4K left — compact to keep earlier details from being dropped."
+- Call reserved space what it is ("Autocompact buffer"), never fold it into free space.
+- The low-space note says what's at stake, not just a number: "13.4K left before auto-compact — compact now to choose what's kept."
 
 ## Accessibility
-- The bar is `role="meter"` with `aria-valuetext` ("175.6K of 200K tokens used").
-- Legend chips are buttons with `aria-pressed` and a visually hidden token count, so each source can be inspected from the keyboard.
+- The bar is `role="meter"` with `aria-valuetext` ("140.6K of 200K tokens used").
+- Source rows are buttons with `aria-pressed`, so each source can be inspected from the keyboard; the buffer and free-space rows are plain list items.
 - The total and low-space note are in an `aria-live="polite"` region that also describes the Compact button.
-- Colour is never the only cue: every segment has a labelled chip, and the warning is text.
+- Colour is never the only cue: every segment has a labelled row with its numbers, and the warning is text.
 - Animations are skipped when the user prefers reduced motion.
 
 ## Related patterns
@@ -72,7 +74,7 @@ export interface ContextSegment {
   id: string;
   label: string;
   tokens: number;
-  /** Tailwind background class for the segment and its legend dot. */
+  /** Tailwind background class for the segment and its row swatch. */
   color: string;
 }
 
@@ -81,10 +83,14 @@ export interface ContextUsageProps {
   segments: ContextSegment[];
   /** Size of the context window, in tokens. */
   limit: number;
-  /** Share of the window (0–1) at which the meter warns that it's nearly full. */
+  /** Tokens held back so the product can auto-compact before the window overflows. */
+  reserved?: number;
+  /** Share of the usable window (limit − reserved, 0–1) at which the meter warns. */
   warnAt?: number;
   title?: string;
   compactLabel?: string;
+  reservedLabel?: string;
+  freeLabel?: string;
   /** Summarise older content to free space. Return a promise to show a pending state. */
   onCompact?: () => void | Promise<void>;
   className?: string;
@@ -100,14 +106,21 @@ function trim(v: number) {
   return v.toFixed(1).replace(/\.0$/, "");
 }
 
+function formatShare(tokens: number, limit: number) {
+  return `${((tokens / Math.max(limit, 1)) * 100).toFixed(1)}%`;
+}
+
 const spring = { type: "spring", stiffness: 200, damping: 28 } as const;
 
 export function ContextUsage({
   segments,
   limit,
+  reserved = 0,
   warnAt = 0.9,
   title = "Context",
   compactLabel = "Compact",
+  reservedLabel = "Autocompact buffer",
+  freeLabel = "Free space",
   onCompact,
   className,
 }: ContextUsageProps) {
@@ -117,9 +130,9 @@ export function ContextUsage({
   const [compacting, setCompacting] = React.useState(false);
 
   const used = segments.reduce((sum, s) => sum + s.tokens, 0);
-  const share = Math.min(1, used / Math.max(limit, 1));
-  const free = Math.max(0, limit - used);
-  const warn = share >= warnAt;
+  const usable = Math.max(1, limit - reserved);
+  const free = Math.max(0, usable - used);
+  const warn = used / usable >= warnAt;
   const focused = segments.find((s) => s.id === active);
   const transition = reduceMotion ? { duration: 0 } : spring;
 
@@ -154,17 +167,24 @@ export function ContextUsage({
       </div>
 
       <div id={`${id}-status`} aria-live="polite" className="flex flex-col gap-1">
-        <p className="flex flex-wrap items-baseline gap-x-2">
-          <span className="text-4xl font-medium tracking-tight tabular-nums">
-            <AnimatedTokens value={focused ? focused.tokens : used} instant={reduceMotion} />
+        <p className="flex flex-wrap items-baseline justify-between gap-x-3">
+          <span className="flex items-baseline gap-2">
+            <span className="text-4xl font-medium tracking-tight tabular-nums">
+              <AnimatedTokens value={focused ? focused.tokens : used} instant={reduceMotion} />
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {focused ? focused.label.toLowerCase() : `of ${formatTokens(limit)}`}
+            </span>
           </span>
-          <span className="text-sm text-muted-foreground">
-            {focused ? `${focused.label.toLowerCase()} · ${Math.round((focused.tokens / limit) * 100)}%` : `of ${formatTokens(limit)}`}
+          <span className="text-sm text-muted-foreground tabular-nums">
+            {Math.round(((focused ? focused.tokens : used) / Math.max(limit, 1)) * 100)}% used
           </span>
         </p>
         {warn && !focused && (
           <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
-            {formatTokens(free)} left — compact to keep earlier details from being dropped.
+            {free > 0
+              ? `${formatTokens(free)} left before auto-compact — compact now to choose what's kept.`
+              : "Auto-compacting on the next message."}
           </p>
         )}
       </div>
@@ -176,7 +196,7 @@ export function ContextUsage({
         aria-valuemax={limit}
         aria-valuenow={Math.min(used, limit)}
         aria-valuetext={`${formatTokens(used)} of ${formatTokens(limit)} tokens used`}
-        className="flex h-11 w-full gap-1"
+        className="flex h-2.5 w-full gap-0.5"
         onMouseLeave={() => setActive(null)}
       >
         {segments.map((s) => (
@@ -184,23 +204,33 @@ export function ContextUsage({
             key={s.id}
             title={`${s.label}: ${formatTokens(s.tokens)}`}
             onMouseEnter={() => setActive(s.id)}
-            className={cn("h-full min-w-0 rounded-md transition-opacity", s.color, active && active !== s.id && "opacity-30")}
+            className={cn("h-full min-w-0 rounded-full transition-opacity", s.color, active && active !== s.id && "opacity-25")}
             initial={false}
             animate={{ flexGrow: s.tokens, flexBasis: 0 }}
-            style={{ flexShrink: 1, minWidth: s.tokens > 0 ? 4 : 0 }}
+            style={{ flexShrink: 1, minWidth: s.tokens > 0 ? 3 : 0 }}
             transition={transition}
           />
         ))}
         <motion.div
           aria-hidden
-          className="h-full rounded-md bg-muted"
+          className="h-full rounded-full bg-muted"
           initial={false}
           animate={{ flexGrow: free, flexBasis: 0 }}
           transition={transition}
         />
+        {reserved > 0 && (
+          <motion.div
+            aria-hidden
+            title={`${reservedLabel}: ${formatTokens(reserved)}`}
+            className={cn("h-full rounded-full bg-muted-foreground/35 transition-opacity", active && "opacity-25")}
+            initial={false}
+            animate={{ flexGrow: reserved, flexBasis: 0 }}
+            transition={transition}
+          />
+        )}
       </div>
 
-      <ul className="flex flex-wrap gap-2" aria-label="What's in context">
+      <ul className="-mx-2 flex flex-col text-sm" aria-label="What's in context">
         {segments.map((s) => (
           <li key={s.id}>
             <button
@@ -212,19 +242,39 @@ export function ContextUsage({
               onBlur={() => setActive(null)}
               onClick={() => setActive((a) => (a === s.id ? null : s.id))}
               className={cn(
-                "flex items-center gap-2 rounded-full bg-muted px-3 py-1.5 text-sm transition-colors outline-none",
-                "hover:bg-muted-foreground/15 focus-visible:ring-2 focus-visible:ring-ring",
-                active === s.id && "bg-muted-foreground/15"
+                "flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors outline-none",
+                "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+                active === s.id && "bg-muted"
               )}
             >
-              <span className={cn("size-2.5 rounded-[3px]", s.color)} aria-hidden />
-              {s.label}
-              <span className="sr-only">: {formatTokens(s.tokens)} tokens</span>
+              <Row swatch={s.color} label={s.label} tokens={s.tokens} limit={limit} />
             </button>
           </li>
         ))}
+        {reserved > 0 && (
+          <li className="flex items-center gap-2.5 px-2 py-1.5 text-muted-foreground">
+            <Row swatch="bg-muted-foreground/35" label={reservedLabel} tokens={reserved} limit={limit} />
+          </li>
+        )}
+        <li className="flex items-center gap-2.5 px-2 py-1.5 text-muted-foreground">
+          <Row swatch="bg-muted ring-1 ring-inset ring-border" label={freeLabel} tokens={free} limit={limit} />
+        </li>
       </ul>
     </div>
+  );
+}
+
+function Row({ swatch, label, tokens, limit }: { swatch: string; label: string; tokens: number; limit: number }) {
+  return (
+    <>
+      <span className={cn("size-2.5 shrink-0 rounded-[3px]", swatch)} aria-hidden />
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      <span className="tabular-nums">
+        {formatTokens(tokens)}
+        <span className="sr-only"> tokens,</span>
+      </span>
+      <span className="w-14 text-right text-muted-foreground tabular-nums">{formatShare(tokens, limit)}</span>
+    </>
   );
 }
 

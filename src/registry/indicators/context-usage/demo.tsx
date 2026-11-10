@@ -5,10 +5,11 @@ import * as React from "react";
 import { ContextUsage, type ContextSegment } from "./component";
 
 const LIMIT = 200_000;
+const RESERVED = 32_000;
 
 const INITIAL: ContextSegment[] = [
-  { id: "chat", label: "Chat", tokens: 118_400, color: "bg-cyan-500" },
-  { id: "files", label: "Files", tokens: 39_200, color: "bg-blue-500" },
+  { id: "chat", label: "Chat", tokens: 96_400, color: "bg-cyan-500" },
+  { id: "files", label: "Files", tokens: 26_200, color: "bg-blue-500" },
   { id: "tools", label: "Tools", tokens: 11_800, color: "bg-violet-500" },
   { id: "system", label: "System", tokens: 3_600, color: "bg-pink-500" },
   { id: "memory", label: "Memory", tokens: 2_600, color: "bg-emerald-500" },
@@ -20,7 +21,7 @@ export default function ContextUsageDemo() {
   function grow(id: string, by: number) {
     setSegments((all) => {
       const used = all.reduce((sum, s) => sum + s.tokens, 0);
-      const add = Math.min(by, LIMIT - used);
+      const add = Math.max(0, Math.min(by, LIMIT - RESERVED - used));
       return all.map((s) => (s.id === id ? { ...s, tokens: s.tokens + add } : s));
     });
   }
@@ -37,7 +38,7 @@ export default function ContextUsageDemo() {
 
   return (
     <div className="flex w-full max-w-sm flex-col gap-4">
-      <ContextUsage segments={segments} limit={LIMIT} onCompact={compact} />
+      <ContextUsage segments={segments} limit={LIMIT} reserved={RESERVED} onCompact={compact} />
       <div className="flex flex-wrap justify-center gap-2 text-xs">
         <button
           type="button"

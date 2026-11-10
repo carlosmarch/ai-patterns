@@ -728,17 +728,17 @@ function useTermScript(step = 650, hold = 2600) {
 function TermRow({ line }: { line: TermLine }) {
   if (line.kind === "prompt")
     return (
-      <p className="text-neutral-100">
-        <span className="text-neutral-500">&gt; </span>
+      <p className="text-slate-100">
+        <span className="text-slate-500">&gt; </span>
         {line.text}
       </p>
     );
   const dot =
     line.kind === "done" ? "text-emerald-400" : line.kind === "write" ? "text-sky-400" : "text-[#d97757]";
   return (
-    <p className={cn(line.kind === "note" ? "pl-4 text-neutral-500" : "text-neutral-300")}>
+    <p className={cn(line.kind === "note" ? "pl-4 text-slate-500" : "text-slate-300")}>
       {line.kind !== "note" && <span className={dot}>● </span>}
-      {line.kind === "note" && <span className="text-neutral-600">⎿ </span>}
+      {line.kind === "note" && <span className="text-slate-600">⎿ </span>}
       {line.text}
     </p>
   );
@@ -751,22 +751,22 @@ function Terminal({ className, compact }: { className?: string; compact?: boolea
     <div
       aria-hidden
       className={cn(
-        "overflow-hidden rounded-xl bg-neutral-950 shadow-xl",
+        "overflow-hidden rounded-xl bg-slate-950 shadow-xl",
         className
       )}
     >
       <div className="flex items-center gap-1.5 px-3 py-2">
         {[0, 1, 2].map((i) => (
-          <span key={i} className="size-2 rounded-full bg-neutral-700" />
+          <span key={i} className="size-2 rounded-full bg-slate-700" />
         ))}
-        <span className="ml-2 font-mono text-[10px] text-neutral-500">claude — my-app</span>
+        <span className="ml-2 font-mono text-[10px] text-slate-500">claude — my-app</span>
         <span className="ml-auto flex gap-1 font-mono text-[10px]">
           {SCRIPTS.map((s, i) => (
             <span
               key={s.mode}
               className={cn(
                 "rounded px-1.5 py-0.5 transition-colors duration-300",
-                i === script ? "bg-neutral-800 text-neutral-100" : "text-neutral-600"
+                i === script ? "bg-slate-800 text-slate-100" : "text-slate-600"
               )}
             >
               {s.mode}
@@ -791,7 +791,7 @@ function Terminal({ className, compact }: { className?: string; compact?: boolea
           </motion.div>
         ))}
         {count < lines.length && (
-          <span className="inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-neutral-400" />
+          <span className="inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-slate-400" />
         )}
       </div>
     </div>

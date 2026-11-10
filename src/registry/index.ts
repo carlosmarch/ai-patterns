@@ -1168,7 +1168,7 @@ export const registry: RegistryEntry[] = [
     job: "oversee",
     title: "Context Usage",
     description:
-      "A context-window meter: tokens used against the limit, a segmented bar of what fills it, a legend to inspect each source and a Compact action to free space.",
+      "A context-window meter: tokens and share used against the limit, a segmented bar of what fills it, a per-source breakdown with tokens and percentages, the autocompact buffer and free space, and a Compact action.",
     Demo: ContextUsageDemo,
     Thumbnail: ContextUsageThumbnail,
     uxDoc: contextUsagePattern,
