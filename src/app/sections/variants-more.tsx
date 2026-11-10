@@ -200,7 +200,7 @@ function PlainBox({ children, className }: { children: ReactNode; className?: st
   return (
     <div
       className={cn(
-        "w-full max-w-[360px] rounded-md border border-neutral-300 bg-white p-4 font-sans text-neutral-800 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200",
+        "w-full max-w-[360px] rounded-md border border-slate-300 bg-white p-4 font-sans text-slate-800 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200",
         className
       )}
     >
@@ -213,8 +213,8 @@ function PlainButton({ children, primary }: { children: ReactNode; primary?: boo
   return (
     <span
       className={cn(
-        "rounded border border-neutral-300 px-3 py-1 text-xs dark:border-neutral-700",
-        primary && "bg-neutral-100 dark:bg-neutral-800"
+        "rounded border border-slate-300 px-3 py-1 text-xs dark:border-slate-700",
+        primary && "bg-slate-100 dark:bg-slate-800"
       )}
     >
       {children}
@@ -254,7 +254,7 @@ function FailureBefore() {
 function WorkingBefore() {
   return (
     <PlainBox className="flex flex-col items-center gap-3 py-8">
-      <span className="size-6 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-700 dark:border-neutral-700 dark:border-t-neutral-300" />
+      <span className="size-6 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700 dark:border-slate-700 dark:border-t-slate-300" />
       <span className="text-xs">Loading...</span>
     </PlainBox>
   );
@@ -264,7 +264,7 @@ function LimitBefore() {
   return (
     <PlainBox>
       <p className="font-mono text-xs">429 Too Many Requests</p>
-      <p className="mt-1 font-mono text-[10px] break-all text-neutral-500">
+      <p className="mt-1 font-mono text-[10px] break-all text-slate-500">
         {"{\"error\":{\"type\":\"rate_limit_error\",\"message\":\"Rate limited\"}}"}
       </p>
       <div className="mt-4 flex justify-end">

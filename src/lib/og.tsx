@@ -14,11 +14,11 @@ export const OG_SIZE = { width: 1200, height: 630 };
 // The light theme from globals.css, as sRGB hex (Satori can't read CSS vars or oklch).
 const theme = {
   background: "#ffffff",
-  foreground: "#141210",
+  foreground: "#020618",
   card: "#ffffff",
-  muted: "#f2f1ef",
-  "muted-foreground": "#706c68",
-  border: "#e4e2df",
+  muted: "#f1f5f9",
+  "muted-foreground": "#62748e",
+  border: "#e2e8f0",
 } as const;
 
 type ThemeColor = keyof typeof theme;
