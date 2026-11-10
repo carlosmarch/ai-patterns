@@ -130,6 +130,12 @@ export function GalleryGrid({
 
   function open(item: GalleryItem) {
     saveReturnState({ filter: active, y: window.scrollY });
+    // On phones the full-screen expanded view is too cramped: open the
+    // pattern page itself, and let back return to the gallery.
+    if (!window.matchMedia(SM).matches) {
+      router.push(item.href);
+      return;
+    }
     markOpeningFromGallery(galleryHref(active));
     router.push(expandedHref(item));
   }
