@@ -75,7 +75,7 @@ export function CatalogHeader({
                 </button>
               </TooltipTrigger>
               <TooltipContent
-                side="bottom"
+                side="top"
                 align="start"
                 sideOffset={8}
                 className="max-w-72 rounded-xl bg-popover px-3.5 py-3 text-left text-sm text-pretty text-popover-foreground ring-1 ring-black/5 dark:ring-white/10"

@@ -46,16 +46,19 @@ export function PatternsSidebar({
   const tabStop = activeIndex === -1 ? hrefs[0] : pathname;
 
   // Keep the current pattern visible inside the sidebar's own scroll area.
-  // On first load it is centred; after that the list only moves as far as
-  // needed. Scrolls the nav alone — never the window, which
+  // Loaded straight onto a pattern, it is centred; after that the list only
+  // moves as far as needed — including the first pattern opened from
+  // /patterns, which shares this sidebar (patterns/layout.tsx), so it stays
+  // where the reader left it. Scrolls the nav alone — never the window, which
   // <ScrollRestoration> owns.
   const hasPositioned = React.useRef(false);
   React.useEffect(() => {
     const nav = navRef.current;
     const link = nav?.querySelector<HTMLElement>('a[aria-current="page"]');
-    if (!nav || !link) return;
-    revealInNav(nav, link, hasPositioned.current ? "nearest" : "center");
+    const mode = hasPositioned.current ? "nearest" : "center";
     hasPositioned.current = true;
+    if (!nav || !link) return;
+    revealInNav(nav, link, mode);
   }, [pathname]);
 
   function onKeyDown(e: React.KeyboardEvent<HTMLElement>) {

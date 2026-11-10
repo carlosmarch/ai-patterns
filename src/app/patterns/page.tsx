@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { SITE_SHARE_IMAGE } from "@/lib/share";
-import { getEntriesByJob, getSidebarGroups, newEntries, registry, type RegistryEntry } from "@/registry";
+import { getEntriesByJob, newEntries, registry, type RegistryEntry } from "@/registry";
 import { JOBS } from "@/registry/jobs";
 import { JobFilter } from "@/components/job-filter";
 import { PatternCard } from "@/components/pattern-card";
-import { PatternsSidebar } from "@/components/patterns-sidebar";
 
 export const metadata: Metadata = {
   title: "Patterns — AI Patterns",
@@ -61,15 +60,13 @@ export default function PatternsIndexPage() {
   );
 
   return (
-    // Same container as /gallery, so the shared header doesn't move when switching views.
+    // The patterns sidebar is beside this, from patterns/layout.tsx.
     <main className="mx-auto w-full max-w-[1480px] flex-1 px-4 pt-16 pb-24 sm:px-5">
       <JobFilter
         jobs={jobs}
         total={registry.length}
         newCount={newEntries.length}
         views={views}
-        // Sticks a little below the site header; the first group lines up with the first card row.
-        sidebar={<PatternsSidebar groups={getSidebarGroups()} className="top-20 h-[calc(100dvh-5rem)] pt-0 pb-10" />}
       />
     </main>
   );
