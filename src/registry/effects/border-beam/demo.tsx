@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search } from "lucide-react";
-
+import { PromptBar } from "../../composer/prompt-bar/component";
 import { PromptBarPro, type PromptBarItem } from "../../composer/prompt-bar-pro/component";
 import { BorderBeam } from "./component";
 
@@ -40,15 +39,8 @@ export default function BorderBeamDemo() {
         />
       </BorderBeam>
 
-      <BorderBeam radius={999} duration={10} className="w-4/5 self-end">
-        <label className="flex items-center gap-2 rounded-full border bg-card px-4 py-2.5 text-sm text-muted-foreground">
-          <Search className="size-4 shrink-0" />
-          <input
-            placeholder="Search patterns, e.g. Cost Estimate"
-            aria-label="Search patterns"
-            className="w-full bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
-          />
-        </label>
+      <BorderBeam radius={24} duration={10} className="w-4/5 self-end">
+        <PromptBar variant="pill" sources={sources} commands={commands} placeholder="Ask about a pattern…" />
       </BorderBeam>
 
       <p className="text-center text-xs text-muted-foreground">
