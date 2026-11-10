@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { SITE_SHARE_IMAGE } from "@/lib/share";
-import { getEntriesByJob, newEntries, registry, type RegistryEntry } from "@/registry";
+import { getEntriesByJob, getSidebarGroups, newEntries, registry, type RegistryEntry } from "@/registry";
 import { JOBS } from "@/registry/jobs";
 import { JobFilter } from "@/components/job-filter";
 import { PatternCard } from "@/components/pattern-card";
-import { PatternsViewSwitch } from "@/components/patterns-view-switch";
+import { PatternsSidebar } from "@/components/patterns-sidebar";
 
 export const metadata: Metadata = {
   title: "Patterns — AI Patterns",
@@ -31,7 +31,7 @@ function PatternGroups({ entries }: { entries: RegistryEntry[] }) {
               {group.length} {group.length === 1 ? "pattern" : "patterns"}
             </span>
           </div>
-          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 2xl:grid-cols-4">
             {group.map((entry) => (
               <li key={entry.slug}>
                 <PatternCard entry={entry} />
@@ -51,7 +51,7 @@ export default function PatternsIndexPage() {
   // `NEW_ID` in job-filter.tsx — a literal here, since values exported from a
   // client module aren't readable in a server component.
   views.new = (
-    <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+    <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 2xl:grid-cols-4">
       {newEntries.map((entry) => (
         <li key={`${entry.category}/${entry.slug}`}>
           <PatternCard entry={entry} />
@@ -61,16 +61,16 @@ export default function PatternsIndexPage() {
   );
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-16">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-3xl font-semibold tracking-tight">Patterns</h1>
-        <PatternsViewSwitch current="details" size="sm" />
-      </div>
-      <p className="mt-2 text-muted-foreground">
-        Copy-paste animated UI patterns for AI products, organized by category.
-      </p>
-
-      <JobFilter jobs={jobs} total={registry.length} newCount={newEntries.length} views={views} />
+    // Same container as /gallery, so the shared header doesn't move when switching views.
+    <main className="mx-auto w-full max-w-[1480px] flex-1 px-4 pt-16 pb-24 sm:px-5">
+      <JobFilter
+        jobs={jobs}
+        total={registry.length}
+        newCount={newEntries.length}
+        views={views}
+        // Sticks a little below the site header; the first group lines up with the first card row.
+        sidebar={<PatternsSidebar groups={getSidebarGroups()} className="top-20 h-[calc(100dvh-5rem)] pt-0 pb-10" />}
+      />
     </main>
   );
 }

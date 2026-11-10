@@ -25,17 +25,11 @@ export default function GalleryPage() {
     isNew: isNewEntry(entry),
     demo: <entry.Demo />,
   }));
-  const filters = JOBS.map((job) => ({ id: job.id, label: job.label }));
+  const filters = JOBS.map(({ id, label, question, description }) => ({ id, label, question, description }));
 
   return (
     <main className="mx-auto w-full max-w-[1480px] flex-1 px-4 pt-16 pb-24 sm:px-5">
-      <div className="mx-auto max-w-xl text-center">
-        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">AI Patterns</h1>
-        <p className="mt-4 text-muted-foreground">
-          {registry.length} interactive patterns for AI products. Play with any of them, then open it for the code and the
-          guardrails.
-        </p>
-      </div>
+      {/* Title, filters and the view switch come from the shared CatalogHeader, inside the grid. */}
       <GalleryGrid items={items} filters={filters} />
     </main>
   );

@@ -2,22 +2,24 @@
 
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
+import { CatalogHeader, NEW_FILTER } from "@/components/catalog-header";
 
 /** The non-job view of the most recently added patterns (`?job=new`). */
-export const NEW_ID = "new";
+export const NEW_ID = NEW_FILTER;
 
 export type JobFilterOption = { id: string; label: string; question: string; description: string; count: number };
 
-// The pill row on /patterns that switches between the full catalogue and
-// one job's patterns. Every view is rendered on the server and passed in,
-// so this only picks one; the choice lives in ?job= so it can be linked
-// (the site is a static export, so the param is read on the client).
+// The Details view of the catalogue (/patterns): the shared catalogue header,
+// then the patterns sidebar beside the cards. Every filtered view is rendered
+// on the server and passed in, so this only picks one; the choice lives in
+// ?job= so it can be linked and carried to the Gallery view (the site is a
+// static export, so the param is read on the client).
 export function JobFilter({
   jobs,
   total,
   newCount,
   views,
+  sidebar,
 }: {
   jobs: JobFilterOption[];
   total: number;
@@ -25,6 +27,8 @@ export function JobFilter({
   newCount: number;
   /** One rendered view per job id, plus "all" and "new". */
   views: Record<string, React.ReactNode>;
+  /** The patterns sidebar, shown left of the cards. */
+  sidebar?: React.ReactNode;
 }) {
   const [job, setJob] = React.useState("all");
 
@@ -43,78 +47,20 @@ export function JobFilter({
     window.history.replaceState(null, "", url);
   }
 
-  const current = jobs.find((j) => j.id === job);
-
   return (
-    <div className="mt-8">
-      <div role="group" aria-label="Filter patterns" className="-mx-1 flex flex-wrap gap-1.5 px-1">
-        <Pill active={job === "all"} onClick={() => choose("all")} label="All" count={total} />
-        {newCount > 0 && (
-          <Pill
-            active={job === NEW_ID}
-            onClick={() => choose(NEW_ID)}
-            label={
-              <>
-                <span aria-hidden className="size-1.5 rounded-full bg-blue-500" />
-                New
-              </>
-            }
-            count={newCount}
-            title="The most recently added patterns"
-          />
-        )}
-        {jobs.map((j) => (
-          <Pill key={j.id} active={job === j.id} onClick={() => choose(j.id)} label={j.label} count={j.count} title={j.question} />
-        ))}
+    <>
+      <CatalogHeader
+        view="details"
+        total={total}
+        newCount={newCount}
+        filters={jobs}
+        active={job}
+        onChoose={choose}
+      />
+      <div className="flex gap-10">
+        {sidebar}
+        <div className="min-w-0 flex-1">{views[job] ?? views.all}</div>
       </div>
-
-      <p aria-live="polite" className="mt-3 min-h-5 text-sm text-pretty text-muted-foreground">
-        {job === NEW_ID ? (
-          `The ${newCount} latest patterns added to the catalogue, newest first.`
-        ) : current ? (
-          <>
-            <span className="font-medium text-foreground">“{/[?.!]$/.test(current.question) ? current.question : `${current.question}.`}”</span> {current.description}
-          </>
-        ) : (
-          "Filter by the job a pattern does for the user, across categories."
-        )}
-      </p>
-
-      <div className="mt-8">{views[job] ?? views.all}</div>
-    </div>
-  );
-}
-
-function Pill({
-  active,
-  onClick,
-  label,
-  count,
-  title,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: React.ReactNode;
-  count: number;
-  title?: string;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      title={title}
-      onClick={onClick}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-        active
-          ? "border-foreground bg-foreground text-background"
-          : "bg-background text-muted-foreground hover:bg-accent hover:text-foreground"
-      )}
-    >
-      {label}
-      <span className={cn("font-mono text-[10px] tabular-nums", active ? "text-background/70" : "text-muted-foreground/70")}>
-        {count}
-      </span>
-    </button>
+    </>
   );
 }

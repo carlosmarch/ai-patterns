@@ -24,8 +24,11 @@ export interface PatternsSidebarGroup {
  */
 export function PatternsSidebar({
   groups,
+  className,
 }: {
   groups: PatternsSidebarGroup[];
+  /** Overrides for the nav, e.g. its sticky offset and padding on /patterns. */
+  className?: string;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -97,7 +100,10 @@ export function PatternsSidebar({
       aria-label="All patterns"
       aria-keyshortcuts="ArrowUp ArrowDown"
       onKeyDown={onKeyDown}
-      className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-56 shrink-0 self-start overflow-y-auto overscroll-contain py-16 pr-4 [scrollbar-width:thin] lg:block"
+      className={cn(
+        "sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-56 shrink-0 self-start overflow-y-auto overscroll-contain py-16 pr-4 [scrollbar-width:thin] lg:block",
+        className,
+      )}
     >
       <div className="space-y-6">
         {groups.map(({ category, items }) => (

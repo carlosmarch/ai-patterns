@@ -7,8 +7,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import { NewBadge } from "@/components/new-badge";
 import { markOpeningFromGallery, patternTransitionName } from "@/components/pattern-expand";
-import { PatternsViewSwitch } from "@/components/patterns-view-switch";
-import { cn } from "@/lib/utils";
+import { CatalogHeader, type CatalogFilter } from "@/components/catalog-header";
 
 export interface GalleryItem {
   id: string;
@@ -56,7 +55,7 @@ function galleryHref(filter: string) {
   return filter === ALL ? "/gallery" : `/gallery?job=${encodeURIComponent(filter)}`;
 }
 
-export function GalleryGrid({ items, filters }: { items: GalleryItem[]; filters: { id: string; label: string }[] }) {
+export function GalleryGrid({ items, filters }: { items: GalleryItem[]; filters: CatalogFilter[] }) {
   const router = useRouter();
   // Read, not taken, in the initializer: Strict Mode runs initializers twice.
   const [restore] = useState(() => returnState);
@@ -93,31 +92,17 @@ export function GalleryGrid({ items, filters }: { items: GalleryItem[]; filters:
   const visible = items.filter((item) =>
     active === ALL ? true : active === NEW ? item.isNew : item.job === active,
   );
-  const pills = [{ id: ALL, label: "All" }, { id: NEW, label: "New" }, ...filters];
 
   return (
     <>
-      <div className="mt-14 mb-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-        <div role="toolbar" aria-label="Filter patterns" className="flex flex-wrap gap-2">
-          {pills.map((pill) => (
-            <button
-              key={pill.id}
-              type="button"
-              aria-pressed={active === pill.id}
-              onClick={() => choose(pill.id)}
-              className={cn(
-                "h-9 rounded-full px-4 text-sm font-medium transition-colors",
-                active === pill.id
-                  ? "bg-foreground text-background"
-                  : "bg-muted text-foreground/80 hover:bg-muted-foreground/15 hover:text-foreground",
-              )}
-            >
-              {pill.label}
-            </button>
-          ))}
-        </div>
-        <PatternsViewSwitch current="gallery" />
-      </div>
+      <CatalogHeader
+        view="gallery"
+        total={items.length}
+        newCount={items.filter((item) => item.isNew).length}
+        filters={filters}
+        active={active}
+        onChoose={choose}
+      />
 
       <ul className="columns-1 gap-3 sm:columns-2 lg:columns-3">
         {visible.map((item, i) => (

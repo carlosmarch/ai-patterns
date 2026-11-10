@@ -1579,6 +1579,20 @@ export function getEntriesByJob(job: PatternJob) {
   return registry.filter((entry) => entry.job === job);
 }
 
+/** Every pattern grouped by category, in registry order — the patterns sidebar's contents. */
+export function getSidebarGroups(): { category: string; items: { slug: string; title: string; isNew: boolean }[] }[] {
+  const groups: { category: string; items: { slug: string; title: string; isNew: boolean }[] }[] = [];
+  for (const entry of registry) {
+    let group = groups.find((g) => g.category === entry.category);
+    if (!group) {
+      group = { category: entry.category, items: [] };
+      groups.push(group);
+    }
+    group.items.push({ slug: entry.slug, title: entry.title, isNew: isNewEntry(entry) });
+  }
+  return groups;
+}
+
 export function getCategories() {
   return Array.from(new Set(registry.map((entry) => entry.category)));
 }
