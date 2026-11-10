@@ -19,6 +19,17 @@ export interface VoiceOrbProps {
   level?: React.RefObject<number> | number;
   /** Number of particles on the sphere. */
   particles?: number;
+  /**
+   * Custom paint for the particles, e.g. a `CanvasGradient` for a metallic
+   * sheen. Called every frame with the canvas context and its CSS size, so it
+   * can move with the page. Defaults to the orb's `currentColor`.
+   */
+  fill?: (ctx: CanvasRenderingContext2D, width: number, height: number) => string | CanvasGradient | CanvasPattern;
+  /**
+   * Cap on the canvas's device-pixel ratio (default 2). Lower it for a very
+   * large orb, where every extra pixel is drawn every frame.
+   */
+  maxPixelRatio?: number;
   className?: string;
 }
 
@@ -44,14 +55,16 @@ const STATE_MOTION: Record<VoiceOrbState, { gain: number; spin: number; ripple: 
  * (and it follows light/dark theme changes live). While thinking, the sphere
  * twists like a Rubik's cube: one third of it turns 90° at a time.
  */
-export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbProps) {
+export function VoiceOrb({ state, level, particles = 900, fill, maxPixelRatio = 2, className }: VoiceOrbProps) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const stateRef = React.useRef(state);
   const levelRef = React.useRef(level);
+  const fillRef = React.useRef(fill);
 
   React.useEffect(() => {
     stateRef.current = state;
     levelRef.current = level;
+    fillRef.current = fill;
   });
 
   React.useEffect(() => {
@@ -61,11 +74,16 @@ export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbP
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const points = fibonacciSphere(particles);
+    // Per-frame screen positions, reused so drawing allocates nothing.
+    const xs = new Float32Array(particles);
+    const ys = new Float32Array(particles);
+    const sizes = new Float32Array(particles);
+    const bands = new Uint8Array(particles);
 
     let width = 0;
     let height = 0;
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, maxPixelRatio);
       width = canvas.clientWidth;
       height = canvas.clientHeight;
       canvas.width = Math.round(width * dpr);
@@ -76,6 +94,21 @@ export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbP
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
 
+    // Only animate while the orb is on screen and the tab is visible.
+    let visible = true;
+    const io = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible && !frame) {
+        last = performance.now();
+        frame = requestAnimationFrame(draw);
+      }
+    });
+    io.observe(canvas);
+
+    // Reading computed style forces a style recalc, so sample the color a few times a second, not every frame.
+    let color = "";
+    let colorAt = -Infinity;
+
     let frame = 0;
     let angle = 0;
     let smoothed = 0;
@@ -84,6 +117,10 @@ export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbP
     let pause = 0;
 
     const draw = (now: number) => {
+      if (!visible) {
+        frame = 0;
+        return;
+      }
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       const t = now / 1000;
@@ -111,9 +148,12 @@ export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbP
       }
       const twist = turn ? turn.direction * (Math.PI / 2) * easeInOut(turn.progress) : 0;
 
-      const color = getComputedStyle(canvas).color;
+      if (now - colorAt > 250) {
+        color = getComputedStyle(canvas).color;
+        colorAt = now;
+      }
       ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = color;
+      ctx.fillStyle = fillRef.current ? fillRef.current(ctx, width, height) : color;
 
       const cx = width / 2;
       const cy = height / 2;
@@ -130,7 +170,8 @@ export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbP
       // The turning slice lifts slightly off the ball and settles back, so the twist reads at a glance.
       const lift = turn ? 1 + 0.1 * Math.sin(Math.PI * turn.progress) : 1;
 
-      for (const base of points) {
+      for (let i = 0; i < points.length; i++) {
+        const base = points[i];
         const turning = turn !== null && inSlice(base, turn);
         const p = turn && turning ? rotatedCopy(base, turn.axis, twist) : base;
         // Per-particle displacement: a slow wave travelling over the surface.
@@ -147,11 +188,21 @@ export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbP
         const scale = focal / (focal - z2 * r);
         const sx = cx + x1 * r * baseRadius * scale;
         const sy = cy + y2 * r * baseRadius * scale;
-        const size = (0.5 + depth * 1.3 + smoothed * 0.5) * p.size;
+        xs[i] = sx;
+        ys[i] = sy;
+        sizes[i] = (0.5 + depth * 1.3 + smoothed * 0.5) * p.size;
+        bands[i] = Math.min(ALPHA_BANDS - 1, Math.floor(depth * ALPHA_BANDS));
+      }
 
-        ctx.globalAlpha = 0.15 + depth * 0.85;
+      // One path and one fill per depth band instead of one per particle: far fewer draw calls.
+      for (let b = 0; b < ALPHA_BANDS; b++) {
+        ctx.globalAlpha = 0.15 + ((b + 0.5) / ALPHA_BANDS) * 0.85;
         ctx.beginPath();
-        ctx.arc(sx, sy, size, 0, Math.PI * 2);
+        for (let i = 0; i < points.length; i++) {
+          if (bands[i] !== b) continue;
+          ctx.moveTo(xs[i] + sizes[i], ys[i]);
+          ctx.arc(xs[i], ys[i], sizes[i], 0, Math.PI * 2);
+        }
         ctx.fill();
       }
       ctx.globalAlpha = 1;
@@ -163,8 +214,9 @@ export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbP
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
+      io.disconnect();
     };
-  }, [particles]);
+  }, [particles, maxPixelRatio]);
 
   return (
     <canvas
@@ -357,6 +409,8 @@ type Point = { x: number; y: number; z: number; size: number; jitter: number };
 type Axis = "x" | "y" | "z";
 type Turn = { axis: Axis; slice: -1 | 0 | 1; direction: 1 | -1; progress: number };
 
+/** Depth bands the particles are batched into, each drawn at one opacity. */
+const ALPHA_BANDS = 10;
 const TURN_SECONDS = 0.45;
 const TURN_PAUSE = 0.12;
 const SLICE_EDGE = 1 / 3;
