@@ -18,7 +18,7 @@ export function PatternCard({ entry }: { entry: RegistryEntry }) {
       <div className="relative aspect-[5/3] rounded-lg border bg-card p-2 transition-transform duration-300 group-hover:-translate-y-0.5 dark:bg-background">
         <Thumbnail />
         {showNew && (
-          <span className="absolute top-1.5 left-1.5 rounded-full bg-card dark:bg-background">
+          <span className="absolute top-1.5 left-1.5 flex rounded-full bg-card dark:bg-background">
             <NewBadge />
           </span>
         )}
