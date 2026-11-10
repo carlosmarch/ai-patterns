@@ -106,7 +106,7 @@ disclose AI and data handling), `recover` (errors and limits).
 | --- | --- | --- | --- | --- |
 | `ai-disclosure-badge` | AI Disclosure Badge | trust | An AI-generated label in chip, image-overlay and inline forms that opens a provenance card: model, time, and whether a person edited it. | [indicators/ai-disclosure-badge.md](./indicators/ai-disclosure-badge.md) |
 | `confidence-indicator` | Confidence Indicator | trust | A badge or inline dot signaling how sure an AI answer or extraction is. | [indicators/confidence-indicator.md](./indicators/confidence-indicator.md) |
-| `context-usage` | Context Usage | oversee | A context-window meter: tokens used against the limit, a segmented bar of what fills it, a legend to inspect each source and a Compact action to free space. | [indicators/context-usage.md](./indicators/context-usage.md) |
+| `context-usage` | Context Usage | oversee | A context-window meter: tokens and share used against the limit, a segmented bar of what fills it, a per-source breakdown with tokens and percentages, the autocompact buffer and free space, and a Compact action. | [indicators/context-usage.md](./indicators/context-usage.md) |
 | `cost-estimate` | Cost Estimate | oversee | A pre-run estimate of what a task will cost, with a live balance meter, a low-balance warning, a top-up when the balance can't cover it and a breakdown. | [indicators/cost-estimate.md](./indicators/cost-estimate.md) |
 
 ### loaders
