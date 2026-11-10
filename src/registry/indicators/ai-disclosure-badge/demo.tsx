@@ -76,7 +76,7 @@ export default function AiDisclosureBadgeDemo() {
           </svg>
           <div className="absolute inset-[22%] rounded-full bg-[radial-gradient(circle_at_35%_30%,rgb(148_163_184/0.45),rgb(203_213_225/0.18)_40%,transparent_70%)] dark:bg-[radial-gradient(circle_at_35%_30%,rgb(255_255_255/0.16),rgb(148_163_184/0.06)_40%,transparent_70%)]" />
           <VoiceOrb
-            state="idle"
+            state="ready"
             particles={2400}
             className="absolute inset-0 size-full text-foreground [filter:url(#disclosure-orb-steel-light)] dark:[filter:url(#disclosure-orb-steel-dark)]"
           />

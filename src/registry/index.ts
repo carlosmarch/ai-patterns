@@ -1195,7 +1195,7 @@ export const registry: RegistryEntry[] = [
     added: "2026-11-07T22:09Z",
     job: "oversee",
     title: "Voice Orb",
-    description: "A 3D particle sphere that breathes and spins with the voice conversation.",
+    description: "A dotted 3D orb that carries a voice agent through Ready, Listening, Thinking and Speaking, with the live transcript and call timer under it.",
     Demo: VoiceOrbDemo,
     Thumbnail: VoiceOrbThumbnail,
     uxDoc: voiceOrbPattern,
