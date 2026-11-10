@@ -94,6 +94,12 @@ export function CatalogHeader({
                         : "bg-muted text-foreground/80 hover:bg-muted-foreground/15 hover:text-foreground",
                     )}
                   >
+                    {pill.id === NEW_FILTER && (
+                      <span
+                        aria-hidden
+                        className="size-1.5 shrink-0 rounded-full bg-blue-500"
+                      />
+                    )}
                     {pill.label}
                     {clearable && (
                       <X
