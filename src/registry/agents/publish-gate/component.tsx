@@ -72,7 +72,7 @@ export function PublishGate({
           : "All checks passed · ready to publish";
 
   return (
-    <section aria-label="Publish app" className={cn("flex flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10", className)}>
+    <section aria-label="Publish app" className={cn("flex flex-col overflow-hidden rounded-2xl bg-card border", className)}>
       <header className="flex items-center gap-2 border-b px-4 py-3">
         <Globe className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         <span className="min-w-0 flex-1 truncate font-mono text-xs">{target}</span>

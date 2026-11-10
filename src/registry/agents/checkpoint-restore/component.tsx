@@ -185,7 +185,7 @@ function CheckpointMarker({
               }
             }}
           >
-            <div className="mt-2 rounded-2xl bg-card p-3 ring-1 ring-black/5 dark:ring-white/10">
+            <div className="mt-2 rounded-2xl bg-card p-3 border">
               <p id={`${id}-title`} className="text-sm font-medium">
                 Restore to before this message?
               </p>

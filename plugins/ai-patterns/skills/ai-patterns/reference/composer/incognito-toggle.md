@@ -156,7 +156,7 @@ export function TemporaryChatBanner({
               <button
                 type="button"
                 onClick={onExit}
-                className="shrink-0 rounded-full bg-background px-2.5 py-1 text-xs font-medium transition-colors hover:bg-accent ring-1 ring-black/5 dark:ring-white/10"
+                className="shrink-0 rounded-full bg-background px-2.5 py-1 text-xs font-medium transition-colors hover:bg-accent border"
               >
                 {exitLabel}
               </button>

@@ -154,7 +154,7 @@ export function MessageQueueComposer({
           e.preventDefault();
           submit(false);
         }}
-        className="flex items-end gap-2 rounded-2xl bg-card p-2 pl-3.5 focus-within:ring-2 focus-within:ring-ring/30 shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+        className="flex items-end gap-2 rounded-2xl bg-card p-2 pl-3.5 focus-within:ring-2 focus-within:ring-ring/30 border"
       >
         <textarea
           ref={inputRef}

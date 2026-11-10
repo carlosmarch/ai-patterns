@@ -166,7 +166,7 @@ export function TerminalStream({
               <button
                 type="button"
                 onClick={jumpToLatest}
-                className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-200 shadow-sm transition-colors hover:bg-slate-700"
+                className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-200 transition-colors hover:bg-slate-700"
               >
                 <ArrowDown className="size-3" aria-hidden /> Jump to latest
               </button>

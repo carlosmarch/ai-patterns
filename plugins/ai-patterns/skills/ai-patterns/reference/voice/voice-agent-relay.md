@@ -142,7 +142,7 @@ export function VoiceAgentRelay({
   return (
     <section
       aria-label="Voice chat with agent"
-      className={cn("flex flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10", className)}
+      className={cn("flex flex-col overflow-hidden rounded-2xl bg-card border", className)}
     >
       {run && <RunStrip run={run} />}
 

@@ -186,7 +186,7 @@ export function AiDisclosureBadge({ label, details, variant = "chip", className 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -3 }}
             transition={{ duration: 0.12, ease: "easeOut" }}
-            className="absolute top-full left-0 z-20 mt-1.5 block w-60 rounded-2xl bg-popover p-3 text-left text-xs font-normal whitespace-normal text-popover-foreground shadow-lg ring-1 ring-black/5 dark:ring-white/10"
+            className="absolute top-full left-0 z-20 mt-1.5 block w-60 rounded-2xl bg-popover p-3 text-left text-xs font-normal whitespace-normal text-popover-foreground border"
           >
             <span className="block font-medium text-foreground">
               {details?.editedBy ? "Created with AI, reviewed by a person" : "Created with AI"}

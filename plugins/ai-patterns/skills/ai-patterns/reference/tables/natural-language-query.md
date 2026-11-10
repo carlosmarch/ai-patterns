@@ -190,14 +190,14 @@ export function NaturalLanguageQuery<Row extends { id: string }>({
   const mode = phase === "translating" ? "translating" : isSql ? "sql" : "ask";
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl bg-card text-sm shadow-sm ring-1 ring-black/5 dark:ring-white/10", className)}>
+    <div className={cn("w-full overflow-hidden rounded-2xl bg-card text-sm border", className)}>
       <div className="border-b p-3">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             submit();
           }}
-          className="flex h-10 items-center gap-2 rounded-2xl bg-background pl-1.5 pr-1.5 focus-within:ring-2 focus-within:ring-ring/40 ring-1 ring-black/5 dark:ring-white/10"
+          className="flex h-10 items-center gap-2 rounded-2xl bg-background pl-1.5 pr-1.5 focus-within:ring-2 focus-within:ring-ring/40 border"
         >
           <ModeBadge mode={mode} />
 

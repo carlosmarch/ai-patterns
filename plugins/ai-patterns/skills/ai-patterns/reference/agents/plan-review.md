@@ -160,7 +160,7 @@ export function PlanReview({
   }
 
   return (
-    <section className={cn("w-full rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10", className)} aria-label="Plan review">
+    <section className={cn("w-full rounded-2xl bg-card border", className)} aria-label="Plan review">
       <header className="flex items-start justify-between gap-3 px-4 pt-4 pb-2">
         <div className="min-w-0">
           <h3 className="text-sm font-semibold">{phase === "approved" ? "Plan approved" : title}</h3>

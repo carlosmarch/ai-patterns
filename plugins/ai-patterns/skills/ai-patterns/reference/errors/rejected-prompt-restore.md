@@ -162,8 +162,8 @@ export function RejectedPromptComposer({
 
       <div
         className={cn(
-          "flex items-end gap-2 rounded-2xl bg-card px-3 py-2 transition-colors ring-1 ring-black/5 dark:ring-white/10",
-          rejection && !edited && "ring-foreground/30"
+          "flex items-end gap-2 rounded-2xl bg-card px-3 py-2 transition-colors border",
+          rejection && !edited && "border-foreground/30"
         )}
       >
         <textarea

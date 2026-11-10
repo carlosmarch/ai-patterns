@@ -286,7 +286,7 @@ const FloatingToolbar = React.forwardRef<
       style={{ position: "fixed", top: anchor.bottom + MARGIN, left, width: TOOLBAR_WIDTH, transform: "translateX(-50%)" }}
       className="z-50"
     >
-      <div className="flex items-center gap-1 rounded-full border bg-popover px-1.5 py-1 shadow-md">
+      <div className="flex items-center gap-1 rounded-full border bg-popover px-1.5 py-1">
         <input
           value={instruction}
           onChange={(e) => onInstructionChange(e.target.value)}
@@ -324,7 +324,7 @@ const FloatingToolbar = React.forwardRef<
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="mt-1.5 overflow-hidden rounded-2xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
+            className="mt-1.5 overflow-hidden rounded-2xl bg-popover border"
           >
             {QUICK_EDITS.map((q) => (
               <button
@@ -348,7 +348,7 @@ const FloatingToolbar = React.forwardRef<
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="mt-1.5 rounded-2xl bg-popover p-3 text-xs text-foreground/90 shadow-md ring-1 ring-black/5 dark:ring-white/10"
+            className="mt-1.5 rounded-2xl bg-popover p-3 text-xs text-foreground/90 border"
           >
             {explanation}
           </motion.div>
@@ -407,7 +407,7 @@ function ReviewToolbar({
       exit={{ opacity: 0, y: -4 }}
       transition={{ duration: 0.14 }}
       style={{ position: "fixed", top: anchor.bottom + MARGIN, left, transform: "translateX(-50%)" }}
-      className="z-50 flex items-center gap-1 rounded-full border bg-popover p-1 shadow-md"
+      className="z-50 flex items-center gap-1 rounded-full border bg-popover p-1"
     >
       <button
         type="button"

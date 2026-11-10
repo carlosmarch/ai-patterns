@@ -158,7 +158,7 @@ export function RefinementControls({
   }
 
   return (
-    <div className={cn("w-full rounded-2xl bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10", className)}>
+    <div className={cn("w-full rounded-2xl bg-card border", className)}>
       <div className="flex items-center justify-between gap-3 px-4 pt-3">
         <span className="truncate text-xs text-muted-foreground">
           {current.label ?? "Original draft"}
@@ -359,7 +359,7 @@ function MoreMenu({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: 0.14 }}
-            className="absolute bottom-full left-0 z-50 mb-2 w-52 origin-bottom-left overflow-hidden rounded-2xl bg-popover py-1 shadow-lg ring-1 ring-black/5 dark:ring-white/10"
+            className="absolute bottom-full left-0 z-50 mb-2 w-52 origin-bottom-left overflow-hidden rounded-2xl bg-popover py-1 border"
           >
             {items.map((r, i) => (
               <button

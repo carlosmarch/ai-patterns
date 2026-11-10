@@ -305,7 +305,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
   };
 
   return (
-    <div suppressHydrationWarning className={cn("w-full max-w-xs overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10", className)}>
+    <div suppressHydrationWarning className={cn("w-full max-w-xs overflow-hidden rounded-2xl bg-card border", className)}>
       {/* Header preview */}
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
@@ -391,7 +391,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                       >
                         <motion.span
                           aria-hidden
-                          className="pointer-events-none inline-block h-4 w-4 rounded-full bg-background shadow-sm"
+                          className="pointer-events-none inline-block h-4 w-4 rounded-full bg-background border"
                           animate={{ x: enabled ? 16 : 0 }}
                           transition={{ type: "spring", stiffness: 500, damping: 30 }}
                         />

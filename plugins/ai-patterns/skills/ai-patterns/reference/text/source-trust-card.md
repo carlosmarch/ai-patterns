@@ -139,7 +139,7 @@ export function SourceTrustCard({ sources, defaultIndex = 0, className }: Source
   }
 
   return (
-    <div className={cn("w-full max-w-sm overflow-hidden rounded-2xl bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10", className)}>
+    <div className={cn("w-full max-w-sm overflow-hidden rounded-2xl bg-card border", className)}>
       <div className="flex items-center justify-between border-b px-3 py-2">
         <div className="flex items-center gap-1">
           <button
@@ -343,7 +343,7 @@ function TrustBadge({ domain, reason, url }: { domain: string; reason: string; u
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: position.placement === "top" ? 4 : -4 }}
                   transition={{ duration: 0.12 }}
-                  className="rounded-2xl bg-popover p-3 text-left shadow-md ring-1 ring-black/5 dark:ring-white/10"
+                  className="rounded-2xl bg-popover p-3 text-left border"
                 >
                   <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
                     <ShieldCheck className="size-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden />

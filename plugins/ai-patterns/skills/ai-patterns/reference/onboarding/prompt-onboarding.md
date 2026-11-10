@@ -162,14 +162,14 @@ export function PromptOnboarding({
   }
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10", className)}>
+    <div className={cn("w-full overflow-hidden rounded-2xl bg-card border", className)}>
       <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-5">
         <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
         {apiKey && <ApiKeyChip apiKey={apiKey} />}
       </div>
 
       <div className="px-5 pt-4">
-        <div className="relative rounded-xl border border-primary/30 p-4 shadow-[0_0_0_4px] shadow-primary/5">
+        <div className="relative rounded-xl border border-primary/30 p-4 ring-4 ring-primary/5">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">{mode === "prompt" ? "AI prompt" : "Snippet"}</span>
             {mode === "prompt" && (
@@ -385,7 +385,7 @@ function OpenInButton({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: 0.14 }}
-            className="absolute right-0 bottom-full z-10 mb-1.5 min-w-44 origin-bottom-right rounded-xl bg-popover p-1 shadow-lg ring-1 ring-black/5 dark:ring-white/10"
+            className="absolute right-0 bottom-full z-10 mb-1.5 min-w-44 origin-bottom-right rounded-xl bg-popover p-1 border"
           >
             {tools.map((t) => {
               const ItemIcon = t.icon;

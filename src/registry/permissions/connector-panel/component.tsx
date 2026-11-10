@@ -250,7 +250,7 @@ function FilterBar({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 4 }}
               transition={{ duration: 0.1 }}
-              className="absolute left-0 top-full z-10 mt-1 min-w-[140px] overflow-hidden rounded-2xl bg-popover shadow-lg ring-1 ring-black/5 dark:ring-white/10"
+              className="absolute left-0 top-full z-10 mt-1 min-w-[140px] overflow-hidden rounded-2xl bg-popover border"
             >
               <li>
                 <button
@@ -376,7 +376,7 @@ export function ConnectorPanel({
   return (
     <div
       className={cn(
-        "flex w-full flex-col overflow-hidden rounded-2xl bg-background shadow-xl ring-1 ring-black/5 dark:ring-white/10",
+        "flex w-full flex-col overflow-hidden rounded-2xl bg-background border",
         className,
       )}
     >

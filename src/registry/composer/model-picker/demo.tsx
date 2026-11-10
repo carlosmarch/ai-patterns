@@ -17,7 +17,7 @@ export default function ModelPickerDemo() {
 
   return (
     <div className="flex w-full max-w-lg flex-col pt-56">
-      <div className="rounded-2xl border bg-card p-3 shadow-sm">
+      <div className="rounded-2xl border bg-card p-3">
         <p className="px-1 pb-6 text-sm text-muted-foreground">Ask anything…</p>
         <div className="flex items-center justify-between">
           <ModelPicker

@@ -11,7 +11,7 @@ export default function QuickChatDockDemo() {
   const [agentOpen, setAgentOpen] = React.useState<false | string>(false);
 
   return (
-    <div className="relative h-72 w-full max-w-xl overflow-hidden rounded-2xl border bg-card shadow-sm">
+    <div className="relative h-72 w-full max-w-xl overflow-hidden rounded-2xl border bg-card">
       <div className="space-y-2 p-5">
         <div className="h-2.5 w-28 rounded-full bg-muted" />
         <div className="h-2 w-64 max-w-full rounded-full bg-muted/70" />
@@ -45,7 +45,7 @@ export default function QuickChatDockDemo() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 420, damping: 40 }}
-            className="absolute inset-y-0 right-0 z-40 flex w-56 flex-col border-l bg-popover p-3 shadow-md"
+            className="absolute inset-y-0 right-0 z-40 flex w-56 flex-col border-l bg-popover p-3"
           >
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium">Agent</p>

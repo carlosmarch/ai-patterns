@@ -324,7 +324,7 @@ function RegenerateButton({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.98 }}
             transition={{ duration: 0.12 }}
-            className="absolute top-full left-0 z-20 mt-1 w-56 origin-top-left rounded-2xl bg-popover p-1 text-popover-foreground shadow-lg ring-1 ring-black/5 dark:ring-white/10"
+            className="absolute top-full left-0 z-20 mt-1 w-56 origin-top-left rounded-2xl bg-popover p-1 text-popover-foreground border"
           >
             <MenuItem ref={(el) => { itemsRef.current[0] = el; }} label="Try again" hint="Same prompt, new answer" onSelect={() => pick()} />
             <div role="separator" className="my-1 h-px bg-border" />
@@ -396,7 +396,7 @@ function FeedbackPanel({
         if (e.key === "Escape") onClose();
       }}
     >
-      <div className="flex flex-col gap-3 rounded-2xl bg-card p-3 ring-1 ring-black/5 dark:ring-white/10">
+      <div className="flex flex-col gap-3 rounded-2xl bg-card p-3 border">
         <div className="flex items-center justify-between gap-2">
           <h3 id={headingId} className="text-sm font-medium">
             What went wrong?

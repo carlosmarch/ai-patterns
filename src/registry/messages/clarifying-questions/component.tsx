@@ -56,7 +56,7 @@ export function ClarifyingQuestions({
   }
 
   return (
-    <div className={cn("w-full rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10", className)}>
+    <div className={cn("w-full rounded-2xl bg-card border", className)}>
       <AnimatePresence mode="wait" initial={false}>
         {submitted ? (
           <motion.div

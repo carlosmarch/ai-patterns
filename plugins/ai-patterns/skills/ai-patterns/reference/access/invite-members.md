@@ -294,7 +294,7 @@ function RolePicker({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -4, scale: 0.97 }}
                 transition={{ duration: 0.1 }}
-                className="min-w-[120px] overflow-hidden rounded-xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
+                className="min-w-[120px] overflow-hidden rounded-xl bg-popover border"
               >
                 {roles.map((role) => (
                   <li key={role.id}>
@@ -512,7 +512,7 @@ function GeneralAccessSection({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -4, scale: 0.97 }}
                 transition={{ duration: 0.1 }}
-                className="min-w-[200px] overflow-hidden rounded-xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
+                className="min-w-[200px] overflow-hidden rounded-xl bg-popover border"
               >
                 {GENERAL_ACCESS_OPTIONS.map((opt) => (
                   <li key={opt.level}>
@@ -665,7 +665,7 @@ function InviteModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.97, y: 8 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
-        className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-background shadow-xl ring-1 ring-black/5 dark:ring-white/10"
+        className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-background border"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -736,7 +736,7 @@ function InviteModal({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.1 }}
-                    className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-2xl bg-popover shadow-lg ring-1 ring-black/5 dark:ring-white/10"
+                    className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-2xl bg-popover border"
                   >
                     <button
                       type="button"
@@ -899,7 +899,7 @@ function InviteModal({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={{ duration: 0.15 }}
-                className="absolute inset-x-6 top-1/2 z-20 -translate-y-1/2 rounded-2xl bg-background p-4 shadow-lg ring-1 ring-black/5 dark:ring-white/10"
+                className="absolute inset-x-6 top-1/2 z-20 -translate-y-1/2 rounded-2xl bg-background p-4 border"
               >
                 <p className="text-sm font-semibold">Remove member?</p>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
@@ -938,7 +938,7 @@ function ShareTrigger({ label, onClick }: { label: string; onClick: () => void }
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex h-8 items-center gap-1.5 rounded-full bg-background px-3 text-sm font-medium transition-colors hover:bg-muted ring-1 ring-black/5 dark:ring-white/10"
+      className="inline-flex h-8 items-center gap-1.5 rounded-full bg-background px-3 text-sm font-medium transition-colors hover:bg-muted border"
     >
       <Share2 className="size-3.5" aria-hidden />
       {label}

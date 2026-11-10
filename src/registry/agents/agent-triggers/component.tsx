@@ -95,7 +95,7 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean
     >
       <motion.span
         aria-hidden
-        className="pointer-events-none inline-block h-4 w-4 rounded-full bg-background shadow-sm"
+        className="pointer-events-none inline-block h-4 w-4 rounded-full bg-background border"
         animate={{ x: enabled ? 16 : 0 }}
         transition={{ type: "spring", stiffness: 500, damping: 30 }}
       />
@@ -130,7 +130,7 @@ export function AgentTriggers({
   }
 
   return (
-    <div className={cn("w-full max-w-xs overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10", className)}>
+    <div className={cn("w-full max-w-xs overflow-hidden rounded-2xl bg-card border", className)}>
       <div className="flex items-start justify-between gap-3 px-4 pb-3 pt-4">
         <div className="flex min-w-0 items-center gap-2.5">
           {agent && <Avatar agent={agent} />}

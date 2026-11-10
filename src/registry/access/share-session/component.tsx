@@ -159,7 +159,7 @@ export function ShareSessionDialog({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 8 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="relative w-full max-w-md rounded-2xl bg-popover p-5 text-popover-foreground shadow-xl ring-1 ring-black/5 dark:ring-white/10"
+            className="relative w-full max-w-md rounded-2xl bg-popover p-5 text-popover-foreground border"
           >
             <div className="flex items-start justify-between gap-4">
               <h2 id={titleId} className="text-base font-semibold">

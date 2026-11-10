@@ -35,7 +35,7 @@ export function DiffSummaryCard({
   const rest = files.slice(visibleCount);
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10", className)}>
+    <div className={cn("w-full overflow-hidden rounded-2xl bg-card border", className)}>
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
         <p className="text-xs font-medium">Edited {files.length} files</p>
         <div className="flex items-center gap-2">

@@ -140,7 +140,7 @@ export function ModelPicker({
             exit={{ opacity: 0, y: side === "up" ? 4 : -4, scale: 0.98 }}
             transition={{ duration: 0.14, ease: "easeOut" }}
             className={cn(
-              "absolute left-0 z-20 w-72 overflow-hidden rounded-2xl bg-popover p-1 text-popover-foreground shadow-lg ring-1 ring-black/5 dark:ring-white/10",
+              "absolute left-0 z-20 w-72 overflow-hidden rounded-2xl bg-popover p-1 text-popover-foreground border",
               side === "up" ? "bottom-full mb-2 origin-bottom-left" : "top-full mt-2 origin-top-left"
             )}
           >
@@ -244,7 +244,7 @@ function Switch({
       <motion.span
         layout
         transition={{ type: "spring", stiffness: 500, damping: 32 }}
-        className={cn("size-4 rounded-full bg-background shadow-sm", checked ? "ml-[18px]" : "ml-0.5")}
+        className={cn("size-4 rounded-full bg-background border", checked ? "ml-[18px]" : "ml-0.5")}
       />
     </button>
   );

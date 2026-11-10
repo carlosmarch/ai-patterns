@@ -192,7 +192,7 @@ function IconButton({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.12 }}
-            className="pointer-events-none absolute bottom-full right-0 z-10 mb-1.5 whitespace-nowrap rounded-full bg-foreground px-2.5 py-1 text-xs font-medium text-background shadow-md"
+            className="pointer-events-none absolute bottom-full right-0 z-10 mb-1.5 whitespace-nowrap rounded-full bg-foreground px-2.5 py-1 text-xs font-medium text-background"
           >
             {label}
           </motion.span>

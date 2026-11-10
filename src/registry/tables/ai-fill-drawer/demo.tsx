@@ -65,7 +65,7 @@ export default function AiFillDrawerDemo() {
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className="mt-4 flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium shadow-sm transition-colors hover:bg-muted"
+              className="mt-4 flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-muted"
             >
               <PanelRight className="size-3.5" />
               Open record

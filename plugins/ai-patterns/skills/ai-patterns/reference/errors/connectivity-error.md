@@ -124,7 +124,7 @@ export function ConnectivityError({
               <button
                 type="button"
                 onClick={onViewDetails}
-                className="rounded-full bg-background px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors hover:bg-accent ring-1 ring-black/5 dark:ring-white/10"
+                className="rounded-full bg-background px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors hover:bg-accent border"
               >
                 {detailsLabel}
               </button>
@@ -133,7 +133,7 @@ export function ConnectivityError({
               <button
                 type="button"
                 onClick={onRetry}
-                className="rounded-full bg-background px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors hover:bg-accent ring-1 ring-black/5 dark:ring-white/10"
+                className="rounded-full bg-background px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors hover:bg-accent border"
               >
                 {retryLabel}
               </button>

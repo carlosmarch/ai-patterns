@@ -538,7 +538,7 @@ function DraftRow({ id, nested }: { id: string; nested: boolean }) {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.14, ease: "easeOut" }}
         style={{ transformOrigin: "top left" }}
-        className="absolute left-0 top-full z-30 mt-1.5 w-60 rounded-2xl bg-popover p-1.5 text-popover-foreground shadow-lg ring-1 ring-black/5 dark:ring-white/10"
+        className="absolute left-0 top-full z-30 mt-1.5 w-60 rounded-2xl bg-popover p-1.5 text-popover-foreground border"
       >
         <ul id={listId} role="listbox" aria-label="Step types">
           {structure.map(renderOption)}
@@ -776,7 +776,7 @@ function TargetPicker({
             exit={{ opacity: 0, y: -4, scale: 0.98, transition: { duration: 0.1 } }}
             transition={{ duration: 0.14, ease: "easeOut" }}
             style={{ transformOrigin: "top left" }}
-            className="absolute left-0 top-full z-30 mt-1.5 min-w-52 rounded-2xl bg-popover p-1.5 text-popover-foreground shadow-lg focus:outline-none ring-1 ring-black/5 dark:ring-white/10"
+            className="absolute left-0 top-full z-30 mt-1.5 min-w-52 rounded-2xl bg-popover p-1.5 text-popover-foreground focus:outline-none border"
           >
             {options.map((option, index) => (
               <li
@@ -899,7 +899,7 @@ function BranchBody({ children, onAdd, addLabel }: { children: React.ReactNode; 
         type="button"
         onClick={onAdd}
         aria-label={addLabel}
-        className="absolute bottom-0 left-0 flex size-6 -translate-x-1/2 items-center justify-center rounded-full bg-background text-foreground/80 shadow-xs transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-1 ring-black/5 dark:ring-white/10"
+        className="absolute bottom-0 left-0 flex size-6 -translate-x-1/2 items-center justify-center rounded-full bg-background text-foreground/80 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border"
       >
         <Plus className="size-3.5" aria-hidden />
       </button>
@@ -922,7 +922,7 @@ function ConditionField({
 }) {
   const code = mode === "code";
   return (
-    <div className="group/condition relative rounded-2xl bg-card px-3.5 py-2.5 pr-11 transition-shadow focus-within:ring-ring/50 focus-within:ring-2 focus-within:ring-ring/15 shadow-xs ring-1 ring-black/5 dark:ring-white/10">
+    <div className="group/condition relative rounded-2xl bg-card px-3.5 py-2.5 pr-11 transition-shadow focus-within:border-ring/50 focus-within:ring-2 focus-within:ring-ring/15 border">
       <div className="relative">
         {code && (
           <pre
@@ -954,7 +954,7 @@ function ConditionField({
         aria-label={code ? "Write in plain language" : "Write as code"}
         title={code ? "Write in plain language" : "Write as code"}
         className={cn(
-          "absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-background text-foreground/70 transition-[opacity,background-color] hover:bg-muted focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-1 ring-black/5 dark:ring-white/10",
+          "absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-background text-foreground/70 transition-[opacity,background-color] hover:bg-muted focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring border",
           code ? "opacity-100" : "opacity-0 group-hover/condition:opacity-100 group-focus-within/condition:opacity-100"
         )}
       >
@@ -1076,7 +1076,7 @@ function KebabMenu({ label, items }: { label: string; items: MenuItem[] }) {
             exit={{ opacity: 0, y: -4, scale: 0.98, transition: { duration: 0.1 } }}
             transition={{ duration: 0.14, ease: "easeOut" }}
             style={{ transformOrigin: "top left" }}
-            className="absolute left-0 top-full z-30 mt-1 min-w-48 rounded-2xl bg-popover p-1.5 text-popover-foreground shadow-lg ring-1 ring-black/5 dark:ring-white/10"
+            className="absolute left-0 top-full z-30 mt-1 min-w-48 rounded-2xl bg-popover p-1.5 text-popover-foreground border"
           >
             {items.map((item, index) => (
               <button

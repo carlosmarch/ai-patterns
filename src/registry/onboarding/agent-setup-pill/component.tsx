@@ -81,7 +81,7 @@ export function AgentSetupPill({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 4 }}
               transition={{ duration: 0.15 }}
-              className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-xl bg-popover px-3 py-1.5 text-xs whitespace-nowrap text-popover-foreground shadow-sm ring-1 ring-black/5 dark:ring-white/10"
+              className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 rounded-xl bg-popover px-3 py-1.5 text-xs whitespace-nowrap text-popover-foreground border"
             >
               {tooltip}
             </motion.div>
@@ -100,7 +100,7 @@ export function AgentSetupPill({
           whileTap={reduce ? undefined : { scale: 0.97 }}
           layout={!reduce}
           transition={spring}
-          className="group flex h-10 items-center gap-3 rounded-full border bg-card pr-3 pl-4 text-sm font-medium text-card-foreground shadow-sm transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="group flex h-10 items-center gap-3 rounded-full border bg-card pr-3 pl-4 text-sm font-medium text-card-foreground transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           <span className="relative grid overflow-hidden">
             <AnimatePresence mode="popLayout" initial={false}>
@@ -156,7 +156,7 @@ export function AgentSetupPill({
           onClick={onDismiss}
           aria-label="Dismiss"
           whileTap={reduce ? undefined : { scale: 0.92 }}
-          className="grid size-10 shrink-0 place-items-center rounded-full bg-card text-muted-foreground shadow-sm transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ring-1 ring-black/5 dark:ring-white/10"
+          className="grid size-10 shrink-0 place-items-center rounded-full bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none border"
         >
           <X className="size-4" />
         </motion.button>

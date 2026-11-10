@@ -182,7 +182,7 @@ export function PromptAutocomplete({
 
   return (
     <div className={cn("flex w-full flex-col gap-2", className)}>
-      <div className="relative rounded-2xl bg-card focus-within:ring-foreground/30 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+      <div className="relative rounded-2xl bg-card focus-within:border-foreground/30 border">
         {/* Mirror layer: sizes the box and draws the ghost after the text. */}
         <div aria-hidden className={cn(textLayer, "min-h-24")}>
           <span className="text-transparent">{value}</span>
@@ -245,7 +245,7 @@ export function PromptAutocomplete({
                 // Keep focus in the textarea, so the tap doesn't blur and dismiss it.
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => accept(ghost)}
-                className="inline-flex items-center gap-1.5 rounded-full bg-background px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground ring-1 ring-black/5 dark:ring-white/10"
+                className="inline-flex items-center gap-1.5 rounded-full bg-background px-2 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground border"
               >
                 <kbd className="rounded border bg-muted px-1 font-sans text-[10px] font-medium">Tab</kbd>
                 to accept

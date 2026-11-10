@@ -89,7 +89,7 @@ export function MemoryPanel({
   return (
     <section
       aria-labelledby={titleId}
-      className={cn("flex w-full flex-col overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10", className)}
+      className={cn("flex w-full flex-col overflow-hidden rounded-2xl bg-card border", className)}
     >
       <header className="flex items-start gap-3 border-b px-4 py-3">
         <div className="min-w-0 flex-1">
@@ -116,7 +116,7 @@ export function MemoryPanel({
           <motion.span
             layout
             transition={{ type: "spring", stiffness: 500, damping: 32 }}
-            className={cn("size-4 rounded-full bg-background shadow-sm", enabled ? "ml-[18px]" : "ml-0.5")}
+            className={cn("size-4 rounded-full bg-background border", enabled ? "ml-[18px]" : "ml-0.5")}
           />
         </button>
       </header>

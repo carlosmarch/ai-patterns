@@ -151,7 +151,7 @@ export function PromptWizard({ title, steps, build, onSubmit, submitLabel = "Gen
   return (
     <section
       aria-labelledby={`${uid}-question`}
-      className={cn("flex w-full flex-col gap-4 overflow-hidden rounded-2xl bg-card p-4 shadow-sm ring-1 ring-black/5 dark:ring-white/10", className)}
+      className={cn("flex w-full flex-col gap-4 overflow-hidden rounded-2xl bg-card p-4 border", className)}
     >
       <header className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">

@@ -129,7 +129,7 @@ export function AiReviewPanel({
     <aside
       aria-label={title}
       className={cn(
-        "flex h-full w-full max-w-sm flex-col overflow-hidden rounded-2xl bg-background text-sm shadow-sm ring-1 ring-black/5 dark:ring-white/10",
+        "flex h-full w-full max-w-sm flex-col overflow-hidden rounded-2xl bg-background text-sm border",
         className
       )}
     >

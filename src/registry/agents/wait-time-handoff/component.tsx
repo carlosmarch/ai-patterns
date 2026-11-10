@@ -183,7 +183,7 @@ export function WaitTimeHandoff({
   return (
     <section
       aria-labelledby={`${id}-title`}
-      className={cn("w-full max-w-md overflow-hidden rounded-2xl bg-card shadow-sm ring-1 ring-black/5 dark:ring-white/10", className)}
+      className={cn("w-full max-w-md overflow-hidden rounded-2xl bg-card border", className)}
     >
       <h3 className="m-0">
         <button
@@ -295,7 +295,7 @@ export function WaitTimeHandoff({
                         {selected && (
                           <motion.span
                             layoutId={`${id}-segment`}
-                            className="absolute inset-0 rounded-full border bg-background shadow-sm"
+                            className="absolute inset-0 rounded-full border bg-background"
                             transition={{ type: "spring", stiffness: 500, damping: 38 }}
                           />
                         )}

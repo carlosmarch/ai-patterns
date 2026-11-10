@@ -43,7 +43,7 @@ const targets = {
 
 export default function ProcedureBuilderDemo() {
   return (
-    <div className="w-full max-w-2xl rounded-2xl border bg-background px-4 py-6 shadow-sm sm:px-6">
+    <div className="w-full max-w-2xl rounded-2xl border bg-background px-4 py-6 sm:px-6">
       <ProcedureBuilder initialSteps={steps} targets={targets} />
     </div>
   );

@@ -74,7 +74,7 @@ export function ConsoleErrorCard({
   return (
     <div
       className={cn(
-        "w-full overflow-hidden rounded-2xl bg-background text-foreground ring-1 ring-black/5 dark:ring-white/10",
+        "w-full overflow-hidden rounded-2xl bg-background text-foreground border",
         className
       )}
     >

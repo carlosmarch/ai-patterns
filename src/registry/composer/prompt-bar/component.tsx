@@ -285,7 +285,7 @@ export function PromptBar({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.12 }}
-            className="absolute bottom-full left-0 z-10 mb-2 w-full max-w-xs overflow-hidden rounded-2xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
+            className="absolute bottom-full left-0 z-10 mb-2 w-full max-w-xs overflow-hidden rounded-2xl bg-popover border"
           >
             {suggestions.map((item, i) => (
               <button
@@ -314,7 +314,7 @@ export function PromptBar({
 
       <div
         className={cn(
-          "flex flex-wrap items-end gap-1.5 bg-card p-2.5 shadow-sm ring-1 ring-black/5 dark:ring-white/10 sm:flex-nowrap sm:gap-1 sm:p-2",
+          "flex flex-wrap items-end gap-1.5 bg-card p-2.5 sm:flex-nowrap sm:gap-1 sm:p-2 border",
           variant === "pill" ? "rounded-3xl sm:rounded-full" : "rounded-2xl"
         )}
       >
@@ -343,7 +343,7 @@ export function PromptBar({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 4 }}
                 transition={{ duration: 0.12 }}
-                className="absolute bottom-full left-0 z-20 mb-1.5 w-52 overflow-hidden rounded-2xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
+                className="absolute bottom-full left-0 z-20 mb-1.5 w-52 overflow-hidden rounded-2xl bg-popover border"
               >
                 <button
                   type="button"
@@ -426,7 +426,7 @@ export function PromptBar({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 4 }}
                 transition={{ duration: 0.12 }}
-                className="absolute bottom-full right-0 z-10 mb-2 w-40 overflow-hidden rounded-2xl bg-popover shadow-md ring-1 ring-black/5 dark:ring-white/10"
+                className="absolute bottom-full right-0 z-10 mb-2 w-40 overflow-hidden rounded-2xl bg-popover border"
               >
                 {models.map((m) => (
                   <button

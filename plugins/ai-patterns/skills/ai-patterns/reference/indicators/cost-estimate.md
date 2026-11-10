@@ -122,7 +122,7 @@ export function CostEstimate({
   const usedPct = Math.min(100, (Math.min(high, balance) / total) * 100);
 
   return (
-    <div className={cn("flex w-full flex-col gap-3 rounded-2xl bg-card p-4 ring-1 ring-black/5 dark:ring-white/10", className)}>
+    <div className={cn("flex w-full flex-col gap-3 rounded-2xl bg-card p-4 border", className)}>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
         <div className="min-w-0 flex-1">
           <p className="text-xs text-muted-foreground">Estimated cost</p>

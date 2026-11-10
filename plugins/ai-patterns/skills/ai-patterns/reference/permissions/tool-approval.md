@@ -115,7 +115,7 @@ export function ToolApproval({
   }
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10", className)}>
+    <div className={cn("w-full overflow-hidden rounded-2xl bg-card border", className)}>
       <div className="flex items-start gap-3 px-4 py-3.5">
         <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
           <Icon className="size-4.5" />
@@ -170,7 +170,7 @@ export function ToolApproval({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 4 }}
                   transition={{ duration: 0.12 }}
-                  className="absolute bottom-full right-0 z-10 mb-2 w-44 overflow-hidden rounded-2xl bg-popover ring-1 ring-black/5 dark:ring-white/10"
+                  className="absolute bottom-full right-0 z-10 mb-2 w-44 overflow-hidden rounded-2xl bg-popover border"
                 >
                   {scopes.map((scope) => (
                     <button
@@ -218,7 +218,7 @@ function ResolvedRow({
         : "Allowed";
 
   return (
-    <div className={cn("flex items-center gap-3 rounded-2xl bg-card px-4 py-3 ring-1 ring-black/5 dark:ring-white/10", className)}>
+    <div className={cn("flex items-center gap-3 rounded-2xl bg-card px-4 py-3 border", className)}>
       <span
         className={cn(
           "flex size-8 shrink-0 items-center justify-center rounded-full",

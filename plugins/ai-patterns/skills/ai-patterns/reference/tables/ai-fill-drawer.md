@@ -208,7 +208,7 @@ export function AiFillDrawer({
           exit={reduceMotion ? { opacity: 0 } : { x: "100%", opacity: 0.6 }}
           transition={{ type: "spring", stiffness: 380, damping: 38 }}
           className={cn(
-            "flex h-full w-full max-w-sm flex-col overflow-hidden border-l bg-background text-sm shadow-xl outline-none",
+            "flex h-full w-full max-w-sm flex-col overflow-hidden border-l bg-background text-sm outline-none",
             className
           )}
         >

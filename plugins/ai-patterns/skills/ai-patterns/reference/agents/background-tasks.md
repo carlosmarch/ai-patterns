@@ -177,7 +177,7 @@ export function BackgroundTasksDrawer({
           exit={reduceMotion ? { opacity: 0 } : { x: "100%", opacity: 0.6 }}
           transition={{ type: "spring", stiffness: 380, damping: 38 }}
           className={cn(
-            "flex h-full flex-col overflow-hidden border-l bg-background shadow-xl outline-none transition-[width] duration-300",
+            "flex h-full flex-col overflow-hidden border-l bg-background outline-none transition-[width] duration-300",
             expanded ? "w-full" : "w-full max-w-sm",
             className
           )}

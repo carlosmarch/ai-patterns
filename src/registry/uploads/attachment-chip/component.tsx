@@ -90,8 +90,8 @@ export function AttachmentChip({
   return (
     <li
       className={cn(
-        "relative flex w-40 shrink-0 items-center gap-2 rounded-2xl bg-card p-2 ring-1 ring-black/5 dark:ring-white/10",
-        status === "error" && "ring-destructive/40 bg-destructive/5"
+        "relative flex w-40 shrink-0 items-center gap-2 rounded-2xl bg-card p-2 border",
+        status === "error" && "border-destructive/40 bg-destructive/5"
       )}
     >
       <div
@@ -153,7 +153,7 @@ export function AttachmentChip({
         type="button"
         onClick={() => onRemove?.(id)}
         aria-label={`Remove ${name}`}
-        className="absolute -right-1.5 -top-1.5 flex size-4 items-center justify-center rounded-full border bg-background text-muted-foreground shadow-sm transition-colors hover:text-foreground"
+        className="absolute -right-1.5 -top-1.5 flex size-4 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground"
       >
         <X className="size-2.5" aria-hidden />
       </button>

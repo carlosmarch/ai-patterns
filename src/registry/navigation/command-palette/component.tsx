@@ -174,7 +174,7 @@ export function CommandPaletteWindow({
       aria-label="Command palette"
       onKeyDown={handleKeyDown}
       className={cn(
-        "flex h-fit max-h-[70vh] w-full flex-col overflow-hidden rounded-2xl bg-popover shadow-2xl ring-1 ring-black/5 dark:ring-white/10",
+        "flex h-fit max-h-[70vh] w-full flex-col overflow-hidden rounded-2xl bg-popover border",
         className
       )}
     >

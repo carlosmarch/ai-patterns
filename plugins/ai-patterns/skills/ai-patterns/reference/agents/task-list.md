@@ -100,7 +100,7 @@ export function TaskList({ tasks, label = "Task list", className }: TaskListProp
   const done = tasks.filter((t) => t.status === "completed").length;
 
   return (
-    <div className={cn("w-full rounded-2xl bg-card px-4 py-3 ring-1 ring-black/5 dark:ring-white/10", className)}>
+    <div className={cn("w-full rounded-2xl bg-card px-4 py-3 border", className)}>
       <ol aria-label={`${label}, ${done} of ${tasks.length} completed`} className="space-y-2.5">
         {tasks.map((task) => (
           <TaskRow key={task.id} task={task} />

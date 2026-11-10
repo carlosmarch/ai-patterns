@@ -73,7 +73,7 @@ export function AccessRequest({
             exit={{ opacity: 0 }}
             transition={transition}
             role="status"
-            className="flex items-center gap-3 rounded-2xl bg-card px-4 py-3 ring-1 ring-black/5 dark:ring-white/10"
+            className="flex items-center gap-3 rounded-2xl bg-card px-4 py-3 border"
           >
             <span
               className={cn(
@@ -105,7 +105,7 @@ export function AccessRequest({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={transition}
-            className="overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 dark:ring-white/10"
+            className="overflow-hidden rounded-2xl bg-card border"
           >
             <header className="flex items-center gap-3 px-5 pt-5">
               <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-foreground text-background">
