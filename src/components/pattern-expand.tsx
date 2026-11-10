@@ -38,8 +38,6 @@ interface PatternExpandState {
   setExpanded: (expanded: boolean) => void;
   /** Opened from the gallery: collapsing goes back there instead of to the page. */
   fromGallery: boolean;
-  /** Leave the expanded view for the pattern page itself, even when opened from the gallery. */
-  collapseInPlace: () => void;
 }
 
 const PatternExpandContext = createContext<PatternExpandState | null>(null);
@@ -51,7 +49,7 @@ const PatternExpandContext = createContext<PatternExpandState | null>(null);
  */
 export function PatternExpandProvider({ children }: { children: ReactNode }) {
   // Not consumed in the initializer: Strict Mode runs initializers twice.
-  const [returnHref, setReturnHref] = useState(() => openingFromGallery);
+  const [returnHref] = useState(() => openingFromGallery);
   const fromGallery = returnHref !== null;
   const [expanded, setExpandedState] = useState(fromGallery);
   const pathname = usePathname();
@@ -73,13 +71,6 @@ export function PatternExpandProvider({ children }: { children: ReactNode }) {
     },
     [returnHref, router],
   );
-
-  // "Open full page": from here on this is an ordinary pattern page, so
-  // Expand/Collapse stay in place rather than going back to the gallery.
-  const collapseInPlace = useCallback(() => {
-    setReturnHref(null);
-    setExpandedState(false);
-  }, []);
 
   // Whether the URL asked to open expanded and the state hasn't caught up yet
   // (null until first read on mount). Read from window.location rather than
@@ -118,7 +109,7 @@ export function PatternExpandProvider({ children }: { children: ReactNode }) {
   }, [expanded]);
 
   return (
-    <PatternExpandContext.Provider value={{ expanded, setExpanded, fromGallery, collapseInPlace }}>{children}</PatternExpandContext.Provider>
+    <PatternExpandContext.Provider value={{ expanded, setExpanded, fromGallery }}>{children}</PatternExpandContext.Provider>
   );
 }
 

@@ -72,6 +72,44 @@ export default async function PatternPage({
     href: `/patterns#${entry.category}`,
   };
 
+  const related = getRelatedEntries(entry);
+  // The expanded view's Context tab: everything this page says around the
+  // demo, so the expanded view needs nothing from the page itself.
+  const context = (
+    <div className="space-y-8">
+      <p className="text-sm text-muted-foreground">{entry.description}</p>
+      {job && (
+        <section aria-labelledby="context-job">
+          <h2 id="context-job" className="mb-2 text-sm font-medium">
+            Job
+          </h2>
+          <Link
+            href={`/patterns?job=${job.id}`}
+            className="inline-flex rounded-full border bg-background px-2.5 py-0.5 text-xs font-medium transition-colors hover:bg-accent"
+          >
+            {job.label}
+          </Link>
+          <p className="mt-2 text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">
+              “{/[?.!]$/.test(job.question) ? job.question : `${job.question}.`}”
+            </span>{" "}
+            {job.description}
+          </p>
+        </section>
+      )}
+      {entry.seenIn.length > 0 && (
+        <section aria-labelledby="context-seen-in">
+          <h2 id="context-seen-in" className="mb-2 text-sm font-medium">
+            Seen in
+          </h2>
+          <SeenIn items={entry.seenIn} showLabel={false} linked />
+        </section>
+      )}
+      <DosAndDonts entry={entry} layout="panel" headingId="context-dos-and-donts" />
+      <RelatedPatterns items={related} layout="panel" headingId="context-related-patterns" />
+    </div>
+  );
+
   return (
     <main className="mx-auto w-full max-w-3xl py-16">
       <Breadcrumbs
@@ -123,6 +161,7 @@ export default async function PatternPage({
           </div>
         }
         patternPanel={spec}
+        context={context}
         meta={
           <>
             {job && (
@@ -141,7 +180,7 @@ export default async function PatternPage({
 
       <DosAndDonts entry={entry} />
 
-      <RelatedPatterns items={getRelatedEntries(entry)} />
+      <RelatedPatterns items={related} />
 
       <PatternPager prev={toLink(prev)} next={toLink(next)} />
     </main>

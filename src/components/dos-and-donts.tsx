@@ -5,17 +5,29 @@ import { getSpecList, type RegistryEntry } from "@/registry";
 
 // "Do's and don'ts" on a pattern page, drawn from the spec's "When to use"
 // and "When not to use" sections so the page and the spec never drift apart.
-export function DosAndDonts({ entry }: { entry: RegistryEntry }) {
+// `layout="panel"` is the single-column version for the expanded view's
+// Context tab, where the page's breakpoints don't apply; it needs its own
+// heading id, since the page version is on the same page.
+export function DosAndDonts({
+  entry,
+  layout = "page",
+  headingId = "dos-and-donts",
+}: {
+  entry: RegistryEntry;
+  layout?: "page" | "panel";
+  headingId?: string;
+}) {
+  const panel = layout === "panel";
   const dos = getSpecList(entry, "When to use");
   const donts = getSpecList(entry, "When not to use");
   if (dos.length === 0 && donts.length === 0) return null;
 
   return (
-    <section aria-labelledby="dos-and-donts" className="mt-12">
-      <h2 id="dos-and-donts" className="mb-4 text-lg font-semibold tracking-tight">
+    <section aria-labelledby={headingId} className={panel ? undefined : "mt-12"}>
+      <h2 id={headingId} className={panel ? "mb-3 text-sm font-medium" : "mb-4 text-lg font-semibold tracking-tight"}>
         Do&rsquo;s and don&rsquo;ts
       </h2>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className={panel ? "grid gap-3" : "grid gap-3 sm:grid-cols-2"}>
         <Column kind="do" items={dos} />
         <Column kind="dont" items={donts} />
       </div>

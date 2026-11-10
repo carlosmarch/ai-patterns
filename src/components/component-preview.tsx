@@ -3,7 +3,7 @@
 import { useEffect, useState, ViewTransition, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Check, ChevronLeft, ChevronRight, FileText, Link2, Maximize2, Minimize2 } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Link2, Maximize2, Minimize2 } from "lucide-react";
 
 import { AnimatedOrigami } from "@/components/animated-origami";
 import { patternTransitionName, usePatternExpand } from "@/components/pattern-expand";
@@ -23,6 +23,7 @@ export function ComponentPreview({
   prev,
   next,
   meta,
+  context,
 }: {
   title: string;
   /** The pattern's group, shown in the expanded view's breadcrumb. */
@@ -37,11 +38,14 @@ export function ComponentPreview({
   next?: PagerLink;
   /** The pattern's job and "Seen in", shown in the expanded view's header. */
   meta?: ReactNode;
+  /** The expanded side panel's Context tab: what the pattern page says around the demo. */
+  context?: ReactNode;
 }) {
   const pathname = usePathname();
-  const { expanded, setExpanded, fromGallery, collapseInPlace } = usePatternExpand();
+  const { expanded, setExpanded, fromGallery } = usePatternExpand();
   const [tab, setTab] = useState("preview");
-  const [panelTab, setPanelTab] = useState(pattern ? "pattern" : "code");
+  // Opened from the gallery, the panel leads with the context the wall doesn't show.
+  const [panelTab, setPanelTab] = useState(() => (fromGallery && context ? "context" : pattern ? "pattern" : "code"));
 
   function handleTabChange(value: string) {
     setTab(value);
@@ -127,13 +131,6 @@ export function ComponentPreview({
                   </span>
                 </nav>
                 {meta && <div className="flex shrink-0 items-center gap-4 max-md:hidden">{meta}</div>}
-                {/* Opened from the gallery, Collapse goes back there; this is the way to the page itself. */}
-                {fromGallery && (
-                  <Button type="button" variant="ghost" size="sm" onClick={collapseInPlace} className="max-sm:hidden">
-                    <FileText />
-                    Open full page
-                  </Button>
-                )}
                 {/* Not on phones: there's little room, and the address bar shares the link anyway. */}
                 <CopyLinkButton className="max-sm:hidden" />
                 {/* Without room for the side panel, Collapse lives here instead. */}
@@ -166,6 +163,7 @@ export function ComponentPreview({
               title={title}
               code={code}
               pattern={patternPanel ?? pattern}
+              context={context}
               value={panelTab}
               onValueChange={setPanelTab}
               onCollapse={() => setExpanded(false)}
@@ -212,8 +210,10 @@ function storePanelWidth(width: number) {
 }
 
 /**
- * Side panel of the expanded view: shows the pattern's guardrails next to the
- * live preview, with a switcher in its header to swap in the code instead.
+ * Side panel of the expanded view: the pattern's context (what its page says
+ * around the demo), guardrails or code next to the live preview, with a
+ * switcher in its header. With Context it holds everything the pattern page
+ * has, so the expanded view is that page's large-screen layout.
  * Its left edge can be dragged (or moved with the arrow keys) to resize it;
  * the width is remembered across patterns and visits.
  */
@@ -221,6 +221,7 @@ function ExpandedSidePanel({
   title,
   code,
   pattern,
+  context,
   value,
   onValueChange,
   onCollapse,
@@ -228,6 +229,7 @@ function ExpandedSidePanel({
   title: string;
   code: ReactNode;
   pattern?: ReactNode;
+  context?: ReactNode;
   value: string;
   onValueChange: (value: string) => void;
   onCollapse: () => void;
@@ -312,6 +314,7 @@ function ExpandedSidePanel({
         {dragging && <div aria-hidden className="fixed inset-0 z-[5] cursor-col-resize select-none" />}
         <div className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
           <TabsList>
+            {context && <TabsTrigger value="context">Context</TabsTrigger>}
             {pattern && <TabsTrigger value="pattern">Guardrails</TabsTrigger>}
             <TabsTrigger value="code">Code</TabsTrigger>
           </TabsList>
@@ -321,6 +324,11 @@ function ExpandedSidePanel({
         </div>
         {/* The panel scrolls as a whole, so lift the code blocks' own height cap. */}
         <div className="min-h-0 flex-1 overflow-auto p-4 [&_[data-code-scroll]]:max-h-none">
+          {context && (
+            <TabsContent value="context" forceMount className="data-[state=inactive]:hidden">
+              {context}
+            </TabsContent>
+          )}
           {pattern && (
             <TabsContent value="pattern" forceMount className="data-[state=inactive]:hidden">
               {pattern}

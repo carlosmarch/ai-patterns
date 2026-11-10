@@ -4,15 +4,25 @@ import { getEntryHref, type RelatedEntry } from "@/registry";
 
 // "Related patterns" on a pattern page: each card shows the other pattern's
 // wireframe and one sentence on when to use it instead of, or as well as, this one.
-export function RelatedPatterns({ items }: { items: RelatedEntry[] }) {
+// `layout="panel"`: the single-column version for the expanded view's Context tab.
+export function RelatedPatterns({
+  items,
+  layout = "page",
+  headingId = "related-patterns",
+}: {
+  items: RelatedEntry[];
+  layout?: "page" | "panel";
+  headingId?: string;
+}) {
   if (items.length === 0) return null;
+  const panel = layout === "panel";
 
   return (
-    <section aria-labelledby="related-patterns" className="mt-12">
-      <h2 id="related-patterns" className="mb-4 text-lg font-semibold tracking-tight">
+    <section aria-labelledby={headingId} className={panel ? undefined : "mt-12"}>
+      <h2 id={headingId} className={panel ? "mb-3 text-sm font-medium" : "mb-4 text-lg font-semibold tracking-tight"}>
         Related patterns
       </h2>
-      <ul className="grid gap-3 sm:grid-cols-2">
+      <ul className={panel ? "grid gap-3" : "grid gap-3 sm:grid-cols-2"}>
         {items.map(({ entry, reason }) => {
           const { Thumbnail } = entry;
           return (
