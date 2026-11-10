@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUpRight, ChevronDown } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Sparkles } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { trackMcpInstallClicked } from "@/lib/analytics";
 import { CURSOR_INSTALL_URL, VSCODE_INSTALL_URL } from "@/lib/mcp-install";
 import { GithubMark } from "@/components/github-mark";
+import { BorderBeam } from "@/registry/effects/border-beam/component";
 
 const REPO_URL = "https://github.com/carlosmarch/ai-patterns";
 
@@ -49,30 +50,39 @@ export function SiteActions() {
         target="_blank"
         rel="noreferrer"
         aria-label="AI Patterns on GitHub"
-        className="flex size-9 items-center justify-center rounded-full border bg-background text-foreground transition-colors hover:bg-muted"
+        className="hidden size-9 items-center justify-center rounded-full border bg-background text-foreground sm:flex transition-colors hover:bg-muted"
       >
         <GithubMark className="size-4" />
       </a>
 
       <div ref={ref} className="relative hidden sm:block">
-        <div className="flex h-9 items-stretch overflow-hidden rounded-full bg-foreground text-background">
-          <Link
-            href="/skill"
-            className="flex items-center pr-3.5 pl-4 text-sm font-medium transition-opacity hover:opacity-80"
-          >
-            Get the skill
-          </Link>
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-label="More ways to install"
-            aria-haspopup="menu"
-            aria-expanded={open}
-            className="flex items-center border-l border-background/20 pr-3 pl-2.5 transition-opacity hover:opacity-80"
-          >
-            <ChevronDown className={cn("size-4 transition-transform", open && "rotate-180")} aria-hidden />
-          </button>
-        </div>
+        <BorderBeam radius={9999} duration={6}>
+          <div className="flex h-9 items-stretch overflow-hidden rounded-full bg-foreground text-background">
+            <Link
+              href="/skill"
+              className="flex items-center gap-1.5 pr-3.5 pl-3.5 text-sm font-medium transition-opacity hover:opacity-80"
+            >
+              <Sparkles className="size-4" aria-hidden />
+              Get the skill
+            </Link>
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-label="More ways to install"
+              aria-haspopup="menu"
+              aria-expanded={open}
+              className="flex items-center border-l border-background/20 pr-3 pl-2.5 transition-opacity hover:opacity-80"
+            >
+              <ChevronDown
+                className={cn(
+                  "size-4 transition-transform",
+                  open && "rotate-180",
+                )}
+                aria-hidden
+              />
+            </button>
+          </div>
+        </BorderBeam>
 
         {open && (
           <div
@@ -84,9 +94,15 @@ export function SiteActions() {
                 key={item.label}
                 role="menuitem"
                 href={item.href}
-                {...(item.external ? { target: "_blank", rel: "noreferrer" } : {})}
+                {...(item.external
+                  ? { target: "_blank", rel: "noreferrer" }
+                  : {})}
                 onClick={() => {
-                  if (item.client) trackMcpInstallClicked({ client: item.client, page: "header" });
+                  if (item.client)
+                    trackMcpInstallClicked({
+                      client: item.client,
+                      page: "header",
+                    });
                   setOpen(false);
                 }}
                 className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"

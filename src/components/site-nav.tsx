@@ -16,7 +16,7 @@ export function SiteNav({ className }: { className?: string }) {
   const pathname = usePathname();
 
   return (
-    <nav className={cn("flex items-center gap-1", className)}>
+    <nav className={cn("flex items-center gap-1 sm:gap-1.5", className)}>
       {links.map(({ href, label }) => {
         const isActive = pathname === href || pathname.startsWith(`${href}/`);
 
@@ -26,7 +26,7 @@ export function SiteNav({ className }: { className?: string }) {
             href={href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "rounded-md px-1.5 py-1.5 text-sm sm:px-2.5 transition-colors hover:text-foreground",
+              "flex h-9 items-center rounded-full border bg-background px-2.5 text-sm sm:px-3.5 transition-colors hover:text-foreground",
               isActive ? "font-medium text-foreground" : "text-muted-foreground"
             )}
           >
