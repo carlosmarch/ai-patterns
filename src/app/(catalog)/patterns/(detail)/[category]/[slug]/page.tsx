@@ -73,40 +73,17 @@ export default async function PatternPage({
   };
 
   const related = getRelatedEntries(entry);
-  // The expanded view's Context tab: everything this page says around the
-  // demo, so the expanded view needs nothing from the page itself.
+  // The intro (title, description, job, "Seen in"), Do's and don'ts and Related
+  // patterns, exactly as this page shows them. The expanded view's Context tab
+  // reuses them, so the expanded view is this page's large-screen layout. The
+  // card grids follow their own width (container queries), so they're two
+  // columns here and in a wide panel, stacked in a narrow one.
+  const intro = (level: "h1" | "h2") => <PatternIntro entry={entry} job={job} headingLevel={level} />;
   const context = (
-    <div className="space-y-8">
-      <p className="text-sm text-muted-foreground">{entry.description}</p>
-      {job && (
-        <section aria-labelledby="context-job">
-          <h2 id="context-job" className="mb-2 text-sm font-medium">
-            Job
-          </h2>
-          <Link
-            href={`/patterns?job=${job.id}`}
-            className="inline-flex rounded-full border bg-background px-2.5 py-0.5 text-xs font-medium transition-colors hover:bg-accent"
-          >
-            {job.label}
-          </Link>
-          <p className="mt-2 text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">
-              “{/[?.!]$/.test(job.question) ? job.question : `${job.question}.`}”
-            </span>{" "}
-            {job.description}
-          </p>
-        </section>
-      )}
-      {entry.seenIn.length > 0 && (
-        <section aria-labelledby="context-seen-in">
-          <h2 id="context-seen-in" className="mb-2 text-sm font-medium">
-            Seen in
-          </h2>
-          <SeenIn items={entry.seenIn} showLabel={false} linked />
-        </section>
-      )}
-      <DosAndDonts entry={entry} layout="panel" headingId="context-dos-and-donts" />
-      <RelatedPatterns items={related} layout="panel" headingId="context-related-patterns" />
+    <div>
+      {intro("h2")}
+      <DosAndDonts entry={entry} headingId="context-dos-and-donts" />
+      <RelatedPatterns items={related} headingId="context-related-patterns" />
     </div>
   );
 
@@ -122,28 +99,7 @@ export default async function PatternPage({
         ]}
       />
 
-      <div className="mb-8 space-y-2">
-        <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1 text-3xl font-semibold tracking-tight">
-          {entry.title}
-          {isNewEntry(entry) && <NewBadge className="px-2 py-1 text-xs" />}
-        </h1>
-        <p className="text-muted-foreground">{entry.description}</p>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2">
-          {job && (
-            <Link
-              href={`/patterns?job=${job.id}`}
-              title={job.description}
-              className="inline-flex items-center gap-2.5 text-xs text-muted-foreground"
-            >
-              Job
-              <span className="rounded-full border bg-background px-2.5 py-0.5 font-medium text-foreground transition-colors hover:bg-accent">
-                {job.label}
-              </span>
-            </Link>
-          )}
-          <SeenIn items={entry.seenIn} linked />
-        </div>
-      </div>
+      <div className="mb-8">{intro("h1")}</div>
 
       <ComponentPreview
         title={entry.title}
@@ -184,5 +140,42 @@ export default async function PatternPage({
 
       <PatternPager prev={toLink(prev)} next={toLink(next)} />
     </main>
+  );
+}
+
+/** Title, description, and the Job and "Seen in" row — the top of the pattern page and of the Context tab. */
+function PatternIntro({
+  entry,
+  job,
+  headingLevel,
+}: {
+  entry: NonNullable<ReturnType<typeof getRegistryEntry>>;
+  job: ReturnType<typeof getJob>;
+  headingLevel: "h1" | "h2";
+}) {
+  const Heading = headingLevel;
+  return (
+    <div className="space-y-2">
+      <Heading className="flex flex-wrap items-center gap-x-3 gap-y-1 text-3xl font-semibold tracking-tight">
+        {entry.title}
+        {isNewEntry(entry) && <NewBadge className="px-2 py-1 text-xs" />}
+      </Heading>
+      <p className="text-muted-foreground">{entry.description}</p>
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2">
+        {job && (
+          <Link
+            href={`/patterns?job=${job.id}`}
+            title={job.description}
+            className="inline-flex items-center gap-2.5 text-xs text-muted-foreground"
+          >
+            Job
+            <span className="rounded-full border bg-background px-2.5 py-0.5 font-medium text-foreground transition-colors hover:bg-accent">
+              {job.label}
+            </span>
+          </Link>
+        )}
+        <SeenIn items={entry.seenIn} linked />
+      </div>
+    </div>
   );
 }
