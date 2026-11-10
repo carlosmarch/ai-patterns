@@ -2,108 +2,87 @@
 
 import * as React from "react";
 
-import { VoiceOrb, type VoiceOrbState } from "./component";
+import { VoiceOrbCall, type VoiceOrbState, type VoiceOrbTranscript } from "./component";
 
-const STATES: { value: VoiceOrbState; label: string }[] = [
-  { value: "idle", label: "Idle" },
-  { value: "listening", label: "Listening" },
-  { value: "thinking", label: "Thinking" },
-  { value: "speaking", label: "Speaking" },
+const SCRIPT: VoiceOrbTranscript[] = [
+  { speaker: "user", text: "Can you move my three o'clock with Marcus to tomorrow morning?" },
+  { speaker: "assistant", text: "Done. Your sync with Marcus is now tomorrow at 9:30, and I let him know." },
+  { speaker: "user", text: "Great, and remind me to send him the deck tonight." },
+  { speaker: "assistant", text: "Okay. I'll remind you at 7 p.m. to send Marcus the deck." },
 ];
 
+/** A scripted call that walks the orb through Ready → Listening → Thinking → Speaking, turn after turn. */
 export default function VoiceOrbDemo() {
-  const [state, setState] = React.useState<VoiceOrbState>("speaking");
-  const mic = useMicLevel();
+  const [connected, setConnected] = React.useState(true);
+  const [state, setState] = React.useState<VoiceOrbState>("ready");
+  const [transcript, setTranscript] = React.useState<VoiceOrbTranscript | null>(null);
+  const [muted, setMuted] = React.useState(false);
+  const mutedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (!connected) return;
+    let cancelled = false;
+    // Waits `ms` of unmuted time: muting freezes the script where it is.
+    const wait = async (ms: number) => {
+      let left = ms;
+      while (left > 0) {
+        if (cancelled) throw new Error("cancelled");
+        await new Promise((r) => setTimeout(r, 50));
+        if (!mutedRef.current) left -= 50;
+      }
+    };
+
+    async function run() {
+      for (;;) {
+        setState("ready");
+        setTranscript(null);
+        await wait(1400);
+        for (const turn of SCRIPT) {
+          setState(turn.speaker === "user" ? "listening" : "speaking");
+          const words = turn.text.split(" ");
+          for (let i = 1; i <= words.length; i++) {
+            setTranscript({ ...turn, text: words.slice(0, i).join(" "), final: false });
+            await wait(turn.speaker === "user" ? 230 : 190);
+          }
+          setTranscript({ ...turn, final: true });
+          if (turn.speaker === "user") {
+            await wait(500);
+            setState("thinking");
+            await wait(2200);
+          } else {
+            setState("ready");
+            await wait(1600);
+          }
+        }
+        await wait(1200);
+      }
+    }
+
+    run().catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [connected]);
 
   return (
-    <div className="flex w-full max-w-sm flex-col items-center gap-6">
-      <div className="flex flex-wrap justify-center gap-2">
-        {STATES.map((s) => (
-          <button
-            key={s.value}
-            type="button"
-            onClick={() => setState(s.value)}
-            className={[
-              "rounded-full px-3 py-1 text-xs font-medium transition-colors",
-              state === s.value
-                ? "bg-foreground text-background"
-                : "bg-muted text-muted-foreground hover:text-foreground",
-            ].join(" ")}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="w-full rounded-2xl border bg-card p-4">
-        <VoiceOrb state={state} level={mic.active ? mic.level : undefined} className="text-foreground dark:text-orange-50" />
-      </div>
-
-      <button
-        type="button"
-        onClick={() => {
-          if (mic.active) {
-            mic.stop();
-          } else {
-            setState("listening");
-            void mic.start();
-          }
+    <div className="w-full max-w-sm">
+      <VoiceOrbCall
+        state={state}
+        connected={connected}
+        transcript={transcript}
+        muted={muted}
+        onMutedChange={(next) => {
+          mutedRef.current = next;
+          setMuted(next);
         }}
-        className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-      >
-        {mic.active ? "Stop microphone" : "Use my microphone"}
-      </button>
-      {mic.error && <p className="text-xs text-muted-foreground">{mic.error}</p>}
+        onEnd={() => setConnected(false)}
+        onStart={() => {
+          mutedRef.current = false;
+          setMuted(false);
+          setConnected(true);
+        }}
+        orbClassName="text-foreground dark:text-orange-50"
+      />
     </div>
   );
-}
-
-/** Samples the mic's loudness into a ref on every frame (no re-renders). */
-function useMicLevel() {
-  const level = React.useRef(0);
-  const [active, setActive] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const cleanup = React.useRef<() => void>(() => {});
-
-  const stop = React.useCallback(() => {
-    cleanup.current();
-    cleanup.current = () => {};
-    level.current = 0;
-    setActive(false);
-  }, []);
-
-  const start = React.useCallback(async () => {
-    try {
-      setError(null);
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const audio = new AudioContext();
-      const analyser = audio.createAnalyser();
-      analyser.fftSize = 512;
-      audio.createMediaStreamSource(stream).connect(analyser);
-      const data = new Uint8Array(analyser.fftSize);
-
-      let frame = 0;
-      const tick = () => {
-        analyser.getByteTimeDomainData(data);
-        let sum = 0;
-        for (const v of data) sum += ((v - 128) / 128) ** 2;
-        level.current = Math.min(1, Math.sqrt(sum / data.length) * 4);
-        frame = requestAnimationFrame(tick);
-      };
-      tick();
-
-      cleanup.current = () => {
-        cancelAnimationFrame(frame);
-        stream.getTracks().forEach((t) => t.stop());
-        void audio.close();
-      };
-      setActive(true);
-    } catch {
-      setError("Microphone unavailable — showing the synthetic rhythm instead.");
-    }
-  }, []);
-
-  React.useEffect(() => () => cleanup.current(), []);
-
-  return { level, active, error, start, stop };
 }

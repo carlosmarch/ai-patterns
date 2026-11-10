@@ -828,7 +828,7 @@ function VoicePlayground() {
     setMuted(mutedRef.current);
   }
 
-  const orbState = call === "off" || muted ? "idle" : call;
+  const orbState = call === "off" || muted ? "ready" : call;
   const [seconds, setSeconds] = React.useState(0);
   React.useEffect(() => {
     if (call === "off") return;
