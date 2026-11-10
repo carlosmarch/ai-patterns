@@ -45,7 +45,7 @@ export function AttachmentTray({
         setDragging(false);
         if (e.dataTransfer.files.length) onDropFiles?.(e.dataTransfer.files);
       }}
-      className={cn("relative rounded-2xl border p-3", className)}
+      className={cn("relative rounded-2xl p-3 bg-muted/60", className)}
     >
       {dragging && (
         <div className="pointer-events-none absolute inset-1 z-10 flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-foreground/30 bg-background/90 text-sm text-muted-foreground">
@@ -90,7 +90,7 @@ export function AttachmentChip({
   return (
     <li
       className={cn(
-        "relative flex w-40 shrink-0 items-center gap-2 rounded-xl border bg-card p-2",
+        "relative flex w-40 shrink-0 items-center gap-2 rounded-2xl bg-card p-2 border",
         status === "error" && "border-destructive/40 bg-destructive/5"
       )}
     >
@@ -153,7 +153,7 @@ export function AttachmentChip({
         type="button"
         onClick={() => onRemove?.(id)}
         aria-label={`Remove ${name}`}
-        className="absolute -right-1.5 -top-1.5 flex size-4 items-center justify-center rounded-full border bg-background text-muted-foreground shadow-sm transition-colors hover:text-foreground"
+        className="absolute -right-1.5 -top-1.5 flex size-4 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:text-foreground"
       >
         <X className="size-2.5" aria-hidden />
       </button>

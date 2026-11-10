@@ -204,7 +204,7 @@ export function ContextChipsComposer({
 
   return (
     <div ref={rootRef} className={cn("relative w-full", className)}>
-      <div className="rounded-2xl border bg-card p-2 shadow-sm">
+      <div className="rounded-2xl bg-card p-2 border">
         {(auto || attached.length > 0) && (
           <ul aria-label="Context for this message" className="flex flex-wrap gap-1.5 px-1 pt-1 pb-2">
             {auto && (
@@ -241,7 +241,7 @@ export function ContextChipsComposer({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.14 }}
-                  className="flex h-7 items-center gap-1.5 rounded-lg border bg-muted pr-0.5 pl-2 text-xs"
+                  className="flex h-7 items-center gap-1.5 rounded-lg pr-0.5 pl-2 text-xs bg-muted"
                 >
                   <s.icon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
                   <span className="max-w-40 truncate" title={s.detail ?? s.label}>
@@ -325,7 +325,7 @@ export function ContextChipsComposer({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: 0.14, ease: "easeOut" }}
-            className="absolute bottom-full left-0 z-20 mb-2 w-72 origin-bottom-left overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-lg"
+            className="absolute bottom-full left-0 z-20 mb-2 w-72 origin-bottom-left overflow-hidden rounded-2xl bg-popover text-popover-foreground border"
           >
             <div className="flex items-center gap-2 border-b px-3">
               <Search className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />

@@ -107,7 +107,7 @@ export function CollaborativePresence({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="mt-2 w-64 overflow-hidden rounded-xl border bg-popover shadow-md"
+            className="mt-2 w-64 overflow-hidden rounded-2xl bg-popover border"
           >
             <p className="px-3 py-2 text-xs text-muted-foreground">
               {onlineCount > 0
@@ -229,7 +229,7 @@ function Tooltip({ children }: { children: React.ReactNode }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 6 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
-      className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2.5 -translate-x-1/2 whitespace-nowrap rounded-md border bg-popover px-2.5 py-1.5 text-xs shadow-md"
+      className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2.5 -translate-x-1/2 whitespace-nowrap rounded-md border bg-popover px-2.5 py-1.5 text-xs"
     >
       {children}
     </motion.div>

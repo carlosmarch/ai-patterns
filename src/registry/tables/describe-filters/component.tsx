@@ -138,7 +138,7 @@ export function DescribeFiltersTable<Row extends { id: string }>({
   const showSuggestions = mode === "describing" && !draft && suggestions.length > 0;
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card text-sm shadow-sm", className)}>
+    <div className={cn("w-full overflow-hidden rounded-2xl bg-card text-sm border", className)}>
       {/* Toolbar */}
       <div className="border-b">
         <div className="flex min-h-14 items-center gap-2 px-3 py-2.5">
@@ -156,13 +156,13 @@ export function DescribeFiltersTable<Row extends { id: string }>({
                   ref={describeButtonRef}
                   type="button"
                   onClick={() => openDescribe()}
-                  className="flex h-8 shrink-0 items-center gap-1.5 rounded-full border bg-background px-3 font-medium transition-colors hover:bg-accent"
+                  className="flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-background px-3 font-medium transition-colors hover:bg-accent border"
                 >
                   <Sparkles className="size-3.5" aria-hidden />
                   Describe
                 </button>
 
-                <label className="flex h-8 w-40 shrink-0 items-center gap-2 rounded-full border bg-background px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-ring/40">
+                <label className="flex h-8 w-40 shrink-0 items-center gap-2 rounded-full px-3 text-muted-foreground focus-within:ring-2 focus-within:ring-ring/40 bg-muted">
                   <Search className="size-3.5 shrink-0" aria-hidden />
                   <input
                     value={query}

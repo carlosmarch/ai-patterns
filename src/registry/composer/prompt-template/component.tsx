@@ -62,7 +62,7 @@ export function PromptTemplate({ title, parts, onSubmit, submitLabel = "Run", cl
         e.preventDefault();
         submit();
       }}
-      className={cn("flex w-full flex-col gap-3 rounded-2xl border bg-card p-4 shadow-sm", className)}
+      className={cn("flex w-full flex-col gap-3 rounded-2xl bg-card p-4 border", className)}
     >
       {title && <p className="text-xs font-medium text-muted-foreground">{title}</p>}
 

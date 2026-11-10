@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+/* The patterns sidebar folded into a column of ticks (<html data-sidebar="compact">, see PatternsSidebar). */
+@custom-variant sidebar-compact (&:where([data-sidebar="compact"] *));
 
 :root {
   --radius: 0.625rem;
@@ -161,5 +163,30 @@ body {
   .logo-link:hover .animated-origami path,
   .logo-link:focus-visible .animated-origami path {
     animation: none;
+  }
+}
+
+/* Gallery card <-> expanded pattern view --------------------------- */
+/* The card and the expanded view share a view-transition name (see
+   patternTransitionName), so opening a pattern from /gallery grows the card
+   into the full-screen view, and collapsing shrinks it back. */
+::view-transition-group(.pattern-morph) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+::view-transition-image-pair(.pattern-morph) {
+  animation-name: pattern-morph-blur;
+  animation-duration: 420ms;
+}
+@keyframes pattern-morph-blur {
+  30% {
+    filter: blur(2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }

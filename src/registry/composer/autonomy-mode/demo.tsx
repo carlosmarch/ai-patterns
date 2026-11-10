@@ -84,7 +84,7 @@ export default function AutonomyModeDemo() {
         </AnimatePresence>
       </div>
 
-      <div className="rounded-2xl border bg-card p-3 shadow-sm">
+      <div className="rounded-2xl border bg-card p-3">
         <p className="px-1 pb-6 text-sm text-muted-foreground">Add a 20% annual discount and check the tests…</p>
         <div className="flex items-center justify-between">
           <AutonomyModePicker modes={modes} capabilities={capabilities} value={mode} onChange={setMode} />

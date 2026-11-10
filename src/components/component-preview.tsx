@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, ViewTransition, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Check, ChevronLeft, ChevronRight, Link2, Maximize2, Minimize2 } from "lucide-react";
 
 import { AnimatedOrigami } from "@/components/animated-origami";
-import { usePatternExpand } from "@/components/pattern-expand";
+import { patternTransitionName, usePatternExpand } from "@/components/pattern-expand";
 import type { PagerLink } from "@/components/pattern-pager";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,6 +22,7 @@ export function ComponentPreview({
   patternPanel,
   prev,
   next,
+  context,
 }: {
   title: string;
   /** The pattern's group, shown in the expanded view's breadcrumb. */
@@ -34,11 +35,14 @@ export function ComponentPreview({
   patternPanel?: ReactNode;
   prev?: PagerLink;
   next?: PagerLink;
+  /** The expanded side panel's Context tab: what the pattern page says around the demo. */
+  context?: ReactNode;
 }) {
   const pathname = usePathname();
-  const { expanded, setExpanded } = usePatternExpand();
+  const { expanded, setExpanded, fromGallery } = usePatternExpand();
   const [tab, setTab] = useState("preview");
-  const [panelTab, setPanelTab] = useState(pattern ? "pattern" : "code");
+  // Opened from the gallery, the panel leads with the context the wall doesn't show.
+  const [panelTab, setPanelTab] = useState(() => (fromGallery && context ? "context" : pattern ? "pattern" : "code"));
 
   function handleTabChange(value: string) {
     setTab(value);
@@ -64,6 +68,10 @@ export function ComponentPreview({
   }, [expanded, setExpanded]);
 
   const isExpanded = expanded && tab === "preview";
+  // Shares its view-transition name with the pattern's gallery card, so
+  // opening from (and collapsing back to) the gallery morphs card <-> view.
+  const route = pathname?.match(/\/patterns\/([^/]+)\/([^/]+)/);
+  const transitionName = isExpanded && route ? patternTransitionName(route[1], route[2]) : undefined;
 
   return (
     <Tabs value={tab} onValueChange={handleTabChange}>
@@ -80,82 +88,85 @@ export function ComponentPreview({
       </div>
 
       {/* The same wrappers are kept in both states so the demo isn't remounted on expand. */}
-      <div
-        role={isExpanded ? "region" : undefined}
-        aria-label={isExpanded ? `${title} preview, full width` : undefined}
-        className={cn(isExpanded ? "fixed inset-0 z-50 flex bg-background" : "contents")}
-      >
-        {/* Left side: header with logo and title, the live preview, and a footer with the pager. */}
-        <div className={cn(isExpanded ? "flex min-w-0 flex-1 flex-col" : "contents")}>
-          {isExpanded && (
-            <div className="flex h-12 shrink-0 items-center gap-2 border-b px-4 sm:px-6">
-              <nav aria-label="Breadcrumb" className="flex min-w-0 flex-1 items-center gap-1.5 text-sm whitespace-nowrap">
-                <Link
-                  href="/"
-                  aria-label="AI Patterns home"
-                  title="AI Patterns home"
-                  className="logo-link flex shrink-0 items-center text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <AnimatedOrigami className="size-4" />
-                </Link>
-                <BreadcrumbSlash />
-                <Link href="/patterns" className="shrink-0 text-muted-foreground transition-colors hover:text-foreground">
-                  Patterns
-                </Link>
-                <BreadcrumbSlash />
-                {category && (
-                  <>
-                    <Link
-                      href={category.href}
-                      className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      {category.label}
-                    </Link>
-                    <BreadcrumbSlash />
-                  </>
-                )}
-                <span aria-current="page" className="min-w-0 truncate font-medium">
-                  {title}
-                </span>
-              </nav>
-              {/* Not on phones: there's little room, and the address bar shares the link anyway. */}
-              <CopyLinkButton className="max-sm:hidden" />
-              {/* Without room for the side panel, Collapse lives here instead. */}
-              <CollapseButton onClick={() => setExpanded(false)} className="ml-2 lg:hidden" />
-            </div>
-          )}
-          <TabsContent
-            value="preview"
-            forceMount
-            className={cn(
-              "flex items-center justify-center bg-muted/30 p-10 data-[state=inactive]:hidden",
-              isExpanded ? "min-h-0 flex-1 overflow-auto" : "min-h-[280px] rounded-lg border"
+      <ViewTransition name={transitionName} share="pattern-morph" default="none">
+        <div
+          role={isExpanded ? "region" : undefined}
+          aria-label={isExpanded ? `${title} preview, full width` : undefined}
+          className={cn(isExpanded ? "fixed inset-0 z-50 flex bg-background" : "contents")}
+        >
+          {/* Left side: header with logo and title, the live preview, and a footer with the pager. */}
+          <div className={cn(isExpanded ? "flex min-w-0 flex-1 flex-col" : "contents")}>
+            {isExpanded && (
+              <div className="flex h-12 shrink-0 items-center gap-2 border-b px-4 sm:px-6">
+                <nav aria-label="Breadcrumb" className="flex min-w-0 flex-1 items-center gap-1.5 text-sm whitespace-nowrap">
+                  <Link
+                    href="/"
+                    aria-label="AI Patterns home"
+                    title="AI Patterns home"
+                    className="logo-link flex shrink-0 items-center text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <AnimatedOrigami className="size-4" />
+                  </Link>
+                  <BreadcrumbSlash />
+                  <Link href="/patterns" className="shrink-0 text-muted-foreground transition-colors hover:text-foreground">
+                    Patterns
+                  </Link>
+                  <BreadcrumbSlash />
+                  {category && (
+                    <>
+                      <Link
+                        href={category.href}
+                        className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {category.label}
+                      </Link>
+                      <BreadcrumbSlash />
+                    </>
+                  )}
+                  <span aria-current="page" className="min-w-0 truncate font-medium">
+                    {title}
+                  </span>
+                </nav>
+                {/* Not on phones: there's little room, and the address bar shares the link anyway. */}
+                <CopyLinkButton className="max-sm:hidden" />
+                {/* Without room for the side panel, Collapse lives here instead. */}
+                <CollapseButton onClick={() => setExpanded(false)} className="ml-2 lg:hidden" />
+              </div>
             )}
-          >
-            {preview}
-          </TabsContent>
-          {isExpanded && (prev || next) && (
-            <nav
-              aria-label="Previous and next pattern"
-              className="flex h-12 shrink-0 items-center justify-between gap-2 border-t px-4 sm:px-6"
+            <TabsContent
+              value="preview"
+              forceMount
+              className={cn(
+                "flex items-center justify-center bg-muted/30 p-10 data-[state=inactive]:hidden",
+                isExpanded ? "min-h-0 flex-1 overflow-auto" : "min-h-[280px] rounded-lg border"
+              )}
             >
-              <ExpandedPagerLink link={prev} direction="prev" />
-              <ExpandedPagerLink link={next} direction="next" />
-            </nav>
+              {preview}
+            </TabsContent>
+            {isExpanded && (prev || next) && (
+              <nav
+                aria-label="Previous and next pattern"
+                className="flex h-12 shrink-0 items-center justify-between gap-2 border-t px-4 sm:px-6"
+              >
+                <ExpandedPagerLink link={prev} direction="prev" />
+                <ExpandedPagerLink link={next} direction="next" />
+              </nav>
+            )}
+          </div>
+          {/* Right side: resizable panel with the guardrails or code. */}
+          {isExpanded && (
+            <ExpandedSidePanel
+              title={title}
+              code={code}
+              pattern={patternPanel ?? pattern}
+              context={context}
+              value={panelTab}
+              onValueChange={setPanelTab}
+              onCollapse={() => setExpanded(false)}
+            />
           )}
         </div>
-        {/* Right side: resizable panel with the guardrails or code. */}
-        {isExpanded && (
-          <ExpandedSidePanel
-            title={title}
-            code={code}
-            pattern={patternPanel ?? pattern}
-            value={panelTab}
-            onValueChange={setPanelTab}
-            onCollapse={() => setExpanded(false)}
-          />
-        )}
-      </div>
+      </ViewTransition>
 
       <TabsContent value="code" forceMount className="data-[state=inactive]:hidden">
         {code}
@@ -195,8 +206,10 @@ function storePanelWidth(width: number) {
 }
 
 /**
- * Side panel of the expanded view: shows the pattern's guardrails next to the
- * live preview, with a switcher in its header to swap in the code instead.
+ * Side panel of the expanded view: the pattern's context (what its page says
+ * around the demo), guardrails or code next to the live preview, with a
+ * switcher in its header. With Context it holds everything the pattern page
+ * has, so the expanded view is that page's large-screen layout.
  * Its left edge can be dragged (or moved with the arrow keys) to resize it;
  * the width is remembered across patterns and visits.
  */
@@ -204,6 +217,7 @@ function ExpandedSidePanel({
   title,
   code,
   pattern,
+  context,
   value,
   onValueChange,
   onCollapse,
@@ -211,6 +225,7 @@ function ExpandedSidePanel({
   title: string;
   code: ReactNode;
   pattern?: ReactNode;
+  context?: ReactNode;
   value: string;
   onValueChange: (value: string) => void;
   onCollapse: () => void;
@@ -295,6 +310,7 @@ function ExpandedSidePanel({
         {dragging && <div aria-hidden className="fixed inset-0 z-[5] cursor-col-resize select-none" />}
         <div className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
           <TabsList>
+            {context && <TabsTrigger value="context">Context</TabsTrigger>}
             {pattern && <TabsTrigger value="pattern">Guardrails</TabsTrigger>}
             <TabsTrigger value="code">Code</TabsTrigger>
           </TabsList>
@@ -304,6 +320,11 @@ function ExpandedSidePanel({
         </div>
         {/* The panel scrolls as a whole, so lift the code blocks' own height cap. */}
         <div className="min-h-0 flex-1 overflow-auto p-4 [&_[data-code-scroll]]:max-h-none">
+          {context && (
+            <TabsContent value="context" forceMount className="data-[state=inactive]:hidden">
+              {context}
+            </TabsContent>
+          )}
           {pattern && (
             <TabsContent value="pattern" forceMount className="data-[state=inactive]:hidden">
               {pattern}

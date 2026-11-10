@@ -241,7 +241,7 @@ export function InstructionTools({
     const el = editors.current.get(pendingFocus.current);
     pendingFocus.current = null;
     if (!el) return;
-    el.focus();
+    el.focus({ preventScroll: true });
     placeCaret((r) => {
       r.selectNodeContents(el);
       r.collapse(false);
@@ -374,7 +374,7 @@ function StepEditor({
     const el = editorRef.current;
     if (!current || !el) return;
     setPicker(null);
-    el.focus();
+    el.focus({ preventScroll: true });
     const anchor = current.anchor;
     if (!anchor.isConnected) return sync();
     if (replacement && pad) {
@@ -440,7 +440,7 @@ function StepEditor({
 
   function removeChip(chip: ChipState) {
     const el = editorRef.current;
-    el?.focus();
+    el?.focus({ preventScroll: true });
     placeCaret((r) => r.setStartBefore(chip.el));
     chip.el.remove();
     sync();
@@ -647,7 +647,7 @@ function ToolPicker({ picker, tools, onQuery, onActive, onChoose, onBack, onCanc
             e.preventDefault();
             inputRef.current?.focus();
           }}
-          className="absolute left-0 top-full z-30 mt-2 w-72 max-w-[80vw] overflow-hidden rounded-xl border bg-popover p-1 text-sm text-popover-foreground shadow-md"
+          className="absolute left-0 top-full z-30 mt-2 w-72 max-w-[80vw] overflow-hidden rounded-2xl bg-popover p-1 text-sm text-popover-foreground border"
         >
           {count === 0 && <p className="px-2.5 py-2 text-muted-foreground">No matches</p>}
 
@@ -776,7 +776,7 @@ function ToolChip({ chip, onEdit, onRemove }: ToolChipProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
-            className="absolute right-0 top-full z-30 mt-1 flex w-40 flex-col rounded-lg border bg-popover p-1 text-sm shadow-md"
+            className="absolute right-0 top-full z-30 mt-1 flex w-40 flex-col rounded-xl bg-popover p-1 text-sm border"
           >
             {tool.options?.length ? (
               <button

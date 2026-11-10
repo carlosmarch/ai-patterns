@@ -153,7 +153,7 @@ function ConfidenceBadge({
         onClick={() => canExpand && setExpanded((v) => !v)}
         aria-expanded={canExpand ? expanded : undefined}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full border bg-card px-2.5 py-1 text-xs font-medium text-foreground transition-colors",
+          "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium text-foreground transition-colors bg-muted",
           canExpand ? "cursor-pointer hover:bg-accent" : "cursor-default"
         )}
       >

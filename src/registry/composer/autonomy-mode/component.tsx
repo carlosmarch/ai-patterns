@@ -161,7 +161,7 @@ export function AutonomyModePicker({
             exit={{ opacity: 0, y: side === "up" ? 4 : -4, scale: 0.98 }}
             transition={{ duration: 0.14, ease: "easeOut" }}
             className={cn(
-              "absolute left-0 z-20 w-80 overflow-hidden rounded-xl border bg-popover p-1 text-popover-foreground shadow-lg",
+              "absolute left-0 z-20 w-80 overflow-hidden rounded-2xl bg-popover p-1 text-popover-foreground border",
               side === "up" ? "bottom-full mb-2 origin-bottom-left" : "top-full mt-2 origin-top-left"
             )}
           >

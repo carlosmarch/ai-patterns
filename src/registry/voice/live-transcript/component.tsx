@@ -49,7 +49,7 @@ export function LiveTranscript({ segments, active = true, className }: LiveTrans
   }
 
   return (
-    <div className={cn("relative w-full overflow-hidden rounded-2xl border bg-card", className)}>
+    <div className={cn("relative w-full overflow-hidden rounded-2xl bg-card border", className)}>
       <div
         ref={bodyRef}
         onScroll={handleScroll}
@@ -81,7 +81,7 @@ export function LiveTranscript({ segments, active = true, className }: LiveTrans
         <button
           type="button"
           onClick={jumpToLatest}
-          className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-foreground px-2.5 py-1 text-xs text-background shadow-sm"
+          className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-foreground px-2.5 py-1 text-xs text-background"
         >
           <ArrowDown className="size-3" aria-hidden />
           Jump to latest

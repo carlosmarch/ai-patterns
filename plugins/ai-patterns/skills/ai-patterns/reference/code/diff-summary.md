@@ -91,7 +91,7 @@ export function DiffSummaryCard({
   const rest = files.slice(visibleCount);
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card", className)}>
+    <div className={cn("w-full overflow-hidden rounded-2xl bg-card border", className)}>
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
         <p className="text-xs font-medium">Edited {files.length} files</p>
         <div className="flex items-center gap-2">
@@ -105,7 +105,7 @@ export function DiffSummaryCard({
           <button
             type="button"
             onClick={onViewChanges}
-            className="rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:bg-accent"
+            className="rounded-full px-3 py-1 text-xs font-medium transition-colors hover:bg-foreground/10 bg-muted"
           >
             View changes
           </button>

@@ -241,7 +241,7 @@ export function ImagePeek({ images, max = 3, openDelay = 150, className }: Image
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.6, y: -4, transition: { duration: 0.14 } }}
             transition={reduceMotion ? { duration: 0.12 } : spring}
             style={{ transformOrigin: `${originX} 0px` }}
-            className="absolute right-0 top-full z-20 mt-3.5 w-72 overflow-hidden rounded-xl border bg-popover text-popover-foreground shadow-xl shadow-black/10 sm:w-80"
+            className="absolute right-0 top-full z-20 mt-3.5 w-72 overflow-hidden rounded-2xl bg-popover text-popover-foreground sm:w-80 border"
           >
             <div className="group/peek relative aspect-[16/10] overflow-hidden bg-muted">
               <AnimatePresence initial={false} custom={direction} mode="popLayout">
@@ -270,7 +270,7 @@ export function ImagePeek({ images, max = 3, openDelay = 150, className }: Image
                     type="button"
                     aria-label="Previous image"
                     onClick={() => step(-1)}
-                    className="absolute left-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 text-foreground opacity-0 shadow-sm backdrop-blur transition-opacity hover:bg-background focus-visible:opacity-100 group-hover/peek:opacity-100"
+                    className="absolute left-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 text-foreground opacity-0 backdrop-blur transition-opacity hover:bg-background focus-visible:opacity-100 group-hover/peek:opacity-100 border"
                   >
                     <ChevronLeft className="size-4" />
                   </button>
@@ -278,7 +278,7 @@ export function ImagePeek({ images, max = 3, openDelay = 150, className }: Image
                     type="button"
                     aria-label="Next image"
                     onClick={() => step(1)}
-                    className="absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 text-foreground opacity-0 shadow-sm backdrop-blur transition-opacity hover:bg-background focus-visible:opacity-100 group-hover/peek:opacity-100"
+                    className="absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 text-foreground opacity-0 backdrop-blur transition-opacity hover:bg-background focus-visible:opacity-100 group-hover/peek:opacity-100 border"
                   >
                     <ChevronRight className="size-4" />
                   </button>

@@ -201,7 +201,7 @@ export function ModelPicker({
             exit={{ opacity: 0, y: side === "up" ? 4 : -4, scale: 0.98 }}
             transition={{ duration: 0.14, ease: "easeOut" }}
             className={cn(
-              "absolute left-0 z-20 w-72 overflow-hidden rounded-xl border bg-popover p-1 text-popover-foreground shadow-lg",
+              "absolute left-0 z-20 w-72 overflow-hidden rounded-2xl bg-popover p-1 text-popover-foreground border",
               side === "up" ? "bottom-full mb-2 origin-bottom-left" : "top-full mt-2 origin-top-left"
             )}
           >
@@ -238,7 +238,7 @@ export function ModelPicker({
                           {model.label}
                         </span>
                         {model.badge && (
-                          <span className="rounded-full border px-1.5 text-[10px] leading-4 text-muted-foreground">
+                          <span className="rounded-full px-1.5 text-[10px] leading-4 text-muted-foreground bg-muted">
                             {model.badge}
                           </span>
                         )}
@@ -250,7 +250,7 @@ export function ModelPicker({
                     {model.locked ? (
                       onUpgrade ? (
                         // Not a nested button: the whole row is the upgrade action.
-                        <span className="mt-0.5 flex shrink-0 items-center gap-1 rounded-md border bg-background px-1.5 py-0.5 text-[11px] font-medium text-foreground">
+                        <span className="mt-0.5 flex shrink-0 items-center gap-1 rounded-lg px-1.5 py-0.5 text-[11px] font-medium text-foreground bg-muted">
                           <Lock className="size-3" aria-hidden />
                           {upgradeLabel}
                         </span>
@@ -305,7 +305,7 @@ function Switch({
       <motion.span
         layout
         transition={{ type: "spring", stiffness: 500, damping: 32 }}
-        className={cn("size-4 rounded-full bg-background shadow-sm", checked ? "ml-[18px]" : "ml-0.5")}
+        className={cn("size-4 rounded-full bg-background border", checked ? "ml-[18px]" : "ml-0.5")}
       />
     </button>
   );

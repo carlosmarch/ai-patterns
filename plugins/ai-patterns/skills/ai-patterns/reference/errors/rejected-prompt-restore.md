@@ -162,7 +162,7 @@ export function RejectedPromptComposer({
 
       <div
         className={cn(
-          "flex items-end gap-2 rounded-2xl border bg-card px-3 py-2 transition-colors",
+          "flex items-end gap-2 rounded-2xl bg-card px-3 py-2 transition-colors border",
           rejection && !edited && "border-foreground/30"
         )}
       >

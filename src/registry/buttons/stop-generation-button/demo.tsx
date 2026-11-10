@@ -15,7 +15,7 @@ export default function StopGenerationButtonDemo() {
   }, [state]);
 
   return (
-    <div className="flex w-full max-w-sm items-center gap-2 rounded-full border bg-card py-1.5 pl-4 pr-1.5 shadow-sm">
+    <div className="flex w-full max-w-sm items-center gap-2 rounded-full border bg-card py-1.5 pl-4 pr-1.5">
       <input
         value={value}
         onChange={(e) => setValue(e.target.value)}

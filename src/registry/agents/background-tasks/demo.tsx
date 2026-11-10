@@ -102,7 +102,7 @@ export default function BackgroundTasksDemo() {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="mt-auto flex w-fit items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-xs font-medium shadow-sm transition-colors hover:bg-muted"
+            className="mt-auto flex w-fit items-center gap-2 rounded-full border bg-background px-3 py-1.5 text-xs font-medium transition-colors hover:bg-muted"
           >
             <ListChecks className="size-3.5" />
             {runningCount > 0 ? `${runningCount} running` : "Tasks"}

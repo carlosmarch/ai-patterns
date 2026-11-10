@@ -19,6 +19,8 @@ const THEME_INIT_SCRIPT = `
     var theme = localStorage.getItem("theme");
     var isDark = theme === "dark" || (theme !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
     document.documentElement.classList.toggle("dark", isDark);
+    // The patterns sidebar is compact (ticks) unless the reader expanded it — see PatternsSidebar.
+    if (localStorage.getItem("ai-patterns:sidebar") !== "full") document.documentElement.dataset.sidebar = "compact";
   } catch (e) {}
 })();
 `;

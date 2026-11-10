@@ -160,7 +160,7 @@ export function ChatBubble({
               if (e.key === "Escape") cancelEdit();
             }}
             rows={Math.min(6, Math.max(2, draft.split("\n").length))}
-            className="w-full resize-none rounded-2xl border bg-background px-4 py-2.5 text-sm leading-relaxed outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="w-full resize-none rounded-2xl px-4 py-2.5 text-sm leading-relaxed outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 bg-muted focus:bg-background"
           />
           <div className="flex justify-end gap-2">
             <button

@@ -97,7 +97,7 @@ export function PlanReview({
   }
 
   return (
-    <section className={cn("w-full rounded-2xl border bg-card", className)} aria-label="Plan review">
+    <section className={cn("w-full rounded-2xl bg-card border", className)} aria-label="Plan review">
       <header className="flex items-start justify-between gap-3 px-4 pt-4 pb-2">
         <div className="min-w-0">
           <h3 className="text-sm font-semibold">{phase === "approved" ? "Plan approved" : title}</h3>
@@ -108,7 +108,7 @@ export function PlanReview({
           </p>
         </div>
         {changed && phase === "review" && (
-          <span className="shrink-0 rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground">Edited</span>
+          <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] text-muted-foreground bg-muted">Edited</span>
         )}
       </header>
 
@@ -270,7 +270,7 @@ function Row({
         )}
         <span
           className={cn(
-            "mt-px flex size-5 shrink-0 items-center justify-center rounded-full border text-[11px] font-medium tabular-nums",
+            "mt-px flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-medium tabular-nums bg-muted",
             locked && "border-foreground bg-foreground text-background"
           )}
           aria-hidden
@@ -290,7 +290,7 @@ function Row({
             }}
             aria-label={`Edit step ${index + 1}`}
             placeholder="Describe the step"
-            className="min-w-0 flex-1 rounded-md border bg-background px-2 py-0.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="min-w-0 flex-1 rounded-lg px-2 py-0.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring bg-muted focus:bg-background"
           />
         ) : (
           <button

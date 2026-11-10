@@ -56,7 +56,7 @@ export const ArtifactCard = React.forwardRef<HTMLButtonElement, ArtifactCardProp
         className
       )}
     >
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground bg-muted">
         <Icon className="size-4" aria-hidden />
       </span>
       <span className="min-w-0 flex-1">

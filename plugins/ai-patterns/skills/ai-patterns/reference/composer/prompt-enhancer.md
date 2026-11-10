@@ -139,7 +139,7 @@ export function PromptEnhancer({
     <div className={cn("flex w-full flex-col gap-2", className)}>
       <div
         className={cn(
-          "relative overflow-hidden rounded-2xl border bg-card shadow-sm transition-colors",
+          "relative overflow-hidden rounded-2xl bg-card transition-colors border",
           phase === "enhancing" && "border-foreground/30"
         )}
       >
@@ -215,7 +215,7 @@ export function PromptEnhancer({
             onClick={enhance}
             disabled={!canEnhance}
             title={value.trim().length < minLength ? "Write a few words first" : "Rewrite with more detail"}
-            className="inline-flex items-center gap-1.5 rounded-full border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-50 border"
           >
             <motion.span
               animate={phase === "enhancing" && !reduceMotion ? { rotate: [0, 18, -12, 0], scale: [1, 1.15, 1] } : { rotate: 0, scale: 1 }}

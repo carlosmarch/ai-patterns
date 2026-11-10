@@ -21,7 +21,7 @@ export default function IncognitoToggleDemo() {
 
       <div
         className={cn(
-          "flex items-end gap-2 rounded-2xl border bg-card p-3 shadow-sm transition-colors",
+          "flex items-end gap-2 rounded-2xl border bg-card p-3 transition-colors",
           active && "border-dashed border-foreground/30"
         )}
       >

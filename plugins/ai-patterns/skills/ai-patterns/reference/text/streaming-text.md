@@ -142,7 +142,7 @@ export function StreamingText({ segments, speed = 18, followUps, onComplete, cla
                 <button
                   key={label}
                   type="button"
-                  className="rounded-full border px-3 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  className="rounded-full px-3 py-1 text-xs text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-accent-foreground bg-muted"
                 >
                   {label}
                 </button>
@@ -168,7 +168,7 @@ function BlinkingCursor() {
 
 function SourceChip({ label }: { label: string }) {
   return (
-    <span className="mx-1 inline-flex -translate-y-px items-center gap-1 rounded-full border bg-muted px-2 py-0.5 align-middle text-xs">
+    <span className="mx-1 inline-flex -translate-y-px items-center gap-1 rounded-full px-2 py-0.5 align-middle text-xs bg-muted">
       <span className="flex size-3.5 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
         <Globe className="size-2.5" />
       </span>

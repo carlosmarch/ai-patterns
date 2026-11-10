@@ -366,7 +366,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
   };
 
   return (
-    <div suppressHydrationWarning className={cn("w-full max-w-xs overflow-hidden rounded-2xl border bg-card", className)}>
+    <div suppressHydrationWarning className={cn("w-full max-w-xs overflow-hidden rounded-2xl bg-card border", className)}>
       {/* Header preview */}
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
@@ -415,7 +415,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. AI-Patterns"
                 aria-label="Agent name"
-                className="mt-3 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-ring placeholder:text-muted-foreground/50 focus-visible:ring-2"
+                className="mt-3 w-full rounded-xl px-3 py-2 text-sm outline-none ring-ring placeholder:text-muted-foreground/50 focus-visible:ring-2 bg-muted focus:bg-background"
               />
 
               <textarea
@@ -424,10 +424,10 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                 placeholder="e.g. When a GitHub issue is labeled pattern-request in carlosmarch/ai-patterns, triage it and suggest a matching component."
                 aria-label="Agent instructions"
                 rows={3}
-                className="mt-2 w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-ring placeholder:text-muted-foreground/50 focus-visible:ring-2"
+                className="mt-2 w-full resize-none rounded-xl px-3 py-2 text-sm outline-none ring-ring placeholder:text-muted-foreground/50 focus-visible:ring-2 bg-muted focus:bg-background"
               />
 
-              <ul className="mt-3 divide-y rounded-xl border">
+              <ul className="mt-3 divide-y rounded-xl bg-muted/60">
                 {DEFAULT_GUARDRAILS.map(({ id, label, description, icon: Icon }) => {
                   const enabled = guardrailStates[id] ?? false;
                   return (
@@ -452,7 +452,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                       >
                         <motion.span
                           aria-hidden
-                          className="pointer-events-none inline-block h-4 w-4 rounded-full bg-background shadow-sm"
+                          className="pointer-events-none inline-block h-4 w-4 rounded-full bg-background border"
                           animate={{ x: enabled ? 16 : 0 }}
                           transition={{ type: "spring", stiffness: 500, damping: 30 }}
                         />
@@ -577,7 +577,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                         onClick={() => toggleSource(id)}
                         className="flex w-full items-center gap-3 px-3 py-2.5 text-left"
                       >
-                        <span className="flex size-7 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                        <span className="flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground bg-muted">
                           <Icon className="size-3.5" />
                         </span>
                         <span className="min-w-0 flex-1">
@@ -618,13 +618,13 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                                       value={config[field.id] ?? ""}
                                       onChange={(e) => setTriggerField(id, field.id, e.target.value)}
                                       placeholder={field.placeholder}
-                                      className="w-full rounded-md border bg-background px-2.5 py-1.5 text-xs outline-none ring-ring placeholder:text-muted-foreground/40 focus-visible:ring-2"
+                                      className="w-full rounded-lg px-2.5 py-1.5 text-xs outline-none ring-ring placeholder:text-muted-foreground/40 focus-visible:ring-2 bg-muted focus:bg-background"
                                     />
                                   ) : (
                                     <select
                                       value={config[field.id] ?? field.options?.[0]?.value ?? ""}
                                       onChange={(e) => setTriggerField(id, field.id, e.target.value)}
-                                      className="w-full rounded-md border bg-background px-2.5 py-1.5 text-xs outline-none ring-ring focus-visible:ring-2"
+                                      className="w-full rounded-lg px-2.5 py-1.5 text-xs outline-none ring-ring focus-visible:ring-2 bg-muted focus:bg-background"
                                     >
                                       {field.options?.map((opt) => (
                                         <option key={opt.value} value={opt.value}>
@@ -657,7 +657,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                   >
                     <div className="mt-2 rounded-xl border border-foreground/20 bg-muted/40">
                       <div className="flex items-center gap-2 px-3 py-2.5">
-                        <span className="flex size-7 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground">
+                        <span className="flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground bg-muted">
                           <Webhook className="size-3.5" />
                         </span>
                         <span className="flex-1 text-xs font-medium text-muted-foreground">
@@ -682,7 +682,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                             value={ct.name}
                             onChange={(e) => updateCustomTrigger(ct.id, "name", e.target.value)}
                             placeholder="e.g. Webhook received"
-                            className="w-full rounded-md border bg-background px-2.5 py-1.5 text-xs outline-none ring-ring placeholder:text-muted-foreground/40 focus-visible:ring-2"
+                            className="w-full rounded-lg px-2.5 py-1.5 text-xs outline-none ring-ring placeholder:text-muted-foreground/40 focus-visible:ring-2 bg-muted focus:bg-background"
                           />
                         </div>
                         <div className="flex flex-col gap-1">
@@ -694,7 +694,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                             value={ct.event}
                             onChange={(e) => updateCustomTrigger(ct.id, "event", e.target.value)}
                             placeholder="e.g. POST /webhooks/my-agent"
-                            className="w-full rounded-md border bg-background px-2.5 py-1.5 text-xs outline-none ring-ring placeholder:text-muted-foreground/40 focus-visible:ring-2"
+                            className="w-full rounded-lg px-2.5 py-1.5 text-xs outline-none ring-ring placeholder:text-muted-foreground/40 focus-visible:ring-2 bg-muted focus:bg-background"
                           />
                         </div>
                       </div>
@@ -716,7 +716,7 @@ export function CreateAgent({ onCreateAgent, className }: CreateAgentProps) {
                 <button
                   type="button"
                   onClick={goToStep0}
-                  className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
+                  className="flex-1 rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-foreground/10 bg-muted"
                 >
                   Back
                 </button>

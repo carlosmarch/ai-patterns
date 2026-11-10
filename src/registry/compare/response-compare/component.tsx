@@ -139,8 +139,8 @@ function ResponsePanel({
             onPick();
           }}
           className={cn(
-            "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-            picked ? "border-primary bg-primary text-primary-foreground" : "hover:bg-accent"
+            "rounded-full px-3 py-1 text-xs font-medium transition-colors bg-muted",
+            picked ? "bg-primary text-primary-foreground" : "hover:bg-foreground/10"
           )}
         >
           {picked ? "Chosen" : "Choose this"}

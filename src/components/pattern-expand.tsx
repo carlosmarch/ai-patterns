@@ -1,15 +1,43 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+
+import { keepScrollOnNextNavigation } from "@/components/scroll-restoration";
 
 /** `?view=expanded` opens a pattern page straight into the expanded view, so it can be shared. */
 const VIEW_PARAM = "view";
 const EXPANDED_VALUE = "expanded";
 
+/** Where the expanded view returns to when it was opened from the gallery. */
+export const GALLERY_HREF = "/patterns";
+
+// Set by the gallery right before it navigates to a pattern: the gallery URL
+// to return to. The provider reads it on mount to render expanded in the very
+// first frame — that's what lets the gallery card's view transition pair with
+// the expanded view. A module variable rather than state: on a hard load it's
+// always null, so the static HTML and hydration agree.
+let openingFromGallery: string | null = null;
+
+/**
+ * Call right before navigating from the gallery to
+ * `/patterns/<category>/<slug>?view=expanded`, with the gallery URL
+ * (filter included) that collapsing should return to.
+ */
+export function markOpeningFromGallery(returnHref: string = GALLERY_HREF) {
+  openingFromGallery = returnHref;
+}
+
+/** The shared view-transition name of a pattern's gallery card and its expanded view. */
+export function patternTransitionName(category: string, slug: string) {
+  return `pattern-${category}-${slug}`;
+}
+
 interface PatternExpandState {
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
+  /** Opened from the gallery: collapsing goes back there instead of to the page. */
+  fromGallery: boolean;
 }
 
 const PatternExpandContext = createContext<PatternExpandState | null>(null);
@@ -20,19 +48,41 @@ const PatternExpandContext = createContext<PatternExpandState | null>(null);
  * between patterns, so prev/next keeps the preview expanded.
  */
 export function PatternExpandProvider({ children }: { children: ReactNode }) {
-  const [expanded, setExpanded] = useState(false);
+  // Not consumed in the initializer: Strict Mode runs initializers twice.
+  const [returnHref] = useState(() => openingFromGallery);
+  const fromGallery = returnHref !== null;
+  const [expanded, setExpandedState] = useState(fromGallery);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    openingFromGallery = null;
+  }, []);
+
+  const setExpanded = useCallback(
+    (next: boolean) => {
+      if (next || returnHref === null) return setExpandedState(next);
+      // Collapsing a view opened from the gallery returns to the gallery,
+      // morphing back into the card. A push, not router.back(): back/forward
+      // navigations don't run as transitions, so they wouldn't animate. The
+      // gallery restores its own filter and scroll position.
+      keepScrollOnNextNavigation();
+      router.push(returnHref, { scroll: false });
+    },
+    [returnHref, router],
+  );
 
   // Whether the URL asked to open expanded and the state hasn't caught up yet
   // (null until first read on mount). Read from window.location rather than
   // useSearchParams so the static export doesn't need a Suspense boundary.
-  const pendingOpen = useRef<boolean | null>(null);
+  // Already expanded when opened from the gallery, so nothing is pending.
+  const pendingOpen = useRef<boolean | null>(fromGallery ? false : null);
 
   // Keep the URL in step — on toggle and after prev/next — so it can be copied and shared.
   useEffect(() => {
     if (pendingOpen.current === null) {
       pendingOpen.current = new URLSearchParams(window.location.search).get(VIEW_PARAM) === EXPANDED_VALUE;
-      if (pendingOpen.current) requestAnimationFrame(() => setExpanded(true));
+      if (pendingOpen.current) requestAnimationFrame(() => setExpandedState(true));
     }
     if (pendingOpen.current) {
       if (!expanded) return;
@@ -59,7 +109,7 @@ export function PatternExpandProvider({ children }: { children: ReactNode }) {
   }, [expanded]);
 
   return (
-    <PatternExpandContext.Provider value={{ expanded, setExpanded }}>{children}</PatternExpandContext.Provider>
+    <PatternExpandContext.Provider value={{ expanded, setExpanded, fromGallery }}>{children}</PatternExpandContext.Provider>
   );
 }
 

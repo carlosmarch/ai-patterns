@@ -53,7 +53,7 @@ export function MultiAgentTrace({ agents, className }: MultiAgentTraceProps) {
   const allResolved = active === 0;
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card", className)}>
+    <div className={cn("w-full overflow-hidden rounded-2xl bg-card border", className)}>
       <div aria-live="polite" className="flex items-center gap-2 border-b px-4 py-3 text-xs font-medium">
         {!allResolved ? (
           <Loader2 className="size-3.5 animate-spin text-muted-foreground" aria-hidden />

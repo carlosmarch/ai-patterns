@@ -129,7 +129,7 @@ export function AiReviewPanel({
     <aside
       aria-label={title}
       className={cn(
-        "flex h-full w-full max-w-sm flex-col overflow-hidden rounded-xl border bg-background text-sm shadow-sm",
+        "flex h-full w-full max-w-sm flex-col overflow-hidden rounded-2xl bg-background text-sm border",
         className
       )}
     >
@@ -227,7 +227,7 @@ export function AiReviewPanel({
       </div>
 
       <div className="px-3 py-2.5">
-        <label className="flex h-8 items-center gap-2 rounded-md border bg-background px-2.5 focus-within:ring-2 focus-within:ring-ring/40">
+        <label className="flex h-8 items-center gap-2 rounded-lg px-2.5 focus-within:ring-2 focus-within:ring-ring/40 bg-muted">
           <Search className="size-3.5 text-muted-foreground" aria-hidden />
           <input
             value={query}

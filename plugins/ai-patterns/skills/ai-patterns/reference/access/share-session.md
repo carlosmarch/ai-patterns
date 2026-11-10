@@ -223,7 +223,7 @@ export function ShareSessionDialog({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 8 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="relative w-full max-w-md rounded-2xl border bg-popover p-5 text-popover-foreground shadow-xl"
+            className="relative w-full max-w-md rounded-2xl bg-popover p-5 text-popover-foreground border"
           >
             <div className="flex items-start justify-between gap-4">
               <h2 id={titleId} className="text-base font-semibold">
@@ -289,7 +289,7 @@ export function ShareSessionDialog({
                   transition={{ duration: reduce ? 0 : 0.18 }}
                   className="overflow-hidden"
                 >
-                  <div className="mt-3 flex items-center gap-2 rounded-xl border px-3 py-2">
+                  <div className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2 bg-muted/60">
                     <Link2 className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
                     <span className="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground">{shareUrl}</span>
                     <button
@@ -313,7 +313,7 @@ export function ShareSessionDialog({
             {policyNote && <p className="mt-4 text-xs text-muted-foreground">{policyNote}</p>}
 
             {exposureWarning && (
-              <div id={warningId} className="mt-4 flex items-start gap-2.5 rounded-xl border px-3 py-3">
+              <div id={warningId} className="mt-4 flex items-start gap-2.5 rounded-xl px-3 py-3 bg-muted/60">
                 <TriangleAlert className="mt-0.5 size-4 shrink-0 text-amber-500" aria-hidden />
                 <p className="text-sm">{exposureWarning}</p>
               </div>

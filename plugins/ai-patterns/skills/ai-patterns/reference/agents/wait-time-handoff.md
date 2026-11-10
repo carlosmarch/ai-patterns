@@ -170,7 +170,7 @@ function Select({
         aria-label={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-8 w-full cursor-pointer appearance-none rounded-full border bg-background py-0 pl-3 pr-8 text-xs font-medium outline-none transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+        className="h-8 w-full cursor-pointer appearance-none rounded-full py-0 pl-3 pr-8 text-xs font-medium outline-none transition-colors hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring bg-muted"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -251,7 +251,7 @@ export function WaitTimeHandoff({
   return (
     <section
       aria-labelledby={`${id}-title`}
-      className={cn("w-full max-w-md overflow-hidden rounded-2xl border bg-card shadow-sm", className)}
+      className={cn("w-full max-w-md overflow-hidden rounded-2xl bg-card border", className)}
     >
       <h3 className="m-0">
         <button
@@ -313,7 +313,7 @@ export function WaitTimeHandoff({
                     onChange={(e) => setDraftAmount(e.target.value)}
                     onBlur={(e) => commitAmount(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && commitAmount(e.currentTarget.value)}
-                    className="h-8 w-20 rounded-full border bg-background px-3 text-xs tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="h-8 w-20 rounded-full px-3 text-xs tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring bg-muted"
                   />
                   <Select
                     label="Wait unit"
@@ -363,7 +363,7 @@ export function WaitTimeHandoff({
                         {selected && (
                           <motion.span
                             layoutId={`${id}-segment`}
-                            className="absolute inset-0 rounded-full border bg-background shadow-sm"
+                            className="absolute inset-0 rounded-full border bg-background"
                             transition={{ type: "spring", stiffness: 500, damping: 38 }}
                           />
                         )}
@@ -407,7 +407,7 @@ export function WaitTimeHandoff({
                     setMessageEdited(true);
                     update({ message: e.target.value });
                   }}
-                  className="w-full resize-none rounded-xl border bg-background px-3 py-2.5 text-xs leading-relaxed outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                  className="w-full resize-none rounded-2xl px-3 py-2.5 text-xs leading-relaxed outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring bg-muted focus:bg-background"
                 />
               </div>
 

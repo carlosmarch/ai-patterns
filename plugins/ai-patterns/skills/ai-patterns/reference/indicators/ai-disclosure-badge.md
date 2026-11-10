@@ -124,7 +124,7 @@ export function AiDisclosureBadge({ label, details, variant = "chip", className 
 
   const badgeClass = cn(
     "inline-flex items-center gap-1 text-xs font-medium whitespace-nowrap",
-    variant === "chip" && "rounded-full border bg-background px-2 py-0.5 text-muted-foreground",
+    variant === "chip" && "rounded-full px-2 py-0.5 text-muted-foreground bg-muted",
     variant === "overlay" && "rounded-full bg-black/55 px-2 py-0.5 text-white backdrop-blur-sm",
     variant === "inline" && "text-muted-foreground",
     hasDetails && "cursor-pointer transition-colors",
@@ -186,7 +186,7 @@ export function AiDisclosureBadge({ label, details, variant = "chip", className 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -3 }}
             transition={{ duration: 0.12, ease: "easeOut" }}
-            className="absolute top-full left-0 z-20 mt-1.5 block w-60 rounded-xl border bg-popover p-3 text-left text-xs font-normal whitespace-normal text-popover-foreground shadow-lg"
+            className="absolute top-full left-0 z-20 mt-1.5 block w-60 rounded-2xl bg-popover p-3 text-left text-xs font-normal whitespace-normal text-popover-foreground border"
           >
             <span className="block font-medium text-foreground">
               {details?.editedBy ? "Created with AI, reviewed by a person" : "Created with AI"}

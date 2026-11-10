@@ -178,7 +178,7 @@ export function InlineCitation({ index, source, className }: InlineCitationProps
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: position.placement === "top" ? 4 : -4 }}
                   transition={{ duration: 0.12 }}
-                  className="rounded-xl border bg-popover p-3 text-left shadow-md"
+                  className="rounded-2xl bg-popover p-3 text-left border"
                 >
                   <a
                     href={source.url}

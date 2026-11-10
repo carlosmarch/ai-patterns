@@ -88,7 +88,7 @@ export interface AnalysisListProps {
 
 export function AnalysisList({ items, analyzing, className }: AnalysisListProps) {
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card", className)}>
+    <div className={cn("w-full overflow-hidden rounded-2xl bg-card border", className)}>
       <IndeterminateBar active={analyzing} />
       <ul aria-live="polite" className="divide-y divide-border/70">
         {items.map((item) => (

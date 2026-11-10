@@ -40,9 +40,9 @@ export function DiffTabs({ files, defaultFileId, className }: DiffTabsProps) {
             aria-selected={file.id === active.id}
             onClick={() => setActiveId(file.id)}
             className={cn(
-              "flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium transition-colors",
+              "flex items-center gap-1.5 rounded-lg border border-transparent px-2 py-1 text-xs font-medium transition-colors bg-muted",
               file.id === active.id
-                ? "border-foreground/20 bg-accent text-foreground"
+                ? "border-border bg-background text-foreground"
                 : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
             )}
           >
@@ -52,7 +52,7 @@ export function DiffTabs({ files, defaultFileId, className }: DiffTabsProps) {
         ))}
       </div>
 
-      <div className="mt-2 overflow-hidden rounded-2xl border bg-card">
+      <div className="mt-2 overflow-hidden rounded-2xl bg-card border">
         <div className="flex items-center gap-2 border-b px-4 py-2.5">
           <FileCode2 className="size-4 shrink-0 text-muted-foreground" aria-hidden />
           <span className="flex-1 truncate text-xs font-medium">{active.name}</span>

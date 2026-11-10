@@ -134,7 +134,7 @@ export function QuickChatDock({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}
             transition={spring}
-            className="pointer-events-auto mx-3 mb-3 flex w-full max-w-md items-center gap-1 rounded-2xl border bg-card p-2 pl-3.5 shadow-md"
+            className="pointer-events-auto mx-3 mb-3 flex w-full max-w-md items-center gap-1 rounded-2xl bg-card p-2 pl-3.5 border"
           >
             <input
               ref={inputRef}
@@ -187,7 +187,7 @@ export function QuickChatDock({
               className={cn(
                 "flex items-center overflow-visible",
                 expanded
-                  ? "gap-0.5 border bg-popover p-1 shadow-md"
+                  ? "gap-0.5 bg-popover p-1 border"
                   : "h-1.5 w-10 bg-muted-foreground/40 hover:bg-muted-foreground/60"
               )}
             >
@@ -253,14 +253,14 @@ function DockButton({
             animate={{ opacity: 1, y: 0, x: "-50%" }}
             exit={{ opacity: 0, y: 4, x: "-50%" }}
             transition={{ duration: 0.12 }}
-            className="pointer-events-none absolute bottom-full left-1/2 mb-2.5 flex items-center gap-2 rounded-xl border bg-popover py-1.5 pr-1.5 pl-2.5 text-xs font-medium whitespace-nowrap text-foreground shadow-md"
+            className="pointer-events-none absolute bottom-full left-1/2 mb-2.5 flex items-center gap-2 rounded-2xl bg-popover py-1.5 pr-1.5 pl-2.5 text-xs font-medium whitespace-nowrap text-foreground border"
           >
             {label}
             <span className="flex gap-1">
               {keys.map((k) => (
                 <kbd
                   key={k}
-                  className="flex h-5 min-w-5 items-center justify-center rounded border bg-muted px-1 font-sans text-[10px] font-medium text-muted-foreground"
+                  className="flex h-5 min-w-5 items-center justify-center rounded-lg px-1 font-sans text-[10px] font-medium text-muted-foreground bg-muted"
                 >
                   {k}
                 </kbd>

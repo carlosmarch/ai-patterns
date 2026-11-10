@@ -155,7 +155,7 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (v: boolean
     >
       <motion.span
         aria-hidden
-        className="pointer-events-none inline-block h-4 w-4 rounded-full bg-background shadow-sm"
+        className="pointer-events-none inline-block h-4 w-4 rounded-full bg-background border"
         animate={{ x: enabled ? 16 : 0 }}
         transition={{ type: "spring", stiffness: 500, damping: 30 }}
       />
@@ -190,7 +190,7 @@ export function AgentTriggers({
   }
 
   return (
-    <div className={cn("w-full max-w-xs overflow-hidden rounded-2xl border bg-card", className)}>
+    <div className={cn("w-full max-w-xs overflow-hidden rounded-2xl bg-card border", className)}>
       <div className="flex items-start justify-between gap-3 px-4 pb-3 pt-4">
         <div className="flex min-w-0 items-center gap-2.5">
           {agent && <Avatar agent={agent} />}
@@ -204,8 +204,8 @@ export function AgentTriggers({
           onClick={handleRun}
           disabled={running}
           className={cn(
-            "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:pointer-events-none",
-            running ? "border-transparent bg-foreground text-background" : "hover:bg-accent"
+            "flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors disabled:pointer-events-none bg-muted",
+            running ? "bg-foreground text-background" : "hover:bg-foreground/10"
           )}
         >
           <Play className={cn("size-3 transition-all", running ? "fill-current" : "fill-none stroke-current")} />

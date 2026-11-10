@@ -143,7 +143,7 @@ export function ConsoleErrorCard({
   return (
     <div
       className={cn(
-        "w-full overflow-hidden rounded-2xl border border-border bg-background text-foreground",
+        "w-full overflow-hidden rounded-2xl bg-background text-foreground border",
         className
       )}
     >
@@ -290,7 +290,7 @@ export function ConsoleErrorCard({
 
       {/* Call stack */}
       {stack.length > 0 && (
-        <div className="mx-4 mb-3 overflow-hidden rounded-xl border border-border">
+        <div className="mx-4 mb-3 overflow-hidden rounded-xl bg-muted/60">
           <button
             type="button"
             onClick={() => setStackOpen((v) => !v)}

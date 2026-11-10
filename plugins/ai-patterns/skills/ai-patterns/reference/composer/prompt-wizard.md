@@ -151,7 +151,7 @@ export function PromptWizard({ title, steps, build, onSubmit, submitLabel = "Gen
   return (
     <section
       aria-labelledby={`${uid}-question`}
-      className={cn("flex w-full flex-col gap-4 overflow-hidden rounded-2xl border bg-card p-4 shadow-sm", className)}
+      className={cn("flex w-full flex-col gap-4 overflow-hidden rounded-2xl bg-card p-4 border", className)}
     >
       <header className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
@@ -204,7 +204,7 @@ export function PromptWizard({ title, steps, build, onSubmit, submitLabel = "Gen
                       <button
                         type="button"
                         onClick={() => go(i)}
-                        className="rounded-full border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                        className="rounded-full px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground bg-muted"
                       >
                         <span className="sr-only">Change {s.question}: </span>
                         {answers[s.id]?.trim() || "Skipped"}
@@ -218,7 +218,7 @@ export function PromptWizard({ title, steps, build, onSubmit, submitLabel = "Gen
                   onChange={(e) => setEdited(e.target.value)}
                   rows={4}
                   aria-label="Prompt"
-                  className="resize-none rounded-xl border bg-background px-3 py-2 text-sm leading-relaxed outline-none focus:border-foreground/30"
+                  className="resize-none rounded-2xl px-3 py-2 text-sm leading-relaxed outline-none focus:ring-1 focus:ring-foreground/30 bg-muted focus:bg-background"
                 />
                 {edited !== null && (
                   <p className="text-xs text-muted-foreground">
@@ -265,7 +265,7 @@ export function PromptWizard({ title, steps, build, onSubmit, submitLabel = "Gen
                     aria-labelledby={`${uid}-question`}
                     aria-describedby={step.hint ? `${uid}-hint` : undefined}
                     rows={2}
-                    className="resize-none rounded-xl border bg-background px-3 py-2 text-sm leading-relaxed outline-none placeholder:text-muted-foreground focus:border-foreground/30"
+                    className="resize-none rounded-2xl px-3 py-2 text-sm leading-relaxed outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-foreground/30 bg-muted focus:bg-background"
                   />
                 )}
               </>
@@ -363,8 +363,8 @@ function Choices({
             onClick={() => onPick(option)}
             onKeyDown={(e) => onKeyDown(e, i)}
             className={cn(
-              "rounded-full border px-3 py-1.5 text-sm transition-colors",
-              on ? "border-foreground bg-foreground text-background" : "hover:bg-accent"
+              "rounded-full px-3 py-1.5 text-sm transition-colors bg-muted",
+              on ? "bg-foreground text-background" : "hover:bg-foreground/10"
             )}
           >
             {option}

@@ -162,14 +162,14 @@ export function PromptOnboarding({
   }
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl border bg-card", className)}>
+    <div className={cn("w-full overflow-hidden rounded-2xl bg-card border", className)}>
       <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-5">
         <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
         {apiKey && <ApiKeyChip apiKey={apiKey} />}
       </div>
 
       <div className="px-5 pt-4">
-        <div className="relative rounded-xl border border-primary/30 p-4 shadow-[0_0_0_4px] shadow-primary/5">
+        <div className="relative rounded-xl border border-primary/30 p-4 ring-4 ring-primary/5">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">{mode === "prompt" ? "AI prompt" : "Snippet"}</span>
             {mode === "prompt" && (
@@ -179,7 +179,7 @@ export function PromptOnboarding({
             )}
           </div>
 
-          <div role="tablist" aria-label="Setup method" className="mt-3 inline-flex rounded-lg border p-0.5">
+          <div role="tablist" aria-label="Setup method" className="mt-3 inline-flex rounded-lg p-0.5 bg-muted">
             {(["prompt", "snippet"] as const).map((m) => (
               <button
                 key={m}
@@ -356,7 +356,7 @@ function OpenInButton({
   const Icon = tool.icon;
 
   return (
-    <div ref={ref} className="relative inline-flex h-8 rounded-lg border text-xs font-medium">
+    <div ref={ref} className="relative inline-flex h-8 rounded-lg text-xs font-medium bg-muted">
       <button
         type="button"
         onClick={onOpen}
@@ -385,7 +385,7 @@ function OpenInButton({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ duration: 0.14 }}
-            className="absolute right-0 bottom-full z-10 mb-1.5 min-w-44 origin-bottom-right rounded-lg border bg-popover p-1 shadow-lg"
+            className="absolute right-0 bottom-full z-10 mb-1.5 min-w-44 origin-bottom-right rounded-xl bg-popover p-1 border"
           >
             {tools.map((t) => {
               const ItemIcon = t.icon;
@@ -419,7 +419,7 @@ function ApiKeyChip({ apiKey }: { apiKey: string }) {
   const masked = `${apiKey.slice(0, 4)}${"•".repeat(10)}${apiKey.slice(-4)}`;
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs">
+    <div className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs bg-muted">
       <span className="text-muted-foreground">API key</span>
       <code className="font-mono text-[11px]">{masked}</code>
       <button

@@ -121,7 +121,7 @@ export function ConversationBranches({ branches, active, onActiveChange, onEdit,
       <div className="group flex flex-col items-end gap-1">
         {editing ? (
           <form
-            className="flex w-full max-w-[85%] flex-col gap-2 rounded-2xl border bg-card p-2"
+            className="flex w-full max-w-[85%] flex-col gap-2 rounded-2xl bg-card p-2 border"
             onSubmit={(e) => {
               e.preventDefault();
               save();

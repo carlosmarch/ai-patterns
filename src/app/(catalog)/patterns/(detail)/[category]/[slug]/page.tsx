@@ -67,10 +67,26 @@ export default async function PatternPage({
     <CodeBlock code={entry.uxDoc} lang="markdown" wrap trackAs="spec" download={`${entry.slug}.pattern.md`} />
   );
 
-  const categoryCrumb = {
-    label: entry.category.charAt(0).toUpperCase() + entry.category.slice(1),
-    href: `/patterns#${entry.category}`,
-  };
+  // The catalogue is grouped by job, so the breadcrumb goes through the job (the
+  // URL keeps the category: it's the pattern's permanent address).
+  const categoryCrumb = job
+    ? { label: job.label, href: `/patterns?job=${job.id}` }
+    : { label: entry.category.charAt(0).toUpperCase() + entry.category.slice(1), href: "/patterns" };
+
+  const related = getRelatedEntries(entry);
+  // The intro (title, description, job, "Seen in"), Do's and don'ts and Related
+  // patterns, exactly as this page shows them. The expanded view's Context tab
+  // reuses them, so the expanded view is this page's large-screen layout. The
+  // card grids follow their own width (container queries), so they're two
+  // columns here and in a wide panel, stacked in a narrow one.
+  const intro = (level: "h1" | "h2") => <PatternIntro entry={entry} job={job} headingLevel={level} />;
+  const context = (
+    <div>
+      {intro("h2")}
+      <DosAndDonts entry={entry} headingId="context-dos-and-donts" />
+      <RelatedPatterns items={related} headingId="context-related-patterns" />
+    </div>
+  );
 
   return (
     <main className="mx-auto w-full max-w-3xl py-16">
@@ -84,28 +100,7 @@ export default async function PatternPage({
         ]}
       />
 
-      <div className="mb-8 space-y-2">
-        <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1 text-3xl font-semibold tracking-tight">
-          {entry.title}
-          {isNewEntry(entry) && <NewBadge className="px-2 py-1 text-xs" />}
-        </h1>
-        <p className="text-muted-foreground">{entry.description}</p>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2">
-          {job && (
-            <Link
-              href={`/patterns?job=${job.id}`}
-              title={job.description}
-              className="inline-flex items-center gap-2.5 text-xs text-muted-foreground"
-            >
-              Job
-              <span className="rounded-full border bg-background px-2.5 py-0.5 font-medium text-foreground transition-colors hover:bg-accent">
-                {job.label}
-              </span>
-            </Link>
-          )}
-          <SeenIn items={entry.seenIn} linked />
-        </div>
-      </div>
+      <div className="mb-8">{intro("h1")}</div>
 
       <ComponentPreview
         title={entry.title}
@@ -123,13 +118,51 @@ export default async function PatternPage({
           </div>
         }
         patternPanel={spec}
+        context={context}
       />
 
       <DosAndDonts entry={entry} />
 
-      <RelatedPatterns items={getRelatedEntries(entry)} />
+      <RelatedPatterns items={related} />
 
       <PatternPager prev={toLink(prev)} next={toLink(next)} />
     </main>
+  );
+}
+
+/** Title, description, and the Job and "Seen in" row — the top of the pattern page and of the Context tab. */
+function PatternIntro({
+  entry,
+  job,
+  headingLevel,
+}: {
+  entry: NonNullable<ReturnType<typeof getRegistryEntry>>;
+  job: ReturnType<typeof getJob>;
+  headingLevel: "h1" | "h2";
+}) {
+  const Heading = headingLevel;
+  return (
+    <div className="space-y-2">
+      <Heading className="flex flex-wrap items-center gap-x-3 gap-y-1 text-3xl font-semibold tracking-tight">
+        {entry.title}
+        {isNewEntry(entry) && <NewBadge className="px-2 py-1 text-xs" />}
+      </Heading>
+      <p className="text-muted-foreground">{entry.description}</p>
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-2">
+        {job && (
+          <Link
+            href={`/patterns?job=${job.id}`}
+            title={job.description}
+            className="inline-flex items-center gap-2.5 text-xs text-muted-foreground"
+          >
+            Job
+            <span className="rounded-full border bg-background px-2.5 py-0.5 font-medium text-foreground transition-colors hover:bg-accent">
+              {job.label}
+            </span>
+          </Link>
+        )}
+        <SeenIn items={entry.seenIn} linked />
+      </div>
+    </div>
   );
 }
