@@ -2,24 +2,21 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { BookOpen, Sparkles } from "lucide-react";
 
-import { getCategories, NEW_COUNT, newEntries as latestEntries, registry, type RegistryEntry } from "@/registry";
-import { formatAdded } from "@/components/new-badge";
-import { NewWheel } from "./new-wheel";
+import { newEntries as latestEntries, registry, type RegistryEntry } from "@/registry";
+import { JOBS } from "@/registry/jobs";
 import { GithubMark } from "@/components/github-mark";
 import { IntroHero, type HeroEntry } from "./intro-hero/intro-hero";
 import { HomeConnect } from "./home-connect";
-import { HomeHero } from "./home-hero";
-import { Card, Section, href } from "./home-parts";
 import { AskVariant, StatsVariant, TabsVariant, TerminalVariant, type SectionItem } from "./sections/variants";
-import { CompareVariant, ComparisonVariant, IndexVariant } from "./sections/variants-more";
+import { CompareVariant, ComparisonVariant } from "./sections/variants-more";
 
 // The home page, assembled from the blocks explored on /sections. The story
-// runs pitch → proof → how it works → try it → what's new → the catalogue →
-// how your agent uses it → how to connect it → why not a library → numbers and CTA.
+// runs pitch → how your agent uses it → proof → code and spec → how to connect
+// it → why not a library → numbers and CTA.
 
 const REPO_URL = "https://github.com/carlosmarch/ai-patterns";
-const FEATURED = "prompt-bar-pro";
-const HIDDEN = new Set([FEATURED, "shiny-button"]);
+// Too plain to sell the catalogue from the home page.
+const HIDDEN = new Set(["shiny-button"]);
 const SEARCH_THUMBS = ["tool-approval", "streaming-text", "inline-citation", "stop-generation-button", "generation-error", "sources-stack"];
 
 const bySlug = new Map(registry.map((entry) => [entry.slug, entry]));
@@ -35,8 +32,7 @@ const toHeroEntry = ({ slug, category, title, description }: RegistryEntry): Her
 
 export default function Home() {
   const visible = registry.filter((e) => !HIDDEN.has(e.slug));
-  const heroEntries = registry.filter((e) => !HIDDEN.has(e.slug) || e.slug === FEATURED).map(toHeroEntry);
-  const featured = bySlug.get(FEATURED);
+  const heroEntries = visible.map(toHeroEntry);
   const newEntries = latestEntries.filter((e) => !HIDDEN.has(e.slug));
   const items: SectionItem[] = visible.map(({ slug, category, title, Thumbnail }) => ({
     slug,
@@ -66,45 +62,6 @@ export default function Home() {
         <TabsVariant thumbnails={searchThumbs} />
       </Band>
 
-      {featured && (
-        <Band narrow>
-          <Section title="Try it" action={{ label: "View details", href: href(featured) }}>
-            <Card title={featured.title} description={featured.description} href={href(featured)} seenIn={featured.seenIn}>
-              <div className="flex justify-center px-4 py-10 sm:px-10">
-                <HomeHero />
-              </div>
-            </Card>
-          </Section>
-        </Band>
-      )}
-
-      {newEntries.length > 0 && (
-        <Band>
-          <Section
-            id="first-demo"
-            title="New"
-            blurb={`The ${NEW_COUNT} latest patterns added to the catalogue. Drag to spin.`}
-            action={{ label: "View all", href: "/patterns" }}
-          >
-            <NewWheel
-              items={newEntries.map((entry) => ({
-                slug: entry.slug,
-                href: href(entry),
-                title: entry.title,
-                category: entry.category,
-                description: entry.description,
-                added: formatAdded(entry.added),
-                thumb: <entry.Thumbnail />,
-              }))}
-            />
-          </Section>
-        </Band>
-      )}
-
-      <Band>
-        <IndexVariant items={items} total={registry.length} />
-      </Band>
-
       <Band>
         <TerminalVariant />
       </Band>
@@ -118,7 +75,7 @@ export default function Home() {
       </Band>
 
       <Band narrow>
-        <StatsVariant patternCount={registry.length} categoryCount={getCategories().length} />
+        <StatsVariant patternCount={registry.length} jobCount={JOBS.length} />
       </Band>
 
       <section className="px-6 py-24 text-center sm:py-32">
@@ -148,7 +105,7 @@ export default function Home() {
 }
 
 // One horizontal band of the page: wide blocks get the 5xl column, list-like
-// and card blocks keep the current home page's 3xl column.
+// and card blocks the 3xl column.
 function Band({ narrow, children }: { narrow?: boolean; children: ReactNode }) {
   return (
     <div className={narrow ? "mx-auto w-full max-w-3xl px-6 py-10 sm:py-14" : "mx-auto w-full max-w-5xl px-6 py-14 sm:py-20"}>

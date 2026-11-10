@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
-import { getCategories, registry } from "@/registry";
+import { registry } from "@/registry";
+import { JOBS } from "@/registry/jobs";
 import { HomeFeatures } from "../home-features";
 import {
   AskVariant,
@@ -120,7 +121,7 @@ export default function SectionsPage() {
       </Variant>
 
       <Variant label="F" name="Numbers" note="A quiet stats strip with the credit line beneath." narrow>
-        <StatsVariant patternCount={visible.length} categoryCount={getCategories().length} />
+        <StatsVariant patternCount={visible.length} jobCount={JOBS.length} />
       </Variant>
 
       <Variant label="G" name="Before / after" note="Five requests; drag to compare what an agent writes without and with the pattern spec.">
