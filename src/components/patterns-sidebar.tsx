@@ -131,7 +131,10 @@ export function PatternsSidebar({
   return (
     <div
       className={cn(
-        "group/sidebar sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-64 shrink-0 self-start transition-[width] duration-200 ease-out lg:block motion-reduce:transition-none",
+        // z-30: sticky makes this column its own stacking context, so the compact overlay's z-40 only
+        // counts inside it; the column itself must sit above the page (cards, captions), below the
+        // site header and the expanded view (z-50).
+        "group/sidebar sticky top-14 z-30 hidden h-[calc(100dvh-3.5rem)] w-64 shrink-0 self-start transition-[width] duration-200 ease-out lg:block motion-reduce:transition-none",
         "sidebar-compact:w-14",
         className,
       )}
