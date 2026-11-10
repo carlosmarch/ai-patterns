@@ -22,7 +22,6 @@ export function ComponentPreview({
   patternPanel,
   prev,
   next,
-  meta,
   context,
 }: {
   title: string;
@@ -36,8 +35,6 @@ export function ComponentPreview({
   patternPanel?: ReactNode;
   prev?: PagerLink;
   next?: PagerLink;
-  /** The pattern's job and "Seen in", shown in the expanded view's header. */
-  meta?: ReactNode;
   /** The expanded side panel's Context tab: what the pattern page says around the demo. */
   context?: ReactNode;
 }) {
@@ -130,7 +127,6 @@ export function ComponentPreview({
                     {title}
                   </span>
                 </nav>
-                {meta && <div className="flex shrink-0 items-center gap-4 max-md:hidden">{meta}</div>}
                 {/* Not on phones: there's little room, and the address bar shares the link anyway. */}
                 <CopyLinkButton className="max-sm:hidden" />
                 {/* Without room for the side panel, Collapse lives here instead. */}

@@ -118,20 +118,6 @@ export default async function PatternPage({
         }
         patternPanel={spec}
         context={context}
-        meta={
-          <>
-            {job && (
-              <Link
-                href={`/patterns?job=${job.id}`}
-                title={job.description}
-                className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-foreground/10"
-              >
-                {job.label}
-              </Link>
-            )}
-            <SeenIn items={entry.seenIn} size="sm" showLabel={false} linked />
-          </>
-        }
       />
 
       <DosAndDonts entry={entry} />
