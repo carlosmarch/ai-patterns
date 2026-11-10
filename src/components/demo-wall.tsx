@@ -84,55 +84,10 @@ export function DemoWall({ items, onOpen }: { items: WallItem[]; onOpen: (item: 
   );
 }
 
-/** The width demos lay out at before being scaled into their card. */
-const STAGE_WIDTH = 480;
-const STAGE_PADDING = 28;
-
 // Clicks on the demo's own controls play with the demo; anywhere else opens the pattern.
 const INTERACTIVE = 'a, button, input, textarea, select, label, summary, [role="button"], [role="slider"], [role="switch"], [role="tab"], [role="checkbox"], [role="radio"], [role="menuitem"], [role="option"], [contenteditable="true"]';
 
 function DemoCard({ item, height, onOpen }: { item: WallItem; height: number; onOpen: () => void }) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
-  const [scale, setScale] = useState<number | null>(null);
-
-  // Mount demos only once they come near the viewport: ~90 live demos at once
-  // is a lot of timers and animation.
-  useEffect(() => {
-    const card = cardRef.current;
-    if (!card) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setMounted(true);
-          io.disconnect();
-        }
-      },
-      { rootMargin: "400px 0px" },
-    );
-    io.observe(card);
-    return () => io.disconnect();
-  }, []);
-
-  // Scale the demo down (never up) so it fits the card, like a print on a stage.
-  useLayoutEffect(() => {
-    const card = cardRef.current;
-    const content = contentRef.current;
-    if (!mounted || !card || !content) return;
-    const fit = () => {
-      const w = card.clientWidth - STAGE_PADDING * 2;
-      const h = card.clientHeight - STAGE_PADDING * 2 - 24;
-      const s = Math.min(1, w / content.offsetWidth, h / Math.max(1, content.offsetHeight));
-      setScale(s);
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(card);
-    ro.observe(content);
-    return () => ro.disconnect();
-  }, [mounted]);
-
   function handleCardClick(e: MouseEvent<HTMLElement>) {
     const target = e.target as HTMLElement;
     if (target.closest(INTERACTIVE) || window.getSelection()?.toString()) return;
@@ -154,21 +109,7 @@ function DemoCard({ item, height, onOpen }: { item: WallItem; height: number; on
         className="group relative flex-1 cursor-pointer overflow-hidden rounded-[28px] bg-muted/70 dark:bg-muted/40"
         style={{ minHeight: height }}
       >
-        <div ref={cardRef} className="absolute inset-0">
-          {mounted && (
-            <div
-              className="absolute top-1/2 left-1/2 cursor-auto"
-              style={{
-                transform: `translate(-50%, -50%) scale(${scale ?? 1})`,
-                visibility: scale === null ? "hidden" : "visible",
-              }}
-            >
-              <div ref={contentRef} className="flex justify-center" style={{ width: STAGE_WIDTH }}>
-                {item.demo}
-              </div>
-            </div>
-          )}
-        </div>
+        <DemoStage demo={item.demo} className="absolute inset-0" />
 
         {item.isNew && (
           <span className="pointer-events-none absolute top-4 left-4 flex rounded-full bg-background">
@@ -190,5 +131,81 @@ function DemoCard({ item, height, onOpen }: { item: WallItem; height: number; on
         </Link>
       </article>
     </ViewTransition>
+  );
+}
+
+/**
+ * A live demo laid out at `width` and scaled down (never up) to fit its box,
+ * like a print on a stage. Mounted only once it comes near the viewport:
+ * dozens of live demos at once is a lot of timers and animation.
+ */
+export function DemoStage({
+  demo,
+  className,
+  width = 480,
+  padding = 28,
+  reserveBottom = 24,
+}: {
+  demo: ReactNode;
+  className?: string;
+  /** The width the demo lays out at before scaling. */
+  width?: number;
+  padding?: number;
+  /** Extra room kept clear at the bottom (the card's title pill). */
+  reserveBottom?: number;
+}) {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [scale, setScale] = useState<number | null>(null);
+
+  useEffect(() => {
+    const box = boxRef.current;
+    if (!box) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setMounted(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "400px 0px" },
+    );
+    io.observe(box);
+    return () => io.disconnect();
+  }, []);
+
+  useLayoutEffect(() => {
+    const box = boxRef.current;
+    const content = contentRef.current;
+    if (!mounted || !box || !content) return;
+    const fit = () => {
+      const w = box.clientWidth - padding * 2;
+      const h = box.clientHeight - padding * 2 - reserveBottom;
+      setScale(Math.min(1, w / content.offsetWidth, h / Math.max(1, content.offsetHeight)));
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(box);
+    ro.observe(content);
+    return () => ro.disconnect();
+  }, [mounted, padding, reserveBottom]);
+
+  return (
+    <div ref={boxRef} className={className}>
+      {mounted && (
+        <div
+          className="absolute top-1/2 left-1/2 cursor-auto"
+          style={{
+            transform: `translate(-50%, -50%) scale(${scale ?? 1})`,
+            visibility: scale === null ? "hidden" : "visible",
+          }}
+        >
+          <div ref={contentRef} className="flex justify-center" style={{ width }}>
+            {demo}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

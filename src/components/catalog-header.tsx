@@ -49,65 +49,45 @@ export function CatalogHeader({
         </p>
       </div>
 
-      <div className="mt-14 mb-5">
-        <CatalogPills pills={pills} active={active} onChoose={onChoose} />
+      <div className="mt-14 mb-5 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div role="toolbar" aria-label="Filter patterns" className="flex flex-wrap gap-2">
+          {pills.map((pill) => (
+            // What each filter means, on hover or keyboard focus (Radix wires it up as the pill's description).
+            <Tooltip key={pill.id}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-pressed={active === pill.id}
+                  onClick={() => onChoose(pill.id)}
+                  className={cn(
+                    "h-9 rounded-full px-4 text-sm font-medium transition-colors",
+                    active === pill.id
+                      ? "bg-foreground text-background"
+                      : "bg-muted text-foreground/80 hover:bg-muted-foreground/15 hover:text-foreground",
+                  )}
+                >
+                  {pill.label}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                align="start"
+                sideOffset={8}
+                className="max-w-72 rounded-xl bg-popover px-3.5 py-3 text-left text-sm text-pretty text-popover-foreground ring-1 ring-black/5 dark:ring-white/10"
+              >
+                {pill.question && (
+                  <p className="font-medium">
+                    “{/[?.!]$/.test(pill.question) ? pill.question : `${pill.question}.`}”
+                  </p>
+                )}
+                {pill.description && (
+                  <p className={cn("text-muted-foreground", pill.question && "mt-1")}>{pill.description}</p>
+                )}
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
       </div>
     </header>
-  );
-}
-
-/**
- * The filter pills, with each one's meaning in a tooltip. Shared by the
- * catalogue header and the home page's preview of the wall.
- */
-export function CatalogPills({
-  pills,
-  active,
-  onChoose,
-  className,
-}: {
-  pills: CatalogFilter[];
-  active: string;
-  onChoose: (id: string) => void;
-  className?: string;
-}) {
-  return (
-    <div role="toolbar" aria-label="Filter patterns" className={cn("flex flex-wrap gap-2", className)}>
-      {pills.map((pill) => (
-        // What each filter means, on hover or keyboard focus (Radix wires it up as the pill's description).
-        <Tooltip key={pill.id}>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              aria-pressed={active === pill.id}
-              onClick={() => onChoose(pill.id)}
-              className={cn(
-                "h-9 rounded-full px-4 text-sm font-medium transition-colors",
-                active === pill.id
-                  ? "bg-foreground text-background"
-                  : "bg-muted text-foreground/80 hover:bg-muted-foreground/15 hover:text-foreground",
-              )}
-            >
-              {pill.label}
-            </button>
-          </TooltipTrigger>
-          <TooltipContent
-            side="top"
-            align="start"
-            sideOffset={8}
-            className="max-w-72 rounded-xl bg-popover px-3.5 py-3 text-left text-sm text-pretty text-popover-foreground ring-1 ring-black/5 dark:ring-white/10"
-          >
-            {pill.question && (
-              <p className="font-medium">
-                “{/[?.!]$/.test(pill.question) ? pill.question : `${pill.question}.`}”
-              </p>
-            )}
-            {pill.description && (
-              <p className={cn("text-muted-foreground", pill.question && "mt-1")}>{pill.description}</p>
-            )}
-          </TooltipContent>
-        </Tooltip>
-      ))}
-    </div>
   );
 }

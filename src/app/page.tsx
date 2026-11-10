@@ -2,18 +2,17 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { BookOpen, Sparkles } from "lucide-react";
 
-import { getCatalogOrder, getEntryHref, isNewEntry, newEntries as latestEntries, registry, type RegistryEntry } from "@/registry";
+import { newEntries as latestEntries, registry, type RegistryEntry } from "@/registry";
 import { JOBS } from "@/registry/jobs";
-import type { WallItem } from "@/components/demo-wall";
 import { GithubMark } from "@/components/github-mark";
 import { IntroHero, type HeroEntry } from "./intro-hero/intro-hero";
 import { HomeConnect } from "./home-connect";
-import { HomeWall, type HomeWallFilter } from "./home-wall";
+import { HomeShowcase } from "./home-showcase";
 import { AskVariant, StatsVariant, TabsVariant, TerminalVariant, type SectionItem } from "./sections/variants";
 import { CompareVariant, ComparisonVariant } from "./sections/variants-more";
 
 // The home page, assembled from the blocks explored on /sections. The story
-// runs pitch → the catalogue itself (a slice of the /patterns wall, by job) →
+// runs pitch → a glimpse of the catalogue and the way in →
 // how your agent uses it → proof → code and spec → how to connect it → why not
 // a library → numbers and CTA.
 
@@ -33,78 +32,22 @@ const toHeroEntry = ({ slug, category, title, description }: RegistryEntry): Her
   description,
 });
 
-const wallId = (entry: RegistryEntry) => `${entry.category}/${entry.slug}`;
-
-/**
- * Catalogue order clusters a job's patterns by category; for a short preview,
- * take one from each category in turn so the first cards show its range.
- */
-function roundRobinByCategory(entries: RegistryEntry[]) {
-  const groups = new Map<string, RegistryEntry[]>();
-  for (const entry of entries) groups.set(entry.category, [...(groups.get(entry.category) ?? []), entry]);
-  const queues = [...groups.values()];
-  const out: RegistryEntry[] = [];
-  while (queues.some((q) => q.length > 0)) for (const q of queues) if (q.length > 0) out.push(q.shift()!);
-  return out;
-}
-
-/** The home wall's filters: the newest patterns first, then one per job. */
-function wallFilters(): { items: WallItem[]; filters: HomeWallFilter[] } {
-  const catalog = getCatalogOrder();
-  const PREVIEW = 6;
-  const used = new Map<string, RegistryEntry>();
-  const take = (entries: RegistryEntry[]) =>
-    entries
-      .filter((e) => !HIDDEN.has(e.slug))
-      .slice(0, PREVIEW)
-      .map((e) => {
-        used.set(wallId(e), e);
-        return wallId(e);
-      });
-
-  const filters: HomeWallFilter[] = [
-    {
-      id: "new",
-      label: "New",
-      description: `The ${latestEntries.length} latest additions to the catalogue, newest first.`,
-      itemIds: take(latestEntries),
-      total: latestEntries.length,
-      href: "/patterns?job=new",
-      noun: "new patterns",
-    },
-    ...JOBS.map((job) => {
-      const entries = catalog.filter((e) => e.job === job.id);
-      return {
-        id: job.id,
-        label: job.label,
-        question: job.question,
-        description: job.description,
-        itemIds: take(roundRobinByCategory(entries)),
-        total: entries.length,
-        href: `/patterns?job=${job.id}`,
-        noun: `${job.label} patterns`,
-      };
-    }),
-  ];
-
-  const items: WallItem[] = [...used.values()].map((entry) => ({
-    id: wallId(entry),
-    category: entry.category,
-    slug: entry.slug,
-    title: entry.title,
-    job: entry.job,
-    href: getEntryHref(entry),
-    isNew: isNewEntry(entry),
-    demo: <entry.Demo />,
-  }));
-  return { items, filters };
-}
+// The live demos glimpsed in the showcase block, top row first (the top row
+// stays clear of the fade). Two per column, column by column.
+const SHOWCASE = [
+  "create-agent", "command-palette",
+  "multi-agent-trace", "inline-citation",
+  "tool-approval", "thinking-loader",
+  "voice-orb", "diff-summary",
+  "plan-review", "sources-stack",
+  "cost-estimate", "model-picker",
+];
 
 export default function Home() {
   const visible = registry.filter((e) => !HIDDEN.has(e.slug));
   const heroEntries = visible.map(toHeroEntry);
   const newEntries = latestEntries.filter((e) => !HIDDEN.has(e.slug));
-  const wall = wallFilters();
+  const showcase = pick(SHOWCASE).map(({ category, slug, Demo }) => ({ id: `${category}/${slug}`, demo: <Demo /> }));
   const items: SectionItem[] = visible.map(({ slug, category, title, Thumbnail }) => ({
     slug,
     category,
@@ -122,7 +65,7 @@ export default function Home() {
       <IntroHero entries={heroEntries} newEntries={newEntries.map(toHeroEntry)} />
 
       <Band wide>
-        <HomeWall items={wall.items} filters={wall.filters} />
+        <HomeShowcase tiles={showcase} total={registry.length} jobCount={JOBS.length} />
       </Band>
 
       <Band>
