@@ -61,11 +61,11 @@ export function SiteCommandPalette() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Search patterns"
-        className="flex items-center gap-2 rounded-md border bg-background px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        className="flex h-9 items-center gap-2 rounded-full bg-muted px-3 text-sm text-muted-foreground transition-colors hover:text-foreground md:w-56 md:px-4"
       >
-        <Search className="size-3.5" aria-hidden />
-        <span className="hidden sm:inline">Search</span>
-        <kbd className="rounded border bg-muted px-1 py-0.5 font-sans text-[10px] font-medium">⌘K</kbd>
+        <Search className="size-4 shrink-0" aria-hidden />
+        <span className="hidden md:inline">Search</span>
+        <kbd className="ml-auto hidden font-sans text-xs text-muted-foreground/70 md:inline">⌘K</kbd>
       </button>
       <CommandPalette
         open={open}
