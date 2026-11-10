@@ -901,10 +901,10 @@ function CountUp({ to }: { to: number }) {
   return <span ref={ref}>{to}</span>;
 }
 
-export function StatsVariant({ patternCount, categoryCount }: { patternCount: number; categoryCount: number }) {
+export function StatsVariant({ patternCount, jobCount }: { patternCount: number; jobCount: number }) {
   const stats = [
     { value: patternCount, label: "patterns" },
-    { value: categoryCount, label: "categories" },
+    { value: jobCount, label: "jobs they do for your user" },
     { value: 8, label: "sections in every spec" },
     { value: 0, label: "packages to install" },
   ];
