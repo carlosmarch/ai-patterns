@@ -48,10 +48,9 @@ badge on `/patterns` cards and the pattern page, and the sidebar dot.
 Every entry also needs a `job` — what the pattern does for the user,
 across categories: `start`, `ask`, `steer`, `oversee`, `trust` or
 `recover` (defined, with descriptions, in `src/registry/jobs.ts`). The
-catalogue is organised by it: `/patterns` and `/gallery` are grouped into
-one section per job (the filter pills set `?job=<id>`; `category` is a
-secondary filter, `?category=<id>`, and a tag on the cards), the patterns
-sidebar is grouped by job, the pattern page's breadcrumb goes through its
+catalogue is organised by it: `/patterns` (a wall of live demos) is in job
+order and filtered by job (the filter pills set `?job=<id>`; the category is
+a tag on the cards), the patterns sidebar is grouped by job, the pattern page's breadcrumb goes through its
 job, and prev/next follow `getCatalogOrder()` (job, then category). It also
 drives the job chip on the pattern page, the "Patterns by job" section in
 `llms.txt` and `/patterns.md`, the JSON API and the MCP `list_patterns`

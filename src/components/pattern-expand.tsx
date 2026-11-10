@@ -10,7 +10,7 @@ const VIEW_PARAM = "view";
 const EXPANDED_VALUE = "expanded";
 
 /** Where the expanded view returns to when it was opened from the gallery. */
-export const GALLERY_HREF = "/gallery";
+export const GALLERY_HREF = "/patterns";
 
 // Set by the gallery right before it navigates to a pattern: the gallery URL
 // to return to. The provider reads it on mount to render expanded in the very

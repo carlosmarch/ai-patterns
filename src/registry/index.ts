@@ -1583,7 +1583,7 @@ export function getEntriesByJob(job: PatternJob) {
  * Every pattern in catalogue order: by job (in jobs.ts order), then by
  * category within a job (each category's first appearance in the registry),
  * then registry order — so related patterns sit together inside a job. The
- * order of the Details grid, the gallery, the sidebar and prev/next.
+ * order of the gallery, the sidebar and prev/next.
  */
 export function getCatalogOrder(): RegistryEntry[] {
   const categoryRank = new Map(getCategories().map((category, i) => [category, i]));

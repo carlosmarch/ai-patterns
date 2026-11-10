@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 
 // The job the catalogue is filtered to (?job=), shared from the page that owns
-// the filter (/patterns, /gallery) with the patterns sidebar, which lives in
+// the filter (/patterns) with the patterns sidebar, which lives in
 // the layout and so can't read the page's state. null when not filtered to a
 // job ("All", "New", or a page without a filter).
 let activeJob: string | null = null;

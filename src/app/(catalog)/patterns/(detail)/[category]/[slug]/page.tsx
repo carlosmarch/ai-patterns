@@ -71,7 +71,7 @@ export default async function PatternPage({
   // URL keeps the category: it's the pattern's permanent address).
   const categoryCrumb = job
     ? { label: job.label, href: `/patterns?job=${job.id}` }
-    : { label: entry.category.charAt(0).toUpperCase() + entry.category.slice(1), href: `/patterns?category=${entry.category}` };
+    : { label: entry.category.charAt(0).toUpperCase() + entry.category.slice(1), href: "/patterns" };
 
   const related = getRelatedEntries(entry);
   // The intro (title, description, job, "Seen in"), Do's and don'ts and Related

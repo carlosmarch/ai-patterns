@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 // Compact mode folds the sidebar into a column of ticks, one per pattern,
 // which opens into the full list on hover or keyboard focus. The mode lives
 // on <html data-sidebar="compact"> — set before first paint by the root
-// layout's init script from localStorage — so the CSS (the `sidebar-compact:`
+// layout's init script (compact by default, "full" once expanded in localStorage) — so the CSS (the `sidebar-compact:`
 // variant in globals.css) gets it right without waiting for React, and the
 // server HTML is the same either way. React only reads it for the toggle.
 const SIDEBAR_KEY = "ai-patterns:sidebar";
@@ -50,9 +50,9 @@ export interface PatternsSidebarGroup {
 /**
  * Sidebar listing every pattern, grouped by job (the six questions), with the
  * current pattern highlighted. It follows the catalogue's job filter: filtered
- * to a job (on /patterns or /gallery, kept while you open patterns), the other
+ * to a job (on /patterns, kept while you open patterns), the other
  * groups fold to their headings, which open on click; the current pattern's
- * group is always open. With no job filter every group is open. Shown on the catalogue pages (gallery, index
+ * group is always open. With no job filter every group is open. Shown on the catalogue pages (the gallery
  * and pattern pages) at the very left; it sticks below the site header and
  * scrolls on its own, so the current pattern stays in view beside its page.
  * The toggle at its top compresses it into a column of ticks (see above).
@@ -69,7 +69,7 @@ export function PatternsSidebar({
   /** Overrides for the outer column. */
   className?: string;
 }) {
-  const compact = React.useSyncExternalStore(subscribeToSidebar, isCompact, () => false);
+  const compact = React.useSyncExternalStore(subscribeToSidebar, isCompact, () => true);
   const pathname = usePathname();
   const router = useRouter();
   const reduceMotion = useReducedMotion();
