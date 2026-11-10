@@ -52,10 +52,6 @@ export function ComponentPreview({
     }
   }
 
-  function expand() {
-    if (tab !== "preview") handleTabChange("preview");
-    setExpanded(true);
-  }
 
   // Esc leaves the expanded view.
   useEffect(() => {
@@ -67,25 +63,23 @@ export function ComponentPreview({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [expanded, setExpanded]);
 
-  const isExpanded = expanded && tab === "preview";
+  // Expand lives outside this component (<ExpandButton>, on the page's top
+  // row): while expanded the preview is shown, and collapsing returns to the
+  // tab that was open.
+  const activeTab = expanded ? "preview" : tab;
+  const isExpanded = expanded;
   // Shares its view-transition name with the pattern's gallery card, so
   // opening from (and collapsing back to) the gallery morphs card <-> view.
   const route = pathname?.match(/\/patterns\/([^/]+)\/([^/]+)/);
   const transitionName = isExpanded && route ? patternTransitionName(route[1], route[2]) : undefined;
 
   return (
-    <Tabs value={tab} onValueChange={handleTabChange}>
-      <div className="flex items-center justify-between gap-4">
-        <TabsList>
-          <TabsTrigger value="preview">Preview</TabsTrigger>
-          <TabsTrigger value="code">Code</TabsTrigger>
-          {pattern && <TabsTrigger value="pattern">Guardrails</TabsTrigger>}
-        </TabsList>
-        <Button type="button" variant="ghost" size="sm" onClick={expand} aria-label="Expand preview to full width">
-          <Maximize2 />
-          Expand
-        </Button>
-      </div>
+    <Tabs value={activeTab} onValueChange={handleTabChange}>
+      <TabsList>
+        <TabsTrigger value="preview">Preview</TabsTrigger>
+        <TabsTrigger value="code">Code</TabsTrigger>
+        {pattern && <TabsTrigger value="pattern">Guardrails</TabsTrigger>}
+      </TabsList>
 
       {/* The same wrappers are kept in both states so the demo isn't remounted on expand. */}
       <ViewTransition name={transitionName} share="pattern-morph" default="none">
@@ -177,6 +171,24 @@ export function ComponentPreview({
         </TabsContent>
       )}
     </Tabs>
+  );
+}
+
+/** Opens the pattern page's preview full width (and switches to it). */
+export function ExpandButton({ className }: { className?: string }) {
+  const { setExpanded } = usePatternExpand();
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      onClick={() => setExpanded(true)}
+      aria-label="Expand preview to full width"
+      className={className}
+    >
+      <Maximize2 />
+      Expand
+    </Button>
   );
 }
 
