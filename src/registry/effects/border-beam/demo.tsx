@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { PromptBar } from "../../composer/prompt-bar/component";
 import { PromptBarPro, type PromptBarItem } from "../../composer/prompt-bar-pro/component";
 import { BorderBeam } from "./component";
 
@@ -32,15 +31,11 @@ export default function BorderBeamDemo() {
           suggestions={[]}
           sources={sources}
           commands={commands}
-          placeholder="Build anything…"
+          placeholder="Ask about a pattern…"
           generating={working}
           onSubmit={() => setWorking(true)}
           onStop={() => setWorking(false)}
         />
-      </BorderBeam>
-
-      <BorderBeam radius={24} duration={10} className="w-4/5 self-end">
-        <PromptBar variant="pill" sources={sources} commands={commands} placeholder="Ask about a pattern…" />
       </BorderBeam>
 
       <p className="text-center text-xs text-muted-foreground">
