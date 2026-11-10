@@ -66,7 +66,7 @@ export function ShinyButton({ children, className, ...props }: ShinyButtonProps)
     <motion.button
       whileTap={{ scale: 0.97 }}
       className={cn(
-        "relative isolate overflow-hidden rounded-lg border border-white/10 bg-neutral-900 px-6 py-2.5 text-sm font-medium text-neutral-50 shadow-sm dark:bg-neutral-100 dark:text-neutral-900",
+        "relative isolate overflow-hidden rounded-lg border border-white/10 bg-slate-900 px-6 py-2.5 text-sm font-medium text-slate-50 shadow-sm dark:bg-slate-100 dark:text-slate-900",
         className
       )}
       {...props}

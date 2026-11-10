@@ -23,7 +23,7 @@ export interface TerminalStreamProps {
 }
 
 const LEVEL_CLASS: Record<NonNullable<LogLine["level"]>, string> = {
-  default: "text-neutral-300",
+  default: "text-slate-300",
   info: "text-sky-400",
   warn: "text-amber-400",
   error: "text-red-400",
@@ -63,7 +63,7 @@ export function TerminalStream({
   return (
     <div
       className={cn(
-        "w-full overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950 text-neutral-50",
+        "w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950 text-slate-50",
         className
       )}
     >
@@ -73,12 +73,12 @@ export function TerminalStream({
         aria-expanded={open}
         className="flex w-full items-center gap-2 px-3.5 py-2.5 text-left text-sm"
       >
-        <Terminal className="size-3.5 shrink-0 text-neutral-400" aria-hidden />
-        <span className="min-w-0 flex-1 truncate font-mono text-xs text-neutral-200">{command}</span>
+        <Terminal className="size-3.5 shrink-0 text-slate-400" aria-hidden />
+        <span className="min-w-0 flex-1 truncate font-mono text-xs text-slate-200">{command}</span>
         <StatusBadge status={status} />
-        <span className="text-xs text-neutral-500">{lines.length}</span>
+        <span className="text-xs text-slate-500">{lines.length}</span>
         <ChevronDown
-          className={cn("size-4 shrink-0 text-neutral-500 transition-transform", open && "rotate-180")}
+          className={cn("size-4 shrink-0 text-slate-500 transition-transform", open && "rotate-180")}
         />
       </button>
 
@@ -110,7 +110,7 @@ export function TerminalStream({
               <button
                 type="button"
                 onClick={jumpToLatest}
-                className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-neutral-800 px-2.5 py-1 text-xs text-neutral-200 shadow-sm transition-colors hover:bg-neutral-700"
+                className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-200 shadow-sm transition-colors hover:bg-slate-700"
               >
                 <ArrowDown className="size-3" aria-hidden /> Jump to latest
               </button>
@@ -136,7 +136,7 @@ function BlinkingCursor() {
   return (
     <motion.span
       aria-hidden
-      className="inline-block h-3 w-[6px] translate-y-px bg-neutral-400"
+      className="inline-block h-3 w-[6px] translate-y-px bg-slate-400"
       animate={{ opacity: [1, 1, 0, 0] }}
       transition={{ duration: 1, repeat: Infinity, times: [0, 0.5, 0.5, 1], ease: "linear" }}
     />

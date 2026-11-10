@@ -569,8 +569,8 @@ function SceneCard({
           className={cn(
             "group relative block size-full overflow-hidden rounded-[20px] p-1.5 transition-[filter,opacity,transform] duration-700 ease-out",
             scene.tone === "light"
-              ? "bg-neutral-200/80 shadow-[0_24px_60px_-24px_rgb(0_0_0/0.35)] ring-1 ring-black/5 dark:bg-neutral-100"
-              : "bg-neutral-900 shadow-[0_24px_60px_-24px_rgb(0_0_0/0.6)] ring-1 ring-white/10"
+              ? "bg-slate-200/80 shadow-[0_24px_60px_-24px_rgb(0_0_0/0.35)] ring-1 ring-black/5 dark:bg-slate-100"
+              : "bg-slate-900 shadow-[0_24px_60px_-24px_rgb(0_0_0/0.6)] ring-1 ring-white/10"
           )}
           style={{
             filter: `blur(${blur}px)`,
@@ -589,7 +589,7 @@ function SceneCard({
               className={cn(
                 "absolute bottom-3 left-3 flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-medium opacity-0 shadow-lg transition-[opacity,transform] duration-300 group-hover:translate-y-0 group-hover:opacity-100",
                 "translate-y-1",
-                scene.tone === "light" ? "bg-neutral-900 text-white" : "bg-white text-neutral-900"
+                scene.tone === "light" ? "bg-slate-900 text-white" : "bg-white text-slate-900"
               )}
             >
               {entry.title}
