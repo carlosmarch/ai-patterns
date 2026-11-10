@@ -3,10 +3,11 @@
 import { useEffect, useLayoutEffect, useRef, useState, ViewTransition, type MouseEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, LayoutGrid, List } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 import { NewBadge } from "@/components/new-badge";
 import { markOpeningFromGallery, patternTransitionName } from "@/components/pattern-expand";
+import { PatternsViewSwitch } from "@/components/patterns-view-switch";
 import { cn } from "@/lib/utils";
 
 export interface GalleryItem {
@@ -15,6 +16,7 @@ export interface GalleryItem {
   slug: string;
   title: string;
   job: string;
+  jobLabel: string;
   href: string;
   isNew: boolean;
   demo: ReactNode;
@@ -49,6 +51,11 @@ function expandedHref(item: GalleryItem) {
   return `${item.href}?view=expanded`;
 }
 
+/** The gallery URL for a filter — same `?job=` ids as /patterns, so the view switch keeps it. */
+function galleryHref(filter: string) {
+  return filter === ALL ? "/gallery" : `/gallery?job=${encodeURIComponent(filter)}`;
+}
+
 export function GalleryGrid({ items, filters }: { items: GalleryItem[]; filters: { id: string; label: string }[] }) {
   const router = useRouter();
   // Read, not taken, in the initializer: Strict Mode runs initializers twice.
@@ -62,9 +69,24 @@ export function GalleryGrid({ items, filters }: { items: GalleryItem[]; filters:
     if (restore) window.scrollTo(0, restore.y);
   }, [restore]);
 
+  // Otherwise the filter comes from ?job= (a link from /patterns, or a reload).
+  // Synced after hydration: the static HTML always renders "all".
+  useEffect(() => {
+    if (restore) return;
+    const fromUrl = new URLSearchParams(window.location.search).get("job");
+    const valid = fromUrl === NEW || filters.some((f) => f.id === fromUrl);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (fromUrl && valid) setActive(fromUrl);
+  }, [restore, filters]);
+
+  function choose(id: string) {
+    setActive(id);
+    window.history.replaceState(window.history.state, "", galleryHref(id));
+  }
+
   function open(item: GalleryItem) {
     saveReturnState({ filter: active, y: window.scrollY });
-    markOpeningFromGallery();
+    markOpeningFromGallery(galleryHref(active));
     router.push(expandedHref(item));
   }
 
@@ -82,7 +104,7 @@ export function GalleryGrid({ items, filters }: { items: GalleryItem[]; filters:
               key={pill.id}
               type="button"
               aria-pressed={active === pill.id}
-              onClick={() => setActive(pill.id)}
+              onClick={() => choose(pill.id)}
               className={cn(
                 "h-9 rounded-full px-4 text-sm font-medium transition-colors",
                 active === pill.id
@@ -94,7 +116,7 @@ export function GalleryGrid({ items, filters }: { items: GalleryItem[]; filters:
             </button>
           ))}
         </div>
-        <ViewSwitch />
+        <PatternsViewSwitch current="gallery" />
       </div>
 
       <ul className="columns-1 gap-3 sm:columns-2 lg:columns-3">
@@ -105,23 +127,6 @@ export function GalleryGrid({ items, filters }: { items: GalleryItem[]; filters:
         ))}
       </ul>
     </>
-  );
-}
-
-/** Gallery (live demos, this page) or Details (the /patterns index with descriptions). */
-function ViewSwitch() {
-  const segment = "flex h-7 items-center gap-1.5 rounded-full px-3 text-sm font-medium transition-colors";
-  return (
-    <nav aria-label="Patterns view" className="flex rounded-full bg-muted p-1">
-      <span aria-current="page" className={cn(segment, "bg-background text-foreground ring-1 ring-black/5 dark:ring-white/10")}>
-        <LayoutGrid className="size-3.5" />
-        Gallery
-      </span>
-      <Link href="/patterns" className={cn(segment, "text-muted-foreground hover:text-foreground")}>
-        <List className="size-3.5" />
-        Details
-      </Link>
-    </nav>
   );
 }
 
@@ -216,10 +221,12 @@ function GalleryCard({ item, height, onOpen }: { item: GalleryItem; height: numb
         <Link
           href={expandedHref(item)}
           onClick={handleLinkClick}
-          className="absolute right-3 bottom-3 left-3 flex items-center justify-between gap-2 rounded-full bg-background/90 py-1.5 pr-1.5 pl-4 text-sm font-medium opacity-0 backdrop-blur transition-[opacity,transform] duration-200 group-hover:opacity-100 focus-visible:opacity-100 max-lg:opacity-100 lg:translate-y-1 lg:group-hover:translate-y-0"
+          className="absolute right-3 bottom-3 left-3 flex items-center gap-2 rounded-full bg-background/90 py-1.5 pr-1.5 pl-4 text-sm backdrop-blur"
         >
-          <span className="truncate">{item.title}</span>
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
+          {/* Always visible: what it is and the job it does, so the wall can be read, not just watched. */}
+          <span className="min-w-0 truncate font-medium">{item.title}</span>
+          <span className="ml-auto shrink-0 text-xs text-muted-foreground">{item.jobLabel}</span>
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-foreground transition-colors group-hover:bg-foreground group-hover:text-background">
             <ArrowUpRight className="size-3.5" />
           </span>
         </Link>

@@ -3,7 +3,7 @@
 import { useEffect, useState, ViewTransition, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Check, ChevronLeft, ChevronRight, Link2, Maximize2, Minimize2 } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, FileText, Link2, Maximize2, Minimize2 } from "lucide-react";
 
 import { AnimatedOrigami } from "@/components/animated-origami";
 import { patternTransitionName, usePatternExpand } from "@/components/pattern-expand";
@@ -22,6 +22,7 @@ export function ComponentPreview({
   patternPanel,
   prev,
   next,
+  meta,
 }: {
   title: string;
   /** The pattern's group, shown in the expanded view's breadcrumb. */
@@ -34,9 +35,11 @@ export function ComponentPreview({
   patternPanel?: ReactNode;
   prev?: PagerLink;
   next?: PagerLink;
+  /** The pattern's job and "Seen in", shown in the expanded view's header. */
+  meta?: ReactNode;
 }) {
   const pathname = usePathname();
-  const { expanded, setExpanded } = usePatternExpand();
+  const { expanded, setExpanded, fromGallery, collapseInPlace } = usePatternExpand();
   const [tab, setTab] = useState("preview");
   const [panelTab, setPanelTab] = useState(pattern ? "pattern" : "code");
 
@@ -123,6 +126,14 @@ export function ComponentPreview({
                     {title}
                   </span>
                 </nav>
+                {meta && <div className="flex shrink-0 items-center gap-4 max-md:hidden">{meta}</div>}
+                {/* Opened from the gallery, Collapse goes back there; this is the way to the page itself. */}
+                {fromGallery && (
+                  <Button type="button" variant="ghost" size="sm" onClick={collapseInPlace} className="max-sm:hidden">
+                    <FileText />
+                    Open full page
+                  </Button>
+                )}
                 {/* Not on phones: there's little room, and the address bar shares the link anyway. */}
                 <CopyLinkButton className="max-sm:hidden" />
                 {/* Without room for the side panel, Collapse lives here instead. */}

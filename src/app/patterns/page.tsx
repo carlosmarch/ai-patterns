@@ -6,6 +6,7 @@ import { getEntriesByJob, newEntries, registry, type RegistryEntry } from "@/reg
 import { JOBS } from "@/registry/jobs";
 import { JobFilter } from "@/components/job-filter";
 import { PatternCard } from "@/components/pattern-card";
+import { PatternsViewSwitch } from "@/components/patterns-view-switch";
 
 export const metadata: Metadata = {
   title: "Patterns — AI Patterns",
@@ -61,7 +62,10 @@ export default function PatternsIndexPage() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">Patterns</h1>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-3xl font-semibold tracking-tight">Patterns</h1>
+        <PatternsViewSwitch current="details" size="sm" />
+      </div>
       <p className="mt-2 text-muted-foreground">
         Copy-paste animated UI patterns for AI products, organized by category.
       </p>

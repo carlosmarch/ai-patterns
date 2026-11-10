@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { getEntryHref, isNewEntry, registry } from "@/registry";
-import { JOBS } from "@/registry/jobs";
+import { JOBS, getJob } from "@/registry/jobs";
 import { GalleryGrid, type GalleryItem } from "./gallery-grid";
 
 // A hidden page (not linked, not in the sitemap, disallowed in robots.ts):
@@ -20,6 +20,7 @@ export default function GalleryPage() {
     slug: entry.slug,
     title: entry.title,
     job: entry.job,
+    jobLabel: getJob(entry.job)?.label ?? entry.job,
     href: getEntryHref(entry),
     isNew: isNewEntry(entry),
     demo: <entry.Demo />,

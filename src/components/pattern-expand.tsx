@@ -12,16 +12,20 @@ const EXPANDED_VALUE = "expanded";
 /** Where the expanded view returns to when it was opened from the gallery. */
 export const GALLERY_HREF = "/gallery";
 
-// Set by the gallery right before it navigates to a pattern. The provider
-// reads it on mount to render expanded in the very first frame — that's what
-// lets the gallery card's view transition pair with the expanded view. A
-// module flag rather than state: on a hard load it's always false, so the
-// static HTML and hydration agree.
-let openingFromGallery = false;
+// Set by the gallery right before it navigates to a pattern: the gallery URL
+// to return to. The provider reads it on mount to render expanded in the very
+// first frame — that's what lets the gallery card's view transition pair with
+// the expanded view. A module variable rather than state: on a hard load it's
+// always null, so the static HTML and hydration agree.
+let openingFromGallery: string | null = null;
 
-/** Call right before navigating from the gallery to `/patterns/<category>/<slug>?view=expanded`. */
-export function markOpeningFromGallery() {
-  openingFromGallery = true;
+/**
+ * Call right before navigating from the gallery to
+ * `/patterns/<category>/<slug>?view=expanded`, with the gallery URL
+ * (filter included) that collapsing should return to.
+ */
+export function markOpeningFromGallery(returnHref: string = GALLERY_HREF) {
+  openingFromGallery = returnHref;
 }
 
 /** The shared view-transition name of a pattern's gallery card and its expanded view. */
@@ -34,6 +38,8 @@ interface PatternExpandState {
   setExpanded: (expanded: boolean) => void;
   /** Opened from the gallery: collapsing goes back there instead of to the page. */
   fromGallery: boolean;
+  /** Leave the expanded view for the pattern page itself, even when opened from the gallery. */
+  collapseInPlace: () => void;
 }
 
 const PatternExpandContext = createContext<PatternExpandState | null>(null);
@@ -45,27 +51,35 @@ const PatternExpandContext = createContext<PatternExpandState | null>(null);
  */
 export function PatternExpandProvider({ children }: { children: ReactNode }) {
   // Not consumed in the initializer: Strict Mode runs initializers twice.
-  const [fromGallery] = useState(() => openingFromGallery);
+  const [returnHref, setReturnHref] = useState(() => openingFromGallery);
+  const fromGallery = returnHref !== null;
   const [expanded, setExpandedState] = useState(fromGallery);
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
-    openingFromGallery = false;
+    openingFromGallery = null;
   }, []);
 
   const setExpanded = useCallback(
     (next: boolean) => {
-      if (next || !fromGallery) return setExpandedState(next);
+      if (next || returnHref === null) return setExpandedState(next);
       // Collapsing a view opened from the gallery returns to the gallery,
       // morphing back into the card. A push, not router.back(): back/forward
       // navigations don't run as transitions, so they wouldn't animate. The
       // gallery restores its own filter and scroll position.
       keepScrollOnNextNavigation();
-      router.push(GALLERY_HREF, { scroll: false });
+      router.push(returnHref, { scroll: false });
     },
-    [fromGallery, router],
+    [returnHref, router],
   );
+
+  // "Open full page": from here on this is an ordinary pattern page, so
+  // Expand/Collapse stay in place rather than going back to the gallery.
+  const collapseInPlace = useCallback(() => {
+    setReturnHref(null);
+    setExpandedState(false);
+  }, []);
 
   // Whether the URL asked to open expanded and the state hasn't caught up yet
   // (null until first read on mount). Read from window.location rather than
@@ -104,7 +118,7 @@ export function PatternExpandProvider({ children }: { children: ReactNode }) {
   }, [expanded]);
 
   return (
-    <PatternExpandContext.Provider value={{ expanded, setExpanded, fromGallery }}>{children}</PatternExpandContext.Provider>
+    <PatternExpandContext.Provider value={{ expanded, setExpanded, fromGallery, collapseInPlace }}>{children}</PatternExpandContext.Provider>
   );
 }
 
