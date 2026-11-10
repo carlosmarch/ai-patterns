@@ -1,9 +1,11 @@
 import { getTeams, type SeenIn as SeenInRef, type Team } from "@/lib/teams";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 // An overlapping row of app-icon tiles crediting the products a pattern
 // ships in. With `linked`, each tile opens the public page that shows the
-// pattern in that product. Renders nothing when a pattern has no credits.
+// pattern in that product. Hovering (or focusing) a tile shows the product
+// name in a tooltip. Renders nothing when a pattern has no credits.
 export function SeenIn({
   items,
   size = "md",
@@ -28,7 +30,7 @@ export function SeenIn({
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
       {showLabel && <span className="text-xs text-muted-foreground">Seen in</span>}
-      <ul className="flex items-center" aria-label={`Seen in ${names}`} title={linked ? undefined : names}>
+      <ul className="flex items-center" aria-label={`Seen in ${names}`}>
         {teams.map((team, i) => {
           const source = sourceFor.get(team.id);
           return (
@@ -37,20 +39,26 @@ export function SeenIn({
               className={cn("relative", i > 0 && (size === "sm" ? "-ml-1.5" : "-ml-2"))}
               style={{ zIndex: teams.length - i }}
             >
-              {linked && source ? (
-                <a
-                  href={source}
-                  target="_blank"
-                  rel="noreferrer"
-                  title={`${team.name} — view source`}
-                  aria-label={`${team.name} (source)`}
-                  className="block rounded-[26%] transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                >
-                  <TeamTile team={team} size={size} />
-                </a>
-              ) : (
-                <TeamTile team={team} size={size} />
-              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {linked && source ? (
+                    <a
+                      href={source}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`${team.name} (source)`}
+                      className="block rounded-[26%] transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                    >
+                      <TeamTile team={team} size={size} />
+                    </a>
+                  ) : (
+                    <span className="block">
+                      <TeamTile team={team} size={size} />
+                    </span>
+                  )}
+                </TooltipTrigger>
+                <TooltipContent>{team.name}</TooltipContent>
+              </Tooltip>
             </li>
           );
         })}
@@ -62,7 +70,6 @@ export function SeenIn({
 function TeamTile({ team, size }: { team: Team; size: "sm" | "md" }) {
   return (
     <span
-      title={team.name}
       className={cn(
         "grid place-items-center overflow-hidden rounded-[26%] shadow-[0_1px_2px_rgb(0_0_0/0.14)] ring-2 ring-background",
         size === "sm" ? "size-5" : "size-7"
