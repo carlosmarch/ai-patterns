@@ -16,6 +16,8 @@ export const metadata: Metadata = {
 export default function GalleryPage() {
   const items: GalleryItem[] = registry.map((entry) => ({
     id: `${entry.category}/${entry.slug}`,
+    category: entry.category,
+    slug: entry.slug,
     title: entry.title,
     job: entry.job,
     href: getEntryHref(entry),

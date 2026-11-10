@@ -10,6 +10,15 @@ const STORAGE_PREFIX = "scroll-pos:";
 // navigation apart from a regular Link click, which never fires `popstate`.
 let lastNavWasPopState = false;
 
+// Set right before a navigation whose destination restores its own scroll
+// position (the gallery, when a pattern opened from it is collapsed).
+let skipNextReset = false;
+
+/** The next pathname change leaves the scroll position to the destination page. */
+export function keepScrollOnNextNavigation() {
+  skipNextReset = true;
+}
+
 /** Renders nothing. On a real back/forward navigation, restores the scroll
  * position this pathname had when the user left it; on every other
  * navigation (including a hard reload), scrolls to the top. */
@@ -27,6 +36,10 @@ export function ScrollRestoration() {
   React.useEffect(() => {
     const wasPopState = lastNavWasPopState;
     lastNavWasPopState = false;
+    if (skipNextReset) {
+      skipNextReset = false;
+      return;
+    }
 
     let saved = 0;
     try {

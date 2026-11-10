@@ -175,7 +175,7 @@ export function InstructionTools({
     const el = editors.current.get(pendingFocus.current);
     pendingFocus.current = null;
     if (!el) return;
-    el.focus();
+    el.focus({ preventScroll: true });
     placeCaret((r) => {
       r.selectNodeContents(el);
       r.collapse(false);
@@ -308,7 +308,7 @@ function StepEditor({
     const el = editorRef.current;
     if (!current || !el) return;
     setPicker(null);
-    el.focus();
+    el.focus({ preventScroll: true });
     const anchor = current.anchor;
     if (!anchor.isConnected) return sync();
     if (replacement && pad) {
@@ -374,7 +374,7 @@ function StepEditor({
 
   function removeChip(chip: ChipState) {
     const el = editorRef.current;
-    el?.focus();
+    el?.focus({ preventScroll: true });
     placeCaret((r) => r.setStartBefore(chip.el));
     chip.el.remove();
     sync();
