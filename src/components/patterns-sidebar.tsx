@@ -4,39 +4,15 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
-import { ChevronRight, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import { useCatalogJob } from "@/components/catalog-filter-store";
 import { cn } from "@/lib/utils";
 
-// Compact mode folds the sidebar into a column of ticks, one per pattern,
-// which opens into the full list on hover or keyboard focus. The mode lives
-// on <html data-sidebar="compact"> — set before first paint by the root
-// layout's init script (compact by default, "full" once expanded in localStorage) — so the CSS (the `sidebar-compact:`
-// variant in globals.css) gets it right without waiting for React, and the
-// server HTML is the same either way. React only reads it for the toggle.
-const SIDEBAR_KEY = "ai-patterns:sidebar";
-const sidebarListeners = new Set<() => void>();
-
-function isCompact() {
-  return document.documentElement.dataset.sidebar === "compact";
-}
-
-function setCompact(compact: boolean) {
-  if (compact) document.documentElement.dataset.sidebar = "compact";
-  else delete document.documentElement.dataset.sidebar;
-  try {
-    localStorage.setItem(SIDEBAR_KEY, compact ? "compact" : "full");
-  } catch {
-    // Storage unavailable: the mode still applies until the next load.
-  }
-  sidebarListeners.forEach((listener) => listener());
-}
-
-function subscribeToSidebar(listener: () => void) {
-  sidebarListeners.add(listener);
-  return () => sidebarListeners.delete(listener);
-}
+// The sidebar is a column of ticks, one per pattern, which opens into the
+// full list on hover or keyboard focus. The mode lives on
+// <html data-sidebar="compact">, set by the root layout, so the CSS (the
+// `sidebar-compact:` variant in globals.css) applies before React runs.
 
 export interface PatternsSidebarGroup {
   /** The job id. */
@@ -55,7 +31,6 @@ export interface PatternsSidebarGroup {
  * group is always open. With no job filter every group is open. Shown on the catalogue pages (the gallery
  * and pattern pages) at the very left; it sticks below the site header and
  * scrolls on its own, so the current pattern stays in view beside its page.
- * The toggle at its top compresses it into a column of ticks (see above).
  *
  * Keyboard: the list is a single Tab stop (roving tabindex on the current
  * pattern). Once focus is inside, ↑ / ↓ move to the previous / next pattern
@@ -69,7 +44,6 @@ export function PatternsSidebar({
   /** Overrides for the outer column. */
   className?: string;
 }) {
-  const compact = React.useSyncExternalStore(subscribeToSidebar, isCompact, () => true);
   const pathname = usePathname();
   const router = useRouter();
   const reduceMotion = useReducedMotion();
@@ -145,8 +119,6 @@ export function PatternsSidebar({
     router.push(link.getAttribute("href")!);
   }
 
-  const ToggleIcon = compact ? PanelLeftOpen : PanelLeftClose;
-
   return (
     <div
       className={cn(
@@ -158,16 +130,6 @@ export function PatternsSidebar({
         className,
       )}
     >
-      <button
-        type="button"
-        onClick={() => setCompact(!compact)}
-        aria-label={compact ? "Expand the patterns menu" : "Compress the patterns menu"}
-        title={compact ? "Expand menu" : "Compress menu"}
-        className="absolute top-5 left-2.5 z-50 flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none sm:left-4"
-      >
-        <ToggleIcon className="size-4" />
-      </button>
-
       {/* Compact: one tick per pattern, grouped by job; the current one is longer and darker.
           Decorative — hovering (or tabbing into) the column opens the real list over it. */}
       <div aria-hidden data-sidebar-ticks className="hidden h-full flex-col overflow-hidden pt-16 pb-6 pl-4 sm:pl-6 sidebar-compact:flex">
