@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { AnimatedOrigami } from "@/components/animated-origami";
-import { Breadcrumbs } from "@/components/breadcrumbs";
+import { ChevronLeft } from "lucide-react";
+
 import { CodeBlock } from "@/components/code-block";
-import { ComponentPreview } from "@/components/component-preview";
+import { ComponentPreview, ExpandButton } from "@/components/component-preview";
 import { DosAndDonts } from "@/components/dos-and-donts";
 import { NewBadge } from "@/components/new-badge";
 import { SeenIn } from "@/components/seen-in";
@@ -67,8 +67,9 @@ export default async function PatternPage({
     <CodeBlock code={entry.uxDoc} lang="markdown" wrap trackAs="spec" download={`${entry.slug}.pattern.md`} />
   );
 
-  // The catalogue is grouped by job, so the breadcrumb goes through the job (the
-  // URL keeps the category: it's the pattern's permanent address).
+  // The catalogue is grouped by job, so Back (and the expanded view's
+  // breadcrumb) goes to the job's patterns (the URL keeps the category: it's
+  // the pattern's permanent address).
   const categoryCrumb = job
     ? { label: job.label, href: `/patterns?job=${job.id}` }
     : { label: entry.category.charAt(0).toUpperCase() + entry.category.slice(1), href: "/patterns" };
@@ -90,15 +91,17 @@ export default async function PatternPage({
 
   return (
     <main className="mx-auto w-full max-w-3xl py-16">
-      <Breadcrumbs
-        className="mb-6"
-        items={[
-          { label: "AI Patterns home", href: "/", icon: <AnimatedOrigami className="size-4" /> },
-          { label: "Patterns", href: "/patterns" },
-          categoryCrumb,
-          { label: entry.title },
-        ]}
-      />
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <Link
+          href={categoryCrumb.href}
+          aria-label={`Back to ${categoryCrumb.label} patterns`}
+          className="-ml-1 inline-flex items-center gap-1 rounded-md px-1 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ChevronLeft className="size-4" />
+          Back
+        </Link>
+        <ExpandButton />
+      </div>
 
       <div className="mb-8">{intro("h1")}</div>
 
