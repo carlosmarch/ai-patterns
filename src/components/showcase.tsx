@@ -32,12 +32,14 @@ const COLUMN_VISIBILITY = ["flex", "flex", "flex", "hidden sm:flex", "hidden lg:
  * a heading, a line and a call to action, centred). The demos are decoration
  * (inert); the content carries the links.
  *
- * `compact` makes it shorter; `moving` sets each column drifting slowly, up
- * and down in turn (still under prefers-reduced-motion).
+ * `background` makes it a full-width page-header background instead of a
+ * framed block: no frame, borderless cards, the content over the cards and
+ * everything fading into the page. `moving` sets each column drifting slowly,
+ * up and down in turn (still under prefers-reduced-motion).
  */
 export function Showcase({
   tiles,
-  compact,
+  background,
   moving,
   id,
   className,
@@ -45,7 +47,7 @@ export function Showcase({
 }: {
   /** Two per column, column by column; the first of each pair is the clearer one. */
   tiles: ShowcaseTile[];
-  compact?: boolean;
+  background?: boolean;
   moving?: boolean;
   id?: string;
   className?: string;
@@ -55,9 +57,10 @@ export function Showcase({
     <section
       id={id}
       className={cn(
-        "logo-link relative scroll-mt-16 overflow-hidden rounded-[32px] bg-(--showcase)",
-        // Tile size: phones get shorter tiles, a compact block shorter still.
-        compact ? "[--tile-scale:0.5] sm:[--tile-scale:0.72]" : "[--tile-scale:0.62] sm:[--tile-scale:1]",
+        "logo-link relative scroll-mt-16 overflow-hidden",
+        background ? "bg-background" : "rounded-[32px] bg-(--showcase)",
+        // Phones get shorter tiles.
+        "[--tile-scale:0.62] sm:[--tile-scale:1]",
         className,
       )}
       style={{ "--showcase": "color-mix(in oklab, var(--muted) 65%, var(--background))" } as CSSProperties}
@@ -65,8 +68,9 @@ export function Showcase({
       <div inert aria-hidden className="absolute inset-x-0 top-0 flex gap-3 px-3">
         {COLUMNS.map((column, c) => {
           const pair = [tiles[c * 2], tiles[c * 2 + 1]];
-          // Moving columns repeat their tiles once, then loop by half their height.
-          const rounds = moving ? [0, 1] : [0];
+          // Moving columns repeat their tiles three times and loop by one
+          // repeat, so the column always reaches the bottom of the block.
+          const rounds = moving ? [0, 1, 2] : [0];
           return (
             <div
               key={c}
@@ -87,7 +91,10 @@ export function Showcase({
                       tile && (
                         <div key={`${tile.id}-${round}`} className="pb-3">
                           <div
-                            className="relative overflow-hidden rounded-[24px] border bg-background/80 dark:bg-background/50"
+                            className={cn(
+                              "relative overflow-hidden rounded-[24px]",
+                              background ? "bg-muted/70 dark:bg-muted/40" : "border bg-background/80 dark:bg-background/50",
+                            )}
                             style={{ height: `calc(${column.heights[r]}px * var(--tile-scale))` }}
                           >
                             <DemoStage demo={tile.demo} width={440} padding={14} reserveBottom={0} className="absolute inset-0" />
@@ -102,21 +109,24 @@ export function Showcase({
         })}
       </div>
 
-      {/* The tiles fade into the block's own colour, leaving the top row clear. */}
-      <div
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute inset-0",
-          compact
-            ? "bg-[linear-gradient(to_bottom,transparent_8%,var(--showcase)_42%)]"
-            : "bg-[linear-gradient(to_bottom,transparent_12%,var(--showcase)_50%)]",
-        )}
-      />
+      {background ? (
+        // A clearing behind the content, and the bottom fading into the page.
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_75%_42%_at_50%_55%,var(--background)_45%,transparent_100%),linear-gradient(to_bottom,transparent_45%,var(--background)_96%)] sm:bg-[radial-gradient(ellipse_42%_48%_at_50%_52%,var(--background)_35%,transparent_100%),linear-gradient(to_bottom,transparent_45%,var(--background)_96%)]"
+        />
+      ) : (
+        // The tiles fade into the block's own colour, leaving the top row clear.
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent_12%,var(--showcase)_50%)]"
+        />
+      )}
 
       <div
         className={cn(
           "relative flex flex-col items-center px-6 text-center",
-          compact ? "pt-[150px] pb-10 sm:pt-[200px] sm:pb-12" : "pt-[210px] pb-12 sm:pt-[360px] sm:pb-14",
+          background ? "py-20 sm:py-28" : "pt-[210px] pb-12 sm:pt-[360px] sm:pb-14",
         )}
       >
         {children}

@@ -25,37 +25,35 @@ export default function SkillPage() {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-[1480px] px-4 pt-6 sm:px-5">
-        <Showcase tiles={getShowcaseTiles()} compact moving>
-          <ShowcaseLogo className="size-16 rounded-[20px]" />
-          <p className="mt-6 text-sm font-medium text-muted-foreground">Claude Code skill · v{pluginJson.version}</p>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-            {registry.length} patterns, in your agent
-          </h1>
-          <p className="mt-4 max-w-lg text-pretty text-muted-foreground sm:text-lg">{SKILL_TAGLINE}</p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <a
-              href="#install"
-              className="inline-flex h-11 items-center rounded-full bg-foreground px-5 text-[15px] font-medium text-background transition-transform hover:scale-[1.03] active:scale-[0.98]"
-            >
-              Install the skill
-            </a>
-            <Link
-              href="/patterns"
-              className="inline-flex h-11 items-center rounded-full border bg-background px-5 text-[15px] font-medium transition-colors hover:bg-muted"
-            >
-              Browse patterns
-            </Link>
-          </div>
-          <p className="mt-8 text-sm text-muted-foreground">
-            Not on Claude Code?{" "}
-            <a href="#mcp" className="text-foreground underline-offset-4 hover:underline">
-              Use the MCP server
-            </a>
-            .
-          </p>
-        </Showcase>
-      </div>
+      <Showcase tiles={getShowcaseTiles()} background moving>
+        <ShowcaseLogo className="size-16 rounded-[20px] border-0 bg-muted" />
+        <p className="mt-6 text-sm font-medium text-muted-foreground">Claude Code skill · v{pluginJson.version}</p>
+        <h1 className="mt-2 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+          {registry.length} patterns, in your agent
+        </h1>
+        <p className="mt-4 max-w-lg text-pretty text-muted-foreground sm:text-lg">{SKILL_TAGLINE}</p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <a
+            href="#install"
+            className="inline-flex h-11 items-center rounded-full bg-foreground px-5 text-[15px] font-medium text-background transition-transform hover:scale-[1.03] active:scale-[0.98]"
+          >
+            Install the skill
+          </a>
+          <Link
+            href="/patterns"
+            className="inline-flex h-11 items-center rounded-full border bg-background px-5 text-[15px] font-medium transition-colors hover:bg-muted"
+          >
+            Browse patterns
+          </Link>
+        </div>
+        <p className="mt-8 text-sm text-muted-foreground">
+          Not on Claude Code?{" "}
+          <a href="#mcp" className="text-foreground underline-offset-4 hover:underline">
+            Use the MCP server
+          </a>
+          .
+        </p>
+      </Showcase>
 
       <main className="mx-auto w-full max-w-3xl px-6 pt-14 pb-16">
         {/* Install */}
