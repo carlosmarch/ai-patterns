@@ -56,7 +56,7 @@ export function SiteActions() {
       </a>
 
       <div ref={ref} className="relative hidden sm:block">
-        <BorderBeam radius={9999} duration={6}>
+        <BorderBeam radius={9999} duration={8} active className="p-[1.5px]">
           <div className="flex h-9 items-stretch overflow-hidden rounded-full bg-foreground text-background">
             <Link
               href="/skill"
