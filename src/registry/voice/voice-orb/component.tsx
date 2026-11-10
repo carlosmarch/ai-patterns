@@ -284,7 +284,7 @@ export function VoiceOrbCall({
       {/* Controls: mute · timer · end call — or a single button to call again. */}
       <div className="mt-4 flex h-14 items-center">
         {connected ? (
-          <div className="flex items-center gap-1 rounded-full border bg-background p-1.5 shadow-sm">
+          <div className="flex items-center gap-1 rounded-full border bg-background p-1.5">
             <button
               type="button"
               onClick={() => onMutedChange?.(!muted)}

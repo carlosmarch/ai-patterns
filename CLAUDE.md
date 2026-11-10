@@ -25,6 +25,16 @@ Each pattern lives under `src/registry/<category>/<slug>/`:
   expression: grayscale theme tokens (`tone.*`) only — no icons, no
   accent colors — just lines, boxes, dots and pills.
 
+Demo conventions:
+
+- No drop shadows (`shadow-*`) on demo or component surfaces — pills,
+  cards and controls get a border (`border`) and flat background only.
+- Demo copy is about this project's world: someone designing or building
+  an AI product, talking about its UI and the patterns in this catalogue
+  (name real patterns, e.g. "Thinking Loader", "Cost Estimate"). Avoid
+  generic assistant errands (calendars, meetings with named people,
+  reminders).
+
 Register the new entry in `src/registry/index.ts` (import the `Demo`,
 `Thumbnail` and `pattern`, add a `RegistryEntry`) — this is what makes it appear on
 `/patterns` and `/patterns/<category>/<slug>`.

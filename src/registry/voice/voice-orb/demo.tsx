@@ -5,10 +5,10 @@ import * as React from "react";
 import { VoiceOrbCall, type VoiceOrbState, type VoiceOrbTranscript } from "./component";
 
 const SCRIPT: VoiceOrbTranscript[] = [
-  { speaker: "user", text: "Can you move my three o'clock with Marcus to tomorrow morning?" },
-  { speaker: "assistant", text: "Done. Your sync with Marcus is now tomorrow at 9:30, and I let him know." },
-  { speaker: "user", text: "Great, and remind me to send him the deck tonight." },
-  { speaker: "assistant", text: "Okay. I'll remind you at 7 p.m. to send Marcus the deck." },
+  { speaker: "user", text: "Which pattern shows that my agent is still working on an answer?" },
+  { speaker: "assistant", text: "A Thinking Loader for a short wait, or Stream of Thought if people should see the reasoning." },
+  { speaker: "user", text: "And how do I show what a long task will cost?" },
+  { speaker: "assistant", text: "Show a Cost Estimate before it runs, then a Context Usage meter while it works." },
 ];
 
 /** A scripted call that walks the orb through Ready → Listening → Thinking → Speaking, turn after turn. */
