@@ -4,16 +4,9 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, FileCode2, LayoutGrid, Origami, Search, Sparkles } from "lucide-react";
+import { Search } from "lucide-react";
 
-import { getAdjacentEntries, getEntryHref, registry } from "@/registry";
-import { CommandPaletteWindow, type CommandPaletteGroup } from "@/registry/navigation/command-palette/component";
-
-const navItems = [
-  { id: "/", label: "Home", icon: Origami },
-  { id: "/patterns", label: "Patterns", icon: LayoutGrid },
-  { id: "/skill", label: "Skill", icon: Sparkles },
-];
+import { SiteSearch, recordVisit } from "@/components/site-search";
 
 export function SiteCommandPalette() {
   const [open, setOpen] = React.useState(false);
@@ -25,36 +18,23 @@ export function SiteCommandPalette() {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setOpen((v) => !v);
+        return;
+      }
+      // "/" opens search too, unless the user is typing somewhere.
+      const target = e.target as HTMLElement | null;
+      const typing = target?.closest("input, textarea, select, [contenteditable='true']");
+      if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey && !typing) {
+        e.preventDefault();
+        setOpen(true);
       }
     }
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  const groups: CommandPaletteGroup[] = React.useMemo(() => {
-    // On a pattern page, offer jumps to its neighbours first.
-    const [, section, category, slug] = pathname.split("/");
-    const { prev, next } =
-      section === "patterns" && category && slug ? getAdjacentEntries(category, slug) : {};
-    const pagerItems = [
-      prev && { id: `${getEntryHref(prev)}#prev`, label: `Previous pattern: ${prev.title}`, icon: ArrowLeft, meta: "←" },
-      next && { id: `${getEntryHref(next)}#next`, label: `Next pattern: ${next.title}`, icon: ArrowRight, meta: "→" },
-    ].filter((item) => !!item);
-
-    return [
-      ...(pagerItems.length ? [{ label: "This pattern", items: pagerItems }] : []),
-      { label: "Navigate", items: navItems },
-      {
-        label: "Patterns",
-        items: registry.map((entry) => ({
-          id: `/patterns/${entry.category}/${entry.slug}`,
-          label: entry.title,
-          icon: FileCode2,
-          meta: entry.category,
-          keywords: entry.description,
-        })),
-      },
-    ];
+  // Remember pattern pages for "Recently visited".
+  React.useEffect(() => {
+    recordVisit(pathname);
   }, [pathname]);
 
   // The pill and the panel share a layoutId, so opening morphs the pill into
@@ -124,32 +104,59 @@ export function SiteCommandPalette() {
                   onClick={close}
                   aria-hidden
                 />
-                <motion.div
-                  layoutId="site-search"
-                  transition={morph}
-                  style={{ borderRadius: 16 }}
-                  className="relative z-10 h-fit w-full max-w-lg overflow-hidden bg-popover"
+                {/* The search field and the results are two separate surfaces
+                    with a gap between them: the field is the header pill, grown
+                    in place; the results drop in underneath it. */}
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Search"
+                  className="relative z-10 flex h-fit w-full max-w-xl flex-col gap-2"
                 >
-                  {/* The contents fade in once the panel has nearly finished
-                      growing, so they are never seen stretched. */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1, transition: { duration: 0.16, delay: reduceMotion ? 0 : 0.16 } }}
-                    exit={{ opacity: 0, transition: { duration: 0.08 } }}
-                  >
-                    <CommandPaletteWindow
-                      groups={groups}
-                      placeholder="Search patterns or jump to a page..."
-                      autoFocus
-                      // Item ids are routes; pager items carry a #prev/#next suffix to keep ids unique.
-                      onSelect={(item) => {
-                        router.push(item.id.replace(/#(prev|next)$/, ""));
-                        close();
-                      }}
-                      onClose={close}
-                    />
-                  </motion.div>
-                </motion.div>
+                  <SiteSearch
+                    currentPath={pathname}
+                    onClose={close}
+                    onNavigate={(href, newTab) => {
+                      if (newTab) window.open(href, "_blank", "noopener");
+                      else router.push(href);
+                      close();
+                    }}
+                    renderField={(field) => (
+                      <motion.div
+                        layoutId="site-search"
+                        transition={morph}
+                        style={{ borderRadius: 24 }}
+                        className="overflow-hidden border bg-popover"
+                      >
+                        {/* Fades in once the pill has nearly finished growing,
+                            so the contents are never seen stretched. */}
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1, transition: { duration: 0.16, delay: reduceMotion ? 0 : 0.14 } }}
+                          exit={{ opacity: 0, transition: { duration: 0.08 } }}
+                        >
+                          {field}
+                        </motion.div>
+                      </motion.div>
+                    )}
+                    renderResults={(results) => (
+                      <motion.div
+                        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.98 }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          scale: 1,
+                          transition: { duration: 0.2, ease: "easeOut", delay: reduceMotion ? 0 : 0.1 },
+                        }}
+                        exit={{ opacity: 0, y: -6, transition: { duration: 0.1 } }}
+                        style={{ transformOrigin: "top center" }}
+                        className="overflow-hidden rounded-2xl border bg-popover"
+                      >
+                        {results}
+                      </motion.div>
+                    )}
+                  />
+                </div>
               </div>
             )}
           </AnimatePresence>,
