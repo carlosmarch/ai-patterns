@@ -19,8 +19,6 @@ const THEME_INIT_SCRIPT = `
     var theme = localStorage.getItem("theme");
     var isDark = theme === "dark" || (theme !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
     document.documentElement.classList.toggle("dark", isDark);
-    // The patterns sidebar is compact (ticks) unless the reader expanded it — see PatternsSidebar.
-    if (localStorage.getItem("ai-patterns:sidebar") !== "full") document.documentElement.dataset.sidebar = "compact";
   } catch (e) {}
 })();
 `;
@@ -82,6 +80,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      // The patterns sidebar is always compact (ticks) — see PatternsSidebar.
+      data-sidebar="compact"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >

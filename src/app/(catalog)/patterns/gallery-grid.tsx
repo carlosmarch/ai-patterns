@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, ViewTransition, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, ViewTransition, type MouseEvent, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
@@ -22,6 +22,38 @@ export interface GalleryItem {
 }
 
 const ALL = "all";
+
+// Column count per breakpoint (Tailwind sm / lg), read on the client; the static
+// HTML assumes the desktop wall.
+const SM = "(min-width: 640px)";
+const LG = "(min-width: 1024px)";
+
+function subscribeToColumns(onChange: () => void) {
+  const queries = [SM, LG].map((q) => window.matchMedia(q));
+  queries.forEach((mq) => mq.addEventListener("change", onChange));
+  return () => queries.forEach((mq) => mq.removeEventListener("change", onChange));
+}
+
+function getColumns() {
+  return window.matchMedia(LG).matches ? 3 : window.matchMedia(SM).matches ? 2 : 1;
+}
+
+/**
+ * Deal the cards into columns, each to the currently shortest one, so the
+ * wall reads left to right in catalogue order and the columns end level
+ * (the last card of each column stretches to close the remaining gap).
+ */
+function toColumns<T>(items: T[], count: number) {
+  const columns: { item: T; height: number }[][] = Array.from({ length: count }, () => []);
+  const totals = new Array<number>(count).fill(0);
+  items.forEach((item, i) => {
+    const height = HEIGHTS[i % HEIGHTS.length];
+    const shortest = totals.indexOf(Math.min(...totals));
+    columns[shortest].push({ item, height });
+    totals[shortest] += height;
+  });
+  return columns;
+}
 const NEW = "new";
 
 /** Card heights cycle so the columns stagger like a masonry wall. */
@@ -104,6 +136,8 @@ export function GalleryGrid({
 
   // One wall, no section headings: catalogue order (by job) or, for "New", newest first.
   const visible = items.filter((item) => (active === ALL ? true : active === NEW ? item.isNew : item.job === active));
+  const columnCount = useSyncExternalStore(subscribeToColumns, getColumns, () => 3);
+  const columns = toColumns(visible, columnCount);
 
   return (
     <>
@@ -115,13 +149,17 @@ export function GalleryGrid({
         onChoose={choose}
       />
 
-      <ul className="columns-1 gap-3 sm:columns-2 lg:columns-3">
-        {visible.map((item, i) => (
-          <li key={item.id} className="mb-3 break-inside-avoid">
-            <GalleryCard item={item} height={HEIGHTS[i % HEIGHTS.length]} onOpen={() => open(item)} />
-          </li>
+      <div className="flex items-stretch gap-3">
+        {columns.map((column, c) => (
+          <ul key={c} className="flex min-w-0 flex-1 flex-col gap-3">
+            {column.map(({ item, height }) => (
+              <li key={item.id} className="flex flex-col last:flex-1">
+                <GalleryCard item={item} height={height} onOpen={() => open(item)} />
+              </li>
+            ))}
+          </ul>
         ))}
-      </ul>
+      </div>
     </>
   );
 }
@@ -189,8 +227,8 @@ function GalleryCard({ item, height, onOpen }: { item: GalleryItem; height: numb
     <ViewTransition name={patternTransitionName(item.category, item.slug)} share="pattern-morph" default="none">
       <article
         onClick={handleCardClick}
-        className="group relative cursor-pointer overflow-hidden rounded-[28px] bg-muted/70 dark:bg-muted/40"
-        style={{ height }}
+        className="group relative flex-1 cursor-pointer overflow-hidden rounded-[28px] bg-muted/70 dark:bg-muted/40"
+        style={{ minHeight: height }}
       >
         <div ref={cardRef} className="absolute inset-0">
           {mounted && (
