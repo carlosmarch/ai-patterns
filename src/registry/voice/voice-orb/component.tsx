@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { Mic, MicOff, Phone, PhoneOff } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-export type VoiceOrbState = "idle" | "listening" | "thinking" | "speaking";
+export type VoiceOrbState = "ready" | "listening" | "thinking" | "speaking";
 
 export interface VoiceOrbProps {
   state: VoiceOrbState;
@@ -21,7 +23,7 @@ export interface VoiceOrbProps {
 }
 
 const STATE_LABEL: Record<VoiceOrbState, string> = {
-  idle: "Voice idle",
+  ready: "Ready",
   listening: "Listening",
   thinking: "Thinking",
   speaking: "Speaking",
@@ -29,7 +31,7 @@ const STATE_LABEL: Record<VoiceOrbState, string> = {
 
 /** How much the sphere is allowed to swell and how fast it spins, per state. */
 const STATE_MOTION: Record<VoiceOrbState, { gain: number; spin: number; ripple: number }> = {
-  idle: { gain: 0, spin: 0.12, ripple: 0.01 },
+  ready: { gain: 0, spin: 0.12, ripple: 0.01 },
   listening: { gain: 0.22, spin: 0.25, ripple: 0.05 },
   thinking: { gain: 0, spin: 0.15, ripple: 0 },
   speaking: { gain: 0.32, spin: 0.35, ripple: 0.08 },
@@ -174,6 +176,183 @@ export function VoiceOrb({ state, level, particles = 900, className }: VoiceOrbP
   );
 }
 
+export interface VoiceOrbTranscript {
+  speaker: "user" | "assistant";
+  /** The words heard (user) or spoken (assistant) so far in this turn. */
+  text: string;
+  /** True once the turn is complete; only final lines are announced to screen readers. */
+  final?: boolean;
+}
+
+export interface VoiceOrbCallProps {
+  state: VoiceOrbState;
+  /** Whether the call is live. The timer runs while true; false shows a "Call again" button. */
+  connected?: boolean;
+  /** The current turn's words, shown under the orb as they stream in. */
+  transcript?: VoiceOrbTranscript | null;
+  /** Live audio level for the orb (see `VoiceOrb`). */
+  level?: VoiceOrbProps["level"];
+  muted?: boolean;
+  onMutedChange?: (muted: boolean) => void;
+  onEnd?: () => void;
+  onStart?: () => void;
+  /** Words at the tail of the line stay at full strength; older ones fade back. */
+  recentWords?: number;
+  className?: string;
+  orbClassName?: string;
+}
+
+const CALL_STATUS: Record<VoiceOrbState, string> = {
+  ready: "Ready",
+  listening: "Listening",
+  thinking: "Thinking",
+  speaking: "Speaking",
+};
+
+/**
+ * A full voice-agent surface built around the orb: the turn state above it,
+ * the live transcript below it, and a pill with mute, the call timer and
+ * end call. Muting holds the orb at rest, whatever the agent's state.
+ */
+export function VoiceOrbCall({
+  state,
+  connected = true,
+  transcript,
+  level,
+  muted = false,
+  onMutedChange,
+  onEnd,
+  onStart,
+  recentWords = 6,
+  className,
+  orbClassName,
+}: VoiceOrbCallProps) {
+  const seconds = useCallTimer(connected);
+  const orbState: VoiceOrbState = !connected || muted ? "ready" : state;
+  const status = !connected ? "Call ended" : muted ? "Muted" : CALL_STATUS[state];
+  const words = transcript?.text.trim() ? transcript.text.trim().split(/\s+/) : [];
+  const finalLine = transcript?.final ? transcript.text : "";
+
+  return (
+    <div className={cn("flex w-full flex-col items-center", className)}>
+      {/* Turn state: the one word that says whose turn it is. */}
+      <div className="relative h-5 w-full text-center text-sm text-muted-foreground">
+        <AnimatePresence initial={false}>
+          <motion.span
+            key={status}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.2 }}
+            className="absolute inset-x-0"
+          >
+            {status}
+          </motion.span>
+        </AnimatePresence>
+      </div>
+
+      <VoiceOrb
+        state={orbState}
+        level={level}
+        className={cn(
+          "my-2 w-full max-w-64 transition-opacity duration-500",
+          !connected && "opacity-40",
+          orbClassName
+        )}
+      />
+
+      {/* Live transcript: the tail stays strong, earlier words fade back, the top edge feathers out. */}
+      <div className="flex h-[4.5rem] w-full flex-col justify-end overflow-hidden px-2 [mask-image:linear-gradient(to_bottom,transparent,black_35%)]">
+        <p aria-hidden className="text-center text-lg leading-snug text-balance">
+          {words.map((word, i) => (
+            <motion.span
+              key={`${transcript?.speaker}-${i}`}
+              initial={{ opacity: 0, filter: "blur(4px)" }}
+              animate={{ opacity: 1, filter: "blur(0px)" }}
+              transition={{ duration: 0.25 }}
+              className={cn(
+                "inline-block whitespace-pre transition-colors duration-700",
+                i < words.length - recentWords || !connected ? "text-muted-foreground" : "text-foreground"
+              )}
+            >
+              {word}{i < words.length - 1 ? " " : ""}
+            </motion.span>
+          ))}
+        </p>
+      </div>
+
+      {/* Controls: mute · timer · end call — or a single button to call again. */}
+      <div className="mt-4 flex h-14 items-center">
+        {connected ? (
+          <div className="flex items-center gap-1 rounded-full border bg-background p-1.5">
+            <button
+              type="button"
+              onClick={() => onMutedChange?.(!muted)}
+              aria-pressed={muted}
+              aria-label={muted ? "Unmute microphone" : "Mute microphone"}
+              className={cn(
+                "flex size-10 items-center justify-center rounded-full outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+                muted && "bg-muted text-muted-foreground"
+              )}
+            >
+              {muted ? <MicOff className="size-5" aria-hidden /> : <Mic className="size-5" aria-hidden />}
+            </button>
+            <span className="w-12 text-center text-sm tabular-nums" aria-label={`Call time ${formatClock(seconds)}`}>
+              {formatClock(seconds)}
+            </span>
+            <button
+              type="button"
+              onClick={onEnd}
+              aria-label="End call"
+              className="flex size-10 items-center justify-center rounded-full bg-red-500/10 text-red-600 outline-none transition-colors hover:bg-red-500/20 focus-visible:ring-2 focus-visible:ring-ring dark:text-red-400"
+            >
+              <PhoneOff className="size-5" aria-hidden />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={onStart}
+            className="flex items-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-sm font-medium text-background outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <Phone className="size-4" aria-hidden />
+            Call again
+          </button>
+        )}
+      </div>
+
+      {/* Turn changes and finished lines are announced; streaming partials are not. */}
+      <span aria-live="polite" className="sr-only">
+        {status}
+      </span>
+      <span aria-live="polite" className="sr-only">
+        {finalLine && `${transcript?.speaker === "user" ? "You" : "Assistant"}: ${finalLine}`}
+      </span>
+    </div>
+  );
+}
+
+/** Whole seconds since the call connected; restarts from 0 on each new call and holds when it ends. */
+function useCallTimer(connected: boolean) {
+  const [seconds, setSeconds] = React.useState(0);
+  React.useEffect(() => {
+    if (!connected) return;
+    const started = Date.now();
+    const tick = () => setSeconds(Math.floor((Date.now() - started) / 1000));
+    const first = window.setTimeout(tick, 0);
+    const id = window.setInterval(tick, 250);
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(id);
+    };
+  }, [connected]);
+  return seconds;
+}
+
+function formatClock(seconds: number) {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
 type Point = { x: number; y: number; z: number; size: number; jitter: number };
 type Axis = "x" | "y" | "z";
 type Turn = { axis: Axis; slice: -1 | 0 | 1; direction: 1 | -1; progress: number };
@@ -243,7 +422,7 @@ function readLevel(level: VoiceOrbProps["level"], state: VoiceOrbState, t: numbe
   if (typeof level === "number") return clamp(level);
   if (level && typeof level.current === "number") return clamp(level.current);
   // Synthetic rhythm for prototypes with no audio wired up yet.
-  if (state === "idle") return 0;
+  if (state === "ready") return 0;
   if (state === "thinking") return 0;
   const syllables = Math.max(0, Math.sin(t * 7.3) * Math.sin(t * 2.3) + 0.25 * Math.sin(t * 13.1));
   return clamp(state === "speaking" ? syllables * 1.1 : syllables * 0.8);
