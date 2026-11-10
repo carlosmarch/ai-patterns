@@ -1,13 +1,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BookOpen, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, Sparkles } from "lucide-react";
 
 import { newEntries as latestEntries, registry, type RegistryEntry } from "@/registry";
 import { JOBS } from "@/registry/jobs";
 import { GithubMark } from "@/components/github-mark";
 import { IntroHero, type HeroEntry } from "./intro-hero/intro-hero";
 import { HomeConnect } from "./home-connect";
-import { HomeShowcase } from "./home-showcase";
+import { Showcase, ShowcaseLogo } from "@/components/showcase";
+import { getShowcaseTiles } from "./showcase-tiles";
 import { AskVariant, StatsVariant, TabsVariant, TerminalVariant, type SectionItem } from "./sections/variants";
 import { CompareVariant, ComparisonVariant } from "./sections/variants-more";
 
@@ -32,22 +33,10 @@ const toHeroEntry = ({ slug, category, title, description }: RegistryEntry): Her
   description,
 });
 
-// The live demos glimpsed in the showcase block, top row first (the top row
-// stays clear of the fade). Two per column, column by column.
-const SHOWCASE = [
-  "create-agent", "command-palette",
-  "multi-agent-trace", "inline-citation",
-  "tool-approval", "thinking-loader",
-  "voice-orb", "diff-summary",
-  "plan-review", "sources-stack",
-  "cost-estimate", "model-picker",
-];
-
 export default function Home() {
   const visible = registry.filter((e) => !HIDDEN.has(e.slug));
   const heroEntries = visible.map(toHeroEntry);
   const newEntries = latestEntries.filter((e) => !HIDDEN.has(e.slug));
-  const showcase = pick(SHOWCASE).map(({ category, slug, Demo }) => ({ id: `${category}/${slug}`, demo: <Demo /> }));
   const items: SectionItem[] = visible.map(({ slug, category, title, Thumbnail }) => ({
     slug,
     category,
@@ -65,7 +54,22 @@ export default function Home() {
       <IntroHero entries={heroEntries} newEntries={newEntries.map(toHeroEntry)} />
 
       <Band wide>
-        <HomeShowcase tiles={showcase} total={registry.length} jobCount={JOBS.length} />
+        <Showcase id="patterns" tiles={getShowcaseTiles()}>
+          <ShowcaseLogo />
+          <h2 className="mt-8 text-4xl font-semibold tracking-tight sm:text-5xl">Explore {registry.length} patterns</h2>
+          <p className="mt-4 max-w-md text-pretty text-muted-foreground sm:text-lg">
+            Every one a live demo, with the code and the spec behind it. Sorted by the {JOBS.length} jobs they do for
+            your user.
+          </p>
+          <Link
+            href="/patterns"
+            className="group mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-foreground px-6 text-[15px] font-medium text-background transition-transform hover:scale-[1.03] active:scale-[0.98]"
+          >
+            Browse patterns
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+          <p className="mt-10 text-sm text-muted-foreground">Open source, MIT licensed, readable by your coding agent.</p>
+        </Showcase>
       </Band>
 
       <Band>

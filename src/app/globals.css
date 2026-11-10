@@ -190,3 +190,24 @@ body {
     animation: none !important;
   }
 }
+
+/* Showcase (components/showcase.tsx): a moving column's tiles are repeated
+   once, so drifting by half its height loops seamlessly. */
+@keyframes showcase-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+.showcase-drift {
+  animation: showcase-drift 50s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .showcase-drift {
+    animation: none;
+  }
+}
