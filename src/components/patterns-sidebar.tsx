@@ -4,8 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "motion/react";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ChevronRight, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
+import { useCatalogJob } from "@/components/catalog-filter-store";
 import { cn } from "@/lib/utils";
 
 // Compact mode folds the sidebar into a column of ticks, one per pattern,
@@ -38,13 +39,20 @@ function subscribeToSidebar(listener: () => void) {
 }
 
 export interface PatternsSidebarGroup {
-  category: string;
-  items: { slug: string; title: string; isNew?: boolean }[];
+  /** The job id. */
+  id: string;
+  label: string;
+  /** The job's question, shown as the heading's tooltip. */
+  question: string;
+  items: { category: string; slug: string; title: string; isNew?: boolean }[];
 }
 
 /**
- * Sidebar listing every pattern, grouped by category, with the
- * current pattern highlighted. Shown on the catalogue pages (gallery, index
+ * Sidebar listing every pattern, grouped by job (the six questions), with the
+ * current pattern highlighted. It follows the catalogue's job filter: filtered
+ * to a job (on /patterns or /gallery, kept while you open patterns), the other
+ * groups fold to their headings, which open on click; the current pattern's
+ * group is always open. With no job filter every group is open. Shown on the catalogue pages (gallery, index
  * and pattern pages) at the very left; it sticks below the site header and
  * scrolls on its own, so the current pattern stays in view beside its page.
  * The toggle at its top compresses it into a column of ticks (see above).
@@ -67,15 +75,26 @@ export function PatternsSidebar({
   const reduceMotion = useReducedMotion();
   const navRef = React.useRef<HTMLElement>(null);
 
-  const hrefs = React.useMemo(
-    () =>
-      groups.flatMap(({ category, items }) =>
-        items.map(({ slug }) => `/patterns/${category}/${slug}`),
-      ),
-    [groups],
-  );
-  const activeIndex = hrefs.indexOf(pathname);
-  const tabStop = activeIndex === -1 ? hrefs[0] : pathname;
+  // Folding follows the job filter only (it persists while moving around the
+  // catalogue), never navigation: opening a pattern doesn't reshape the list,
+  // so it doesn't jump. With no job filter every group is open; with one, the
+  // others fold. The current pattern's group is always open.
+  const filterJob = useCatalogJob();
+  const currentGroup = groups.find((g) => g.items.some((i) => pathname === `/patterns/${i.category}/${i.slug}`))?.id;
+  const focusGroup = filterJob;
+  // Headings the reader clicked, flipping that group from its default; reset when the filter changes.
+  const [flipped, setFlipped] = React.useState<{ for: string | null; ids: string[] }>({ for: null, ids: [] });
+  const flippedIds = flipped.for === focusGroup ? flipped.ids : [];
+  const isOpen = (id: string) =>
+    (focusGroup === null || id === focusGroup || id === currentGroup) !== flippedIds.includes(id);
+  function toggleGroup(id: string) {
+    setFlipped({ for: focusGroup, ids: flippedIds.includes(id) ? flippedIds.filter((x) => x !== id) : [...flippedIds, id] });
+  }
+  // The list's single Tab stop: the current pattern, or the first link in an open group.
+  const visibleHrefs = groups
+    .filter(({ id }) => isOpen(id))
+    .flatMap(({ items }) => items.map(({ category, slug }) => `/patterns/${category}/${slug}`));
+  const tabStop = visibleHrefs.includes(pathname) ? pathname : visibleHrefs[0];
 
   // Keep the current pattern visible inside the sidebar's own scroll area.
   // Loaded straight onto a pattern, it is centred; after that the list only
@@ -97,7 +116,7 @@ export function PatternsSidebar({
     if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
     const links = Array.from(
       navRef.current?.querySelectorAll<HTMLAnchorElement>("a[data-pattern-link]") ?? [],
-    );
+    ).filter((link) => !link.closest("[hidden]")); // skip folded groups
     const current = links.indexOf(document.activeElement as HTMLAnchorElement);
     if (current === -1) return;
 
@@ -149,12 +168,12 @@ export function PatternsSidebar({
         <ToggleIcon className="size-4" />
       </button>
 
-      {/* Compact: one tick per pattern, grouped by category; the current one is longer and darker.
+      {/* Compact: one tick per pattern, grouped by job; the current one is longer and darker.
           Decorative — hovering (or tabbing into) the column opens the real list over it. */}
       <div aria-hidden data-sidebar-ticks className="hidden h-full flex-col overflow-hidden pt-16 pb-6 pl-4 sm:pl-6 sidebar-compact:flex">
-        {groups.map(({ category, items }) => (
-          <div key={category} className="flex flex-col gap-1 pb-2.5">
-            {items.map(({ slug }) => {
+        {groups.map(({ id, items }) => (
+          <div key={id} className="flex flex-col gap-1 pb-3.5">
+            {items.map(({ category, slug }) => {
               const isActive = pathname === `/patterns/${category}/${slug}`;
               return (
                 <span
@@ -189,13 +208,24 @@ export function PatternsSidebar({
         )}
       >
         <div className="space-y-6">
-          {groups.map(({ category, items }) => (
-            <div key={category}>
-              <h2 className="mb-2 font-mono text-[11px] tracking-wide text-muted-foreground uppercase">
-                {category}
+          {groups.map(({ id, label, question, items }) => (
+            <div key={id}>
+              <h2>
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(id)}
+                  aria-expanded={isOpen(id)}
+                  aria-controls={`sidebar-group-${id}`}
+                  title={question}
+                  className="mb-2 flex w-full items-center gap-1.5 rounded-sm font-mono text-[11px] tracking-wide text-muted-foreground uppercase transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+                >
+                  <ChevronRight className={cn("size-3 transition-transform", isOpen(id) && "rotate-90")} aria-hidden />
+                  {label}
+                  <span className="ml-auto font-sans text-[10px] tracking-normal normal-case tabular-nums">{items.length}</span>
+                </button>
               </h2>
-              <ul className="space-y-0.5 border-l">
-                {items.map(({ slug, title, isNew }) => {
+              <ul id={`sidebar-group-${id}`} hidden={!isOpen(id)} className="space-y-0.5 border-l">
+                {items.map(({ category, slug, title, isNew }) => {
                   const href = `/patterns/${category}/${slug}`;
                   const isActive = pathname === href;
                   return (

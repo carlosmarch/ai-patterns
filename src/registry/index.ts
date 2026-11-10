@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 
 import type { SeenIn } from "@/lib/teams";
-import type { PatternJob } from "./jobs";
+import { JOBS, type PatternJob } from "./jobs";
 
 import PromptAutocompleteDemo from "./composer/prompt-autocomplete/demo";
 import PromptAutocompleteThumbnail from "./composer/prompt-autocomplete/thumbnail";
@@ -1579,29 +1579,58 @@ export function getEntriesByJob(job: PatternJob) {
   return registry.filter((entry) => entry.job === job);
 }
 
-/** Every pattern grouped by category, in registry order — the patterns sidebar's contents. */
-export function getSidebarGroups(): { category: string; items: { slug: string; title: string; isNew: boolean }[] }[] {
-  const groups: { category: string; items: { slug: string; title: string; isNew: boolean }[] }[] = [];
-  for (const entry of registry) {
-    let group = groups.find((g) => g.category === entry.category);
-    if (!group) {
-      group = { category: entry.category, items: [] };
-      groups.push(group);
-    }
-    group.items.push({ slug: entry.slug, title: entry.title, isNew: isNewEntry(entry) });
-  }
-  return groups;
+/**
+ * Every pattern in catalogue order: by job (in jobs.ts order), then by
+ * category within a job (each category's first appearance in the registry),
+ * then registry order — so related patterns sit together inside a job. The
+ * order of the Details grid, the gallery, the sidebar and prev/next.
+ */
+export function getCatalogOrder(): RegistryEntry[] {
+  const categoryRank = new Map(getCategories().map((category, i) => [category, i]));
+  const jobRank = new Map(JOBS.map((job, i) => [job.id as string, i]));
+  return registry
+    .map((entry, i) => ({ entry, i }))
+    .sort(
+      (a, b) =>
+        jobRank.get(a.entry.job)! - jobRank.get(b.entry.job)! ||
+        categoryRank.get(a.entry.category)! - categoryRank.get(b.entry.category)! ||
+        a.i - b.i,
+    )
+    .map(({ entry }) => entry);
+}
+
+export interface SidebarGroup {
+  /** The job id. */
+  id: string;
+  label: string;
+  /** The job's question, e.g. "Can I believe it, and what does it keep?" */
+  question: string;
+  items: { category: string; slug: string; title: string; isNew: boolean }[];
+}
+
+/** Every pattern grouped by job, in catalogue order — the patterns sidebar's contents. */
+export function getSidebarGroups(): SidebarGroup[] {
+  const order = getCatalogOrder();
+  return JOBS.map((job) => ({
+    id: job.id,
+    label: job.label,
+    question: job.question,
+    items: order
+      .filter((entry) => entry.job === job.id)
+      .map((entry) => ({ category: entry.category, slug: entry.slug, title: entry.title, isNew: isNewEntry(entry) })),
+  }));
 }
 
 export function getCategories() {
   return Array.from(new Set(registry.map((entry) => entry.category)));
 }
 
-/** The patterns before and after this one in registry order (no wrap-around). */
+/** The patterns before and after this one in catalogue order (no wrap-around), matching the sidebar. */
 export function getAdjacentEntries(category: string, slug: string) {
-  const index = registry.findIndex((entry) => entry.category === category && entry.slug === slug);
+  const order = getCatalogOrder();
+  const index = order.findIndex((entry) => entry.category === category && entry.slug === slug);
   if (index === -1) return { prev: undefined, next: undefined };
-  return { prev: registry[index - 1], next: registry[index + 1] };
+  return { prev: order[index - 1], next: order[index + 1] };
 }
 
 export function getEntryHref(entry: Pick<RegistryEntry, "category" | "slug">) {

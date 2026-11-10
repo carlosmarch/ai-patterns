@@ -7,7 +7,8 @@ import { isNewEntry, type RegistryEntry } from "@/registry";
 // The thumbnail card used on the home page and the /patterns index: a
 // wireframe print on a white surface, framed by a muted card. Recently added
 // patterns get the "New" tag on the print.
-export function PatternCard({ entry }: { entry: RegistryEntry }) {
+// `showCategory`: tag the card with its category, where the cards are grouped by job (/patterns).
+export function PatternCard({ entry, showCategory = false }: { entry: RegistryEntry; showCategory?: boolean }) {
   const { Thumbnail } = entry;
   const showNew = isNewEntry(entry);
   return (
@@ -29,6 +30,9 @@ export function PatternCard({ entry }: { entry: RegistryEntry }) {
           <SeenIn items={entry.seenIn} size="sm" showLabel={false} className="shrink-0" />
         </div>
         <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{entry.description}</p>
+        {showCategory && (
+          <p className="mt-2 font-mono text-[10px] tracking-wide text-muted-foreground/80 uppercase">{entry.category}</p>
+        )}
       </div>
     </Link>
   );

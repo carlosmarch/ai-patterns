@@ -8,6 +8,7 @@ import { ArrowUpRight } from "lucide-react";
 import { NewBadge } from "@/components/new-badge";
 import { markOpeningFromGallery, patternTransitionName } from "@/components/pattern-expand";
 import { CatalogHeader, type CatalogFilter } from "@/components/catalog-header";
+import { setCatalogJob } from "@/components/catalog-filter-store";
 
 export interface GalleryItem {
   id: string;
@@ -15,7 +16,6 @@ export interface GalleryItem {
   slug: string;
   title: string;
   job: string;
-  jobLabel: string;
   href: string;
   isNew: boolean;
   demo: ReactNode;
@@ -34,9 +34,9 @@ const STAGE_PADDING = 28;
 // Filter and scroll position, kept while a pattern is open so closing it lands
 // back in place. Coming back is a client-side navigation, so a module variable
 // survives it; on a hard load it's null, matching the static HTML.
-let returnState: { filter: string; y: number } | null = null;
+let returnState: { filter: string; category: string; y: number } | null = null;
 
-function saveReturnState(state: { filter: string; y: number }) {
+function saveReturnState(state: { filter: string; category: string; y: number }) {
   returnState = state;
 }
 
@@ -50,16 +50,30 @@ function expandedHref(item: GalleryItem) {
   return `${item.href}?view=expanded`;
 }
 
-/** The gallery URL for a filter — same `?job=` ids as /patterns, so the view switch keeps it. */
-function galleryHref(filter: string) {
-  return filter === ALL ? "/gallery" : `/gallery?job=${encodeURIComponent(filter)}`;
+/** The gallery URL for the filters — same `?job=` / `?category=` as /patterns, so the view switch keeps them. */
+function galleryHref(filter: string, category: string) {
+  const params = new URLSearchParams();
+  if (filter !== ALL) params.set("job", filter);
+  if (category !== ALL) params.set("category", category);
+  return params.size ? `/gallery?${params}` : "/gallery";
 }
 
-export function GalleryGrid({ items, filters }: { items: GalleryItem[]; filters: CatalogFilter[] }) {
+export function GalleryGrid({
+  items,
+  filters,
+  categories,
+}: {
+  /** In catalogue order: by job, clustered by category. */
+  items: GalleryItem[];
+  filters: CatalogFilter[];
+  /** Every category, in catalogue order. */
+  categories: string[];
+}) {
   const router = useRouter();
   // Read, not taken, in the initializer: Strict Mode runs initializers twice.
   const [restore] = useState(() => returnState);
   const [active, setActive] = useState(restore?.filter ?? ALL);
+  const [category, setCategory] = useState(restore?.category ?? ALL);
 
   // Put the scroll back before the first paint, so the view transition
   // morphs into the right card.
@@ -68,30 +82,50 @@ export function GalleryGrid({ items, filters }: { items: GalleryItem[]; filters:
     if (restore) window.scrollTo(0, restore.y);
   }, [restore]);
 
-  // Otherwise the filter comes from ?job= (a link from /patterns, or a reload).
-  // Synced after hydration: the static HTML always renders "all".
+  // Otherwise the filters come from ?job= / ?category= (a link from /patterns,
+  // or a reload). Synced after hydration: the static HTML always renders "all".
   useEffect(() => {
     if (restore) return;
-    const fromUrl = new URLSearchParams(window.location.search).get("job");
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get("job");
     const valid = fromUrl === NEW || filters.some((f) => f.id === fromUrl);
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (fromUrl && valid) setActive(fromUrl);
-  }, [restore, filters]);
+    const cat = params.get("category");
+    if (cat && categories.includes(cat)) setCategory(cat);
+  }, [restore, filters, categories]);
+
+  // Tell the patterns sidebar which job is in play, so it can fold the others.
+  useEffect(() => {
+    setCatalogJob(active === ALL || active === NEW ? null : active);
+  }, [active]);
 
   function choose(id: string) {
     setActive(id);
-    window.history.replaceState(window.history.state, "", galleryHref(id));
+    window.history.replaceState(window.history.state, "", galleryHref(id, category));
+  }
+
+  function chooseCategory(id: string) {
+    setCategory(id);
+    window.history.replaceState(window.history.state, "", galleryHref(active, id));
   }
 
   function open(item: GalleryItem) {
-    saveReturnState({ filter: active, y: window.scrollY });
-    markOpeningFromGallery(galleryHref(active));
+    saveReturnState({ filter: active, category, y: window.scrollY });
+    markOpeningFromGallery(galleryHref(active, category));
     router.push(expandedHref(item));
   }
 
-  const visible = items.filter((item) =>
-    active === ALL ? true : active === NEW ? item.isNew : item.job === active,
-  );
+  const inJob = items.filter((item) => (active === ALL ? true : active === NEW ? item.isNew : item.job === active));
+  const visible = inJob.filter((item) => category === ALL || item.category === category);
+  const categoryCounts = categories.map((id) => ({ id, count: inJob.filter((item) => item.category === id).length }));
+  // "New" is newest first, not by job; otherwise one section per job, headed by its question.
+  const sections =
+    active === NEW
+      ? [{ job: null, items: visible }]
+      : filters
+          .map((job) => ({ job, items: visible.filter((item) => item.job === job.id) }))
+          .filter((section) => section.items.length > 0);
 
   return (
     <>
@@ -102,15 +136,47 @@ export function GalleryGrid({ items, filters }: { items: GalleryItem[]; filters:
         filters={filters}
         active={active}
         onChoose={choose}
+        categories={categoryCounts}
+        category={category}
+        onCategory={chooseCategory}
       />
 
-      <ul className="columns-1 gap-3 sm:columns-2 lg:columns-3">
-        {visible.map((item, i) => (
-          <li key={item.id} className="mb-3 break-inside-avoid">
-            <GalleryCard item={item} height={HEIGHTS[i % HEIGHTS.length]} onOpen={() => open(item)} />
-          </li>
+      {visible.length === 0 && (
+        <p className="py-16 text-center text-sm text-muted-foreground">
+          No <span className="capitalize">{category}</span> patterns for this job.{" "}
+          <button type="button" onClick={() => chooseCategory(ALL)} className="font-medium text-foreground underline underline-offset-4">
+            Show every category
+          </button>
+        </p>
+      )}
+      <div className="space-y-14">
+        {sections.map(({ job, items: sectionItems }) => (
+          <section key={job?.id ?? "new"} aria-labelledby={job ? `gallery-job-${job.id}` : undefined}>
+            {job && (
+              <div className="mb-5">
+                <h2 id={`gallery-job-${job.id}`} className="text-xl font-semibold tracking-tight">
+                  {job.label}
+                </h2>
+                {job.question && (
+                  <p className="mt-1 text-sm text-pretty text-muted-foreground">
+                    <span className="font-medium text-foreground">
+                      “{/[?.!]$/.test(job.question) ? job.question : `${job.question}.`}”
+                    </span>{" "}
+                    {job.description}
+                  </p>
+                )}
+              </div>
+            )}
+            <ul className="columns-1 gap-3 sm:columns-2 lg:columns-3">
+              {sectionItems.map((item, i) => (
+                <li key={item.id} className="mb-3 break-inside-avoid">
+                  <GalleryCard item={item} height={HEIGHTS[i % HEIGHTS.length]} onOpen={() => open(item)} />
+                </li>
+              ))}
+            </ul>
+          </section>
         ))}
-      </ul>
+      </div>
     </>
   );
 }
@@ -208,9 +274,9 @@ function GalleryCard({ item, height, onOpen }: { item: GalleryItem; height: numb
           onClick={handleLinkClick}
           className="absolute right-3 bottom-3 left-3 flex items-center gap-2 rounded-full bg-background/90 py-1.5 pr-1.5 pl-4 text-sm backdrop-blur"
         >
-          {/* Always visible: what it is and the job it does, so the wall can be read, not just watched. */}
+          {/* Always visible: what it is and its category (the job is the section it sits in). */}
           <span className="min-w-0 truncate font-medium">{item.title}</span>
-          <span className="ml-auto shrink-0 text-xs text-muted-foreground">{item.jobLabel}</span>
+          <span className="ml-auto shrink-0 text-xs text-muted-foreground capitalize">{item.category}</span>
           <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-foreground transition-colors group-hover:bg-foreground group-hover:text-background">
             <ArrowUpRight className="size-3.5" />
           </span>

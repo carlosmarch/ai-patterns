@@ -9,15 +9,15 @@ import { cn } from "@/lib/utils";
 
 const VIEWS = [
   { id: "gallery", label: "Gallery", href: "/gallery", Icon: LayoutGrid, title: "Live demos" },
-  { id: "details", label: "Details", href: "/patterns", Icon: List, title: "Wireframes with descriptions, by category" },
+  { id: "details", label: "Details", href: "/patterns", Icon: List, title: "Wireframes with descriptions, by job" },
 ] as const;
 
 export type PatternsView = (typeof VIEWS)[number]["id"];
 
 /**
  * Switches between the two views of the catalogue — the live-demo gallery and
- * the detailed index — keeping the `?job=` filter, so the same set of patterns
- * stays on screen. Both pages read `?job=` on load.
+ * the detailed index — keeping the `?job=` and `?category=` filters, so the
+ * same set of patterns stays on screen. Both pages read them on load.
  */
 export function PatternsViewSwitch({ current, size = "md" }: { current: PatternsView; size?: "sm" | "md" }) {
   const router = useRouter();
@@ -25,8 +25,14 @@ export function PatternsViewSwitch({ current, size = "md" }: { current: Patterns
   function go(e: MouseEvent<HTMLAnchorElement>, href: string) {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
     e.preventDefault();
-    const job = new URLSearchParams(window.location.search).get("job");
-    router.push(job ? `${href}?job=${encodeURIComponent(job)}` : href);
+    // Carry the filters across, so the same set of patterns stays on screen.
+    const from = new URLSearchParams(window.location.search);
+    const to = new URLSearchParams();
+    for (const key of ["job", "category"]) {
+      const value = from.get(key);
+      if (value) to.set(key, value);
+    }
+    router.push(to.size ? `${href}?${to}` : href);
   }
 
   const segment = cn(

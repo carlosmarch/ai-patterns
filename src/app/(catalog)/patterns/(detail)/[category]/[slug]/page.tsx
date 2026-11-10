@@ -67,10 +67,11 @@ export default async function PatternPage({
     <CodeBlock code={entry.uxDoc} lang="markdown" wrap trackAs="spec" download={`${entry.slug}.pattern.md`} />
   );
 
-  const categoryCrumb = {
-    label: entry.category.charAt(0).toUpperCase() + entry.category.slice(1),
-    href: `/patterns#${entry.category}`,
-  };
+  // The catalogue is grouped by job, so the breadcrumb goes through the job (the
+  // URL keeps the category: it's the pattern's permanent address).
+  const categoryCrumb = job
+    ? { label: job.label, href: `/patterns?job=${job.id}` }
+    : { label: entry.category.charAt(0).toUpperCase() + entry.category.slice(1), href: `/patterns?category=${entry.category}` };
 
   const related = getRelatedEntries(entry);
   // The intro (title, description, job, "Seen in"), Do's and don'ts and Related

@@ -3,10 +3,17 @@
 import { cn } from "@/lib/utils";
 import { PatternsViewSwitch, type PatternsView } from "@/components/patterns-view-switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ChevronDown } from "lucide-react";
 
 /** The non-job filter for the most recently added patterns (`?job=new`). */
 export const NEW_FILTER = "new";
 export const ALL_FILTER = "all";
+
+export interface CatalogCategory {
+  id: string;
+  /** Patterns in this category within the current job filter. */
+  count: number;
+}
 
 export interface CatalogFilter {
   id: string;
@@ -29,6 +36,9 @@ export function CatalogHeader({
   filters,
   active,
   onChoose,
+  categories,
+  category,
+  onCategory,
 }: {
   view: PatternsView;
   total: number;
@@ -37,6 +47,11 @@ export function CatalogHeader({
   filters: CatalogFilter[];
   active: string;
   onChoose: (id: string) => void;
+  /** The category filter's options, with counts for the current job filter. */
+  categories: CatalogCategory[];
+  /** The selected category, or ALL_FILTER. */
+  category: string;
+  onCategory: (id: string) => void;
 }) {
   const pills: CatalogFilter[] = [
     { id: ALL_FILTER, label: "All", description: `Every pattern in the catalogue — ${total} of them.` },
@@ -92,7 +107,35 @@ export function CatalogHeader({
             </Tooltip>
           ))}
         </div>
-        <PatternsViewSwitch current={view} />
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Category is a filter on top of the job, not a grouping: 22 of them don't fit as pills. */}
+          <label className="relative">
+            <span className="sr-only">Category</span>
+            <select
+              value={category}
+              onChange={(e) => onCategory(e.target.value)}
+              className={cn(
+                "h-9 cursor-pointer appearance-none rounded-full border py-0 pr-8 pl-4 text-sm font-medium capitalize transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+                category === ALL_FILTER ? "bg-background text-foreground/80 hover:bg-muted" : "border-foreground bg-foreground text-background",
+              )}
+            >
+              <option value={ALL_FILTER}>All categories</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id} disabled={c.count === 0 && c.id !== category}>
+                  {c.id} ({c.count})
+                </option>
+              ))}
+            </select>
+            <ChevronDown
+              aria-hidden
+              className={cn(
+                "pointer-events-none absolute top-1/2 right-3 size-3.5 -translate-y-1/2",
+                category === ALL_FILTER ? "text-muted-foreground" : "text-background",
+              )}
+            />
+          </label>
+          <PatternsViewSwitch current={view} />
+        </div>
       </div>
     </header>
   );
