@@ -2,6 +2,8 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+/* The patterns sidebar folded into a column of ticks (<html data-sidebar="compact">, see PatternsSidebar). */
+@custom-variant sidebar-compact (&:where([data-sidebar="compact"] *));
 
 :root {
   --radius: 0.625rem;
