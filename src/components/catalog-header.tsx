@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { PatternsViewSwitch, type PatternsView } from "@/components/patterns-view-switch";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 /** The non-job filter for the most recently added patterns (`?job=new`). */
 export const NEW_FILTER = "new";
@@ -37,8 +38,11 @@ export function CatalogHeader({
   active: string;
   onChoose: (id: string) => void;
 }) {
-  const pills: CatalogFilter[] = [{ id: ALL_FILTER, label: "All" }, { id: NEW_FILTER, label: "New" }, ...filters];
-  const current = filters.find((f) => f.id === active);
+  const pills: CatalogFilter[] = [
+    { id: ALL_FILTER, label: "All", description: `Every pattern in the catalogue — ${total} of them.` },
+    { id: NEW_FILTER, label: "New", description: `The ${newCount} latest patterns added to the catalogue, newest first.` },
+    ...filters,
+  ];
 
   return (
     <header>
@@ -50,42 +54,46 @@ export function CatalogHeader({
         </p>
       </div>
 
-      <div className="mt-14 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+      <div className="mt-14 mb-5 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
         <div role="toolbar" aria-label="Filter patterns" className="flex flex-wrap gap-2">
           {pills.map((pill) => (
-            <button
-              key={pill.id}
-              type="button"
-              aria-pressed={active === pill.id}
-              title={pill.question}
-              onClick={() => onChoose(pill.id)}
-              className={cn(
-                "h-9 rounded-full px-4 text-sm font-medium transition-colors",
-                active === pill.id
-                  ? "bg-foreground text-background"
-                  : "bg-muted text-foreground/80 hover:bg-muted-foreground/15 hover:text-foreground",
-              )}
-            >
-              {pill.label}
-            </button>
+            // What each filter means, on hover or keyboard focus (Radix wires it up as the pill's description).
+            <Tooltip key={pill.id}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-pressed={active === pill.id}
+                  onClick={() => onChoose(pill.id)}
+                  className={cn(
+                    "h-9 rounded-full px-4 text-sm font-medium transition-colors",
+                    active === pill.id
+                      ? "bg-foreground text-background"
+                      : "bg-muted text-foreground/80 hover:bg-muted-foreground/15 hover:text-foreground",
+                  )}
+                >
+                  {pill.label}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                align="start"
+                sideOffset={8}
+                className="max-w-72 rounded-xl bg-popover px-3.5 py-3 text-left text-sm text-pretty text-popover-foreground ring-1 ring-black/5 dark:ring-white/10"
+              >
+                {pill.question && (
+                  <p className="font-medium">
+                    “{/[?.!]$/.test(pill.question) ? pill.question : `${pill.question}.`}”
+                  </p>
+                )}
+                {pill.description && (
+                  <p className={cn("text-muted-foreground", pill.question && "mt-1")}>{pill.description}</p>
+                )}
+              </TooltipContent>
+            </Tooltip>
           ))}
         </div>
         <PatternsViewSwitch current={view} />
       </div>
-
-      {/* What the selected filter means; nothing for "All", so the header stays quiet by default. */}
-      <p aria-live="polite" className="mt-3 mb-5 min-h-5 text-sm text-pretty text-muted-foreground">
-        {active === NEW_FILTER ? (
-          `The ${newCount} latest patterns added to the catalogue, newest first.`
-        ) : current?.question ? (
-          <>
-            <span className="font-medium text-foreground">
-              “{/[?.!]$/.test(current.question) ? current.question : `${current.question}.`}”
-            </span>{" "}
-            {current.description}
-          </>
-        ) : null}
-      </p>
     </header>
   );
 }
