@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Mic, MicOff, Square } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -12,17 +12,20 @@ export interface ListeningStateProps {
   /**
    * Live mic loudness (0-1) — e.g. the `level` ref from Voice Waveform's
    * `useMicLevel()`. Read on every frame, so pass a ref to avoid re-renders.
-   * When given, the halo swells with the voice and a long silence turns the
-   * label into a "can't hear you" hint. When omitted, the glyph just pulses.
+   * When given, the halo swells with the voice and a long silence tints the
+   * glyph amber. When omitted, the glyph just pulses.
    */
   level?: React.RefObject<number> | number;
+  /** Announced to screen readers while capturing (there is no visible label). */
   label?: string;
-  /** Shown instead of `label` after `silenceMs` of near-silence on a real `level`. */
+  /** Announced (and shown as a tooltip) after `silenceMs` of near-silence on a real `level`. */
   silenceHint?: string;
   silenceMs?: number;
-  /** Show an elapsed-time counter next to the label. */
-  showTimer?: boolean;
-  onStop?: () => void;
+  /**
+   * Called with the next state when the mic glyph is clicked: `false` to
+   * pause/stop capture, `true` to resume. Without it the glyph is not interactive.
+   */
+  onActiveChange?: (active: boolean) => void;
   className?: string;
 }
 
@@ -34,8 +37,7 @@ export function ListeningState({
   label = "Listening…",
   silenceHint = "Can't hear you — check your mic",
   silenceMs = 4000,
-  showTimer = true,
-  onStop,
+  onActiveChange,
   className,
 }: ListeningStateProps) {
   const haloRef = React.useRef<HTMLSpanElement>(null);
@@ -46,18 +48,7 @@ export function ListeningState({
 
   const hasLevel = level !== undefined;
   const [silent, setSilent] = React.useState(false);
-  const [elapsed, setElapsed] = React.useState(0);
-
-  // Elapsed time restarts every time capture (re)starts.
-  React.useEffect(() => {
-    if (!active) return;
-    const started = Date.now();
-    const id = window.setInterval(() => setElapsed(Math.floor((Date.now() - started) / 1000)), 250);
-    return () => {
-      window.clearInterval(id);
-      setElapsed(0);
-    };
-  }, [active]);
+  const elapsed = useElapsed(active);
 
   // Halo follows the voice: fast attack, slow release, written straight to the DOM each frame.
   React.useEffect(() => {
@@ -94,13 +85,25 @@ export function ListeningState({
   }, [active, hasLevel, silenceMs]);
 
   const status = !active ? "Paused" : silent ? silenceHint : label;
+  const interactive = Boolean(onActiveChange);
+  const Glyph = interactive ? "button" : "div";
 
   return (
-    <div className={cn("flex flex-col items-center gap-3", className)}>
-      <div
+    <div className={cn("flex flex-col items-center gap-2", className)}>
+      <Glyph
+        {...(interactive
+          ? {
+              type: "button" as const,
+              onClick: () => onActiveChange?.(!active),
+              "aria-label": active ? "Stop listening" : "Resume listening",
+              title: silent ? silenceHint : active ? "Stop listening" : "Resume listening",
+            }
+          : { "aria-hidden": true })}
         className={cn(
-          "relative flex size-14 shrink-0 items-center justify-center rounded-full transition-colors duration-300",
-          !active ? "text-muted-foreground" : silent ? "text-amber-500" : "text-sky-500"
+          "group relative flex size-14 shrink-0 items-center justify-center rounded-full transition-colors duration-300",
+          !active ? "text-muted-foreground" : silent ? "text-amber-500" : "text-sky-500",
+          interactive &&
+            "cursor-pointer outline-none hover:bg-current/10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         )}
       >
         {/* Voice-driven halo: swells with each syllable. */}
@@ -108,7 +111,7 @@ export function ListeningState({
           <span
             ref={haloRef}
             aria-hidden
-            className="absolute inset-0 rounded-full bg-current opacity-15 will-change-transform"
+            className="pointer-events-none absolute inset-0 rounded-full bg-current opacity-15 will-change-transform"
           />
         )}
         {/* Ambient ripple: "the mic is live" even between words. */}
@@ -116,7 +119,7 @@ export function ListeningState({
           <motion.span
             key="ripple"
             aria-hidden
-            className="absolute inset-0 rounded-full bg-current/20 motion-reduce:hidden"
+            className="pointer-events-none absolute inset-0 rounded-full bg-current/20 motion-reduce:hidden"
             animate={{ scale: [1, 1.5], opacity: [0, 0.6, 0] }}
             transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut" }}
           />
@@ -128,46 +131,51 @@ export function ListeningState({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.6, opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="relative"
+            className="relative transition-transform group-active:scale-90"
           >
             {active ? <Mic className="size-6" aria-hidden /> : <MicOff className="size-6" aria-hidden />}
           </motion.span>
         </AnimatePresence>
-      </div>
+      </Glyph>
 
-      <div className="flex min-h-6 items-center gap-2">
-        <span aria-live="polite" className="text-sm text-muted-foreground">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.span
-              key={status}
-              initial={{ opacity: 0, y: 3 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -3 }}
-              transition={{ duration: 0.15 }}
-              className="inline-block"
-            >
-              {status}
-            </motion.span>
-          </AnimatePresence>
-        </span>
-        {showTimer && active && (
-          <span className="text-sm tabular-nums text-muted-foreground/70" aria-hidden>
-            {formatElapsed(elapsed)}
-          </span>
+      {/* The only visible text: elapsed capture time, frozen and dimmed while paused. */}
+      <span
+        aria-hidden
+        className={cn(
+          "text-sm tabular-nums transition-colors duration-300",
+          active ? "text-muted-foreground" : "text-muted-foreground/50"
         )}
-        {onStop && active && (
-          <button
-            type="button"
-            onClick={onStop}
-            aria-label="Stop listening"
-            className="flex size-6 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-accent"
-          >
-            <Square className="size-2.5" aria-hidden fill="currentColor" />
-          </button>
-        )}
-      </div>
+      >
+        {formatElapsed(elapsed)}
+      </span>
+
+      {/* State changes are still announced, just not shown. */}
+      <span aria-live="polite" className="sr-only">
+        {status}
+      </span>
     </div>
   );
+}
+
+/** Seconds spent capturing: counts while `active`, holds while paused, continues on resume. */
+function useElapsed(active: boolean) {
+  const [elapsed, setElapsed] = React.useState(0);
+  const banked = React.useRef(0);
+
+  React.useEffect(() => {
+    if (!active) return;
+    const started = Date.now();
+    const id = window.setInterval(
+      () => setElapsed(Math.floor((banked.current + Date.now() - started) / 1000)),
+      250
+    );
+    return () => {
+      window.clearInterval(id);
+      banked.current += Date.now() - started;
+    };
+  }, [active]);
+
+  return elapsed;
 }
 
 function formatElapsed(seconds: number) {

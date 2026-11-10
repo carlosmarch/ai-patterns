@@ -15,21 +15,11 @@ export default function ListeningStateDemo() {
         <ListeningState
           active={active}
           level={mic.active ? mic.level : undefined}
-          onStop={() => {
-            setActive(false);
-            mic.stop();
-          }}
+          onActiveChange={setActive}
         />
       </div>
 
-      <div className="flex flex-wrap justify-center gap-2">
-        <button
-          type="button"
-          onClick={() => setActive((v) => !v)}
-          className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          {active ? "Pause" : "Resume"}
-        </button>
+      <div className="flex flex-col items-center gap-2">
         <button
           type="button"
           onClick={() => {
@@ -44,6 +34,7 @@ export default function ListeningStateDemo() {
         >
           {mic.active ? "Stop microphone" : "Use my microphone"}
         </button>
+        <p className="text-xs text-muted-foreground">Click the mic to pause and resume.</p>
       </div>
       {mic.error && <p className="text-xs text-muted-foreground">{mic.error}</p>}
     </div>

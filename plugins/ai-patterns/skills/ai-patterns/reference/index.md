@@ -201,7 +201,7 @@ disclose AI and data handling), `recover` (errors and limits).
 
 | slug | title | job | description | spec |
 | --- | --- | --- | --- | --- |
-| `listening-state` | Listening State | ask | A pulsing mic indicator showing the AI is actively listening. | [voice/listening-state.md](./voice/listening-state.md) |
+| `listening-state` | Listening State | ask | A pulsing, clickable mic with an elapsed timer showing the AI is actively listening. | [voice/listening-state.md](./voice/listening-state.md) |
 | `live-transcript` | Live Transcript | ask | A streaming, speaker-labeled transcription of a voice conversation. | [voice/live-transcript.md](./voice/live-transcript.md) |
 | `voice-agent-relay` | Voice Agent Relay | oversee | A realtime voice call with a voice agent that hands work to a working agent, answers questions about its progress and speaks short updates and a summary while it runs. | [voice/voice-agent-relay.md](./voice/voice-agent-relay.md) |
 | `voice-orb` | Voice Orb | oversee | A 3D particle sphere that breathes and spins with the voice conversation. | [voice/voice-orb.md](./voice/voice-orb.md) |
