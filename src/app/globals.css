@@ -71,6 +71,7 @@
   --radius-xl: calc(var(--radius) + 4px);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-instrument-sans);
 }
 
 body {
@@ -80,6 +81,11 @@ body {
 
 * {
   border-color: var(--border);
+}
+
+/* Page titles use the heading face (Instrument Sans). */
+h1 {
+  font-family: var(--font-heading);
 }
 
 /* Intro hero ------------------------------------------------------- */
