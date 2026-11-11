@@ -1,18 +1,28 @@
 import { TEAMS } from "@/lib/teams";
 import { MCP_JSON_CONFIG } from "@/lib/mcp-install";
 import {
+  ABSTRACT,
   AUTHOR,
+  FIELD,
+  KEYWORDS,
   LIMITATIONS,
   METHOD,
   NEXT_STEPS,
+  OBJECTIVES,
+  REFERENCES,
+  RELATED_WORK,
+  RESEARCH_GAP,
   RESEARCH_QUESTION,
   RESEARCH_STATEMENT,
+  RESEARCH_SUBTITLE,
   RESEARCH_TITLE,
   SCOPE,
   SUB_QUESTIONS,
+  getAnswers,
   getCitation,
   getCorpus,
   getHypotheses,
+  getOutputs,
 } from "@/lib/research";
 import { getCategories, getEntryHref, getRegistryEntry, registry, type RegistryEntry } from "@/registry";
 import { getJob, JOBS } from "@/registry/jobs";
@@ -185,7 +195,7 @@ ${sections}
 ## Optional
 
 - [Home](${abs("/index.md")}): what the catalogue is.
-- [Research brief](${abs("/research.md")}): the research question, method, corpus statistics, working hypotheses and limitations.
+- [Research thesis](${abs("/research.md")}): research questions, related work, method, results, discussion, limitations and outcomes.
 - [Claude Code skill](${abs("/skill.md")}): install and use the skill.
 - [Source on GitHub](${REPO_URL}): the registry lives in \`src/registry/<category>/<slug>/\` (MIT).
 `;
@@ -277,7 +287,7 @@ export function buildHomeMarkdown() {
 
 ${RESEARCH_STATEMENT}
 
-Method: **observe** a pattern in products people already use, **specify** it as a portable UX contract, **test** it by giving the spec to agents. ${registry.length} patterns across ${getCategories().length} categories so far. Findings are provisional and get rewritten as products change. Led and maintained by [${AUTHOR.name}](${AUTHOR.url}); the full [research brief](${abs("/research.md")}) covers method, corpus and hypotheses.
+Method: **observe** a pattern in products people already use, **specify** it as a portable UX contract, **test** it by giving the spec to agents. ${registry.length} patterns across ${getCategories().length} categories so far. Findings are provisional and get rewritten as products change. Led and maintained by [${AUTHOR.name}](${AUTHOR.url}); the full [research thesis](${abs("/research.md")}) covers related work, method, results and outcomes.
 
 ### Open questions
 
@@ -296,23 +306,43 @@ export function buildResearchMarkdown() {
   const list = (items: string[]) => items.map((i) => `- ${i}`).join("\n");
   return `# ${RESEARCH_TITLE}
 
-> An open research project led and maintained by [${AUTHOR.name}](${AUTHOR.url}), exploring how user experience evolves as artificial intelligence moves from answering to acting. More in [${AUTHOR.name}'s writing on AI](${AUTHOR.writingUrl}).
+*${RESEARCH_SUBTITLE}*
 
-Status: ongoing · Started: ${c.started} · Last addition: ${c.updated} · Corpus: ${c.total} patterns, ${c.categories} categories · Licence: MIT
+> A research thesis written and maintained in the open by [${AUTHOR.name}](${AUTHOR.url}) — independent research, ${FIELD}. More in [${AUTHOR.name}'s writing on AI](${AUTHOR.writingUrl}).
+
+Status: working draft, open · Started: ${c.started} · Last revision: ${c.updated} · Corpus: ${c.total} patterns, ${c.categories} categories · Licence: MIT
 
 HTML: ${abs("/research")}
 
 ## Abstract
 
+**Background.** ${ABSTRACT.background}
+
+**Aim.** ${ABSTRACT.aim}
+
+**Method.** ${ABSTRACT.method}
+
+**Results.** The corpus holds ${c.total} patterns across ${c.categories} categories, crediting ${c.teams} product teams; ${c.coverage}% are observed in at least one shipping product. Oversight and trust account for ${c.oversightShare}% of the corpus, and ${c.convergence[0].share}% of patterns have converged across three or more products.
+
+**Keywords:** ${KEYWORDS.join(", ")}
+
+## 1. Introduction
+
+### 1.1 Motivation
+
 ${RESEARCH_STATEMENT}
 
-## 1. Research question
+### 1.2 Research questions
 
 **${RESEARCH_QUESTION}**
 
 ${SUB_QUESTIONS.map((q) => `- **${q.id}.** ${q.text}`).join("\n")}
 
-## 2. Scope
+### 1.3 Objectives
+
+${OBJECTIVES.map((o) => `- **${o.id}** (${o.rq}). ${o.text}`).join("\n")}
+
+### 1.4 Scope and delimitations
 
 In scope:
 
@@ -322,35 +352,75 @@ Out of scope:
 
 ${list(SCOPE.out)}
 
-## 3. Method
+## 2. Background and related work
+
+${RELATED_WORK.map((r) => `### ${r.id} ${r.title}\n\n${r.body}`).join("\n\n")}
+
+### 2.6 Research gap
+
+${RESEARCH_GAP}
+
+## 3. Methodology
 
 ${METHOD.map((m) => `### ${m.id} ${m.title}\n\n${m.body}`).join("\n\n")}
 
-## 4. Corpus
+Coding scheme (job facet):
+
+| job | the person asks | definition |
+| --- | --- | --- |
+${c.jobs.map((j) => `| ${j.label} | ${j.question} | ${j.description} |`).join("\n")}
+
+## 4. Results
 
 ${c.total} patterns across ${c.categories} categories, crediting ${c.teams} product teams. ${c.observed} patterns (${c.coverage}%) cite at least one public source showing the pattern in a shipping product.
 
-| job | question | n | share |
+### 4.1 Composition by job
+
+| job | n | share |
+| --- | ---: | ---: |
+${c.jobs.map((j) => `| ${j.label} | ${j.count} | ${j.share}% |`).join("\n")}
+
+### 4.2 Convergence across products
+
+| band | rule | n | share |
 | --- | --- | ---: | ---: |
-${c.jobs.map((j) => `| ${j.label} | ${j.question} | ${j.count} | ${j.share}% |`).join("\n")}
+${c.convergence.map((b) => `| ${b.label} | ${b.rule} | ${b.count} | ${b.share}% |`).join("\n")}
+
+Most widely shipped: ${c.mostShared.map((e) => `[${e.title}](${abs(`${getEntryHref(e)}.md`)}) (${e.teams})`).join(", ")}.
+
+### 4.3 Corpus growth
 
 | month | added | total |
 | --- | ---: | ---: |
 ${c.growth.map((g) => `| ${g.month} | ${g.added} | ${g.total} |`).join("\n")}
 
-## 5. Working hypotheses
+## 5. Discussion
 
-${getHypotheses(c).map((h) => `- **${h.id}. ${h.claim}** ${h.evidence}`).join("\n")}
+${getHypotheses(c).map((h) => `- **${h.id}. ${h.claim}** (${h.status}) ${h.evidence} *To test:* ${h.test}`).join("\n")}
 
-## 6. Limitations
+## 6. Limitations and threats to validity
 
-${LIMITATIONS.map((l) => `- **${l.title}.** ${l.body}`).join("\n")}
+${LIMITATIONS.map((l) => `- **${l.title}** (${l.validity.toLowerCase()} validity). ${l.body}`).join("\n")}
 
-## 7. Next steps
+## 7. Conclusions and outcomes
+
+### 7.1 Answers to the research questions
+
+${getAnswers(c).map((a) => `- **${a.id}** (${a.status}). ${a.answer}`).join("\n")}
+
+### 7.2 Research outputs
+
+${getOutputs(c).map((o) => `- **${o.title}** — ${o.kind}, delivers ${o.objective}. ${o.body}`).join("\n")}
+
+### 7.3 Future work
 
 ${list(NEXT_STEPS)}
 
-## 8. Cite
+## References
+
+${REFERENCES.map((r) => `${r.id}. ${r.text}`).join("\n")}
+
+## Appendix A. Citation
 
 \`\`\`bibtex
 ${getCitation(c)}
