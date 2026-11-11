@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { AnimatedOrigami } from "@/components/animated-origami";
 import { DemoStage } from "@/components/demo-wall";
+import { BorderBeam } from "@/registry/effects/border-beam/component";
 import { cn } from "@/lib/utils";
 
 export interface ShowcaseTile {
@@ -125,15 +126,21 @@ export function Showcase({
 }
 
 /** The logo in a tile, for the top of a showcase's content. */
-export function ShowcaseLogo({ className }: { className?: string }) {
-  return (
+export function ShowcaseLogo({ className, beam = false }: { className?: string; beam?: boolean }) {
+  const logo = (
     <div
       className={cn(
         "flex size-16 items-center justify-center rounded-[20px] bg-muted",
-        className,
+        !beam && className,
       )}
     >
       <AnimatedOrigami className="size-9" />
     </div>
+  );
+  if (!beam) return logo;
+  return (
+    <BorderBeam radius={20} duration={8} className={className}>
+      {logo}
+    </BorderBeam>
   );
 }
