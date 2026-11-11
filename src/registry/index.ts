@@ -397,7 +397,9 @@ export const registry: RegistryEntry[] = [
     Demo: AgentRunCardDemo,
     Thumbnail: AgentRunCardThumbnail,
     uxDoc: agentRunCardPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "copilot", source: "https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/track-copilot-sessions" },
+    ],
   },
   {
     slug: "wait-time-handoff",
@@ -667,7 +669,10 @@ export const registry: RegistryEntry[] = [
     Demo: PromptWizardDemo,
     Thumbnail: PromptWizardThumbnail,
     uxDoc: promptWizardPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/10500283-deep-research-in-chatgpt" },
+      { team: "cursor", source: "https://cursor.com/docs/agent/plan-mode" },
+    ],
   },
   {
     slug: "response-actions",
@@ -698,7 +703,9 @@ export const registry: RegistryEntry[] = [
     Demo: PromptEnhancerDemo,
     Thumbnail: PromptEnhancerThumbnail,
     uxDoc: promptEnhancerPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "elevenlabs", source: "https://elevenlabs.io/docs/best-practices/prompting/eleven-v3" },
+    ],
   },
   {
     slug: "prompt-template",
@@ -1569,7 +1576,9 @@ export const registry: RegistryEntry[] = [
     Demo: BorderBeamDemo,
     Thumbnail: BorderBeamThumbnail,
     uxDoc: borderBeamPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "mongodb", source: "https://jira.mongodb.org/browse/COMPASS-7836" },
+    ],
   },
 ];
 
