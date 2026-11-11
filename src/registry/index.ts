@@ -338,6 +338,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: backgroundTasksPattern,
     seenIn: [
       { team: "cursor", source: "https://cursor.com/help/ai-features/background-agents" },
+      { team: "copilot", source: "https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/track-copilot-sessions" },
     ],
   },
   {
@@ -397,7 +398,9 @@ export const registry: RegistryEntry[] = [
     Demo: AgentRunCardDemo,
     Thumbnail: AgentRunCardThumbnail,
     uxDoc: agentRunCardPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "copilot", source: "https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/track-copilot-sessions" },
+    ],
   },
   {
     slug: "wait-time-handoff",
@@ -443,6 +446,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: multiAgentTracePattern,
     seenIn: [
       { team: "claude", source: "https://claude.com/blog/how-and-when-to-use-subagents-in-claude-code" },
+      { team: "cursor", source: "https://cursor.com/docs/subagents" },
     ],
   },
   {
@@ -667,7 +671,10 @@ export const registry: RegistryEntry[] = [
     Demo: PromptWizardDemo,
     Thumbnail: PromptWizardThumbnail,
     uxDoc: promptWizardPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/10500283-deep-research-in-chatgpt" },
+      { team: "cursor", source: "https://cursor.com/docs/agent/plan-mode" },
+    ],
   },
   {
     slug: "response-actions",
@@ -698,7 +705,9 @@ export const registry: RegistryEntry[] = [
     Demo: PromptEnhancerDemo,
     Thumbnail: PromptEnhancerThumbnail,
     uxDoc: promptEnhancerPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "elevenlabs", source: "https://elevenlabs.io/docs/best-practices/prompting/eleven-v3" },
+    ],
   },
   {
     slug: "prompt-template",
@@ -757,6 +766,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: codePreviewPattern,
     seenIn: [
       { team: "chatgpt", source: "https://help.openai.com/en/articles/9930697-what-is-the-canvas-feature-in-chatgpt-and-how-do-i-use-it" },
+      { team: "claude", source: "https://support.claude.com/en/articles/9487310-what-are-artifacts-and-how-do-i-use-them" },
     ],
   },
   {
@@ -771,6 +781,8 @@ export const registry: RegistryEntry[] = [
     uxDoc: flowchartPattern,
     seenIn: [
       { team: "intercom", source: "https://www.intercom.com/help/en/articles/7846212-how-to-use-branches-in-workflows" },
+      { team: "zapier", source: "https://help.zapier.com/hc/en-us/articles/8496276332557-Add-conditions-to-Zaps-with-filters" },
+      { team: "notion", source: "https://www.notion.com/help/database-automations" },
     ],
   },
   {
@@ -801,6 +813,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: clarifyingQuestionsPattern,
     seenIn: [
       { team: "chatgpt", source: "https://openai.com/index/introducing-deep-research/" },
+      { team: "cursor", source: "https://cursor.com/docs/agent/plan-mode" },
     ],
   },
   {
@@ -1190,6 +1203,7 @@ export const registry: RegistryEntry[] = [
     seenIn: [
       { team: "gemini", source: "https://support.google.com/gemini/answer/15274899?hl=en&co=GENIE.Platform%3DAndroid" },
       { team: "claude", source: "https://claude.com/download" },
+      { team: "zed", source: "https://zed.dev/docs/ai/agent-panel" },
     ],
   },
   {
@@ -1219,6 +1233,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: listeningStatePattern,
     seenIn: [
       { team: "gemini", source: "https://support.google.com/gemini/answer/15274899?hl=en&co=GENIE.Platform%3DAndroid" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/20001274-chatgpt-voice-mode-faq" },
     ],
   },
   {
@@ -1248,6 +1263,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: commandPalettePattern,
     seenIn: [
       { team: "linear", source: "https://linear.app/enablement/guide/navigating-linear" },
+      { team: "zed", source: "https://zed.dev/docs/getting-started" },
     ],
   },
   {
@@ -1263,6 +1279,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: collaborativePresencePattern,
     seenIn: [
       { team: "figma", source: "https://help.figma.com/hc/en-us/articles/29638316371479-See-viewer-history-for-your-files" },
+      { team: "notion", source: "https://www.notion.com/help/collaborate-within-a-workspace" },
     ],
   },
   {
@@ -1278,6 +1295,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: inviteMembersPattern,
     seenIn: [
       { team: "notion", source: "https://www.notion.com/help/sharing-and-permissions" },
+      { team: "figma", source: "https://help.figma.com/hc/en-us/articles/1500007609322-Guide-to-sharing-and-permissions" },
     ],
   },
   {
@@ -1541,6 +1559,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: archivedSessionPattern,
     seenIn: [
       { team: "claude", source: "https://code.claude.com/docs/en/claude-code-on-the-web" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/8809935-how-to-archive-chats-in-chatgpt" },
     ],
   },
   {
@@ -1556,6 +1575,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: shareSessionPattern,
     seenIn: [
       { team: "claude", source: "https://code.claude.com/docs/en/claude-code-on-the-web" },
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/7925741-chatgpt-shared-links-faq" },
     ],
   },
   {
@@ -1569,7 +1589,9 @@ export const registry: RegistryEntry[] = [
     Demo: BorderBeamDemo,
     Thumbnail: BorderBeamThumbnail,
     uxDoc: borderBeamPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "mongodb", source: "https://jira.mongodb.org/browse/COMPASS-7836" },
+    ],
   },
 ];
 
