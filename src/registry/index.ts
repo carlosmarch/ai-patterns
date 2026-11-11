@@ -1010,7 +1010,12 @@ export const registry: RegistryEntry[] = [
     Demo: FollowUpListDemo,
     Thumbnail: FollowUpListThumbnail,
     uxDoc: followUpListPattern,
-    seenIn: [],
+    seenIn: [
+      { team: "chatgpt", source: "https://help.openai.com/en/articles/6825453-chatgpt-release-notes" },
+      { team: "perplexity", source: "https://www.perplexity.ai/hub/blog/getting-started-with-perplexity" },
+      { team: "claude", source: "https://code.claude.com/docs/en/interactive-mode#prompt-suggestions" },
+      { team: "gemini", source: "https://www.androidauthority.com/google-gemini-follow-up-question-suggestions-3595747/" },
+    ],
   },
   {
     slug: "selection-actions",
