@@ -20,7 +20,7 @@ const columns: { heading: string; links: FooterLink[] }[] = [
   {
     heading: "Resources",
     links: [
-      { label: "Research brief", href: "/research" },
+      { label: "Research thesis", href: "/research" },
       { label: "Workspace demo", href: "/workspace" },
       { label: "Source on GitHub", href: REPO_URL, external: true },
       { label: "For agents (llms.txt)", href: "/llms.txt", external: true },
