@@ -75,6 +75,7 @@ export function PromptOnboarding({
   onFinish,
   className,
 }: PromptOnboardingProps) {
+  const tabsId = React.useId();
   const [mode, setMode] = React.useState<Mode>("prompt");
   const [expanded, setExpanded] = React.useState(false);
   const [copied, setCopied] = useCopied();
@@ -122,8 +123,8 @@ export function PromptOnboarding({
               >
                 {mode === m && (
                   <motion.span
-                    layoutId="prompt-onboarding-tab"
-                    className="absolute inset-0 rounded-md bg-accent"
+                    layoutId={`${tabsId}-tab`}
+                    className="absolute inset-0 rounded-md border bg-background"
                     transition={{ type: "spring", stiffness: 500, damping: 36 }}
                   />
                 )}
