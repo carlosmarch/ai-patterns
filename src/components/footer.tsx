@@ -103,7 +103,12 @@ export function Footer() {
             >
               Carlos March
             </a>
-            <span className="hidden sm:inline"> · MIT licensed</span>
+            <span>
+              {" · "}
+              <Link href="/license" className="transition-colors hover:text-foreground">
+                MIT licensed
+              </Link>
+            </span>
           </p>
           <ThemeToggle />
         </div>

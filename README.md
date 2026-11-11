@@ -204,3 +204,13 @@ The plugin version is the compatibility contract for anyone whose agent depends 
 - **Patch** — new pattern, docs/copy fixes, non-breaking implementation tweaks
 - **Minor** — a pattern's contract grows in a backward-compatible way (new optional prop, added "When to use" case)
 - **Major** — a breaking change to a pattern's contract (prop renamed/removed, required anatomy changed, behavior that previously held no longer does)
+
+---
+
+## Citing
+
+If you use the catalogue or its framework in research, cite it with the metadata in [`CITATION.cff`](CITATION.cff) (GitHub's "Cite this repository" button gives APA and BibTeX).
+
+## License
+
+[MIT](LICENSE) © Carlos March

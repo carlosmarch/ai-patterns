@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use ai-patterns in your research, please cite it as below."
+type: software
+title: "ai-patterns: A pattern library for AI products that act"
+abstract: >-
+  An open research project on how user experience changes as AI moves from
+  answering to acting, and a pattern library for the interactions that don't
+  have established conventions yet. Each pattern is observed in a shipping
+  product, written down as a portable UX contract (anatomy, behavior,
+  accessibility, content guidelines) separate from its implementation, and
+  organised by the job it does for the user: start, ask, steer, oversee,
+  trust or recover. The catalogue is readable by people and by agents
+  (Markdown, JSON, MCP and a Claude Code skill).
+authors:
+  - given-names: Carlos
+    family-names: March
+repository-code: "https://github.com/carlosmarch/ai-patterns"
+url: "https://ai-patterns.app"
+license: MIT
+version: "0.52.4"
+date-released: "2026-11-11"
+keywords:
+  - human-AI interaction
+  - user experience
+  - design patterns
+  - pattern language
+  - AI agents
+  - agentic UX
+  - UI components
