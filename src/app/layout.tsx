@@ -94,7 +94,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col font-sans">
         <ScrollRestoration />
         <SiteHeader>
-          <div className="grid h-full grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-6">
+          <div className="grid h-full grid-cols-[1fr_auto] items-center sm:grid-cols-[1fr_auto_1fr] gap-3 px-4 sm:px-6">
             <div className="flex items-center gap-2 sm:gap-4 lg:gap-8 transition-[opacity,translate,visibility] duration-300 ease-out group-data-[collapsed=true]/header:invisible group-data-[collapsed=true]/header:pointer-events-none group-data-[collapsed=true]/header:opacity-0 group-data-[collapsed=true]/header:-translate-y-2">
               <Link href="/" aria-label="AI Patterns home" className="logo-link flex items-center gap-2 font-semibold tracking-tight">
                 <span className="logo-beam -m-1 p-1">
@@ -107,7 +107,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <div className="pointer-events-auto">
               <SiteCommandPalette />
             </div>
-            <div className="flex justify-end transition-[opacity,translate,visibility] duration-300 ease-out group-data-[collapsed=true]/header:invisible group-data-[collapsed=true]/header:pointer-events-none group-data-[collapsed=true]/header:opacity-0 group-data-[collapsed=true]/header:-translate-y-2">
+            <div className="hidden justify-end sm:flex transition-[opacity,translate,visibility] duration-300 ease-out group-data-[collapsed=true]/header:invisible group-data-[collapsed=true]/header:pointer-events-none group-data-[collapsed=true]/header:opacity-0 group-data-[collapsed=true]/header:-translate-y-2">
               <SiteActions />
             </div>
           </div>
