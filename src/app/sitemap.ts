@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: abs("/skill"), priority: 0.7 },
     { url: abs("/demo"), priority: 0.5 },
     { url: abs("/workspace"), priority: 0.5 },
+    { url: abs("/license"), priority: 0.3 },
     ...registry.map((entry) => ({ url: patternUrl(entry), priority: 0.8 })),
   ];
 }
