@@ -41,7 +41,10 @@ export function SiteCommandPalette() {
   // the panel (and closing folds it back) instead of fading a modal in.
   const mounted = React.useSyncExternalStore(subscribeNoop, () => true, () => false);
   const reduceMotion = useReducedMotion();
-  const morph = reduceMotion ? { duration: 0 } : { type: "spring" as const, stiffness: 420, damping: 38, mass: 0.9 };
+  // One clock for the whole opening: the pill grows into the field (just
+  // below the header, so it barely travels) over OPEN_S, and the results
+  // drop in under it only as that growth is finishing.
+  const morph = reduceMotion ? { duration: 0 } : { duration: OPEN_S, ease: OPEN_EASE };
   const pillRef = React.useRef<HTMLButtonElement>(null);
   const wasOpen = React.useRef(false);
 
@@ -94,7 +97,7 @@ export function SiteCommandPalette() {
         createPortal(
           <AnimatePresence>
             {open && (
-              <div key="palette" className="fixed inset-0 z-50 flex justify-center px-4 pt-[12vh]">
+              <div key="palette" className="fixed inset-0 z-50 flex justify-center px-4 pt-2">
                 <motion.div
                   className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                   initial={{ opacity: 0 }}
@@ -132,7 +135,10 @@ export function SiteCommandPalette() {
                             so the contents are never seen stretched. */}
                         <motion.div
                           initial={{ opacity: 0 }}
-                          animate={{ opacity: 1, transition: { duration: 0.16, delay: reduceMotion ? 0 : 0.14 } }}
+                          animate={{
+                            opacity: 1,
+                            transition: reduceMotion ? { duration: 0 } : { duration: OPEN_S * 0.5, delay: OPEN_S * 0.5 },
+                          }}
                           exit={{ opacity: 0, transition: { duration: 0.08 } }}
                         >
                           {field}
@@ -141,12 +147,16 @@ export function SiteCommandPalette() {
                     )}
                     renderResults={(results) => (
                       <motion.div
-                        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.98 }}
+                        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.99 }}
                         animate={{
                           opacity: 1,
                           y: 0,
                           scale: 1,
-                          transition: { duration: 0.2, ease: "easeOut", delay: reduceMotion ? 0 : 0.1 },
+                          transition: reduceMotion
+                            ? { duration: 0 }
+                            : // Only once the field has nearly finished growing,
+                              // so the two never move at the same time.
+                              { duration: OPEN_S * 0.5, delay: OPEN_S * 0.75, ease: "easeOut" },
                         }}
                         exit={{ opacity: 0, y: -6, transition: { duration: 0.1 } }}
                         style={{ transformOrigin: "top center" }}
@@ -165,6 +175,12 @@ export function SiteCommandPalette() {
     </LayoutGroup>
   );
 }
+
+/** Seconds the search takes to open, field and results alike. */
+const OPEN_S = 0.32;
+/** A timed ease-out rather than a spring: a spring's tail keeps the big
+ *  pill-to-field morph creeping after the small results drop has stopped. */
+const OPEN_EASE = [0.32, 0.72, 0, 1] as const;
 
 function subscribeNoop() {
   return () => {};
