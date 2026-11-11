@@ -273,7 +273,7 @@ function AskPanel({ items }: { items: SectionItem[] }) {
       {/* The registry's own patterns narrate the answer: the Thinking loader
           while the agent reads the specs, then an Expandable trace step that
           carries the count and the one-line reasoning. */}
-      <div className="mt-8 min-h-24">
+      <div className="mt-14 min-h-24">
         <AnimatePresence mode="wait" initial={false}>
           {shown === "searching" && (
             <motion.div

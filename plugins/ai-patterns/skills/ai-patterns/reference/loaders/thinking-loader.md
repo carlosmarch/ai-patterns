@@ -130,7 +130,9 @@ function useElapsedSeconds() {
 function ShimmerWord({ word }: { word: string }) {
   return (
     <span className="relative inline-block h-[1.2em] overflow-hidden text-xs font-medium">
-      <AnimatePresence mode="popLayout" initial={false}>
+      {/* No `initial={false}` here: it would skip the first word's mount
+          animation, and with it the looping shimmer. */}
+      <AnimatePresence mode="popLayout">
         <motion.span
           key={word}
           className="inline-block whitespace-nowrap bg-clip-text text-transparent"
