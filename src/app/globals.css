@@ -223,7 +223,7 @@ body {
 .logo-link:focus-visible .logo-beam::before,
 .logo-link:focus-visible .logo-beam::after {
   opacity: 1;
-  animation: beam-spin 2s linear infinite;
+  animation: beam-spin 4s linear infinite;
 }
 .logo-link:hover .logo-beam::after,
 .logo-link:focus-visible .logo-beam::after {
