@@ -102,7 +102,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 </span>
                 <span className="hidden xl:inline">AI Patterns</span>
               </Link>
-              <SiteNav />
+              <SiteNav className="flex-1 justify-center sm:flex-none sm:justify-start" />
             </div>
             <div className="pointer-events-auto">
               <SiteCommandPalette />
