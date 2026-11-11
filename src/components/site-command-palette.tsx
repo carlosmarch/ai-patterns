@@ -41,9 +41,9 @@ export function SiteCommandPalette() {
   // the panel (and closing folds it back) instead of fading a modal in.
   const mounted = React.useSyncExternalStore(subscribeNoop, () => true, () => false);
   const reduceMotion = useReducedMotion();
-  // One clock for the whole opening: the pill's morph into the field, the
-  // field's contents fading in and the results dropping in all land together
-  // at OPEN_S, so neither surface is still moving once the other has settled.
+  // One clock for the whole opening: the pill grows into the field (just
+  // below the header, so it barely travels) over OPEN_S, and the results
+  // drop in under it only as that growth is finishing.
   const morph = reduceMotion ? { duration: 0 } : { duration: OPEN_S, ease: OPEN_EASE };
   const pillRef = React.useRef<HTMLButtonElement>(null);
   const wasOpen = React.useRef(false);
@@ -97,7 +97,7 @@ export function SiteCommandPalette() {
         createPortal(
           <AnimatePresence>
             {open && (
-              <div key="palette" className="fixed inset-0 z-50 flex justify-center px-4 pt-[12vh]">
+              <div key="palette" className="fixed inset-0 z-50 flex justify-center px-4 pt-2">
                 <motion.div
                   className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                   initial={{ opacity: 0 }}
@@ -147,14 +147,16 @@ export function SiteCommandPalette() {
                     )}
                     renderResults={(results) => (
                       <motion.div
-                        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.98 }}
+                        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.99 }}
                         animate={{
                           opacity: 1,
                           y: 0,
                           scale: 1,
                           transition: reduceMotion
                             ? { duration: 0 }
-                            : { ...morph, opacity: { duration: OPEN_S * 0.6, delay: OPEN_S * 0.2, ease: "easeOut" } },
+                            : // Only once the field has nearly finished growing,
+                              // so the two never move at the same time.
+                              { duration: OPEN_S * 0.5, delay: OPEN_S * 0.75, ease: "easeOut" },
                         }}
                         exit={{ opacity: 0, y: -6, transition: { duration: 0.1 } }}
                         style={{ transformOrigin: "top center" }}
