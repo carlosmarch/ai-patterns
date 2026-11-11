@@ -26,7 +26,7 @@ export default function SkillPage() {
   return (
     <>
       <Showcase tiles={getShowcaseTiles()}>
-        <ShowcaseLogo />
+        <ShowcaseLogo beam />
         <p className="mt-6 text-sm font-medium text-muted-foreground">Claude Code skill · v{pluginJson.version}</p>
         <h1 className="mt-2 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
           {registry.length} patterns, in your agent
