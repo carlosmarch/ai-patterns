@@ -5,6 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import { CodeBlock } from "@/components/code-block";
 import { BackdropOrb } from "./backdrop-orb";
+import { ResearchToc, type ResearchTocItem } from "./research-toc";
 import { formatAdded } from "@/components/new-badge";
 import { getEntryHref } from "@/registry";
 import { SITE_SHARE_IMAGE } from "@/lib/share";
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
 
 const REPO_URL = "https://github.com/carlosmarch/ai-patterns";
 
-const TOC = [
+const TOC: ResearchTocItem[] = [
   { id: "abstract", n: "", label: "Abstract" },
   { id: "introduction", n: "1", label: "Introduction" },
   { id: "background", n: "2", label: "Background & related work" },
@@ -145,21 +146,7 @@ export default function ResearchPage() {
         </dl>
 
         <div className="mt-16 lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-14">
-          <nav aria-label="Contents" className="hidden lg:block">
-            <div className="sticky top-24">
-              <p className="font-mono text-[11px] tracking-wider text-muted-foreground uppercase">Contents</p>
-              <ol className="mt-3 space-y-2 text-sm">
-                {TOC.map((t) => (
-                  <li key={t.id}>
-                    <a href={`#${t.id}`} className="flex gap-2 text-muted-foreground transition-colors hover:text-foreground">
-                      <span className="w-4 shrink-0 font-mono text-xs leading-5 tabular-nums">{t.n}</span>
-                      <span>{t.label}</span>
-                    </a>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </nav>
+          <ResearchToc items={TOC} />
 
           <article className="max-w-3xl min-w-0 space-y-20">
             {/* Front matter */}
