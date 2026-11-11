@@ -159,6 +159,85 @@ body {
 .logo-link .animated-origami path:nth-child(3) {
   animation-delay: -2.352s;
 }
+
+/* The header mark gets a fast border beam on hover: a ring of the Border Beam
+   pattern's gradient around a tile behind the mark, plus a blurred copy that
+   glows outside it. The gradient turns via an animated --beam-angle. */
+@property --beam-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes beam-spin {
+  to {
+    --beam-angle: 360deg;
+  }
+}
+.logo-beam {
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 10px;
+}
+.logo-beam::before,
+.logo-beam::after {
+  --beam: conic-gradient(
+    from var(--beam-angle),
+    transparent 0deg,
+    #34d399 30deg,
+    #60a5fa 70deg,
+    transparent 110deg,
+    transparent 180deg,
+    #f472b6 210deg,
+    #fb923c 250deg,
+    transparent 290deg
+  );
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+/* Tile + crisp 1.5px ring in one layer: the background fills the padding box,
+   the beam shows through the transparent border. */
+.logo-beam::before {
+  inset: 0;
+  z-index: -1;
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(var(--background), var(--background)) padding-box,
+    var(--beam) border-box;
+}
+/* Glow: the beam blurred behind the tile, so it only shows past its edge. */
+.logo-beam::after {
+  inset: -3px;
+  z-index: -2;
+  border-radius: 13px;
+  background: var(--beam);
+  filter: blur(6px);
+}
+.logo-link:hover .logo-beam::before,
+.logo-link:hover .logo-beam::after,
+.logo-link:focus-visible .logo-beam::before,
+.logo-link:focus-visible .logo-beam::after {
+  opacity: 1;
+  animation: beam-spin 2s linear infinite;
+}
+.logo-link:hover .logo-beam::after,
+.logo-link:focus-visible .logo-beam::after {
+  opacity: 0.7;
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-link:hover .logo-beam::before,
+  .logo-link:hover .logo-beam::after,
+  .logo-link:focus-visible .logo-beam::before,
+  .logo-link:focus-visible .logo-beam::after {
+    animation: none;
+    --beam-angle: 45deg;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .logo-link:hover .animated-origami path,
   .logo-link:focus-visible .animated-origami path {
