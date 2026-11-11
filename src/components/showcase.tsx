@@ -2,6 +2,8 @@
 
 import type { ReactNode } from "react";
 
+import { motion, useReducedMotion } from "motion/react";
+
 import { AnimatedOrigami } from "@/components/animated-origami";
 import { DemoStage } from "@/components/demo-wall";
 import { BorderBeam } from "@/registry/effects/border-beam/component";
@@ -126,11 +128,17 @@ export function Showcase({
 }
 
 /** The logo in a tile, for the top of a showcase's content. */
+/** Same arcs and lap as BorderBeam's defaults, so the outer glow tracks the beam. */
+const BEAM_GRADIENT =
+  "conic-gradient(from 0deg, transparent 0deg, #34d399 30deg, #60a5fa 70deg, transparent 110deg, transparent 180deg, #f472b6 210deg, #fb923c 250deg, transparent 290deg)";
+const BEAM_LAP = 8;
+
 export function ShowcaseLogo({ className, beam = false }: { className?: string; beam?: boolean }) {
+  const reduceMotion = useReducedMotion();
   const logo = (
     <div
       className={cn(
-        "flex size-16 items-center justify-center rounded-[20px] bg-muted",
+        "relative flex size-16 items-center justify-center rounded-[20px] bg-muted",
         !beam && className,
       )}
     >
@@ -139,7 +147,19 @@ export function ShowcaseLogo({ className, beam = false }: { className?: string; 
   );
   if (!beam) return logo;
   return (
-    <BorderBeam radius={20} duration={8} className={className}>
+    <BorderBeam radius={20} duration={BEAM_LAP} className={className}>
+      {/* Outer glow: the beam's gradient, blurred behind the logo so it only shows past its edge. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -inset-1.5 -z-10 overflow-hidden rounded-[26px] opacity-70 blur-lg"
+      >
+        <motion.span
+          className="absolute top-1/2 left-1/2 aspect-square w-[200%] -translate-x-1/2 -translate-y-1/2"
+          style={{ background: BEAM_GRADIENT }}
+          animate={reduceMotion ? { rotate: 45 } : { rotate: 360 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: BEAM_LAP, ease: "linear", repeat: Infinity }}
+        />
+      </span>
       {logo}
     </BorderBeam>
   );
