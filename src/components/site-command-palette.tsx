@@ -41,7 +41,10 @@ export function SiteCommandPalette() {
   // the panel (and closing folds it back) instead of fading a modal in.
   const mounted = React.useSyncExternalStore(subscribeNoop, () => true, () => false);
   const reduceMotion = useReducedMotion();
-  const morph = reduceMotion ? { duration: 0 } : { type: "spring" as const, stiffness: 420, damping: 38, mass: 0.9 };
+  // One clock for the whole opening: the pill's morph into the field, the
+  // field's contents fading in and the results dropping in all land together
+  // at OPEN_S, so neither surface is still moving once the other has settled.
+  const morph = reduceMotion ? { duration: 0 } : { duration: OPEN_S, ease: OPEN_EASE };
   const pillRef = React.useRef<HTMLButtonElement>(null);
   const wasOpen = React.useRef(false);
 
@@ -132,7 +135,10 @@ export function SiteCommandPalette() {
                             so the contents are never seen stretched. */}
                         <motion.div
                           initial={{ opacity: 0 }}
-                          animate={{ opacity: 1, transition: { duration: 0.16, delay: reduceMotion ? 0 : 0.14 } }}
+                          animate={{
+                            opacity: 1,
+                            transition: reduceMotion ? { duration: 0 } : { duration: OPEN_S * 0.5, delay: OPEN_S * 0.5 },
+                          }}
                           exit={{ opacity: 0, transition: { duration: 0.08 } }}
                         >
                           {field}
@@ -146,7 +152,9 @@ export function SiteCommandPalette() {
                           opacity: 1,
                           y: 0,
                           scale: 1,
-                          transition: { duration: 0.2, ease: "easeOut", delay: reduceMotion ? 0 : 0.1 },
+                          transition: reduceMotion
+                            ? { duration: 0 }
+                            : { ...morph, opacity: { duration: OPEN_S * 0.6, delay: OPEN_S * 0.2, ease: "easeOut" } },
                         }}
                         exit={{ opacity: 0, y: -6, transition: { duration: 0.1 } }}
                         style={{ transformOrigin: "top center" }}
@@ -165,6 +173,12 @@ export function SiteCommandPalette() {
     </LayoutGroup>
   );
 }
+
+/** Seconds the search takes to open, field and results alike. */
+const OPEN_S = 0.32;
+/** A timed ease-out rather than a spring: a spring's tail keeps the big
+ *  pill-to-field morph creeping after the small results drop has stopped. */
+const OPEN_EASE = [0.32, 0.72, 0, 1] as const;
 
 function subscribeNoop() {
   return () => {};
