@@ -561,6 +561,9 @@ export const registry: RegistryEntry[] = [
     uxDoc: promptBarProPattern,
     seenIn: [
       { team: "cursor", source: "https://cursor.com/docs/context/symbols" },
+      { team: "perplexity", source: "https://intercom.help/perplexity-ai/en/articles/10354753-what-is-focus" },
+      { team: "claude", source: "https://code.claude.com/docs/en/claude-code-on-the-web" },
+      { team: "chatgpt", source: "https://developers.openai.com/codex/cloud" },
     ],
   },
   {
@@ -1329,6 +1332,7 @@ export const registry: RegistryEntry[] = [
     uxDoc: setupChecklistPattern,
     seenIn: [
       { team: "intercom", source: "https://www.intercom.com/help/en/articles/6661022-getting-started-with-checklists" },
+      { team: "perplexity", source: "https://intercom.help/perplexity-ai/en/articles/11172798-getting-started-with-comet" },
     ],
   },
   {
