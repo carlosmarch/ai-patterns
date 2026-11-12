@@ -131,7 +131,7 @@ export default function ResearchPage() {
           </div>
         </header>
 
-        <dl className="mt-12 grid grid-cols-2 overflow-hidden rounded-xl border sm:grid-cols-3">
+        <dl className="mt-12 grid grid-cols-2 overflow-hidden rounded-xl border backdrop-blur-sm sm:grid-cols-3">
           {facts.map((f, i) => (
             <div
               key={f.label}
