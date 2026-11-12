@@ -244,6 +244,9 @@ import { pattern as contextUsagePattern } from "./indicators/context-usage/patte
 import ArtifactPanelDemo from "./messages/artifact-panel/demo";
 import ArtifactPanelThumbnail from "./messages/artifact-panel/thumbnail";
 import { pattern as artifactPanelPattern } from "./messages/artifact-panel/pattern";
+import GeneratedSurfaceDemo from "./messages/generated-surface/demo";
+import GeneratedSurfaceThumbnail from "./messages/generated-surface/thumbnail";
+import { pattern as generatedSurfacePattern } from "./messages/generated-surface/pattern";
 import ContextChipsDemo from "./composer/context-chips/demo";
 import ContextChipsThumbnail from "./composer/context-chips/thumbnail";
 import { pattern as contextChipsPattern } from "./composer/context-chips/pattern";
@@ -1620,6 +1623,22 @@ export const registry: RegistryEntry[] = [
       { team: "claude", source: "https://code.claude.com/docs/en/agent-sdk/user-input" },
       { team: "chatgpt", source: "https://chatgpt.com" },
       { team: "figma", source: "https://help.figma.com/hc/en-us/articles/39166810751895-Figma-skills-for-MCP" },
+    ],
+  },
+  {
+    slug: "generated-surface",
+    category: "messages",
+    added: "2026-11-12T14:20Z",
+    job: "trust",
+    title: "Generated Surface",
+    description:
+      "A sandboxed frame for UI the model built for one answer — marked as generated, filling in while it builds, catching its runtime errors with a Fix it, versioned, and always switchable to plain text.",
+    Demo: GeneratedSurfaceDemo,
+    Thumbnail: GeneratedSurfaceThumbnail,
+    uxDoc: generatedSurfacePattern,
+    seenIn: [
+      { team: "gemini", source: "https://blog.google/products/gemini/gemini-3-gemini-app/" },
+      { team: "claude", source: "https://support.claude.com/en/articles/9487310-what-are-artifacts-and-how-do-i-use-them" },
     ],
   },
 ];
