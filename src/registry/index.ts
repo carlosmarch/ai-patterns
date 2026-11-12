@@ -27,6 +27,9 @@ import { pattern as clarifyingQuestionsPattern } from "./messages/clarifying-que
 import ConversationBranchesDemo from "./messages/conversation-branches/demo";
 import ConversationBranchesThumbnail from "./messages/conversation-branches/thumbnail";
 import { pattern as conversationBranchesPattern } from "./messages/conversation-branches/pattern";
+import ComposerQuestionDemo from "./composer/composer-question/demo";
+import ComposerQuestionThumbnail from "./composer/composer-question/thumbnail";
+import { pattern as composerQuestionPattern } from "./composer/composer-question/pattern";
 import PlanReviewDemo from "./agents/plan-review/demo";
 import PlanReviewThumbnail from "./agents/plan-review/thumbnail";
 import { pattern as planReviewPattern } from "./agents/plan-review/pattern";
@@ -1600,6 +1603,21 @@ export const registry: RegistryEntry[] = [
     uxDoc: borderBeamPattern,
     seenIn: [
       { team: "mongodb", source: "https://jira.mongodb.org/browse/COMPASS-7836" },
+    ],
+  },
+  {
+    slug: "composer-question",
+    category: "composer",
+    added: "2026-11-12T11:37Z",
+    job: "steer",
+    title: "Composer Question",
+    description:
+      "An agent's question docked above the composer as numbered options: one key or click answers, a write-in row and Skip cover the rest, and typing a reply answers too.",
+    Demo: ComposerQuestionDemo,
+    Thumbnail: ComposerQuestionThumbnail,
+    uxDoc: composerQuestionPattern,
+    seenIn: [
+      { team: "claude", source: "https://code.claude.com/docs/en/agent-sdk/user-input" },
     ],
   },
 ];
