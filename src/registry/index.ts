@@ -1618,6 +1618,8 @@ export const registry: RegistryEntry[] = [
     uxDoc: composerQuestionPattern,
     seenIn: [
       { team: "claude", source: "https://code.claude.com/docs/en/agent-sdk/user-input" },
+      { team: "chatgpt", source: "https://chatgpt.com" },
+      { team: "figma", source: "https://help.figma.com/hc/en-us/articles/39166810751895-Figma-skills-for-MCP" },
     ],
   },
 ];
