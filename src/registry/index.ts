@@ -217,6 +217,9 @@ import { pattern as aiFillDrawerPattern } from "./tables/ai-fill-drawer/pattern"
 import NaturalLanguageQueryDemo from "./tables/natural-language-query/demo";
 import NaturalLanguageQueryThumbnail from "./tables/natural-language-query/thumbnail";
 import { pattern as naturalLanguageQueryPattern } from "./tables/natural-language-query/pattern";
+import RefineSearchDemo from "./tables/refine-search/demo";
+import RefineSearchThumbnail from "./tables/refine-search/thumbnail";
+import { pattern as refineSearchPattern } from "./tables/refine-search/pattern";
 import AiReviewPanelDemo from "./review/ai-review-panel/demo";
 import AiReviewPanelThumbnail from "./review/ai-review-panel/thumbnail";
 import { pattern as aiReviewPanelPattern } from "./review/ai-review-panel/pattern";
@@ -1621,6 +1624,18 @@ export const registry: RegistryEntry[] = [
       { team: "chatgpt", source: "https://chatgpt.com" },
       { team: "figma", source: "https://help.figma.com/hc/en-us/articles/39166810751895-Figma-skills-for-MCP" },
     ],
+  },  {
+    slug: "refine-search",
+    category: "tables",
+    added: "2026-11-12T15:51Z",
+    job: "steer",
+    title: "Refine Search",
+    description:
+      "A \"Refine your search\" panel above search results where the AI proposes a few filters, each with the count it would leave, and one click applies it as a removable chip.",
+    Demo: RefineSearchDemo,
+    Thumbnail: RefineSearchThumbnail,
+    uxDoc: refineSearchPattern,
+    seenIn: [{ team: "datamaran", source: "https://www.datamaran.com/" }],
   },
 ];
 
