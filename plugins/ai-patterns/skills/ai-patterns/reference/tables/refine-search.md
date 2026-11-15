@@ -124,8 +124,8 @@ export function RefineSearch<Row extends { id: string }>({
   const [draft, setDraft] = React.useState(initialQuery);
   const [query, setQuery] = React.useState(initialQuery);
   const [applied, setApplied] = React.useState<RefineProposal<Row>[]>([]);
-  const [proposals, setProposals] = React.useState<RefineProposal<Row>[]>([]);
-  const [status, setStatus] = React.useState<"loading" | "ready" | "error">("loading");
+  /** The last proposal response, tagged with the result set it was for. */
+  const [response, setResponse] = React.useState<{ key: string; proposals: RefineProposal<Row>[] } | null>(null);
   const [dismissed, setDismissed] = React.useState(false);
   const requestId = React.useRef(0);
 
@@ -137,31 +137,36 @@ export function RefineSearch<Row extends { id: string }>({
   }, [rows, query, applied, searchText]);
 
   // Re-propose whenever the result set changes: a new search or a filter
-  // added/removed. Stale responses are ignored.
+  // added/removed. Responses for an older result set are ignored, and the
+  // panel shows its loading state until the current one arrives.
+  const key = JSON.stringify([query, applied.map((f) => f.id)]);
   React.useEffect(() => {
     const id = ++requestId.current;
-    setStatus("loading");
+    const appliedKeys = new Set(applied.map((f) => `${f.field}:${f.label}`));
     onPropose(query, results, applied)
       .then((next) => {
         if (id !== requestId.current) return;
-        const appliedKeys = new Set(applied.map((f) => `${f.field}:${f.label}`));
-        setProposals(
-          next
+        setResponse({
+          key,
+          proposals: next
             .filter((p) => !appliedKeys.has(`${p.field}:${p.label}`))
             .filter((p) => {
               const n = results.filter(p.test).length;
               return n > 0 && n < results.length;
             })
-            .slice(0, maxProposals)
-        );
-        setStatus("ready");
+            .slice(0, maxProposals),
+        });
       })
+      // A failed request collapses the panel; search keeps working.
       .catch(() => {
-        if (id === requestId.current) setStatus("error");
+        if (id === requestId.current) setResponse({ key, proposals: [] });
       });
-    // `results` derives from query + applied; keying on them avoids refetching on unrelated renders.
+    // `key` captures query + applied; `results` derives from them.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, applied]);
+  }, [key]);
+
+  const status = response?.key === key ? "ready" : "loading";
+  const proposals = status === "ready" ? response!.proposals : [];
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -171,7 +176,6 @@ export function RefineSearch<Row extends { id: string }>({
   }
 
   function apply(p: RefineProposal<Row>) {
-    setProposals((prev) => prev.filter((x) => x.id !== p.id));
     setApplied((prev) => [...prev, p]);
   }
 

@@ -33,6 +33,9 @@ import { pattern as composerQuestionPattern } from "./composer/composer-question
 import PlanReviewDemo from "./agents/plan-review/demo";
 import PlanReviewThumbnail from "./agents/plan-review/thumbnail";
 import { pattern as planReviewPattern } from "./agents/plan-review/pattern";
+import ScheduledTaskDemo from "./messages/scheduled-task/demo";
+import ScheduledTaskThumbnail from "./messages/scheduled-task/thumbnail";
+import { pattern as scheduledTaskPattern } from "./messages/scheduled-task/pattern";
 
 import AgentTriggersDemo from "./agents/agent-triggers/demo";
 import AgentTriggersThumbnail from "./agents/agent-triggers/thumbnail";
@@ -1636,6 +1639,19 @@ export const registry: RegistryEntry[] = [
     Thumbnail: RefineSearchThumbnail,
     uxDoc: refineSearchPattern,
     seenIn: [{ team: "datamaran", source: "https://www.datamaran.com/" }],
+  },
+  {
+    slug: "scheduled-task",
+    category: "messages",
+    added: "2026-11-15T00:03Z",
+    job: "steer",
+    title: "Scheduled Task",
+    description:
+      "When the user accepts an offer to do something later, the reply confirms it as a \"Scheduled task\" card with the time in plain words, a pencil to change it and a Run now button.",
+    Demo: ScheduledTaskDemo,
+    Thumbnail: ScheduledTaskThumbnail,
+    uxDoc: scheduledTaskPattern,
+    seenIn: [{ team: "chatgpt", source: "https://help.openai.com/en/articles/10291617-tasks-in-chatgpt" }],
   },
 ];
 
