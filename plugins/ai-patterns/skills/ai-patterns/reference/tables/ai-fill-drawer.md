@@ -348,14 +348,15 @@ function FieldRow({
   return (
     <div
       className={cn(
-        "group grid grid-cols-[7.5rem_1fr] items-start gap-3 rounded-lg px-3 py-2 transition-colors",
+        // Label above value on phones; side by side once there is room.
+        "group grid grid-cols-1 items-start gap-0.5 rounded-lg px-3 py-2 transition-colors sm:grid-cols-[7.5rem_1fr] sm:gap-3",
         suggested && "bg-muted/60"
       )}
     >
-      <dt id={labelId} className="truncate pt-1.5 text-xs text-muted-foreground">
+      <dt id={labelId} className="truncate text-xs text-muted-foreground sm:pt-1.5">
         {field.label}
       </dt>
-      <dd className="min-w-0">
+      <dd className="min-w-0 break-words">
         {editing ? (
           <input
             autoFocus

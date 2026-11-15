@@ -206,21 +206,25 @@ export function AccessRequest({
                 </thead>
                 <tbody>
                   {changes.map((change) => (
-                    <tr key={change.id} className="border-t first:border-t-0">
-                      <th scope="row" className="py-2 pr-4 text-left text-xs font-normal whitespace-nowrap text-muted-foreground">
+                    <tr
+                      key={change.id}
+                      // On phones each row stacks: the label above, then "from → to".
+                      className="border-t first:border-t-0 max-sm:flex max-sm:flex-wrap max-sm:items-center max-sm:py-2"
+                    >
+                      <th scope="row" className="py-2 pr-4 text-left text-xs font-normal whitespace-nowrap text-muted-foreground max-sm:basis-full max-sm:pt-0 max-sm:pb-1">
                         {change.label}
                       </th>
-                      <td className="py-2 pr-2 whitespace-nowrap text-muted-foreground">
+                      <td className="py-2 pr-2 whitespace-nowrap text-muted-foreground max-sm:py-0">
                         {change.from ? (
                           <span className="line-through decoration-muted-foreground/50">{change.from}</span>
                         ) : (
                           <span aria-label="Not set">—</span>
                         )}
                       </td>
-                      <td className="w-px py-2 pr-2" aria-hidden>
+                      <td className="w-px py-2 pr-2 max-sm:py-0" aria-hidden>
                         <ArrowRight className="size-3.5 text-muted-foreground" />
                       </td>
-                      <td className="py-2">
+                      <td className="py-2 max-sm:py-0">
                         <span className="inline-flex flex-wrap items-center gap-2">
                           <span className="font-medium">{change.to}</span>
                           {change.widens && (
@@ -237,9 +241,9 @@ export function AccessRequest({
               </table>
             </div>
 
-            <footer className="mt-4 flex items-center gap-4 border-t bg-muted/40 px-5 py-3">
+            <footer className="mt-4 flex flex-col gap-3 border-t bg-muted/40 px-5 py-3 sm:flex-row sm:items-center sm:gap-4">
               <p className="min-w-0 flex-1 text-xs text-muted-foreground">{impact}</p>
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex shrink-0 items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => decide("deny")}

@@ -188,7 +188,7 @@ export function PromptOnboarding({
                 key={alt.id}
                 type="button"
                 onClick={alt.onClick}
-                className="flex items-center gap-3 rounded-xl border p-3 text-left transition-colors hover:bg-accent/50"
+                className="flex min-w-0 items-center gap-3 rounded-xl border p-3 text-left transition-colors hover:bg-accent/50"
               >
                 <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <alt.icon className="size-4" aria-hidden />

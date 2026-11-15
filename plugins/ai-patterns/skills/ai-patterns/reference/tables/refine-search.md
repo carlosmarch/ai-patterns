@@ -352,7 +352,7 @@ export function RefineSearch<Row extends { id: string }>({
 
       {/* Results */}
       <div className="max-h-72 overflow-auto border-t">
-        <table className="w-full border-collapse" aria-busy={status === "loading"}>
+        <table className="w-full border-collapse whitespace-nowrap" aria-busy={status === "loading"}>
           <thead className="sticky top-0 z-[1] bg-card">
             <tr className="border-b text-left text-xs text-muted-foreground">
               {columns.map((c) => (

@@ -131,9 +131,9 @@ export function AgentSetupPill({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={reduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.96 }}
       transition={spring}
-      className={cn("flex items-center gap-2", className)}
+      className={cn("flex max-w-full items-center gap-2", className)}
     >
-      <div className="relative">
+      <div className="relative min-w-0">
         <AnimatePresence>
           {hint && !copied && (
             <motion.div
@@ -162,9 +162,10 @@ export function AgentSetupPill({
           whileTap={reduce ? undefined : { scale: 0.97 }}
           layout={!reduce}
           transition={spring}
-          className="group flex h-10 items-center gap-3 rounded-full border bg-card pr-3 pl-4 text-sm font-medium text-card-foreground transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="group flex h-10 max-w-full min-w-0 items-center gap-3 rounded-full border bg-card pr-3 pl-4 text-sm font-medium text-card-foreground transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
-          <span className="relative grid overflow-hidden">
+          {/* The label truncates on narrow screens so the pill never overflows. */}
+          <span className="relative grid min-w-0 overflow-hidden">
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.span
                 key={copied ? "copied" : "idle"}
@@ -172,10 +173,10 @@ export function AgentSetupPill({
                 animate={{ opacity: 1, y: 0 }}
                 exit={reduce ? { opacity: 0 } : { opacity: 0, y: -12 }}
                 transition={{ duration: 0.2 }}
-                className="flex items-center gap-1.5 whitespace-nowrap"
+                className="flex min-w-0 items-center gap-1.5 whitespace-nowrap"
               >
                 {copied && <Check className="size-4 text-emerald-600 dark:text-emerald-400" aria-hidden />}
-                {copied ? copiedLabel : label}
+                <span className="truncate">{copied ? copiedLabel : label}</span>
               </motion.span>
             </AnimatePresence>
           </span>
@@ -188,7 +189,7 @@ export function AgentSetupPill({
                 animate={{ opacity: 1, width: "auto" }}
                 exit={{ opacity: 0, width: 0 }}
                 transition={{ duration: 0.2 }}
-                className="flex items-center"
+                className="flex shrink-0 items-center"
               >
                 {agents.map((agent, i) => (
                   <motion.span

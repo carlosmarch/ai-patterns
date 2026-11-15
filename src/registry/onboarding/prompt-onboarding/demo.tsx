@@ -90,7 +90,7 @@ export default function PromptOnboardingDemo() {
         onSkip={() => setHint("Skipped — re-surface setup later from the sidebar")}
         onFinish={() => setHint("Setup finished")}
       />
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-xs text-muted-foreground">
         <span>{hint}</span>
         {status === "received" && (
           <button

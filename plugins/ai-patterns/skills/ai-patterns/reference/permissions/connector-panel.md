@@ -168,7 +168,8 @@ function ToolRow({
   onPermissionChange: (p: ToolPermission) => void;
 }) {
   return (
-    <div className="flex items-start gap-3 border-t px-4 py-3">
+    // On phones the permission toggle drops below the description instead of squeezing it.
+    <div className="flex flex-col gap-2 border-t px-4 py-3 sm:flex-row sm:items-start sm:gap-3">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-xs font-semibold">{tool.name}</span>
@@ -446,13 +447,13 @@ export function ConnectorPanel({
       )}
     >
       {/* Header */}
-      <div className="flex items-start gap-3 border-b px-5 py-4">
+      <div className="flex flex-wrap items-start gap-3 border-b px-5 py-4">
         {appIcon && (
           <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border bg-muted">
             {appIcon}
           </div>
         )}
-        <div className="min-w-0 flex-1">
+        <div className="min-w-[12rem] flex-1">
           <div className="flex items-center gap-1.5">
             <span className="text-sm font-semibold">{appName}</span>
             {verified && (
@@ -489,11 +490,11 @@ export function ConnectorPanel({
       </div>
 
       {/* Body */}
-      <div className="flex min-h-0 flex-1">
-        {/* Sidebar */}
+      <div className="flex min-h-0 flex-1 flex-col sm:flex-row">
+        {/* Sidebar: stacks above the tools on narrow screens. */}
         <aside
           aria-label="Connector overview"
-          className="w-44 shrink-0 border-r px-4 py-4"
+          className="shrink-0 border-b px-4 py-4 sm:w-44 sm:border-r sm:border-b-0"
         >
           {overview.length > 0 && (
             <div className="mb-5">
