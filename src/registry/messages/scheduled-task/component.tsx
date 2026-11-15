@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 export type ScheduledTaskStatus = "scheduled" | "running" | "ran";
 
 export interface ScheduledTaskProps {
-  /** What the AI will do, as a short imperative ("Draft the Cost Estimate states"). */
+  /** What the AI will do, as a short imperative ("Run the research scout"). */
   title: string;
   /** When it will run, in plain words ("Tomorrow, 9:00"). */
   when: string;

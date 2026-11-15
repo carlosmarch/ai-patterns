@@ -34,6 +34,14 @@ Demo conventions:
   (name real patterns, e.g. "Thinking Loader", "Cost Estimate"). Avoid
   generic assistant errands (calendars, meetings with named people,
   reminders).
+- Ground it in this repo's real work, not just pattern names: when the
+  demo needs a task, a file, a command or a result, use one from this
+  project — `npm run scout` and its `research/scout/<date>.md` report,
+  `npm run skill:build`, adding an entry to `src/registry/index.ts`, a PR
+  preview build, a `seenIn` source, the `/llms.txt` or MCP endpoints.
+  Apply the same examples in the spec (`pattern.ts`) and the component's
+  prop docs. Reference screenshots from other products (a game, a recipe
+  app) set the interaction only; rewrite their copy into this world.
 
 Register the new entry in `src/registry/index.ts` (import the `Demo`,
 `Thumbnail` and `pattern`, add a `RegistryEntry`) — this is what makes it appear on
