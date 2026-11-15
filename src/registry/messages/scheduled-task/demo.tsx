@@ -6,9 +6,9 @@ import { Check } from "lucide-react";
 
 import { ScheduledTask, type ScheduledTaskStatus } from "./component";
 
-const OFFER = "Draft the Cost Estimate states tomorrow";
-const TITLE = "Draft the Cost Estimate states";
-const WHEN_OPTIONS = ["Tomorrow, 9:00", "In 1 hour", "Monday, 9:00", "Friday, 16:00"];
+const OFFER = "Run the research scout on Monday";
+const TITLE = "Run the research scout";
+const WHEN_OPTIONS = ["Monday, 9:00", "Tomorrow, 9:00", "In 1 hour", "Friday, 16:00"];
 
 type Stage = "offer" | "accepted" | "scheduled";
 
@@ -44,8 +44,8 @@ export default function ScheduledTaskDemo() {
   return (
     <div className="flex w-full max-w-md flex-col gap-4 text-sm">
       <p className="text-foreground/90">
-        The Cost Estimate pill is in. Its empty, over-budget and loading states still need drafts — want me to pick
-        them up tomorrow?
+        Scheduled Task is merged and in the catalogue. Want me to run the research scout again on Monday, to code
+        the week&rsquo;s new changelogs against the registry?
       </p>
 
       <button
@@ -87,8 +87,8 @@ export default function ScheduledTaskDemo() {
           />
           <p className="text-xs text-muted-foreground">
             {status === "ran"
-              ? "Done — three state drafts are ready in the Cost Estimate spec."
-              : `Got it — I'll draft the states (${when}) and tell you here when they're ready.`}
+              ? "Done — research/scout/2026-11-15.md has 2 new candidates and a new Seen in source for Composer Question."
+              : `Got it — I'll run the scout (${when}) and link the report here when it's written.`}
           </p>
         </div>
       )}

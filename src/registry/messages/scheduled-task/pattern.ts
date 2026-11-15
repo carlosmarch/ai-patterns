@@ -1,7 +1,7 @@
 export const pattern = `# Scheduled Task
 
 ## Summary
-When the assistant offers to do something later ("Want me to pick this up tomorrow?") and the user accepts, the reply confirms it as a scheduled task right in the conversation: a "Scheduled task" tag, a card naming the task and when it will run, an edit control to change the time, and a "Run now" button. It turns a promise in prose into a visible, editable commitment.
+When the assistant offers to do something later ("Want me to run the research scout again on Monday?") and the user accepts, the reply confirms it as a scheduled task right in the conversation: a "Scheduled task" tag, a card naming the task and when it will run, an edit control to change the time, and a "Run now" button. It turns a promise in prose into a visible, editable commitment.
 
 ## When to use
 - When the AI can run work on its own at a later time (a follow-up draft, a recurring check, a next step of a longer project) and the user has just asked for or accepted that.
@@ -14,9 +14,9 @@ When the assistant offers to do something later ("Want me to pick this up tomorr
 - For work that is running right now — use **Agent Run Card** or **Background Tasks Drawer** to show progress.
 
 ## Anatomy
-- **Offer** (preceding turn): the assistant proposes the deferred work, ideally as a one-tap option the user can accept ("Draft the Cost Estimate states tomorrow"); once accepted it stays visible, dimmed with a check.
+- **Offer** (preceding turn): the assistant proposes the deferred work, ideally as a one-tap option the user can accept ("Run the research scout on Monday"); once accepted it stays visible, dimmed with a check.
 - **Tag**: a small "Scheduled task" pill heading the reply, so the turn reads as a system action, not just text.
-- **Task card**: a leading icon, the task's title as a short imperative, and the schedule in plain words beneath ("Tomorrow, 9:00").
+- **Task card**: a leading icon, the task's title as a short imperative, and the schedule in plain words beneath ("Monday, 9:00").
 - **Edit control**: a pencil at the card's trailing edge that opens the schedule choices inline.
 - **Run now**: a secondary pill under the card that runs the task immediately instead of waiting.
 - **Confirmation line**: one sentence restating what will happen and where the result will show up.
@@ -29,13 +29,13 @@ When the assistant offers to do something later ("Want me to pick this up tomorr
 - The card stays in the transcript afterwards and reflects the task's latest state (scheduled, running, ran, cancelled), rather than freezing at the moment it was created.
 
 ## Content guidelines
-- Title the task as what the AI will do, in the user's words where possible ("Draft the Cost Estimate states"), not the system's ("Task #4821").
+- Title the task as what the AI will do, in the user's words where possible ("Run the research scout"), not the system's ("Task #4821").
 - Write the time relative and concrete: "Tomorrow, 9:00", "In 1 hour", "Monday, 9:00" — never a raw timestamp, and never just "Later".
-- Keep the confirmation line to one sentence and say where the result will appear ("I'll tell you here when they're ready").
+- Keep the confirmation line to one sentence and say where the result will appear ("I'll link the report here when it's written").
 - Keep "Run now" literal; don't rename it to "Skip the wait" or similar.
 
 ## Accessibility
-- The edit control is a real button with an accessible name that includes the task ("Change when “Draft the Cost Estimate states” runs") and \`aria-expanded\` tied to the choices it reveals.
+- The edit control is a real button with an accessible name that includes the task ("Change when “Run the research scout” runs") and \`aria-expanded\` tied to the choices it reveals.
 - The time choices are a \`radiogroup\` of \`radio\` buttons so the current one is announced as checked.
 - The schedule line is a polite live region, so switching to "Running now…" and "Ran just now" is announced.
 - Status changes are conveyed in text, not only by the spinner or check icons, which are \`aria-hidden\`.
