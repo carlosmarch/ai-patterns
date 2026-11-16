@@ -127,14 +127,14 @@ export function PartialResponse({
         />
       </div>
 
-      <div className="flex items-center justify-between border-t border-border/60 bg-muted/40 px-4 py-2.5">
-        <p className="text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border/60 bg-muted/40 px-4 py-2.5">
+        <p className="min-w-[12rem] flex-1 text-xs text-muted-foreground">
           <span className="font-medium text-foreground">{config.label}</span>
           {" · "}
           {config.hint}
         </p>
 
-        <div className="flex items-center gap-1.5">
+        <div className="ml-auto flex items-center gap-1.5">
           {onRetry && (
             <button
               type="button"

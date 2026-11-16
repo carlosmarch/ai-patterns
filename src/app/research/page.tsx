@@ -191,15 +191,19 @@ export default function ResearchPage() {
                       <tr className="border-b text-left font-mono text-[11px] text-muted-foreground">
                         <th className="py-2 pr-3 font-normal">#</th>
                         <th className="py-2 pr-3 font-normal">Objective</th>
-                        <th className="py-2 text-right font-normal">Serves</th>
+                        <th className="py-2 text-right font-normal max-sm:hidden">Serves</th>
                       </tr>
                     </thead>
                     <tbody>
                       {OBJECTIVES.map((o) => (
                         <tr key={o.id} className="border-b align-baseline last:border-0">
                           <td className="py-2.5 pr-3 font-mono text-xs text-foreground">{o.id}</td>
-                          <td className="py-2.5 pr-3">{o.text}</td>
-                          <td className="py-2.5 text-right font-mono text-xs">{o.rq}</td>
+                          <td className="py-2.5 pr-3 max-sm:pr-0">
+                            {o.text}
+                            {/* On phones the "Serves" column folds in here, so the objective gets the full width. */}
+                            <span className="ml-1.5 font-mono text-xs whitespace-nowrap text-muted-foreground sm:hidden">→ {o.rq}</span>
+                          </td>
+                          <td className="py-2.5 text-right font-mono text-xs max-sm:hidden">{o.rq}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -373,13 +377,13 @@ export default function ResearchPage() {
                         <th className="py-2 pr-3 font-normal">Month</th>
                         <th className="py-2 pr-3 text-right font-normal">Added</th>
                         <th className="py-2 pr-3 text-right font-normal">Total</th>
-                        <th className="w-[45%] py-2 font-normal" aria-hidden />
+                        <th className="w-[35%] py-2 font-normal sm:w-[45%]" aria-hidden />
                       </tr>
                     </thead>
                     <tbody>
                       {c.growth.map((g) => (
                         <tr key={g.month} className="border-b last:border-0">
-                          <td className="py-2.5 pr-3 font-mono text-foreground">{g.month}</td>
+                          <td className="py-2.5 pr-3 font-mono whitespace-nowrap text-foreground">{g.month}</td>
                           <td className="py-2.5 pr-3 text-right font-mono tabular-nums text-foreground">+{g.added}</td>
                           <td className="py-2.5 pr-3 text-right font-mono tabular-nums">{g.total}</td>
                           <td className="py-2.5">

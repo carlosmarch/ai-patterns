@@ -259,7 +259,7 @@ export function AiReviewPanel({
         </div>
       </div>
 
-      <div role="tablist" aria-label="Filter by status" className="flex border-b px-1.5">
+      <div role="tablist" aria-label="Filter by status" className="flex overflow-x-auto border-b px-1.5 [scrollbar-width:none]">
         {FILTERS.map((f, i) => {
           const active = filter === f;
           return (
@@ -276,7 +276,7 @@ export function AiReviewPanel({
               onClick={() => setFilter(f)}
               onKeyDown={(e) => onTabKey(e, i)}
               className={cn(
-                "relative flex flex-1 items-center justify-center gap-1 whitespace-nowrap px-1 py-2 text-xs transition-colors",
+                "relative flex flex-1 shrink-0 items-center justify-center gap-1 whitespace-nowrap px-2 py-2 text-xs transition-colors",
                 active ? "font-medium text-foreground" : "text-muted-foreground hover:text-foreground"
               )}
             >

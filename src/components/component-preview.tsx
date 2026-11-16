@@ -131,7 +131,7 @@ export function ComponentPreview({
               value="preview"
               forceMount
               className={cn(
-                "flex items-center justify-center bg-muted/30 p-10 data-[state=inactive]:hidden",
+                "flex items-center justify-center bg-muted/30 px-4 py-10 data-[state=inactive]:hidden sm:p-10",
                 isExpanded ? "min-h-0 flex-1 overflow-auto" : "min-h-[280px] rounded-lg border"
               )}
             >

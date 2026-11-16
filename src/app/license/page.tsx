@@ -19,6 +19,10 @@ export const metadata: Metadata = {
 // matches the LICENSE file at the repo root.
 const LICENSE_TEXT = readFileSync(join(process.cwd(), "LICENSE"), "utf8").trim();
 
+// The file is hard-wrapped at ~80 columns, which breaks into ragged lines on
+// a phone. Reflow it: blank lines separate paragraphs, single newlines don't.
+const LICENSE_PARAGRAPHS = LICENSE_TEXT.split(/\n\s*\n/).map((p) => p.replace(/\s*\n\s*/g, " "));
+
 export default function LicensePage() {
   return (
     <main className="mx-auto w-full max-w-3xl px-6 pt-14 pb-16">
@@ -28,9 +32,11 @@ export default function LicensePage() {
         The components, pattern specs and site code are free to use, copy, modify and ship, in commercial projects too.
         Keep the copyright notice and this permission notice with substantial copies.
       </p>
-      <pre className="mt-10 overflow-x-auto rounded-xl border bg-muted/40 p-6 font-mono text-[13px] leading-relaxed whitespace-pre-wrap">
-        {LICENSE_TEXT}
-      </pre>
+      <div className="mt-10 space-y-4 rounded-xl border bg-muted/40 p-5 font-mono text-[13px] leading-relaxed sm:p-6">
+        {LICENSE_PARAGRAPHS.map((p, i) => (
+          <p key={i}>{p}</p>
+        ))}
+      </div>
       <p className="mt-6 text-sm text-muted-foreground">
         Source:{" "}
         <a

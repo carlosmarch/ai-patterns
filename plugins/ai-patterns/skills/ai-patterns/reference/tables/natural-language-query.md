@@ -301,7 +301,7 @@ export function NaturalLanguageQuery<Row extends { id: string }>({
       </div>
 
       <div className="max-h-80 overflow-auto">
-        <table className="w-full border-collapse" aria-busy={busy}>
+        <table className="w-full border-collapse whitespace-nowrap" aria-busy={busy}>
           <thead className="sticky top-0 z-[1] bg-card">
             <tr className="border-b text-left text-xs text-muted-foreground">
               {columns.map((c) => (

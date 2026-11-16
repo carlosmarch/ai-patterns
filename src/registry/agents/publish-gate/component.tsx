@@ -107,7 +107,7 @@ export function PublishGate({
                   className="overflow-hidden"
                 >
                   <div className="ml-6 mt-1.5 flex flex-wrap items-center gap-2">
-                    <p className="min-w-0 flex-1 text-xs text-muted-foreground">{check.detail}</p>
+                    <p className="min-w-[12rem] flex-1 text-xs text-muted-foreground">{check.detail}</p>
                     <button
                       type="button"
                       onClick={() => onFix(check.id)}

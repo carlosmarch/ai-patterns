@@ -50,14 +50,17 @@ export function ConnectivityError({
           )}
         >
           {/* Message */}
-          <div className="flex min-w-0 flex-1 items-center gap-2">
+          {/* Wraps onto its own line on narrow screens instead of truncating to a few letters. */}
+          <div className="flex min-w-[12rem] flex-1 items-center gap-x-2">
             <WifiOff className="size-3.5 shrink-0 text-foreground" aria-hidden />
-            <span className="truncate text-xs font-semibold text-foreground">{title}</span>
-            <span className="truncate text-xs text-muted-foreground">{description}</span>
+            <p className="min-w-0 text-xs sm:truncate">
+              <span className="font-semibold text-foreground">{title}</span>{" "}
+              <span className="text-muted-foreground">{description}</span>
+            </p>
           </div>
 
           {/* Actions */}
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="ml-auto flex shrink-0 items-center gap-2">
             {onViewDetails && (
               <button
                 type="button"
