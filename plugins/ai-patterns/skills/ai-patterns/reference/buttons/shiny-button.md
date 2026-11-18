@@ -20,13 +20,16 @@ A primary call-to-action button with a looping light-sweep animation across its 
 ## Anatomy
 - Leading icon — Sparkles by default, marking the action as AI-powered (decorative, hidden from assistive tech).
 - Label (text or short phrase).
+- Border beam — two soft multicolor arcs circling the border, painted on the button's own border so it sits flush against the fill (decorative, optional).
 - Looping sheen overlay (decorative, non-interactive).
 - Press feedback (slight scale-down on tap/click).
 
 ## Behavior
 - The sheen loops continuously and indefinitely while the button is enabled — it is not tied to a loading state.
+- The border beam laps slowly (about 6s) and independently of the sheen; the two layers should read as one ambient "AI" shimmer, not compete.
+- Draw the beam on the button's own border, not on a wrapper around it — a separate ring leaves a hairline gap or anti-aliased seam between beam and fill.
 - Press/tap gives immediate tactile feedback (subtle scale), independent of the sheen loop.
-- On disabled state: stop the sheen animation and reduce opacity. A looping animation on a dead button reads as broken, not exciting.
+- On disabled state: stop the sheen and beam animations and reduce opacity. A looping animation on a dead button reads as broken, not exciting.
 
 ## Content guidelines
 - Short imperative verb phrase naming what the AI will do: "Generate spec", "Run scout", "Draft with AI". No trailing punctuation.
@@ -36,9 +39,10 @@ A primary call-to-action button with a looping light-sweep animation across its 
 ## Accessibility
 - Must render as a real `<button>` or link element, not a styled `<div>`.
 - The sheen must never reduce the label's contrast below WCAG AA against the button background.
-- The animation is decorative only — pause or remove it when the user has `prefers-reduced-motion` set.
+- The animation is decorative only — pause the sheen and freeze the beam at a fixed angle when the user has `prefers-reduced-motion` set.
 
 ## Related patterns
+- **Border Beam** — The same beam for a larger surface (a composer or card); Shiny Button builds it into the button.
 - **Agent Setup Pill** — Use it instead when the call to action is connecting an agent, and don't show both on one screen.
 - **Stop Generation Button** — Use it instead when the button controls a running generation rather than inviting a first click.
 
@@ -56,7 +60,7 @@ instead of copying these Tailwind classes or the Motion API.
 "use client";
 
 import * as React from "react";
-import { motion, type HTMLMotionProps } from "motion/react";
+import { animate, motion, useMotionValue, useMotionTemplate, useReducedMotion, type HTMLMotionProps } from "motion/react";
 import { Sparkles } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -66,45 +70,80 @@ export interface ShinyButtonProps extends Omit<HTMLMotionProps<"button">, "ref">
   children: React.ReactNode;
   /** Leading icon. Defaults to Sparkles to mark the action as AI-powered; pass `null` to hide it. */
   icon?: React.ReactNode;
+  /** Run a multicolor beam around the border. On by default; set `false` for a plain sheen. */
+  beam?: boolean;
+  /** Seconds for one lap of the beam. */
+  beamDuration?: number;
 }
+
+const BEAM_STOPS =
+  "transparent 0deg, #34d399 30deg, #60a5fa 70deg, transparent 110deg, transparent 180deg, #f472b6 210deg, #fb923c 250deg, transparent 290deg";
 
 export function ShinyButton({
   children,
   icon = <Sparkles className="size-4" aria-hidden />,
+  beam = true,
+  beamDuration = 6,
   className,
+  style,
+  disabled,
   ...props
 }: ShinyButtonProps) {
+  const reduceMotion = useReducedMotion();
+  const angle = useMotionValue(45);
+  const spinning = beam && !disabled && !reduceMotion;
+
+  React.useEffect(() => {
+    if (!spinning) return;
+    const controls = animate(angle, [angle.get(), angle.get() + 360], {
+      duration: beamDuration,
+      ease: "linear",
+      repeat: Infinity,
+    });
+    return () => controls.stop();
+  }, [spinning, beamDuration, angle]);
+
+  // The beam is painted on the button's own transparent border (border-box
+  // layer) under the solid fill (padding-box layer). Fill and ring share one
+  // edge on one element, so there is no gap or anti-aliased seam between them.
+  const background = useMotionTemplate`linear-gradient(var(--shiny-fill), var(--shiny-fill)) padding-box, conic-gradient(from ${angle}deg, ${BEAM_STOPS}) border-box`;
+
   return (
     <motion.button
       whileTap={{ scale: 0.97 }}
+      disabled={disabled}
       className={cn(
-        "relative isolate overflow-hidden rounded-lg border border-white/10 bg-slate-900 px-6 py-2.5 text-sm font-medium text-slate-50 dark:bg-slate-100 dark:text-slate-900",
+        "relative isolate overflow-hidden rounded-lg px-6 py-2.5 text-sm font-medium text-slate-50 [--shiny-fill:var(--color-slate-900)] disabled:opacity-50 dark:text-slate-900 dark:[--shiny-fill:var(--color-slate-100)]",
+        !beam && "border border-white/10 bg-[var(--shiny-fill)]",
         className
       )}
+      style={beam ? { border: "1.5px solid transparent", background, ...style } : style}
       {...props}
     >
       <span className="relative z-10 inline-flex items-center gap-2">
         {icon}
         {children}
       </span>
-      <motion.span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0"
-        style={{
-          background:
-            "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%)",
-          backgroundSize: "200% 100%",
-        }}
-        initial={{ backgroundPositionX: "150%" }}
-        animate={{ backgroundPositionX: "-50%" }}
-        transition={{
-          repeat: Infinity,
-          repeatType: "loop",
-          duration: 2.2,
-          ease: "linear",
-          repeatDelay: 0.8,
-        }}
-      />
+      {!disabled && (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0"
+          style={{
+            background:
+              "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%)",
+            backgroundSize: "200% 100%",
+          }}
+          initial={{ backgroundPositionX: "150%" }}
+          animate={reduceMotion ? undefined : { backgroundPositionX: "-50%" }}
+          transition={{
+            repeat: Infinity,
+            repeatType: "loop",
+            duration: 2.2,
+            ease: "linear",
+            repeatDelay: 0.8,
+          }}
+        />
+      )}
     </motion.button>
   );
 }
