@@ -8,8 +8,8 @@
 A primary call-to-action button with a looping light-sweep animation across its surface. The motion exists purely to draw the eye to the single most important action on the screen.
 
 ## When to use
-- The one primary CTA on a screen (hero "Get Started", "Upgrade", "Try it now").
-- Actions that begin the product's core flow.
+- The one primary CTA on a screen (hero "Generate spec", "Run scout", "Draft with AI").
+- Actions that kick off the product's core AI flow — generating, drafting, running an agent.
 
 ## When not to use
 - Secondary or tertiary actions — use a plain or outline button instead.
@@ -18,6 +18,7 @@ A primary call-to-action button with a looping light-sweep animation across its 
 - A button that stays disabled or pending for a long time — stop the animation rather than looping over a dead action.
 
 ## Anatomy
+- Leading icon — Sparkles by default, marking the action as AI-powered (decorative, hidden from assistive tech).
 - Label (text or short phrase).
 - Looping sheen overlay (decorative, non-interactive).
 - Press feedback (slight scale-down on tap/click).
@@ -28,7 +29,9 @@ A primary call-to-action button with a looping light-sweep animation across its 
 - On disabled state: stop the sheen animation and reduce opacity. A looping animation on a dead button reads as broken, not exciting.
 
 ## Content guidelines
-- Short imperative verb phrase: "Get Started", "Try it", "Upgrade". No trailing punctuation.
+- Short imperative verb phrase naming what the AI will do: "Generate spec", "Run scout", "Draft with AI". No trailing punctuation.
+- Name the outcome, not the technology — the sparkles already say "AI", so "Generate spec" beats "Ask AI".
+- Only use the sparkles icon for actions that actually call a model; drop it (`icon={null}`) for plain CTAs.
 
 ## Accessibility
 - Must render as a real `<button>` or link element, not a styled `<div>`.
@@ -54,14 +57,23 @@ instead of copying these Tailwind classes or the Motion API.
 
 import * as React from "react";
 import { motion, type HTMLMotionProps } from "motion/react";
+import { Sparkles } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 export interface ShinyButtonProps extends Omit<HTMLMotionProps<"button">, "ref"> {
+  /** The action label, e.g. "Generate spec" or "Run scout". */
   children: React.ReactNode;
+  /** Leading icon. Defaults to Sparkles to mark the action as AI-powered; pass `null` to hide it. */
+  icon?: React.ReactNode;
 }
 
-export function ShinyButton({ children, className, ...props }: ShinyButtonProps) {
+export function ShinyButton({
+  children,
+  icon = <Sparkles className="size-4" aria-hidden />,
+  className,
+  ...props
+}: ShinyButtonProps) {
   return (
     <motion.button
       whileTap={{ scale: 0.97 }}
@@ -71,7 +83,10 @@ export function ShinyButton({ children, className, ...props }: ShinyButtonProps)
       )}
       {...props}
     >
-      <span className="relative z-10">{children}</span>
+      <span className="relative z-10 inline-flex items-center gap-2">
+        {icon}
+        {children}
+      </span>
       <motion.span
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0"

@@ -2,14 +2,23 @@
 
 import * as React from "react";
 import { motion, type HTMLMotionProps } from "motion/react";
+import { Sparkles } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 export interface ShinyButtonProps extends Omit<HTMLMotionProps<"button">, "ref"> {
+  /** The action label, e.g. "Generate spec" or "Run scout". */
   children: React.ReactNode;
+  /** Leading icon. Defaults to Sparkles to mark the action as AI-powered; pass `null` to hide it. */
+  icon?: React.ReactNode;
 }
 
-export function ShinyButton({ children, className, ...props }: ShinyButtonProps) {
+export function ShinyButton({
+  children,
+  icon = <Sparkles className="size-4" aria-hidden />,
+  className,
+  ...props
+}: ShinyButtonProps) {
   return (
     <motion.button
       whileTap={{ scale: 0.97 }}
@@ -19,7 +28,10 @@ export function ShinyButton({ children, className, ...props }: ShinyButtonProps)
       )}
       {...props}
     >
-      <span className="relative z-10">{children}</span>
+      <span className="relative z-10 inline-flex items-center gap-2">
+        {icon}
+        {children}
+      </span>
       <motion.span
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0"
