@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { trackMcpInstallClicked } from "@/lib/analytics";
 import { CURSOR_INSTALL_URL, VSCODE_INSTALL_URL } from "@/lib/mcp-install";
 import { GithubMark } from "@/components/github-mark";
-import { BorderBeam } from "@/registry/effects/border-beam/component";
 
 const REPO_URL = "https://github.com/carlosmarch/ai-patterns";
 
@@ -56,8 +55,8 @@ export function SiteActions() {
       </a>
 
       <div ref={ref} className="relative hidden sm:block">
-        <BorderBeam radius={9999} duration={8} active className="p-[1.5px]">
-          <div className="flex h-9 items-stretch overflow-hidden rounded-full bg-foreground text-background">
+        <div className="cta-beam">
+          <div className="cta-beam-fill flex h-9 items-stretch overflow-hidden rounded-full text-background">
             <Link
               href="/skill"
               className="flex items-center gap-1.5 pr-3.5 pl-3.5 text-sm font-medium transition-opacity hover:opacity-80"
@@ -82,7 +81,7 @@ export function SiteActions() {
               />
             </button>
           </div>
-        </BorderBeam>
+        </div>
 
         {open && (
           <div

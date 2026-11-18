@@ -245,6 +245,55 @@ body {
   }
 }
 
+/* Header "Get the skill" pill: the Border Beam gradient painted on the pill's
+   own transparent border, under a padding-box fill. Fill and ring share one
+   edge on one element, so no page background or anti-aliased seam shows
+   between them (a separate ring around the pill left a hairline gap). A
+   blurred copy on the wrapper glows just outside. */
+.cta-beam {
+  --beam: conic-gradient(
+    from var(--beam-angle),
+    transparent 0deg,
+    #34d399 30deg,
+    #60a5fa 70deg,
+    transparent 110deg,
+    transparent 180deg,
+    #f472b6 210deg,
+    #fb923c 250deg,
+    transparent 290deg
+  );
+  position: relative;
+  isolation: isolate;
+  border-radius: 9999px;
+}
+.cta-beam::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--beam);
+  filter: blur(5px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.cta-beam > .cta-beam-fill {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(var(--foreground), var(--foreground)) padding-box,
+    var(--beam) border-box;
+}
+/* Only the wrapper spins: --beam resolves there and the glow and fill inherit it. */
+.cta-beam {
+  animation: beam-spin 4s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-beam {
+    animation: none;
+    --beam-angle: 45deg;
+  }
+}
+
 /* Gallery card <-> expanded pattern view --------------------------- */
 /* The card and the expanded view share a view-transition name (see
    patternTransitionName), so opening a pattern from /gallery grows the card
