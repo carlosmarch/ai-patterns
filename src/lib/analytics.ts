@@ -38,3 +38,34 @@ export function trackMcpInstallClicked(props: { client: string; page: string }) 
 export function trackGithubClicked(props: { page: string }) {
   track("github_clicked", props);
 }
+
+export type SearchResultType = "pattern" | "recent" | "page" | "job";
+
+/** A result picked in site search (⌘K); `search_term` is empty when picked from the open state. */
+export function trackSearchResultSelected(props: {
+  search_term: string;
+  result_type: SearchResultType;
+  href: string;
+  position: number;
+  new_tab: boolean;
+}) {
+  track("search_result_selected", props);
+}
+
+/** A job filter pill on /patterns (`all`, `new` or a job id). */
+export function trackJobFilterChanged(props: { job: string }) {
+  track("job_filter_changed", props);
+}
+
+export function trackSkillCtaClicked(props: { page: string }) {
+  track("skill_cta_clicked", props);
+}
+
+export function trackStarToast(props: { action: "shown" | "clicked" | "dismissed" }) {
+  track("star_toast", props);
+}
+
+/** Prev/next between pattern pages, by click or ←/→. */
+export function trackPatternNav(props: { direction: "prev" | "next"; via: "click" | "keyboard"; to: string }) {
+  track("pattern_nav", props);
+}

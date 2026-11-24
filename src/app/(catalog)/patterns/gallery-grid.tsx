@@ -7,6 +7,7 @@ import { markOpeningFromGallery } from "@/components/pattern-expand";
 import { CatalogHeader, type CatalogFilter } from "@/components/catalog-header";
 import { setCatalogJob } from "@/components/catalog-filter-store";
 import { DemoWall, expandedHref, SM, type WallItem } from "@/components/demo-wall";
+import { trackJobFilterChanged } from "@/lib/analytics";
 
 export type GalleryItem = WallItem;
 
@@ -70,6 +71,7 @@ export function GalleryGrid({
   }, [active]);
 
   function choose(id: string) {
+    if (id !== active) trackJobFilterChanged({ job: id });
     setActive(id);
     window.history.replaceState(window.history.state, "", galleryHref(id));
   }

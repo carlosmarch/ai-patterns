@@ -168,7 +168,7 @@ The site is a static export (`output: "export"`) hosted on [Cloudflare Workers](
 
 The site loads Google Tag Manager (container `GTM-WKPZ539R`, set in `src/app/layout.tsx`), only on the `SITE_URL` host (`ai-patterns.app`), so localhost and PR previews send nothing. Which tags run (GA4, …) is configured in GTM.
 
-The custom events in `src/lib/analytics.ts` (`code_copied`, `tab_changed`, `spec_downloaded`, `demo_prompt_submitted`, `mcp_install_clicked`, `github_clicked`) are pushed to `dataLayer` as `{ event, ...params }`; pick them up in GTM with a Custom Event trigger and Data Layer Variables for the params. Navigation is client-side, so page views after the first need GA4's history-based page views (on by default in enhanced measurement) or a History Change trigger.
+The custom events in `src/lib/analytics.ts` (`code_copied`, `tab_changed`, `spec_downloaded`, `demo_prompt_submitted`, `mcp_install_clicked`, `github_clicked`, `search_result_selected`, `job_filter_changed`, `skill_cta_clicked`, `star_toast`, `pattern_nav`) are pushed to `dataLayer` as `{ event, ...params }`; pick them up in GTM with a Custom Event trigger and Data Layer Variables for the params. Navigation is client-side, so page views after the first need GA4's history-based page views (on by default in enhanced measurement) or a History Change trigger.
 
 ---
 

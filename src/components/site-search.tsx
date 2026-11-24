@@ -6,6 +6,7 @@ import { CornerDownLeft, FileCode2, LayoutGrid, Origami, Search, Sparkles, X } f
 import { cn } from "@/lib/utils";
 import { getCatalogOrder, getEntryHref, isNewEntry, type RegistryEntry } from "@/registry";
 import { JOBS, getJob } from "@/registry/jobs";
+import { trackSearchResultSelected, type SearchResultType } from "@/lib/analytics";
 
 /*
  * The site's ⌘K search: a free-standing search field and, a gap below it, a
@@ -223,6 +224,17 @@ export function SiteSearch({ onNavigate, onClose, renderField, renderResults, cu
     setRecent([]);
   }
 
+  function select(item: Item, newTab: boolean) {
+    trackSearchResultSelected({
+      search_term: query.trim(),
+      result_type: item.id.split(":")[0] as SearchResultType,
+      href: item.href,
+      position: flatItems.indexOf(item) + 1,
+      new_tab: newTab,
+    });
+    onNavigate(item.href, newTab);
+  }
+
   function move(delta: number) {
     if (!flatItems.length) return;
     setActiveIndex((i) => (i + delta + flatItems.length) % flatItems.length);
@@ -249,7 +261,7 @@ export function SiteSearch({ onNavigate, onClose, renderField, renderResults, cu
       setActiveIndex(flatItems.length - 1);
     } else if (e.key === "Enter" && active) {
       e.preventDefault();
-      onNavigate(active.href, e.metaKey || e.ctrlKey);
+      select(active, e.metaKey || e.ctrlKey);
     } else if ((e.key === "Backspace" || e.key === "Delete") && e.shiftKey && active?.removable) {
       e.preventDefault();
       removeRecent(active.href);
@@ -338,7 +350,7 @@ export function SiteSearch({ onNavigate, onClose, renderField, renderResults, cu
                     words={words}
                     active={item === active}
                     onHover={() => setActiveIndex(index)}
-                    onSelect={(newTab) => onNavigate(item.href, newTab)}
+                    onSelect={(newTab) => select(item, newTab)}
                     onRemove={item.removable ? () => removeRecent(item.href) : undefined}
                   />
                 );
