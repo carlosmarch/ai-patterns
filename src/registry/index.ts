@@ -36,6 +36,9 @@ import { pattern as planReviewPattern } from "./agents/plan-review/pattern";
 import ScheduledTaskDemo from "./messages/scheduled-task/demo";
 import ScheduledTaskThumbnail from "./messages/scheduled-task/thumbnail";
 import { pattern as scheduledTaskPattern } from "./messages/scheduled-task/pattern";
+import PrMergeTrackerDemo from "./agents/pr-merge-tracker/demo";
+import PrMergeTrackerThumbnail from "./agents/pr-merge-tracker/thumbnail";
+import { pattern as prMergeTrackerPattern } from "./agents/pr-merge-tracker/pattern";
 
 import AgentTriggersDemo from "./agents/agent-triggers/demo";
 import AgentTriggersThumbnail from "./agents/agent-triggers/thumbnail";
@@ -1652,6 +1655,21 @@ export const registry: RegistryEntry[] = [
     Thumbnail: ScheduledTaskThumbnail,
     uxDoc: scheduledTaskPattern,
     seenIn: [{ team: "chatgpt", source: "https://help.openai.com/en/articles/10291617-tasks-in-chatgpt" }],
+  },
+  {
+    slug: "pr-merge-tracker",
+    category: "agents",
+    added: "2026-11-24T07:03Z",
+    job: "oversee",
+    title: "PR Merge Tracker",
+    description:
+      "After an agent opens a pull request it keeps tracking it: required checks and reviews tick over, failures turn into pushed fixes, and it merges once everything is green — unless you turn Merge when ready off or stop tracking.",
+    Demo: PrMergeTrackerDemo,
+    Thumbnail: PrMergeTrackerThumbnail,
+    uxDoc: prMergeTrackerPattern,
+    seenIn: [
+      { team: "copilot", source: "https://github.blog/changelog/2026-11-06-github-copilot-weekly-releases-november-2/" },
+    ],
   },
 ];
 
