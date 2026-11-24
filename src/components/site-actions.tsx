@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, ChevronDown, Sparkles } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { trackMcpInstallClicked } from "@/lib/analytics";
+import { trackGithubClicked, trackMcpInstallClicked, trackSkillCtaClicked } from "@/lib/analytics";
 import { CURSOR_INSTALL_URL, VSCODE_INSTALL_URL } from "@/lib/mcp-install";
 import { GithubMark } from "@/components/github-mark";
 
@@ -49,6 +49,7 @@ export function SiteActions() {
         target="_blank"
         rel="noreferrer"
         aria-label="AI Patterns on GitHub"
+        onClick={() => trackGithubClicked({ page: "header" })}
         className="hidden size-9 items-center justify-center rounded-full border bg-background text-foreground sm:flex transition-colors hover:bg-muted"
       >
         <GithubMark className="size-4" />
@@ -59,6 +60,7 @@ export function SiteActions() {
           <div className="cta-beam-fill flex h-9 items-stretch overflow-hidden rounded-full text-background">
             <Link
               href="/skill"
+              onClick={() => trackSkillCtaClicked({ page: "header" })}
               className="flex items-center gap-1.5 pr-3.5 pl-3.5 text-sm font-medium transition-opacity hover:opacity-80"
             >
               <Sparkles className="size-4" aria-hidden />
@@ -102,6 +104,7 @@ export function SiteActions() {
                       client: item.client,
                       page: "header",
                     });
+                  else if (item.external) trackGithubClicked({ page: "header_menu" });
                   setOpen(false);
                 }}
                 className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"

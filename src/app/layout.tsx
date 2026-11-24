@@ -14,6 +14,7 @@ import { SiteActions } from "@/components/site-actions";
 import { SiteCommandPalette } from "@/components/site-command-palette";
 import { ScrollRestoration } from "@/components/scroll-restoration";
 import { StarToast } from "@/components/star-toast";
+import { SiteTracking } from "@/components/site-tracking";
 
 const THEME_INIT_SCRIPT = `
 (function () {
@@ -115,6 +116,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="flex-1">{children}</div>
         <Footer />
         <StarToast />
+        <SiteTracking />
         <Script id="gtm-init" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: GTM_INIT_SCRIPT }} />
       </body>
     </html>

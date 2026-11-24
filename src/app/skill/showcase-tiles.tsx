@@ -17,6 +17,17 @@ export function getShowcaseTiles(): ShowcaseTile[] {
   const bySlug = new Map(registry.map((entry) => [entry.slug, entry]));
   return SHOWCASE.flatMap((slug) => {
     const entry = bySlug.get(slug);
-    return entry ? [{ id: `${entry.category}/${entry.slug}`, demo: <entry.Demo /> }] : [];
+    if (!entry) return [];
+    const id = `${entry.category}/${entry.slug}`;
+    return [
+      {
+        id,
+        demo: (
+          <div data-track-demo={id} className="contents">
+            <entry.Demo />
+          </div>
+        ),
+      },
+    ];
   });
 }

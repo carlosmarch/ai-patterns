@@ -24,7 +24,11 @@ export default function PatternsIndexPage() {
     job: entry.job,
     href: getEntryHref(entry),
     isNew: isNewEntry(entry),
-    demo: <entry.Demo />,
+    demo: (
+      <div data-track-demo={`${entry.category}/${entry.slug}`} className="contents">
+        <entry.Demo />
+      </div>
+    ),
   }));
   const filters = JOBS.map(({ id, label, question, description }) => ({ id, label, question, description }));
 

@@ -394,7 +394,10 @@ function PatternDetail({
         </div>
 
         {tab === "preview" ? (
-          <div className="flex min-h-[320px] items-center justify-center rounded-2xl border bg-muted/30 p-6 sm:p-10">
+          <div
+            data-track-demo={`${entry.category}/${entry.slug}`}
+            className="flex min-h-[320px] items-center justify-center rounded-2xl border bg-muted/30 p-6 sm:p-10"
+          >
             <Demo />
           </div>
         ) : tab === "guardrails" ? (

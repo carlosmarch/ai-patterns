@@ -6,6 +6,7 @@ import { CornerDownLeft, FileCode2, LayoutGrid, Origami, Search, Sparkles, X } f
 import { cn } from "@/lib/utils";
 import { getCatalogOrder, getEntryHref, isNewEntry, type RegistryEntry } from "@/registry";
 import { JOBS, getJob } from "@/registry/jobs";
+import { trackSearchNoResults, trackSearchResultSelected, type SearchResultType } from "@/lib/analytics";
 
 /*
  * The site's ⌘K search: a free-standing search field and, a gap below it, a
@@ -203,6 +204,14 @@ export function SiteSearch({ onNavigate, onClose, renderField, renderResults, cu
   const flatItems = React.useMemo(() => groups.flatMap((g) => g.items), [groups]);
   const active = flatItems[Math.min(activeIndex, flatItems.length - 1)];
 
+  // Report a search that finds nothing once the person pauses typing.
+  const noResults = words.length > 0 && flatItems.length === 0;
+  React.useEffect(() => {
+    if (!noResults) return;
+    const timer = window.setTimeout(() => trackSearchNoResults({ search_term: query.trim() }), 1000);
+    return () => window.clearTimeout(timer);
+  }, [noResults, query]);
+
   React.useEffect(() => {
     const id = requestAnimationFrame(() => inputRef.current?.focus());
     return () => cancelAnimationFrame(id);
@@ -221,6 +230,17 @@ export function SiteSearch({ onNavigate, onClose, renderField, renderResults, cu
   function clearRecent() {
     writeRecent([]);
     setRecent([]);
+  }
+
+  function select(item: Item, newTab: boolean) {
+    trackSearchResultSelected({
+      search_term: query.trim(),
+      result_type: item.id.split(":")[0] as SearchResultType,
+      href: item.href,
+      position: flatItems.indexOf(item) + 1,
+      new_tab: newTab,
+    });
+    onNavigate(item.href, newTab);
   }
 
   function move(delta: number) {
@@ -249,7 +269,7 @@ export function SiteSearch({ onNavigate, onClose, renderField, renderResults, cu
       setActiveIndex(flatItems.length - 1);
     } else if (e.key === "Enter" && active) {
       e.preventDefault();
-      onNavigate(active.href, e.metaKey || e.ctrlKey);
+      select(active, e.metaKey || e.ctrlKey);
     } else if ((e.key === "Backspace" || e.key === "Delete") && e.shiftKey && active?.removable) {
       e.preventDefault();
       removeRecent(active.href);
@@ -338,7 +358,7 @@ export function SiteSearch({ onNavigate, onClose, renderField, renderResults, cu
                     words={words}
                     active={item === active}
                     onHover={() => setActiveIndex(index)}
-                    onSelect={(newTab) => onNavigate(item.href, newTab)}
+                    onSelect={(newTab) => select(item, newTab)}
                     onRemove={item.removable ? () => removeRecent(item.href) : undefined}
                   />
                 );

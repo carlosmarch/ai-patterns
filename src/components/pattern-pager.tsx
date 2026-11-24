@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
+import { trackPatternNav } from "@/lib/analytics";
 
 export interface PagerLink {
   href: string;
@@ -32,6 +33,7 @@ export function PatternPager({ prev, next }: { prev?: PagerLink; next?: PagerLin
       const to = e.key === "ArrowLeft" ? prev : e.key === "ArrowRight" ? next : undefined;
       if (!to) return;
       e.preventDefault();
+      trackPatternNav({ direction: to === prev ? "prev" : "next", via: "keyboard", to: to.href });
       router.push(to.href);
     }
     document.addEventListener("keydown", onKeyDown);
@@ -55,6 +57,7 @@ function PagerCard({ link, direction }: { link: PagerLink; direction: "prev" | "
     <Link
       href={link.href}
       rel={direction}
+      onClick={() => trackPatternNav({ direction, via: "click", to: link.href })}
       aria-keyshortcuts={isNext ? "ArrowRight" : "ArrowLeft"}
       className={cn(
         "flex flex-col gap-1 rounded-lg border p-4 transition-colors hover:bg-accent",

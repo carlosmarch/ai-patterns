@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Star, X } from "lucide-react";
 
 import { GithubMark } from "@/components/github-mark";
+import { trackGithubClicked, trackStarToast } from "@/lib/analytics";
 
 const REPO_URL = "https://github.com/carlosmarch/ai-patterns";
 const STORAGE_KEY = "star-toast-dismissed";
@@ -34,10 +35,15 @@ export function StarToast() {
 
   // The workspace is a full-screen app with its own chrome.
   const hidden = pathname.startsWith("/workspace");
+  const visible = open && !hidden;
+
+  React.useEffect(() => {
+    if (visible) trackStarToast({ action: "shown" });
+  }, [visible]);
 
   return (
     <AnimatePresence>
-      {open && !hidden && (
+      {visible && (
         <motion.div
           role="status"
           initial={{ opacity: 0, y: 16, scale: 0.96 }}
@@ -54,7 +60,11 @@ export function StarToast() {
             href={REPO_URL}
             target="_blank"
             rel="noreferrer"
-            onClick={dismiss}
+            onClick={() => {
+              trackStarToast({ action: "clicked" });
+              trackGithubClicked({ page: "star_toast" });
+              dismiss();
+            }}
             className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-foreground px-3 text-xs font-medium text-background transition-opacity hover:opacity-90"
           >
             <Star className="size-3.5" />
@@ -62,7 +72,10 @@ export function StarToast() {
           </a>
           <button
             type="button"
-            onClick={dismiss}
+            onClick={() => {
+              trackStarToast({ action: "dismissed" });
+              dismiss();
+            }}
             aria-label="Dismiss"
             className="flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >

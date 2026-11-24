@@ -4,6 +4,7 @@ import * as React from "react";
 import { Monitor, Moon, Sun } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { trackThemeChanged } from "@/lib/analytics";
 
 type Theme = "light" | "dark" | "system";
 
@@ -45,7 +46,10 @@ export function ThemeToggle({ className }: { className?: string }) {
         <button
           key={option.value}
           type="button"
-          onClick={() => setTheme(option.value)}
+          onClick={() => {
+            if (option.value !== theme) trackThemeChanged({ theme: option.value });
+            setTheme(option.value);
+          }}
           aria-label={option.label}
           aria-pressed={theme === option.value}
           suppressHydrationWarning
