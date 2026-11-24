@@ -110,7 +110,11 @@ export default async function PatternPage({
         category={categoryCrumb}
         prev={toLink(prev)}
         next={toLink(next)}
-        preview={<Demo />}
+        preview={
+          <div data-track-demo={`${entry.category}/${entry.slug}`} className="contents">
+            <Demo />
+          </div>
+        }
         code={<CodeBlock code={source} trackAs="component" download={`${entry.slug}.tsx`} />}
         pattern={
           <div className="space-y-3">

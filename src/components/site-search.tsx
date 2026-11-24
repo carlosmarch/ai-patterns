@@ -6,7 +6,7 @@ import { CornerDownLeft, FileCode2, LayoutGrid, Origami, Search, Sparkles, X } f
 import { cn } from "@/lib/utils";
 import { getCatalogOrder, getEntryHref, isNewEntry, type RegistryEntry } from "@/registry";
 import { JOBS, getJob } from "@/registry/jobs";
-import { trackSearchResultSelected, type SearchResultType } from "@/lib/analytics";
+import { trackSearchNoResults, trackSearchResultSelected, type SearchResultType } from "@/lib/analytics";
 
 /*
  * The site's ⌘K search: a free-standing search field and, a gap below it, a
@@ -203,6 +203,14 @@ export function SiteSearch({ onNavigate, onClose, renderField, renderResults, cu
 
   const flatItems = React.useMemo(() => groups.flatMap((g) => g.items), [groups]);
   const active = flatItems[Math.min(activeIndex, flatItems.length - 1)];
+
+  // Report a search that finds nothing once the person pauses typing.
+  const noResults = words.length > 0 && flatItems.length === 0;
+  React.useEffect(() => {
+    if (!noResults) return;
+    const timer = window.setTimeout(() => trackSearchNoResults({ search_term: query.trim() }), 1000);
+    return () => window.clearTimeout(timer);
+  }, [noResults, query]);
 
   React.useEffect(() => {
     const id = requestAnimationFrame(() => inputRef.current?.focus());

@@ -168,7 +168,15 @@ The site is a static export (`output: "export"`) hosted on [Cloudflare Workers](
 
 The site loads Google Tag Manager (container `GTM-WKPZ539R`, set in `src/app/layout.tsx`), only on the `SITE_URL` host (`ai-patterns.app`), so localhost and PR previews send nothing. Which tags run (GA4, …) is configured in GTM.
 
-The custom events in `src/lib/analytics.ts` (`code_copied`, `tab_changed`, `spec_downloaded`, `demo_prompt_submitted`, `mcp_install_clicked`, `github_clicked`, `search_result_selected`, `job_filter_changed`, `skill_cta_clicked`, `star_toast`, `pattern_nav`) are pushed to `dataLayer` as `{ event, ...params }`; pick them up in GTM with a Custom Event trigger and Data Layer Variables for the params. Navigation is client-side, so page views after the first need GA4's history-based page views (on by default in enhanced measurement) or a History Change trigger.
+The custom events in `src/lib/analytics.ts` (`code_copied`, `tab_changed`, `spec_downloaded`, `demo_prompt_submitted`, `mcp_install_clicked`, `github_clicked`, `search_result_selected`, `search_opened`, `search_no_results`, `job_filter_changed`, `skill_cta_clicked`, `star_toast`, `pattern_nav`, `theme_changed`) are pushed to `dataLayer` as `{ event, ...params }`; pick them up in GTM with a Custom Event trigger and Data Layer Variables for the params. Navigation is client-side, so page views after the first need GA4's history-based page views (on by default in enhanced measurement) or a History Change trigger.
+
+On top of those, `<SiteTracking>` (`src/components/site-tracking.tsx`, mounted in the root layout) tracks every interaction on the site from document-level listeners, so new UI is covered without wiring:
+
+- `ui_click` — any click on a link, button or ARIA control: `element` (role or tag), `label` (aria-label, title or text, 100 chars), `href` and `outbound` for links.
+- `form_submitted` — `form` (aria-label, name or id).
+- `text_copied` — `length` of the selection (never the text).
+
+All three carry `page_path`, `area` (the nearest `data-track-area`, else the landmark: `header`, `nav`, `sidebar`, `main`, `footer`, `dialog`) and, inside a pattern demo, `demo` (`category/slug`, from the `data-track-demo` wrapper around each demo).
 
 ---
 

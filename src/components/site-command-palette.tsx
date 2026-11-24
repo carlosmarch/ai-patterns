@@ -7,9 +7,19 @@ import { usePathname, useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 
 import { SiteSearch, recordVisit } from "@/components/site-search";
+import { trackSearchOpened } from "@/lib/analytics";
 
 export function SiteCommandPalette() {
   const [open, setOpen] = React.useState(false);
+  const openRef = React.useRef(false);
+  React.useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
+  const openSearch = (via: "click" | "shortcut" | "slash") => {
+    if (!openRef.current) trackSearchOpened({ via, page_path: window.location.pathname });
+    setOpen(true);
+  };
   const router = useRouter();
   const pathname = usePathname();
 
@@ -17,7 +27,8 @@ export function SiteCommandPalette() {
     function onKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setOpen((v) => !v);
+        if (openRef.current) setOpen(false);
+        else openSearch("shortcut");
         return;
       }
       // "/" opens search too, unless the user is typing somewhere.
@@ -25,7 +36,7 @@ export function SiteCommandPalette() {
       const typing = target?.closest("input, textarea, select, [contenteditable='true']");
       if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey && !typing) {
         e.preventDefault();
-        setOpen(true);
+        openSearch("slash");
       }
     }
     document.addEventListener("keydown", onKeyDown);
@@ -76,7 +87,7 @@ export function SiteCommandPalette() {
             layoutId="site-search"
             transition={morph}
             type="button"
-            onClick={() => setOpen(true)}
+            onClick={() => openSearch("click")}
             aria-label="Search patterns"
             aria-haspopup="dialog"
             style={{ borderRadius: 18 }}
